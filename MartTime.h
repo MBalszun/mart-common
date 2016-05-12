@@ -14,7 +14,7 @@
  *  e.g. if you want to have a timeout for a certain loop:
  *
  *  void foo(std::chrono::milliseconds timeout) {
- *  	mart::Timer timer(timeout); *
+ *  	mart::Timer timer(timeout);
  *
  *  	while (!timer.hasTimedOut()) {
  *  		//Do something
@@ -80,7 +80,7 @@ namespace mart {
 	template<class T = copter_default_period>
 	T timeSinceEpoch(){ return std::chrono::duration_cast<T>	(mart::now().time_since_epoch()); }
 
-
+	/*### for interfacing with legacy code, that expects integers representing a duration since epoch ###*/
 	inline int64_t us_SinceEpoch()	{ return timeSinceEpoch<std::chrono::microseconds>().count();	}
 	inline int64_t ms_SinceEpoch()	{ return timeSinceEpoch<std::chrono::milliseconds>().count();	}
 	inline int64_t s_SinceEpoch()	{ return timeSinceEpoch<std::chrono::seconds>().count();		}
