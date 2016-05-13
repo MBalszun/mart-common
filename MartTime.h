@@ -131,6 +131,12 @@ namespace mart {
 			return std::chrono::duration_cast<DUR>(now()-_start_time);
 		}
 
+		/// remaining time, before hasTimedOut will be true (will always return a non-negative number)
+		template<class DUR = copter_default_period>
+		DUR remaining() const {
+			return std::max(std::chrono::duration_cast<DUR>(_timeout-(now()-_start_time)),DUR{});
+		}
+
 		/// true if duration since creation or last call to reset is longer than timeout that was specified upon creation
 		bool hasTimedOut() const {
 			using namespace std::chrono;
