@@ -137,7 +137,7 @@ namespace mart {
 			return std::max(std::chrono::duration_cast<DUR>(_timeout-(now()-_start_time)),DUR{});
 		}
 
-		/// true if duration since creation or last call to reset is longer than timeout that was specified upon creation
+		/// true if duration since creation or last call to reset is longer than the timeout that was specified upon creation
 		bool hasTimedOut() const {
 			using namespace std::chrono;
 			return (mart::now()-_start_time) > _timeout;
