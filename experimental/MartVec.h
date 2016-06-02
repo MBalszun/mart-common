@@ -39,8 +39,6 @@
 
 /* Project Includes */
 
-
-
 namespace mart {
 //### forward declarations ###
 
@@ -179,52 +177,51 @@ T inner_product(const Vec<T,N>& l, const Vec<T,N>& r){
 }
 
 namespace _impl_vec {
-/**
- * used in function template parameter lists.
- *
- * E.g. when two parameter shall be of same type, but only one gets deduced:
- *
- * template<class T>
- * void foo(T l, Type<T> r){...}
- *
- * foo(0.0, 10u); -> T gets deduced to double
- */
-template<class T>
-using Type=T;
 
-template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l, F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0])	),sizeof...(I)>	{ return {func(l[I])...};	}
+	/**
+	 * used in function template parameter lists.
+	 *
+	 * E.g. when two parameter shall be of same type, but only one gets deduced:
+	 *
+	 * template<class T>
+	 * void foo(T l, Type<T> r){...}
+	 *
+	 * foo(0.0, 10u); -> T gets deduced to double
+	 */
+	template<class T>
+	using Type=T;
 
-template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r[0])	),sizeof...(I)>	{ return {func(l[I],r[I])...};	}
-template<class T, class F, int ...I> constexpr auto apply_helper(Type<T> l, 					const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l,r[0])	),sizeof...(I)> { return {func(l,r[I])...};		}
-template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	Type<T> r, 						F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r)	),sizeof...(I)>	{ return {func(l[I],r)...};		}
+	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l, F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0])	),sizeof...(I)>	{ return {func(l[I])...};	}
 
-//general dispatcher for applying functor that forwards the call to the respective apply_helper- functions
-//c++14: remove -> decltype(...)
-template<size_t N, class F, class ... ARGS>
-constexpr auto apply(F func, ARGS&& ... args) -> decltype(_impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{}))	{
-	return _impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{});
+	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r[0])	),sizeof...(I)>	{ return {func(l[I],r[I])...};	}
+	template<class T, class F, int ...I> constexpr auto apply_helper(Type<T> l, 					const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l,r[0])	),sizeof...(I)> { return {func(l,r[I])...};		}
+	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	Type<T> r, 						F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r)	),sizeof...(I)>	{ return {func(l[I],r)...};		}
+
+	//general dispatcher for applying functor that forwards the call to the respective apply_helper- functions
+	//c++14: remove -> decltype(...)
+	template<size_t N, class F, class ... ARGS>
+	constexpr auto apply(F func, ARGS&& ... args) -> decltype(_impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{}))	{
+		return _impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{});
+	}
+
+	template<class T>
+	struct maximum {
+		T operator()(const T& l, const T& r){
+			return std::max(l,r);
+		}
+	};
+
+	template<class T>
+	struct minimum {
+		T operator()(const T& l, const T& r){
+			return std::min(l,r);
+		}
+	};
+
 }
 
-template<class T>
-struct maximum {
-	T operator()(const T& l, const T& r){
-		return std::max(l,r);
-	}
-};
-
-template<class T>
-struct minimum {
-	T operator()(const T& l, const T& r){
-		return std::min(l,r);
-	}
-};
-
-
-
-}
-
 /**
- * Macro for defining all permutations for elementswise vector operations:
+ * Macro for defining all permutations for element wise vector operations:
  * OP(Vec, Vec)
  * OP(Vec, Scalar)
  * OP(Scalar, Vec)
@@ -256,16 +253,6 @@ DEFINE_ND_VECTOR_OP(operator*,std::multiplies)
 DEFINE_ND_VECTOR_OP(operator-,std::minus)
 DEFINE_ND_VECTOR_OP(operator/,std::divides)
 
-//comparison operators
-DEFINE_ND_VECTOR_OP(operator<,std::less)
-DEFINE_ND_VECTOR_OP(operator<=,std::less_equal)
-DEFINE_ND_VECTOR_OP(operator>,std::greater)
-DEFINE_ND_VECTOR_OP(operator>=,std::greater_equal)
-
-//not overloaded, because it is not clear, whether operator== would mean element wise or total equality
-//DEFINE_ND_VECTOR_OP(operator==,std::equal_to)
-//DEFINE_ND_VECTOR_OP(operator!=,std::not_equal_to)
-
 //min max
 DEFINE_ND_VECTOR_OP(max,_impl_vec::maximum)
 DEFINE_ND_VECTOR_OP(min,_impl_vec::minimum)
@@ -278,11 +265,46 @@ DEFINE_ND_VECTOR_OP(elementOr,std::logical_or)
 DEFINE_ND_VECTOR_OP(elementEquals,std::equal_to)
 DEFINE_ND_VECTOR_OP(elementNE,std::not_equal_to)
 
+DEFINE_ND_VECTOR_OP(elementLess,std::less)
+DEFINE_ND_VECTOR_OP(elementLessEqual,std::less_equal)
+DEFINE_ND_VECTOR_OP(elementGreater,std::greater)
+DEFINE_ND_VECTOR_OP(elementGreaterEqual,std::greater_equal)
+
+//comparison operators TODO: should those operator overloads be implemented or is this confusing?
+//DEFINE_ND_VECTOR_OP(operator<,std::less)
+//DEFINE_ND_VECTOR_OP(operator<=,std::less_equal)
+//DEFINE_ND_VECTOR_OP(operator>,std::greater)
+//DEFINE_ND_VECTOR_OP(operator>=,std::greater_equal)
+
 
 #undef DEFINE_UNARY_ND_VECTOR_OP
 #undef DEFINE_ND_VECTOR_OP
 
+namespace _impl_vec {
+	template<class T, size_t N, class F, size_t I=0>
+	struct Fold {
+		constexpr auto operator()(const Vec<T,N>& l, F op, T init =true) const ->decltype(op(init,init))  {
+			return Fold<T,N,F,I+1>{}(l,op,init & l[I]);
+		}
+	};
 
+	template<class T, size_t N, class F>
+	struct Fold<T,N,F,N> {
+		constexpr auto operator()(const Vec<T,N>& , F , T init) const -> T  {
+			return init;
+		}
+	};
+}
+
+template<class T, int N>
+constexpr bool operator==(const Vec<T,N> l, const Vec<T,N> r){
+	return _impl_vec::Fold<T,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{}) ;
+}
+
+template<class T, int N>
+constexpr bool operator!=(const Vec<T,N> l, const Vec<T,N> r){
+	return !(l==r) ;
+}
 
 
 //clang-format on
