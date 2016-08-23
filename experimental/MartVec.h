@@ -306,9 +306,6 @@ constexpr bool operator!=(const Vec<T,N> l, const Vec<T,N> r){
 	return !(l==r) ;
 }
 
-
-//clang-format on
-
 }
 
 #endif /* MARTVEC_H_ */
