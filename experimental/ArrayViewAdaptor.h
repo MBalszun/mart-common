@@ -26,7 +26,7 @@ namespace mart {
  * CRTP- Type class that can be used to provide standard array view functions by inheriting from it
  *
  * For this you have to
- * - inherit form it :
+ * - inherit form it
  * - provide 3 functions:
  * 	-       T* _arrayView_data()
  * 	- const T* _arrayView_data() const
@@ -64,7 +64,7 @@ namespace mart {
  */
 
 
-template<class T, class TYPE>
+template<class T, class DERIVED_TYPE>
 class ArrayViewAdaptor {
 public:
 	static_assert(std::is_reference<T>::value == false, "T must not be a reference type");
@@ -124,9 +124,9 @@ protected:
 	constexpr bool _throwIfOutOfRange(size_t idx) const { return idx < _size() ? true : throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size())); }
 
 private:
-					pointer _data()       { return static_cast<		 TYPE*>(this)->_arrayView_data(); }
-	constexpr const_pointer _data()	const { return static_cast<const TYPE*>(this)->_arrayView_data(); }
-	constexpr	  size_type	_size()	const { return static_cast<const TYPE*>(this)->_arrayView_size(); }
+					pointer _data()       { return static_cast<		 DERIVED_TYPE*>(this)->_arrayView_data(); }
+	constexpr const_pointer _data()	const { return static_cast<const DERIVED_TYPE*>(this)->_arrayView_data(); }
+	constexpr	  size_type	_size()	const { return static_cast<const DERIVED_TYPE*>(this)->_arrayView_size(); }
 
 };
 
