@@ -210,7 +210,7 @@ public:
 			ArrayView<T>{ _data + offset, _size - offset};
 	}
 
-
+	bool isValid() { return _data != nullptr; }
 protected:
 	constexpr bool _throwIfOutOfRange(size_t idx) const { return idx < _size ? true : throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size)); }
 	constexpr bool _throwIfInvalidSubview(size_t offset, size_t count) const {
@@ -242,12 +242,12 @@ constexpr MemoryView viewMemory(T& e){
 
 template<class T>
 constexpr ConstMemoryView viewMemory(const T& e){
-	return ConstMemoryView(reinterpret_cast<ByteType*>(&e),sizeof(e));
+	return ConstMemoryView(reinterpret_cast<const ByteType*>(&e),sizeof(e));
 }
 
 template<class T>
 constexpr ConstMemoryView viewMemoryConst(const T& e){
-	return ConstMemoryView(reinterpret_cast<ByteType*>(&e),sizeof(e));
+	return ConstMemoryView(reinterpret_cast<const ByteType*>(&e),sizeof(e));
 }
 
 
