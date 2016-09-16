@@ -252,6 +252,30 @@ constexpr ConstMemoryView viewMemoryConst(const T& e){
 
 
 
+template<class T>
+auto copy(ArrayView<T> src, ArrayView<typename std::remove_const<T>::type> dest) -> ArrayView<typename std::remove_const<T>::type>
+{
+	if (src.size() > dest.size()) {
+		assert(false);
+		return ArrayView<typename std::remove_const<T>::type>{};
+	}
+	auto cnt = std::min(src.size(), dest.size());
+	std::copy_n(src.cbegin(), cnt, dest.begin());
+	return dest.subview(cnt);
+}
+
+
+template<class T>
+bool equal(ArrayView<T> l, ArrayView<T> r)
+{
+	if (l.size() != r.size()) {
+		return false;
+	}
+	return std::equal(l.begin(),l.end(),r.begin());
+}
+
+
+
 
 
 
