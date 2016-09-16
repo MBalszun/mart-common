@@ -15,6 +15,7 @@
 #include <memory>
 #include <type_traits>
 #include <string>
+#include <ostream>
 
 /* Proprietary Library Includes */
 
@@ -80,11 +81,12 @@ public:
 	}
 
 	friend int compare(str_ref l, str_ref r);
-	friend std::ostream& operator<<(std::ostream& out, const str_ref& string) {
+	friend std::ostream& operator<<(std::ostream& out, const str_ref string) {
 		out.write(string.data(), string.size());
 		return out;
 	}
 protected:
+	//keep this private/protected
 	using ArrayViewAdaptor<const char, str_ref>::data;
 
 	friend class ArrayViewAdaptor<const char, str_ref>;
@@ -119,8 +121,6 @@ inline bool operator< (const str_ref& l, const str_ref& r) { return compare(l,r)
 inline bool operator> (const str_ref& l, const str_ref& r) { return r<l; }
 inline bool operator<=(const str_ref& l, const str_ref& r) { return !(l>r); }
 inline bool operator>=(const str_ref& l, const str_ref& r) { return !(l < r); }
-
-
 
 }
 
