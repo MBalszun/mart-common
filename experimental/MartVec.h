@@ -86,18 +86,15 @@ namespace mp{
 
 	template<int N >
 	using make_index_sequence = typename impl_helper::make_is<N>::type;
-
 }
 
+/*################# Vec class implementation ######################*/
 template<class T, int N>
 struct Vec {
 	static_assert(N>0, "mart::Vector must at least have a size of 1");
 	using value_type = T;
+	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	std::array<T, N> data;
-
-	//### ctor ###
-	constexpr Vec() = default;
-
 //c++14:
 //	constexpr Vec(std::initializer_list<T> init){
 //		std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
@@ -106,38 +103,41 @@ struct Vec {
 	//### Data access ###
 	T &operator[](int idx)
 	{
-		assert(0 <= idx && idx < (int)N);
+		assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 
 	const T &operator[](int idx) const
 	{
-		assert(0 <= idx && idx < (int)N);
+		assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 	static constexpr int size() { return N; }
 
 
-	T squareNorm() const {
-		T sum{};
+	square_type squareNorm() const {
+		square_type sum{};
 		for (int i=0;i<N;++i) {
 			sum+=(*this)[i]*(*this)[i];
 		}
 		return sum;
 	}
+
 	T norm() const {
 		return std::sqrt(squareNorm());
 	}
 
+	//vector in the same direction but size 1
 	Vec<T,N> unityVec() const {
 		Vec<T,N> res(*this);
-		T abs = norm();
+		auto abs = norm();
 		for (size_t i=0;i<N;++i) {
 			res[i]/= abs;
 		}
 		return res;
 	}
 
+	//Creates a vector with the first K elements
 	template<int K>
 	Vec<T,K> toKDim() const {
 		return toKDim_helper<K>(mp::make_index_sequence<(K < N? K: N)>{});
@@ -149,6 +149,24 @@ private:
 		return Vec<T,K>{(*this)[I]...};
 	}
 };
+
+//there should be a check for any instantiated vector type, but this has to do for now
+static_assert(std::is_trivial < Vec<int, 5>>::value, "mart::Vec is not a trivial type");
+
+namespace _impl_mart_vec {
+	template<class T, int ...I1, int ...I2>
+	Vec<T, sizeof...(I1)+sizeof...(I2)> concat_impl(const Vec<T,sizeof...(I1)>& v1, const Vec<T, sizeof...(I2)>& v2, mp::index_sequence<I1...>, mp::index_sequence<I2...>)
+	{
+		return { v1[I1]...,v2[I2]... };
+	}
+}
+
+
+template<class T, int N1, int N2>
+Vec<T, N1+N2> concat(const Vec<T, N1>& v1, const Vec<T,N2>& v2)
+{
+	return _impl_mart_vec::concat_impl(v1, v2, mp::make_index_sequence<N1>{}, mp::make_index_sequence<N2>{});
+}
 
 /**
  * Left-Multiplies a (colum) vector with a square matrix.
