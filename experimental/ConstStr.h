@@ -21,7 +21,7 @@
 
 namespace mart {
 
-class ConstStr : public str_ref {
+class ConstStr : public string_view {
 
 public:
 	/* #### CTORS #### */
@@ -29,7 +29,7 @@ public:
 
 	ConstStr(const char* other, size_t size) 	{ _copyFrom(other, size); }
 	explicit ConstStr(const std::string& other) { _copyFrom(other.c_str(), other.size()); }
-	explicit ConstStr(const str_ref& other) 	{ _copyFrom(other.cbegin(), other.size()); }
+	explicit ConstStr(const string_view& other) 	{ _copyFrom(other.cbegin(), other.size()); }
 
 	// don't accept c-strings in the form of pointer
 	// if you need to create a const_string from a c string use the <const_string(const char*, size_t)> constructor
@@ -40,7 +40,7 @@ public:
 	//NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
 	explicit constexpr ConstStr(const char(&other)[N]) noexcept :
-		str_ref(other, N - 1)
+		string_view(other, N - 1)
 	{}
 
 	/* #### Special member functions #### */
@@ -52,7 +52,7 @@ public:
 	/* #### String functions  #### */
 	ConstStr substr(size_t offset, size_t count) const {
 		ConstStr retval;
-		static_cast<str_ref&>(retval) = str_ref::substr(offset, count);
+		static_cast<string_view&>(retval) = string_view::substr(offset, count);
 		retval._data = this->_data;
 		return retval;
 	}
@@ -71,7 +71,7 @@ private:
 	}
 
 	//impl helper for concat
-	static void _addTo(char*& buffer, const str_ref& str) {
+	static void _addTo(char*& buffer, const string_view& str) {
 		std::copy_n(str.cbegin(), str.size(), buffer);
 		buffer += str.size();
 	}
@@ -99,7 +99,7 @@ private:
 
 template<class ...ARGS>
 ConstStr concat(ARGS&&...args) {
-	return ConstStr::_concat_impl(str_ref(args)...);
+	return ConstStr::_concat_impl(string_view(args)...);
 }
 
 }
