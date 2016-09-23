@@ -34,6 +34,7 @@
 #include <functional>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 
 /* Proprietary Library Includes */
 
@@ -57,7 +58,7 @@ using Vec4D = Vec<T, 4>;
 template <class T, int N>
 using Matrix = Vec<Vec<T,N>,N>;
 
-
+//some metaprogramming stuff
 namespace mp{
 	/*### index sequence (placeholder for c++14 index sequence) #### */
 
@@ -115,19 +116,16 @@ struct Vec {
 	static constexpr int size() { return N; }
 
 
-	square_type squareNorm() const {
-		square_type sum{};
-		for (int i=0;i<N;++i) {
-			sum+=(*this)[i]*(*this)[i];
-		}
-		return sum;
+
+	T squareNorm() const {
+		return std::inner_product(data.begin(), data.end(), data.begin(), T{});
 	}
 
 	T norm() const {
 		return std::sqrt(squareNorm());
 	}
 
-	//vector in the same direction but size 1
+	//Creates a vector of length 1 that points in the same direction as the original one
 	Vec<T,N> unityVec() const {
 		Vec<T,N> res(*this);
 		auto abs = norm();
@@ -137,7 +135,9 @@ struct Vec {
 		return res;
 	}
 
-	//Creates a vector with the first K elements
+	//returns a K dimensional vector
+	//if K<=N, the first K values are copied
+	//if K>N, all values are copied and the remaining values are zero-initialized
 	template<int K>
 	Vec<T,K> toKDim() const {
 		return toKDim_helper<K>(mp::make_index_sequence<(K < N? K: N)>{});
@@ -173,7 +173,7 @@ Vec<T, N1+N2> concat(const Vec<T, N1>& v1, const Vec<T,N2>& v2)
  *
  * Main purpose is coordinate transformation. For that,
  * the colums of the matrix shall correspond to the
- * axis of the source coordinate system in the target
+ * axis of the source coordinate system represented in the target
  * system.
  * @param vec
  * @param mx matrix to multiply vector with
@@ -197,7 +197,7 @@ T inner_product(const Vec<T,N>& l, const Vec<T,N>& r){
 namespace _impl_vec {
 
 	/**
-	 * used in function template parameter lists.
+	 * This type alias is used in function template parameter lists.
 	 *
 	 * E.g. when two parameter shall be of same type, but only one gets deduced:
 	 *
@@ -209,6 +209,7 @@ namespace _impl_vec {
 	template<class T>
 	using Type=T;
 
+	//applies unary function F to each element of l and stores the results in a new vector
 	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l, F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0])	),sizeof...(I)>	{ return {func(l[I])...};	}
 
 	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r[0])	),sizeof...(I)>	{ return {func(l[I],r[I])...};	}
@@ -222,17 +223,20 @@ namespace _impl_vec {
 		return _impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{});
 	}
 
+	//std::plus,td::multiplies,... - like function objects for maximum and minimum
 	template<class T>
 	struct maximum {
 		T operator()(const T& l, const T& r){
-			return std::max(l,r);
+			using std::max;
+			return max(l,r);
 		}
 	};
 
 	template<class T>
 	struct minimum {
 		T operator()(const T& l, const T& r){
-			return std::min(l,r);
+			using std::min;
+			return min(l,r);
 		}
 	};
 
@@ -280,6 +284,7 @@ DEFINE_UNARY_ND_VECTOR_OP(operator!,std::logical_not)
 DEFINE_ND_VECTOR_OP(elementAnd,std::logical_and)
 DEFINE_ND_VECTOR_OP(elementOr,std::logical_or)
 
+//element wise comparison operations
 DEFINE_ND_VECTOR_OP(elementEquals,std::equal_to)
 DEFINE_ND_VECTOR_OP(elementNE,std::not_equal_to)
 
@@ -301,8 +306,8 @@ DEFINE_ND_VECTOR_OP(elementGreaterEqual,std::greater_equal)
 namespace _impl_vec {
 	template<class T, size_t N, class F, size_t I=0>
 	struct Fold {
-		constexpr auto operator()(const Vec<T,N>& l, F op, T init =true) const ->decltype(op(init,init))  {
-			return Fold<T,N,F,I+1>{}(l,op,init & l[I]);
+		constexpr auto operator()(const Vec<T,N>& l, F op, T init) const ->decltype(op(init,init))  {
+			return Fold<T,N,F,I+1>{}(l,op,op(init,  l[I]));
 		}
 	};
 
@@ -316,7 +321,8 @@ namespace _impl_vec {
 
 template<class T, int N>
 constexpr bool operator==(const Vec<T,N> l, const Vec<T,N> r){
-	return _impl_vec::Fold<T,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{}) ;
+	//first compare the vectors element wise and then fold the results voer &&
+	return _impl_vec::Fold<T,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{},true) ;
 }
 
 template<class T, int N>
