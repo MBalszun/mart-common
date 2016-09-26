@@ -86,8 +86,6 @@ public:
 		return out;
 	}
 protected:
-	//keep this private/protected
-	using ArrayViewAdaptor<const char, string_view>::data;
 
 	friend class ArrayViewAdaptor<const char, string_view>;
 	constexpr	  size_type _arrayView_size() const { return _size; }
