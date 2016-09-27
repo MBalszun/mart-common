@@ -207,6 +207,12 @@ ConstString concat(ARGS&&...args)
 	return ConstString::_concat_impl(StringView(std::forward<ARGS>(args))...);
 }
 
+inline mart::ConstString& getEmptyConstString()
+{
+	static mart::ConstString str(mart::EmptyStringView);
+	return str;
+}
+
 }
 
 
