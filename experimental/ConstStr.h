@@ -12,7 +12,9 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <algorithm>
-#include <memory>
+#include <cassert>
+#include "../cpp_std/utility.h"
+#include "../cpp_std/memory.h"
 
 /* Proprietary Library Includes */
 
@@ -32,22 +34,18 @@ namespace mart {
  * needs only a single dynamic memory allocation
  *
  */
-class ConstStr : public string_view {
-
+class ConstStr : public StringView {
 public:
-	/* #### CTORS #### */
-	constexpr ConstStr() = default;
+	/* #################### CTORS ########################## */
+	//Default ConstStr points at empty string
+	ConstStr() :
+		StringView(mart::EmptyStringView)
+	{};
 
-	ConstStr(string_view other)
+	explicit ConstStr(StringView other)
 	{
 		_copyFrom(other);
 	}
-	ConstStr(const char* other, size_t size) :
-		ConstStr{ string_view{other,size} }
-	{}
-	explicit ConstStr(const std::string& other) :
-		ConstStr{ string_view(other) }
-	{}
 
 	// don't accept c-strings in the form of pointer
 	// if you need to create a const_string from a c string use the <const_string(const char*, size_t)> constructor
@@ -57,32 +55,82 @@ public:
 
 	//NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
-	constexpr ConstStr(const char(&other)[N]) noexcept :
-		string_view(other)
+	ConstStr(const char(&other)[N]) noexcept :
+		StringView(other)
 		//we don't have to initialize the shared_ptr to anything as string litterals already have static lifetime
-	{}
+	{
+		static_assert(N >= 1, "");
+	}
+protected:
+	//private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
+	ConstStr(std::unique_ptr<const char[]> data, size_t size) :
+		StringView(data.get(), size),
+		_data(std::move(data))
+	{
+		assert(_start != nullptr);
+	}
+public:
 
-	/* #### Special member functions #### */
+	/* ############### Special member functions ######################################## */
 	ConstStr(const ConstStr& other) = default;
-	ConstStr(ConstStr&& other) = default;
 	ConstStr& operator=(const ConstStr& other) = default;
-	ConstStr& operator=(ConstStr&& other) = default;
 
-	/* #### String functions  #### */
+	ConstStr(ConstStr&& other):
+		//string_view{ nullptr,other.size() },
+		StringView(other),
+		_data(std::move(other._data))
+	{
+		other._as_strview() = mart::EmptyStringView;
+	}
+	ConstStr& operator=(ConstStr&& other)
+	{
+		this->_as_strview() = mart::exchange(other._as_strview(), mart::EmptyStringView);
+		_data = std::move(other._data);
+		return *this;
+	}
+
+	/* ################## String functions  ################################# */
 	ConstStr substr(size_t offset, size_t count) const
 	{
 		ConstStr retval;
 		//use substr fucntionality from our base class
-		static_cast<string_view&>(retval) = string_view::substr(offset, count);
-		//copy underlying storage
+		// and copy pointer underlying storage
+		retval._as_strview() = retval._as_strview().substr(offset, count);
 		retval._data = this->_data;
 		return retval;
 	}
 
-	/* #### String functions  #### */
 	ConstStr substr(size_t offset) const
 	{
 		return substr(offset, _size - offset);
+	}
+
+	bool isZeroTerminated() const
+	{
+		return (*this)[size()] == '\0';
+	}
+
+	ConstStr unshare() const
+	{
+		return ConstStr(static_cast<mart::StringView>(*this));
+	}
+
+	ConstStr createZStr() const &
+	{
+		if (isZeroTerminated()) {
+			return *this; //just copy
+		} else {
+			return unshare();
+		}
+	}
+
+	ConstStr createZStr() &&
+	{
+		if (isZeroTerminated()) {
+			return std::move(*this); //already zero terminated - just move
+		} else {
+			return unshare();
+		}
 	}
 
 	template<class ...ARGS>
@@ -91,24 +139,34 @@ public:
 private:
 	std::shared_ptr<const char> _data = nullptr;
 
-	void _copyFrom(const mart::string_view other)
+	StringView& _as_strview()
 	{
+		return static_cast<StringView&>(*this);
+	}
+
+	static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
+	{
+		auto data = mart::make_unique<char[]>(size + 1);//std::unique_ptr<char[]>(new char[size + 1]); //c++14: auto data= std::make_unique<char[]>(size+1);
+		data[size] = '\0'; //zero terminate
+		return data;
+	}
+
+	void _copyFrom(const mart::StringView other)
+	{
+		if (other.data() == nullptr) {
+			this->_as_strview() = EmptyStringView;
+			return;
+		}
 		//create buffer and copy data over
-		auto data = std::unique_ptr<char[]>(new char[other.size()]); //c++14: auto data= std::make_unique<char[]>(size);
+		auto data = _allocate_null_terminated_char_buffer(other.size());
 		std::copy_n(other.data(), other.size(), data.get());
 
 		//initialize ConstStr data fields;
 		*this = ConstStr(std::move(data), other.size());
 	}
 
-	//private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
-	ConstStr(std::unique_ptr<const char[]> data, size_t size) :
-		string_view(data.get(), size),
-		_data(std::move(data))
-	{}
-
 	//######## impl helper for concat ###############
-	static void _addTo(char*& buffer, const string_view& str)
+	static void _addTo(char*& buffer, const StringView& str)
 	{
 		std::copy_n(str.cbegin(), str.size(), buffer);
 		buffer += str.size();
@@ -128,7 +186,7 @@ private:
 
 		//construct buffer and copy data
 		//auto data = [&]() { //can't use lambdas here due to bug in g++ 4.8
-		auto data = std::unique_ptr<char[]>(new char[newSize]);
+		auto data = _allocate_null_terminated_char_buffer(newSize);
 		char * bufferStart = data.get();
 		const int ignore2[] = { (_addTo(bufferStart,args),0)... };
 		(void)ignore2;
@@ -141,11 +199,12 @@ private:
 
 /**
  * Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
+ * returned constStr will always be zero terminated
  */
 template<class ...ARGS>
 ConstStr concat(ARGS&&...args)
 {
-	return ConstStr::_concat_impl(string_view(std::forward<ARGS>(args))...);
+	return ConstStr::_concat_impl(StringView(std::forward<ARGS>(args))...);
 }
 
 }
