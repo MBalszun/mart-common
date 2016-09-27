@@ -15,6 +15,7 @@
 #include <memory>
 #include <type_traits>
 #include <string>
+#include <cstring>
 #include <ostream>
 
 /* Proprietary Library Includes */
@@ -45,6 +46,11 @@ public:
 		_start(other),
 		_size(size)
 	{}
+
+	static StringView fromZString(const char* other)
+	{
+		return{ other, std::strlen(other) };
+	}
 
 	//NOTE: Use only for string literals!!!
 	template<size_t N>
@@ -119,6 +125,8 @@ inline bool operator< (const string_view& l, const string_view& r) { return comp
 inline bool operator> (const string_view& l, const string_view& r) { return r<l; }
 inline bool operator<=(const string_view& l, const string_view& r) { return !(l>r); }
 inline bool operator>=(const string_view& l, const string_view& r) { return !(l < r); }
+
+constexpr StringView EmptyStringView{ "" };
 
 }
 
