@@ -1,5 +1,5 @@
 /*
- * ConstStr.h
+ * ConstString.h
  *
  *  Created on: Jun 20, 2016
  *      Author: balszun
@@ -24,38 +24,38 @@
 namespace mart {
 
 /**
- * ConstStr is a ref-counted String implementation, that doesn't allow the modification of the underlying storage at all.
+ * ConstString is a ref-counted String implementation, that doesn't allow the modification of the underlying storage at all.
  *
  * One particular property is that when it is constructed from a "const char [N]" argument it is assumed, that this represents
- * a string litteral, in which case ConstStr doesn't perform any copy or dynamic memory allocation and also
- * copying the ConstStr will not result in any copyies or refcount updates.
+ * a string litteral, in which case ConstString doesn't perform any copy or dynamic memory allocation and also
+ * copying the ConstString will not result in any copyies or refcount updates.
  *
  * This header also provides a function that can efficently concatenate multiple string like objects, because it
  * needs only a single dynamic memory allocation
  *
  */
-class ConstStr : public StringView {
+class ConstString : public StringView {
 public:
 	/* #################### CTORS ########################## */
-	//Default ConstStr points at empty string
-	ConstStr() :
+	//Default ConstString points at empty string
+	ConstString() :
 		StringView(mart::EmptyStringView)
 	{};
 
-	explicit ConstStr(StringView other)
+	explicit ConstString(StringView other)
 	{
 		_copyFrom(other);
 	}
 
 	// don't accept c-strings in the form of pointer
 	// if you need to create a const_string from a c string use the <const_string(const char*, size_t)> constructor
-	// if you need to create a ConstStr form a string literal, use the <ConstStr(const char(&other)[N])> constructor
+	// if you need to create a ConstString form a string literal, use the <ConstString(const char(&other)[N])> constructor
 	template<class T>
-	ConstStr(T const * const& other) = delete;
+	ConstString(T const * const& other) = delete;
 
 	//NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
-	ConstStr(const char(&other)[N]) noexcept :
+	ConstString(const char(&other)[N]) noexcept :
 		StringView(other)
 		//we don't have to initialize the shared_ptr to anything as string litterals already have static lifetime
 	{
@@ -63,7 +63,7 @@ public:
 	}
 protected:
 	//private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
-	ConstStr(std::unique_ptr<const char[]> data, size_t size) :
+	ConstString(std::unique_ptr<const char[]> data, size_t size) :
 		StringView(data.get(), size),
 		_data(std::move(data))
 	{
@@ -72,17 +72,17 @@ protected:
 public:
 
 	/* ############### Special member functions ######################################## */
-	ConstStr(const ConstStr& other) = default;
-	ConstStr& operator=(const ConstStr& other) = default;
+	ConstString(const ConstString& other) = default;
+	ConstString& operator=(const ConstString& other) = default;
 
-	ConstStr(ConstStr&& other):
+	ConstString(ConstString&& other):
 		//string_view{ nullptr,other.size() },
 		StringView(other),
 		_data(std::move(other._data))
 	{
 		other._as_strview() = mart::EmptyStringView;
 	}
-	ConstStr& operator=(ConstStr&& other)
+	ConstString& operator=(ConstString&& other)
 	{
 		this->_as_strview() = mart::exchange(other._as_strview(), mart::EmptyStringView);
 		_data = std::move(other._data);
@@ -90,9 +90,9 @@ public:
 	}
 
 	/* ################## String functions  ################################# */
-	ConstStr substr(size_t offset, size_t count) const
+	ConstString substr(size_t offset, size_t count) const
 	{
-		ConstStr retval;
+		ConstString retval;
 		//use substr fucntionality from our base class
 		// and copy pointer underlying storage
 		retval._as_strview() = retval._as_strview().substr(offset, count);
@@ -100,7 +100,7 @@ public:
 		return retval;
 	}
 
-	ConstStr substr(size_t offset) const
+	ConstString substr(size_t offset) const
 	{
 		return substr(offset, _size - offset);
 	}
@@ -110,12 +110,12 @@ public:
 		return (*this)[size()] == '\0';
 	}
 
-	ConstStr unshare() const
+	ConstString unshare() const
 	{
-		return ConstStr(static_cast<mart::StringView>(*this));
+		return ConstString(static_cast<mart::StringView>(*this));
 	}
 
-	ConstStr createZStr() const &
+	ConstString createZStr() const &
 	{
 		if (isZeroTerminated()) {
 			return *this; //just copy
@@ -124,7 +124,7 @@ public:
 		}
 	}
 
-	ConstStr createZStr() &&
+	ConstString createZStr() &&
 	{
 		if (isZeroTerminated()) {
 			return std::move(*this); //already zero terminated - just move
@@ -134,7 +134,7 @@ public:
 	}
 
 	template<class ...ARGS>
-	friend ConstStr concat(ARGS&&...args);
+	friend ConstString concat(ARGS&&...args);
 
 private:
 	std::shared_ptr<const char> _data = nullptr;
@@ -161,8 +161,8 @@ private:
 		auto data = _allocate_null_terminated_char_buffer(other.size());
 		std::copy_n(other.data(), other.size(), data.get());
 
-		//initialize ConstStr data fields;
-		*this = ConstStr(std::move(data), other.size());
+		//initialize ConstString data fields;
+		*this = ConstString(std::move(data), other.size());
 	}
 
 	//######## impl helper for concat ###############
@@ -173,7 +173,7 @@ private:
 	}
 
 	template<class ...ARGS>
-	inline static ConstStr _concat_impl(const ARGS& ...args)
+	inline static ConstString _concat_impl(const ARGS& ...args)
 	{
 		//determine required size
 		//c++17: ~ const size_t newSize = 0 + ... + args.size();
@@ -193,7 +193,7 @@ private:
 		//	return data;
 		//}();
 
-		return ConstStr(std::move(data),newSize	);
+		return ConstString(std::move(data),newSize	);
 	}
 };
 
@@ -202,9 +202,9 @@ private:
  * returned constStr will always be zero terminated
  */
 template<class ...ARGS>
-ConstStr concat(ARGS&&...args)
+ConstString concat(ARGS&&...args)
 {
-	return ConstStr::_concat_impl(StringView(std::forward<ARGS>(args))...);
+	return ConstString::_concat_impl(StringView(std::forward<ARGS>(args))...);
 }
 
 }
