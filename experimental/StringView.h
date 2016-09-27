@@ -25,7 +25,7 @@
 
 namespace mart {
 
-class string_view : public ArrayViewAdaptor<const char,string_view>{
+class StringView : public ArrayViewAdaptor<const char,StringView>{
 public:
 	//type defs
 	using CharT = char;
@@ -35,14 +35,14 @@ public:
 
 public:
 	/* #### CTORS #### */
-	constexpr string_view() = default;
+	constexpr StringView() = default;
 
-	string_view(const std::string& other) noexcept:
+	StringView(const std::string& other) noexcept:
 		_start(other.data()),
 		_size(other.size())
 	{}
 
-	constexpr string_view(const char* other, size_type size) noexcept :
+	constexpr StringView(const char* other, size_type size) noexcept :
 		_start(other),
 		_size(size)
 	{}
@@ -54,25 +54,25 @@ public:
 
 	//NOTE: Use only for string literals!!!
 	template<size_t N>
-	constexpr string_view(const char(&other)[N]) noexcept :
+	constexpr StringView(const char(&other)[N]) noexcept :
 		_start(other),
 		_size(N - 1)
 	{}
 
 	template<class T>
-	string_view(const T * const& other) = delete;
+	StringView(const T * const& other) = delete;
 
 	/* #### Special member functions #### */
-	constexpr string_view(const string_view& other) = default;
-	string_view& operator=(const string_view& other) = default;
+	constexpr StringView(const StringView& other) = default;
+	StringView& operator=(const StringView& other) = default;
 
 	/*#### string functions ####*/
 	std::string to_string() const {
 		return std::string(cbegin(), cend());
 	}
 
-	constexpr string_view substr(size_t offset, size_t count) const {
-		return offset + count <= this->_size ? string_view{ this->_start + offset, count } :
+	constexpr StringView substr(size_t offset, size_t count) const {
+		return offset + count <= this->_size ? StringView{ this->_start + offset, count } :
 			throw std::out_of_range("Tried to create a substring that would exceed the original string. Original string:\n\n" + this->to_string() + "\"\n");
 	}
 
@@ -80,20 +80,20 @@ public:
 
 	/*#### algorithms ####*/
 
-	size_type find(string_view str, size_type pos = 0) const {
+	size_type find(StringView str, size_type pos = 0) const {
 		if (pos >= str.size()) return npos;
 		auto it = std::search(this->cbegin()+pos, this->cend(), str.cbegin(), str.cend());
 		return it != this->cend() ? it - this->cbegin() : npos;
 	}
 
-	friend int compare(string_view l, string_view r);
-	friend std::ostream& operator<<(std::ostream& out, const string_view string) {
+	friend int compare(StringView l, StringView r);
+	friend std::ostream& operator<<(std::ostream& out, const StringView string) {
 		out.write(string.data(), string.size());
 		return out;
 	}
 protected:
 
-	friend class ArrayViewAdaptor<const char, string_view>;
+	friend class ArrayViewAdaptor<const char, StringView>;
 	constexpr	  size_type _arrayView_size() const { return _size; }
 	constexpr const_pointer _arrayView_data() const { return _start; }
 
@@ -101,11 +101,11 @@ protected:
 	size_type _size = 0;
 };
 
-inline int compare(string_view l, string_view r) {
+inline int compare(StringView l, StringView r) {
 	if ((l._start == r._start) && (l.size() == l.size())) {
 		return 0;
 	}
-	int ret = string_view::traits_type::compare(l.cbegin(), r.cbegin(), std::min(l.size(), r.size()));
+	int ret = StringView::traits_type::compare(l.cbegin(), r.cbegin(), std::min(l.size(), r.size()));
 
 	if (ret == 0) {
 		//couldn't find a difference yet -> compare sizes
@@ -119,21 +119,21 @@ inline int compare(string_view l, string_view r) {
 }
 
 /* operator overloads */
-inline bool operator==(const string_view& l, const string_view& r) { return compare(l,r) == 0; }
-inline bool operator!=(const string_view& l, const string_view& r) { return !(l == r); }
-inline bool operator< (const string_view& l, const string_view& r) { return compare(l,r) < 0; }
-inline bool operator> (const string_view& l, const string_view& r) { return r<l; }
-inline bool operator<=(const string_view& l, const string_view& r) { return !(l>r); }
-inline bool operator>=(const string_view& l, const string_view& r) { return !(l < r); }
+inline bool operator==(const StringView& l, const StringView& r) { return compare(l,r) == 0; }
+inline bool operator!=(const StringView& l, const StringView& r) { return !(l == r); }
+inline bool operator< (const StringView& l, const StringView& r) { return compare(l,r) < 0; }
+inline bool operator> (const StringView& l, const StringView& r) { return r<l; }
+inline bool operator<=(const StringView& l, const StringView& r) { return !(l>r); }
+inline bool operator>=(const StringView& l, const StringView& r) { return !(l < r); }
 
 constexpr StringView EmptyStringView{ "" };
 
 }
 
 namespace std {
-template <> struct hash<mart::string_view>
+template <> struct hash<mart::StringView>
 {
-	size_t operator()(const mart::string_view & x) const
+	size_t operator()(const mart::StringView & x) const
 	{
 		//XXX some arbitrarily put together hashing algorithm
 		auto hash = std::hash<char>{};
