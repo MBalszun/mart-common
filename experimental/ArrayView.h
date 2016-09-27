@@ -15,7 +15,7 @@
 #include <cstddef>
 #include <cassert>
 
-#include <type_traits>
+#include "../cpp_std/type_traits.h"
 #include <algorithm>
 #include <iterator>
 #include <string>
@@ -97,21 +97,18 @@ private:
 	};
 
 	template<class IT>
-	using enable_if_random_it_t = typename std::enable_if<is_random_it<IT>::value>::type;
-
-	template<class U>
-	using remove_c_t = typename std::remove_const<U>::type;
+	using enable_if_random_it_t = mart::enable_if_t<is_random_it<IT>::value>;
 
 	template<class U, class = typename U::iterator>
 	struct is_compatible_container {
 		static constexpr bool value = has_random_it<U>::value &&
-			(std::is_same<typename U::value_type, remove_c_t<value_type> >::value ||
-				std::is_same<typename U::value_type, value_type >::value);
+			(std::is_same<typename U::value_type, mart::remove_const_t<value_type>	>::value ||
+			 std::is_same<typename U::value_type, value_type						>::value);
 	};
 
 	template<class U, class K>
 	struct transfer_constness {
-		using type = typename std::conditional<std::is_const<U>::value, typename std::add_const<K>::type, K>::type;
+		using type = mart::conditional_t<std::is_const<U>::value, mart::add_const_t<K>, K>;
 	};
 
 	template<class U, class K>
@@ -150,7 +147,7 @@ public:
 	/**
 	* construction from a container, in case T is not const (using SFINAE for disambiguation with the other constructor).
 	*/
-	template <class U, class = typename std::enable_if< !std::is_const<T>::value && is_compatible_container<U>::value >::type>
+	template <class U, class = mart::enable_if_t< !std::is_const<T>::value && is_compatible_container<U>::value >>
 	constexpr ArrayView(U& other) noexcept :
 		_data(other.data()),
 		_size(other.size())
@@ -159,7 +156,7 @@ public:
 	/**
 	* construction from a container, in case T is const (using SFINAE for disambiguation with the other constructor).
 	*/
-	template <class U, class = typename std::enable_if<  std::is_const<T>::value && is_compatible_container<U>::value >::type>
+	template <class U, class = mart::enable_if_t<  std::is_const<T>::value && is_compatible_container<U>::value >>
 	constexpr ArrayView(const U& other) noexcept :
 		_data(other.data()),
 		_size(other.size())
@@ -251,13 +248,12 @@ constexpr ConstMemoryView viewMemoryConst(const T& e){
 }
 
 
-
 template<class T>
-auto copy(ArrayView<T> src, ArrayView<typename std::remove_const<T>::type> dest) -> ArrayView<typename std::remove_const<T>::type>
+auto copy(ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest) -> ArrayView<mart::remove_const_t<T>>
 {
 	if (src.size() > dest.size()) {
 		assert(false);
-		return ArrayView<typename std::remove_const<T>::type>{};
+		return ArrayView<mart::remove_const_t<T>>{};
 	}
 	auto cnt = std::min(src.size(), dest.size());
 	std::copy_n(src.cbegin(), cnt, dest.begin());
