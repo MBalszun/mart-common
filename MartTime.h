@@ -53,7 +53,7 @@
 /* Standard Library Includes */
 #include <chrono>
 #include <type_traits>
-
+#include <thread>
 /* Proprietary Library Includes */
 
 /* Project Includes */
@@ -145,6 +145,30 @@ namespace mart {
 	private:
 		copter_time_point _start_time;
 		copter_default_period _timeout{-1};
+	};
+
+	class PeriodicScheduler {
+	public:
+		PeriodicScheduler(std::chrono::microseconds interval) :
+			_interval(interval)
+		{
+			_lastInvocation = mart::now();
+		}
+		copter_time_point getNextWakeTime() const
+		{
+			return _lastInvocation + _interval;
+		}
+		void sleep()
+		{
+			_lastInvocation += _interval;
+			std::this_thread::sleep_until(_lastInvocation);
+			_cnt++;
+		}
+		size_t invocationCnt() const { return _cnt; }
+	private:
+		std::chrono::microseconds _interval;
+		copter_time_point _lastInvocation;
+		size_t _cnt = 1;
 	};
 
 
