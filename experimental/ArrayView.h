@@ -182,6 +182,8 @@ public:
 	constexpr ArrayView<const ByteType> asBytes() 		const { return asConstBytes(); }
 
 	constexpr const char* asConstCharPtr() const { return reinterpret_cast<const char*>(_data); }
+	constexpr const char* asCharPtr() const { return asConstCharPtr(); }
+	transfer_constness_t<T, char>* asCharPtr() { return reinterpret_cast<transfer_constness_t<T, char>*>(_data); }
 
 
 	constexpr ArrayView<T> subview(size_t offset, size_t count) const {
@@ -208,6 +210,7 @@ public:
 	}
 
 	bool isValid() { return _data != nullptr; }
+
 protected:
 	constexpr bool _throwIfOutOfRange(size_t idx) const { return idx < _size ? true : throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size)); }
 	constexpr bool _throwIfInvalidSubview(size_t offset, size_t count) const {
