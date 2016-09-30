@@ -92,6 +92,11 @@ public:
 		auto it = std::search(this->cbegin()+pos, this->cend(), str.cbegin(), str.cend());
 		return it != this->cend() ? it - this->cbegin() : npos;
 	}
+	size_type find(char c, size_type pos = 0) const {
+		if (pos + 1 >= size()) return npos;
+		auto it = std::find(this->cbegin() + pos, this->cend(), c);
+		return it != this->cend() ? it - this->cbegin() : npos;
+	}
 
 	friend int compare(StringView l, StringView r);
 	friend std::ostream& operator<<(std::ostream& out, const StringView string) {
