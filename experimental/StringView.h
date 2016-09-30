@@ -145,17 +145,28 @@ constexpr StringView EmptyStringView{ "" };
 namespace std {
 template <> struct hash<mart::StringView>
 {
-	size_t operator()(const mart::StringView & x) const
+	//size_t operator()(const mart::StringView & x) const
+	//{
+	//	//XXX some arbitrarily put together hashing algorithm
+	//	auto hash = std::hash<char>{};
+	//	size_t accum = 0;
+	//	for (auto c : x) {
+	//		auto tmp = hash(c);
+	//		tmp = (tmp << 6) + (tmp >> 2);
+	//		accum ^= tmp;
+	//	}
+	//	return accum;
+	//}
+	//form http://stackoverflow.com/questions/24923289/is-there-a-standard-mechanism-to-retrieve-the-hash-of-a-c-string
+	std::size_t	operator()(mart::StringView str)	const noexcept
 	{
-		//XXX some arbitrarily put together hashing algorithm
-		auto hash = std::hash<char>{};
-		size_t accum = 0;
-		for (auto c : x) {
-			auto tmp = hash(c);
-			tmp = (tmp << 6) + (tmp >> 2);
-			accum ^= tmp;
+		std::size_t h = 0;
+
+		for (auto c: str) {
+			h += h * 65599 + c;
 		}
-		return accum;
+
+		return h ^ (h >> 16);
 	}
 };
 }
