@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 #include <stdexcept>
+#include <random>
 
 namespace mart {
 
@@ -53,6 +54,19 @@ inline T narrow(U u)
 	}
 
 	return t;
+}
+
+template<class E>
+using uType_t = typename std::underlying_type<E>::type;
+
+template<class E>
+constexpr uType_t<E> toUType(E e) { return static_cast<uType_t<E>>(e); }
+
+template<class T = int>
+T getRandomNumber(T min, T max)
+{
+	thread_local std::default_random_engine rg(std::random_device{}());
+	return std::uniform_int_distribution<T>(min, max)(rg);
 }
 
 }//mart
