@@ -90,20 +90,20 @@ public:
 	}
 
 	/* ################## String functions  ################################# */
-	ConstString substr(size_t offset, size_t count) const
-	{
-		ConstString retval;
-		//use substr fucntionality from our base class
-		// and copy pointer underlying storage
-		retval._as_strview() = retval._as_strview().substr(offset, count);
-		retval._data = this->_data;
-		return retval;
-	}
+	//ConstString substr(size_t offset, size_t count) const
+	//{
+	//	ConstString retval;
+	//	//use substr fucntionality from our base class
+	//	// and copy pointer underlying storage
+	//	retval._as_strview() = this->_as_strview().substr(offset, count);
+	//	retval._data = this->_data;
+	//	return retval;
+	//}
 
-	ConstString substr(size_t offset) const
-	{
-		return substr(offset, _size - offset);
-	}
+	//ConstString substr(size_t offset) const
+	//{
+	//	return substr(offset, _size - offset);
+	//}
 
 	bool isZeroTerminated() const
 	{
@@ -142,6 +142,11 @@ private:
 	StringView& _as_strview()
 	{
 		return static_cast<StringView&>(*this);
+	}
+
+	const StringView& _as_strview() const
+	{
+		return static_cast<const StringView&>(*this);
 	}
 
 	static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
