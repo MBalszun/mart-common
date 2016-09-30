@@ -81,7 +81,7 @@ public:
 	/*#### algorithms ####*/
 
 	size_type find(StringView str, size_type pos = 0) const {
-		if (pos >= str.size()) return npos;
+		if (pos + str.size() >= size()) return npos;
 		auto it = std::search(this->cbegin()+pos, this->cend(), str.cbegin(), str.cend());
 		return it != this->cend() ? it - this->cbegin() : npos;
 	}
