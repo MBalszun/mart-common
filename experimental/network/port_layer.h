@@ -43,6 +43,8 @@
 #include <Ws2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib")
 
+#undef ERROR
+
 #ifdef MBA_UTILS_DEFINED_WIN_LEAN_AND_MEAN
 	#undef WIN32_LEAN_AND_MEAN
 #endif
@@ -84,15 +86,15 @@ inline bool set_blocking(handle_type socket, bool should_block)
 {
 	bool ret = true;
 #ifdef MBA_UTILS_USE_WINSOCKS
+	// from http://stackoverflow.com/questions/5489562/in-win32-is-there-a-way-to-test-if-a-socket-is-non-blocking/33087879
 	/// @note windows sockets are created in blocking mode by default
 	// currently on windows, there is no easy way to obtain the socket's current blocking mode since WSAIsBlocking was deprecated
 	u_long non_blocking = should_block ? 0 : 1;
 	ret = NO_ERROR == ioctlsocket(socket, FIONBIO, &non_blocking);
 #else
 	const int flags = fcntl(socket, F_GETFL, 0);
-	if ((flags & O_NONBLOCK) && !should_block) { return ret; }
-	if (!(flags & O_NONBLOCK) && should_block) { return ret; }
-	ret = 0 == fcntl(socket, F_SETFL, should_block ? flags ^ O_NONBLOCK : flags | O_NONBLOCK);
+	if (!(flags & O_NONBLOCK) == should_block) { return ret; }
+	ret = 0 == fcntl(socket, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK);
 #endif
 	return ret;
 }
@@ -102,7 +104,7 @@ inline int close_socket(handle_type handle)
 #ifdef MBA_UTILS_USE_WINSOCKS
 	return ::closesocket(handle);
 #else
-	return ::close(handle);
+	return ::close(handle); //in linux, a socket is just another file descriptor
 #endif
 }
 
@@ -126,7 +128,7 @@ inline bool waInit()
 	}
 	return true;
 #else
-	return true;
+	return true; //on linux we don't have to initialize anything
 #endif
 }
 
