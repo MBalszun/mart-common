@@ -14,6 +14,9 @@ using remove_extent_t = typename std::remove_extent<T>::type;
 template< bool B, class T, class F >
 using conditional_t = typename std::conditional<B, T, F>::type;
 
+template< class T >
+using underlying_type_t = typename std::underlying_type<T>::type;
+
 
 /*####### remove cv-qualifiers ##################*/
 template< class T >
