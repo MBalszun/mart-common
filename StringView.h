@@ -16,7 +16,7 @@ namespace mart {
 
 		typename std::make_unsigned<T>::type tmp = 0;;
 		bool neg = str[0] == '-';
-		if (neg || str[0]=='+') {
+		if (neg || str[0] == '+') {
 			str = str.substr(1);
 		}
 		for (auto c : str) {
@@ -28,7 +28,7 @@ namespace mart {
 				break;
 			}
 		}
-		return neg ? -static_cast<T>(tmp) : static_cast<T>(tmp);
+		return neg ? - static_cast<T>(tmp) : static_cast<T>(tmp);
 	}
 }
 
