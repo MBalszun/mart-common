@@ -2,8 +2,11 @@
 #include <type_traits>
 #include <stdexcept>
 #include <random>
+#include "./cpp_std/type_traits.h"
 
 namespace mart {
+
+/* ######## narrowing ################################################ */
 
 // narrow_cast(): a searchable way to do narrowing casts of values
 template <class T, class U>
@@ -23,6 +26,7 @@ struct is_same_signedness
 
 template <class T, class U, bool SameSigndness= is_same_signedness<T,U>::value>
 struct sign_check {
+	//throws an narrowing error, of both parameters are of different signdness and one is negative
 	static void check(T t,U u)
 	{
 		if ((t < T{}) != (u < U{})) {
@@ -33,6 +37,7 @@ struct sign_check {
 
 template <class T, class U>
 struct sign_check<T,U,true> {
+	//if both parameters are of same signess, we don't have to do anything
 	static void check(T, U)
 	{}
 };
@@ -56,17 +61,57 @@ inline T narrow(U u)
 	return t;
 }
 
+/* ######## enum ################################################ */
 template<class E>
-using uType_t = typename std::underlying_type<E>::type;
+using uType_t = underlying_type_t<E>;
 
+//cast to underlying type
 template<class E>
 constexpr uType_t<E> toUType(E e) { return static_cast<uType_t<E>>(e); }
 
-template<class T = int>
-T getRandomNumber(T min, T max)
+/* ######## random ################################################ */
+inline std::default_random_engine& getRandomEngine()
 {
 	thread_local std::default_random_engine rg(std::random_device{}());
-	return std::uniform_int_distribution<T>(min, max)(rg);
+	return rg;
+}
+
+// Shorthand to get an random integral random number within a certain range
+template <class T = int>
+T getRandomInt(T min, T max)
+{
+	static_assert(std::is_integral<T>::value, "Parameters must be integral type");
+	return std::uniform_int_distribution<T>(min, max)(getRandomEngine());
+}
+
+// Shorthand to get an random floating point number within a certain range
+template<class T = double>
+T getRandomFloat(T min, T max)
+{
+	static_assert(std::is_floating_point<T>::value, "Parameters must be floating point type");
+	return std::uniform_real_distribution<T>(min, max)(getRandomEngine());
+}
+
+/* ######## container ################################################ */
+
+/**
+ * creates a container and reserves the given amount of space.
+ * So instead of
+ *
+ *	std::vector<int> vec;
+ *	vec.reserve(100);
+ *
+ * you can call
+ *
+ *  auto vec = mart::make_with_capacity<std::vector<int>(100);
+ * */
+
+template<class T>
+T make_with_capacity(size_t i)
+{
+	T t;
+	t.reserve(i);
+	return t;
 }
 
 }//mart
