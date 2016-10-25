@@ -99,11 +99,23 @@ private:
 	template<class IT>
 	using enable_if_random_it_t = mart::enable_if_t<is_random_it<IT>::value>;
 
-	template<class U, class = typename U::iterator>
-	struct is_compatible_container {
-		static constexpr bool value = has_random_it<U>::value &&
+
+
+	template<class U>
+	static constexpr auto is_compatible_container_helper(std::nullptr_t) -> decltype((std::declval<U>().data() + std::declval<U>().size())  == nullptr){
+		return has_random_it<U>::value &&
 			(std::is_same<typename U::value_type, mart::remove_const_t<value_type>	>::value ||
 			 std::is_same<typename U::value_type, value_type						>::value);
+	};
+
+	template<class U>
+	static constexpr auto is_compatible_container_helper(U*) -> bool {
+		return false;
+	};
+
+	template<class U>
+	struct is_compatible_container {
+		static constexpr bool value = is_compatible_container_helper<U>(nullptr);
 	};
 
 	template<class U, class K>
