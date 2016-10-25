@@ -43,7 +43,7 @@ public:
 	{
 		in_addr addr{};
 
-		if (1 == nw::port::ip::inet_pres_to_net(AF_INET, str, &addr)) {
+		if (1 == nw::ip::port_layer::inet_pres_to_net(AF_INET, str, &addr)) {
 			_addr = uint32_net_t(addr.s_addr);
 		}
 	}
@@ -56,7 +56,7 @@ public:
 		std::array<char, 24> ret{}; //17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
 		in_addr addr{};
 		addr.s_addr = mart::toUType(_addr);
-		nw::port::ip::inet_net_to_pres(AF_INET, &addr, ret.data(), ret.size());// mart::ArrayView<char>(ret)));
+		nw::ip::port_layer::inet_net_to_pres(AF_INET, &addr, ret.data(), ret.size());// mart::ArrayView<char>(ret)));
 
 
 		return mart::ConstString(mart::StringView::fromZString(ret.data()));

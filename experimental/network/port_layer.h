@@ -65,24 +65,24 @@
 namespace mart {
 namespace experimental {
 namespace nw {
-namespace port {
-namespace sock {
+namespace socks {
+namespace port_layer {
 
 //Define aliases for platform specific types and values
 #ifdef MBA_UTILS_USE_WINSOCKS
-using handle_type = SOCKET;
-using address_len_type = int;
-using txrx_size_type = int;
-static constexpr handle_type invalid_handle = INVALID_SOCKET;
+using handle_t = SOCKET;
+using address_len_t = int;
+using txrx_size_t = int;
+static constexpr handle_t invalid_handle = INVALID_SOCKET;
 #else
-using handle_type = int;
-using address_len_type = socklen_t;
-using txrx_size_type = ssize_t;
-static constexpr handle_type invalid_handle = -1;
+using handle_t = int;
+using address_len_t = socklen_t;
+using txrx_size_t = ssize_t;
+static constexpr handle_t invalid_handle = -1;
 #endif // MBA_UTILS_USE_WINSOCKS
 
 //Wrapper functions for socket related functions, that are specific to a certain platform
-inline bool set_blocking(handle_type socket, bool should_block)
+inline bool set_blocking(handle_t socket, bool should_block)
 {
 	bool ret = true;
 #ifdef MBA_UTILS_USE_WINSOCKS
@@ -99,12 +99,21 @@ inline bool set_blocking(handle_type socket, bool should_block)
 	return ret;
 }
 
-inline int close_socket(handle_type handle)
+inline int close_socket(handle_t handle)
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	return ::closesocket(handle);
 #else
 	return ::close(handle); //in linux, a socket is just another file descriptor
+#endif
+}
+
+inline int getLastSocketError()
+{
+#ifdef MBA_UTILS_USE_WINSOCKS
+	return WSAGetLastError();
+#else
+	return errno;
 #endif
 }
 
@@ -131,10 +140,11 @@ inline bool waInit()
 	return true; //on linux we don't have to initialize anything
 #endif
 }
-
+} //port_layer
 } //sock
 
 namespace ip {
+namespace port_layer {
 
 	inline const char *inet_net_to_pres(int af, const void *src, char *dst, size_t size)
 	{
@@ -153,8 +163,8 @@ namespace ip {
 			return inet_pton(af, src, dst);
 		#endif
 	}
+} //port_layer
 }//ip
-} //port
 } //nw
 } //experimental
 } //mba
@@ -162,7 +172,12 @@ namespace ip {
 //we have to define sockaddr_un type on windows
 //XXX find way to create compiletime error, if used on windows
 #ifdef MBA_UTILS_USE_WINSOCKS
-struct sockaddr_un {};
+struct sockaddr_un {
+private:
+	//prevent instantiation on windows instantiate
+	sockaddr_un(){}
+	~sockaddr_un(){}
+};
 
 #endif
 

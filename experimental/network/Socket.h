@@ -4,11 +4,11 @@
 *  Created on: 2016-09-29
 *      Author: Michael Balszun <michael.balszun@tum.de>
 *
-*      This file provides the NativeSocketWrapper class
+*      This file provides the Socket class
 */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_NATIVE_SOCKET_WRAPPER_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_NATIVE_SOCKET_WRAPPER_H_
+#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_SOCKET_H_
+#define LIBS_MART_COMMON_EXPERIMENTAL_NW_SOCKET_H_
 #pragma once
 
 /* ######## INCLUDES ######### */
@@ -27,23 +27,45 @@ namespace mart {
 namespace experimental {
 namespace nw {
 
+template<class Dur>
+timeval to_timeval(Dur duration)
+{
+	using namespace std::chrono;
+	timeval ret{};
+	if (duration.count() > 0) {
+		auto s = duration_cast<seconds>(duration);
+		ret.tv_sec = mart::narrow<decltype(ret.tv_sec)>(s.count());
+		ret.tv_usec = mart::narrow<decltype(ret.tv_usec)>((duration_cast<microseconds>(duration) - s).count());
+	}
+	return ret;
+}
+
+template<class Dur>
+Dur from_timeval(timeval duration)
+{
+	using namespace std::chrono;
+	return duration_cast<Dur>(seconds(duration.tv_sec) + microseconds(duration.tv_usec));
+}
+
+namespace socks {
+
 namespace _impl_details_nw {
 
 //on windows, the wa system has to be initialized before sockets can be used
 inline bool startUp() {
-	const static bool isInit = port::sock::waInit();
+	const static bool isInit = port_layer::waInit();
 	return isInit;
 }
 
 } //_impl_details_nw
 
-enum class SocketDomain {
+enum class Domain {
 	local = AF_UNIX,
 	inet = AF_INET,
 	inet6 = AF_INET6,
 };
 
-enum class SocketType {
+enum class TransportType {
 	stream = SOCK_STREAM,
 	datagram = SOCK_DGRAM,
 	seqpacket = SOCK_SEQPACKET,
@@ -51,20 +73,20 @@ enum class SocketType {
 
 
 
-template<SocketDomain, SocketType>
+template<Domain, TransportType>
 struct socket_traits {};
 
-template<SocketType Type>
-struct socket_traits<SocketDomain::local, Type> {
+template<TransportType Type>
+struct socket_traits<Domain::local, Type> {
 	using address_t = sockaddr_un;
 };
-template<SocketType Type>
-struct socket_traits<SocketDomain::inet, Type> {
+template<TransportType Type>
+struct socket_traits<Domain::inet, Type> {
 	using address_t = sockaddr_in;
 };
 
-template<SocketType Type>
-struct socket_traits<SocketDomain::inet6, Type> {
+template<TransportType Type>
+struct socket_traits<Domain::inet6, Type> {
 	using address_t = sockaddr_in6;
 };
 
@@ -82,7 +104,7 @@ struct is_sock_addr_type {
  * which sometimes use a little more convenient parameter types (e.g. ArrayView instead of pointer+length)
  * It doesn't retain any state except the handle
  */
-class NativeSocketWrapper {
+class Socket {
 	template<class T>
 	static sockaddr* asSockAddrPtr(T& addr)
 	{
@@ -98,76 +120,76 @@ class NativeSocketWrapper {
 	}
 public:
 	/*##### CTORS / DTORS #####*/
-	constexpr NativeSocketWrapper() = default;
-	explicit NativeSocketWrapper(port::sock::handle_type handle) :
+	constexpr Socket() = default;
+	explicit Socket(port_layer::handle_t handle) :
 		_handle(handle)
 	{}
-	NativeSocketWrapper(SocketDomain domain, SocketType type, int protocol = 0)
+	Socket(Domain domain, TransportType type, int protocol = 0)
 	{
 		_open(domain, type, protocol);
 	}
-	~NativeSocketWrapper()
+	~Socket()
 	{
 		close();
 	}
 
 	/*##### Special member functions #####*/
-	NativeSocketWrapper(const NativeSocketWrapper& other) = delete;
-	NativeSocketWrapper& operator=(const NativeSocketWrapper& other) = delete;
+	Socket(const Socket& other) = delete;
+	Socket& operator=(const Socket& other) = delete;
 
-	NativeSocketWrapper(NativeSocketWrapper&& other) :
-		_handle		{ mart::exchange(other._handle, port::sock::invalid_handle) },
+	Socket(Socket&& other) :
+		_handle{ mart::exchange(other._handle, port_layer::invalid_handle) },
 		_is_blocking{ mart::exchange(other._is_blocking, true) }
 	{}
 
-	NativeSocketWrapper& operator=(NativeSocketWrapper&& other)
+	Socket& operator=(Socket&& other)
 	{
 		close();
-		_handle			= mart::exchange(other._handle, port::sock::invalid_handle);
-		_is_blocking	= mart::exchange(other._is_blocking, true);
+		_handle = mart::exchange(other._handle, port_layer::invalid_handle);
+		_is_blocking = mart::exchange(other._is_blocking, true);
 		return *this;
 	}
 
 	/*##### Socket operations #####*/
 	bool isValid() const
 	{
-		return _handle != port::sock::invalid_handle;
+		return _handle != port_layer::invalid_handle;
 	}
 
 	int close()
 	{
 		int ret = -1;
 		if (isValid()) {
-			ret = port::sock::close_socket(_handle);
-			_handle = port::sock::invalid_handle;
+			ret = port_layer::close_socket(_handle);
+			_handle = port_layer::invalid_handle;
 		}
 		return ret;
 	}
 
-	port::sock::handle_type getNative() const
+	port_layer::handle_t getNative() const
 	{
 		return _handle;
 	}
 
-	port::sock::handle_type release()
+	port_layer::handle_t release()
 	{
-		return mart::exchange(_handle, port::sock::invalid_handle);
+		return mart::exchange(_handle, port_layer::invalid_handle);
 	}
 
 	/* ###### send / rec ############### */
 
-	auto send(mart::ConstMemoryView data, int flags) -> port::sock::txrx_size_type
+	auto send(mart::ConstMemoryView data, int flags) -> port_layer::txrx_size_t
 	{
-		return ::send(_handle, data.asConstCharPtr(), data.size_inBytes(), flags);
+		return ::send(_handle, data.asConstCharPtr(), data.size(), flags);
 	}
 
 	template<class AddrT>
-	auto sendto(mart::ConstMemoryView data, int flags, const AddrT& addr) -> nw::port::sock::txrx_size_type
+	auto sendto(mart::ConstMemoryView data, int flags, const AddrT& addr) -> port_layer::txrx_size_t
 	{
-		return ::sendto(_handle, data.asConstCharPtr(), data.size_inBytes(), flags, asSockAddrPtr(addr), sizeof(addr));
+		return ::sendto(_handle, data.asConstCharPtr(), data.size(), flags, asSockAddrPtr(addr), sizeof(addr));
 	}
 
-	auto recv(mart::MemoryView buffer, int flags) -> std::pair<nw::port::sock::txrx_size_type, mart::MemoryView>
+	auto recv(mart::MemoryView buffer, int flags) -> std::pair<port_layer::txrx_size_t, mart::MemoryView>
 	{
 		auto ret = ::recv(_handle, buffer.asCharPtr(), buffer.size(), flags);
 		if (ret >= 0) {
@@ -178,10 +200,10 @@ public:
 	}
 
 	template<class AddrT>
-	auto recvfrom(mart::MemoryView buffer, int flags, AddrT& src_addr) -> std::pair<nw::port::sock::txrx_size_type, mart::MemoryView>
+	auto recvfrom(mart::MemoryView buffer, int flags, AddrT& src_addr) -> std::pair<port_layer::txrx_size_t, mart::MemoryView>
 	{
-		nw::port::sock::address_len_type len = sizeof(src_addr);
-		nw::port::sock::txrx_size_type ret = ::recvfrom(_handle, buffer.asCharPtr(), buffer.size(), flags, asSockAddrPtr(src_addr), &len);
+		port_layer::address_len_t len = sizeof(src_addr);
+		port_layer::txrx_size_t ret = ::recvfrom(_handle, buffer.asCharPtr(), buffer.size(), flags, asSockAddrPtr(src_addr), &len);
 		if (ret >= 0 && len == sizeof(src_addr)) {
 			return{ ret,buffer.subview(0,ret) };
 		} else {
@@ -208,22 +230,22 @@ public:
 	}
 
 	template<class AddrT>
-	NativeSocketWrapper accept(AddrT& remote_addr)
+	Socket accept(AddrT& remote_addr)
 	{
-		nw::port::sock::address_len_type len = sizeof(remote_addr);
-		NativeSocketWrapper h{ ::accept(_handle, asSockAddrPtr(remote_addr), &len) };
+		port_layer::address_len_t len = sizeof(remote_addr);
+		Socket h{ ::accept(_handle, asSockAddrPtr(remote_addr), &len) };
 		if (len == sizeof(remote_addr)) {
 			return h;
 		} else {
-			return NativeSocketWrapper{};
+			return Socket{};
 		}
 	}
 
-	NativeSocketWrapper accept()
+	Socket accept()
 	{
-		nw::port::sock::address_len_type len = 0;
-		nw::port::sock::handle_type h = ::accept(_handle, nullptr, &len);
-		return NativeSocketWrapper(h);
+		port_layer::address_len_t len = 0;
+		port_layer::handle_t h = ::accept(_handle, nullptr, &len);
+		return Socket(h);
 	}
 
 	/* ###### Configuration ############### */
@@ -237,16 +259,38 @@ public:
 	template<class T>
 	int getsockopt(int level, int optname, T& option_data)
 	{
-		nw::port::sock::address_len_type optlen = sizeof(option_data);
+		port_layer::address_len_t optlen = sizeof(option_data);
 		return ::getsockopt(_handle, level, optname, reinterpret_cast<char*>(&option_data), &optlen);
 	}
 	bool setBlocking(bool should_block)
 	{
-		if (nw::port::sock::set_blocking(_handle, should_block)) {
+		if (port_layer::set_blocking(_handle, should_block)) {
 			_is_blocking = should_block;
 			return true;
 		}
 		return false;
+	}
+	void setTxTimeout(std::chrono::microseconds timeout)
+	{
+		auto to = nw::to_timeval(timeout);
+		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+	}
+	void setRxTimeout(std::chrono::microseconds timeout)
+	{
+		auto to = nw::to_timeval(timeout);
+		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+	}
+	std::chrono::microseconds getTxTimeout()
+	{
+		timeval to;
+		this->getsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		return nw::from_timeval<std::chrono::microseconds>(to);
+	}
+	std::chrono::microseconds getRxTimeout()
+	{
+		timeval to;
+		this->getsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
+		return nw::from_timeval<std::chrono::microseconds>(to);
 	}
 	bool isBlocking() const
 	{
@@ -256,40 +300,19 @@ public:
 
 
 private:
-	bool _open(SocketDomain domain, SocketType type, int protocol)
+	bool _open(Domain domain, TransportType type, int protocol)
 	{
 		if (_impl_details_nw::startUp() == false) {
 			return false;
 		}
 		_handle = ::socket(mart::toUType(domain), mart::toUType(type), protocol);
-		return _handle != port::sock::invalid_handle;
+		return _handle != port_layer::invalid_handle;
 	}
-	port::sock::handle_type _handle = port::sock::invalid_handle;
+	port_layer::handle_t _handle = port_layer::invalid_handle;
 	bool _is_blocking = true;
 };
 
-
-template<class Dur>
-timeval to_timeval(Dur duration)
-{
-	using namespace std::chrono;
-	timeval ret{};
-	if (duration.count() > 0) {
-		auto s = duration_cast<seconds>(duration);
-		ret.tv_sec = mart::narrow<decltype(ret.tv_sec)>(s.count());
-		ret.tv_usec = mart::narrow<decltype(ret.tv_usec)>((duration_cast<microseconds>(duration) - s).count());
-	}
-	return ret;
-}
-
-template<class Dur>
-Dur from_timeval(timeval duration)
-{
-	using namespace std::chrono;
-	return duration_cast<Dur>(seconds(duration.tv_sec) + microseconds(duration.tv_usec));
-}
-
-
+}//socks
 }//nw
 }//experimental
 }//mart

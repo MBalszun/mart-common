@@ -23,7 +23,7 @@
 
 /* Project Includes */
 #include "ip.h"
-#include "NativeSocketWrapper.h"
+#include "Socket.h"
 
 namespace mart {
 namespace experimental {
@@ -36,12 +36,12 @@ using endpoint = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::UDP>
 class Socket {
 public:
 	Socket() :
-		_socket_handle(SocketDomain::inet, SocketType::datagram, 0)
+		_socket_handle(socks::Domain::inet, socks::TransportType::datagram, 0)
 	{}
 	Socket(Socket&&) = default;
 	Socket& operator=(Socket&&) = default;
 
-	nw::NativeSocketWrapper& getSocket()
+	nw::socks::Socket& getSocket()
 	{
 		return _socket_handle;
 	}
@@ -81,7 +81,7 @@ public:
 	{
 		sockaddr_in src{};
 		auto tmp = _socket_handle.recvfrom(buffer, 0, src);
-		if (tmp.second.isValid() && src.sin_family == mart::toUType(nw::SocketDomain::inet)) {
+		if (tmp.second.isValid() && src.sin_family == mart::toUType(nw::socks::Domain::inet)) {
 			src_addr = endpoint(src);
 			return tmp.second;
 		} else {
@@ -99,25 +99,19 @@ public:
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
-		auto to = nw::to_timeval(timeout);
-		_socket_handle.setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		_socket_handle.setTxTimeout(timeout);
 	}
 	void setRxTimeout(std::chrono::microseconds timeout)
 	{
-		auto to = nw::to_timeval(timeout);
-		_socket_handle.setsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
+		_socket_handle.setTxTimeout(timeout);
 	}
 	std::chrono::microseconds getTxTimeout()
 	{
-		timeval to;
-		_socket_handle.getsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
-		return nw::from_timeval<std::chrono::microseconds>(to);
+		return _socket_handle.getTxTimeout();
 	}
 	std::chrono::microseconds getRxTimeout()
 	{
-		timeval to;
-		_socket_handle.getsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
-		return nw::from_timeval<std::chrono::microseconds>(to);
+		return _socket_handle.getRxTimeout();
 	}
 	bool setBlocking(bool should_block)
 	{
@@ -130,14 +124,14 @@ public:
 	const endpoint& getLocalEndpoint() { return _ep_local; }
 	const endpoint& getRemoteEndpoint() { return _ep_remote; }
 private:
-	bool _txWasSuccess(mart::ConstMemoryView data, nw::port::sock::txrx_size_type ret)
+	bool _txWasSuccess(mart::ConstMemoryView data, nw::socks::port_layer::txrx_size_t ret)
 	{
-		return mart::narrow<nw::port::sock::txrx_size_type>(data.size_inBytes()) == ret;
+		return mart::narrow<nw::socks::port_layer::txrx_size_t>(data.size()) == ret;
 	}
 	endpoint _ep_local{};
 	endpoint _ep_remote{};
 	sockaddr_in _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to sockaddr_in  every time.
-	nw::NativeSocketWrapper _socket_handle;
+	nw::socks::Socket _socket_handle;
 };
 
 }//ns udp

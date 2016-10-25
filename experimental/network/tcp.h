@@ -22,7 +22,7 @@
 
 /* Project Includes */
 #include "ip.h"
-#include "NativeSocketWrapper.h"
+#include "Socket.h"
 
 namespace mart {
 namespace experimental {
@@ -36,7 +36,7 @@ class Acceptor;
 class Socket {
 public:
 	Socket() :
-		_socket_handle(SocketDomain::inet, SocketType::stream, 0)
+		_socket_handle(socks::Domain::inet, socks::TransportType::stream, 0)
 	{}
 	Socket(endpoint ep) :
 		Socket()
@@ -62,7 +62,7 @@ public:
 	{
 		_ep_remote = ep;
 		auto t = _socket_handle.connect(ep.toSockAddr_in());
-		auto t_ep = getSockAddress(_socket_handle.getNative());
+		auto t_ep = getSockAddress(_socket_handle);
 		if (t_ep.valid) {
 			_ep_local = t_ep;
 		}
@@ -75,7 +75,7 @@ public:
 	}
 	mart::ConstMemoryView send(mart::ConstMemoryView data)
 	{
-		nw::port::sock::txrx_size_type ret = _socket_handle.send(data, 0);
+		auto ret = _socket_handle.send(data, 0);
 		if (ret >= 0) {
 			return data.subview(ret);
 		} else {
@@ -86,19 +86,17 @@ public:
 	{
 		return _socket_handle.recv(buffer, 0).second;
 	}
-	nw::NativeSocketWrapper& getSocket()
+	nw::socks::Socket& getSocket()
 	{
 		return _socket_handle;
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
-		auto to = nw::to_timeval(timeout);
-		_socket_handle.setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		_socket_handle.setTxTimeout(timeout);
 	}
 	void setRxTimeout(std::chrono::microseconds timeout)
 	{
-		auto to = nw::to_timeval(timeout);
-		_socket_handle.setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		_socket_handle.setRxTimeout(timeout);
 	}
 	bool setBlocking(bool should_block)
 	{
@@ -111,11 +109,11 @@ public:
 	const endpoint& getLocalEndpoint() { return _ep_local; }
 	const endpoint& getRemoteEndpoint() { return _ep_remote; }
 private:
-	static endpoint getSockAddress(nw::port::sock::handle_type handle)
+	static endpoint getSockAddress(const nw::socks::Socket& socket)
 	{
 		sockaddr_in t_locaddr{};
 		socklen_t addrlenLocal = sizeof(t_locaddr);
-		if (getsockname(handle, (sockaddr *)&t_locaddr, &addrlenLocal) == -1) {
+		if (getsockname(socket.getNative(), (sockaddr *)&t_locaddr, &addrlenLocal) == -1) {
 			return endpoint{};
 		} else {
 			return endpoint(t_locaddr);
@@ -124,7 +122,7 @@ private:
 
 
 	friend Acceptor;
-	nw::NativeSocketWrapper _socket_handle;
+	nw::socks::Socket _socket_handle;
 	endpoint _ep_local{};
 	endpoint _ep_remote{};
 };
@@ -162,7 +160,7 @@ public:
 	/* Binds to an address and immediately starts to listen on that address*/
 	bool open()
 	{
-		_socket_handle = nw::NativeSocketWrapper(SocketDomain::inet, SocketType::stream, 0);
+		_socket_handle = nw::socks::Socket(socks::Domain::inet, socks::TransportType::stream, 0);
 		if (_socket_handle.isValid()) {
 			_state = State::open;
 			return true;
@@ -201,7 +199,7 @@ public:
 	{
 		switch(_state ) {
 			case State::listening : {
-				_socket_handle = nw::NativeSocketWrapper();
+				_socket_handle = nw::socks::Socket();
 				this->_ep_local = tcp::endpoint{};
 				this->_state = State::closed;
 			}//deliberate fall through
@@ -239,14 +237,14 @@ public:
 		ret._ep_remote = endpoint(sa_remote);
 		return ret;
 	}
-	nw::NativeSocketWrapper& getSocket()
+	nw::socks::Socket& getSocket()
 	{
 		return _socket_handle;
 	}
 
 	endpoint getLocalEndpoint() const { return _ep_local; }
 private:
-	nw::NativeSocketWrapper _socket_handle;
+	nw::socks::Socket _socket_handle;
 	endpoint _ep_local{};
 	State _state = State::closed;
 };
