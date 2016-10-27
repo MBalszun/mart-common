@@ -44,7 +44,9 @@ struct sign_check<T,U,true> {
 
 } // _impl_narrow
 
-
+/**
+ * Performs a narrowing cast and throws a narrowing_error exception if the source value can't be represented in the target type
+ */
 template <class T, class U>
 inline T narrow(U u)
 {
@@ -92,6 +94,12 @@ T getRandomFloat(T min, T max)
 	return std::uniform_real_distribution<T>(min, max)(getRandomEngine());
 }
 
+
+bool getRandomBool(double hitProb)
+{
+	return std::bernoulli_distribution{hitProb}(getRandomEngine());
+}
+
 /* ######## container ################################################ */
 
 /**
@@ -101,10 +109,10 @@ T getRandomFloat(T min, T max)
  *	std::vector<int> vec;
  *	vec.reserve(100);
  *
- * you can call
+ * you can write
  *
  *  auto vec = mart::make_with_capacity<std::vector<int>(100);
- * */
+ **/
 
 template<class T>
 T make_with_capacity(size_t i)
