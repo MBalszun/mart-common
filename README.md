@@ -1,5 +1,5 @@
 ### mart-common
-This is a small utilitties library for usage in software related to the mart project at rcs
+This is a small utilities library for usage in software related to the mart project at rcs
 
 
 ### Content
@@ -27,3 +27,9 @@ This is a small utilitties library for usage in software related to the mart pro
   Contains new feature, classes, functions, whose interface might change at any point in the future
   
 For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de  
+
+
+### Contributing
+
+This library is an ongoing effort and might (will) contain bugs and lack features. If you want to help with the deveolpment and improvement, please contact michael.balszun@tum.de and/or provide contribute to https://gitlab.lrz.de/rcs_mart/mart-common 
+
