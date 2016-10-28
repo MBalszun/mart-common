@@ -17,6 +17,14 @@ using conditional_t = typename std::conditional<B, T, F>::type;
 template< class T >
 using underlying_type_t = typename std::underlying_type<T>::type;
 
+/*####### signed/unsigned ##################*/
+
+template< class T >
+using make_signed_t = typename  std::make_signed<T>::type;
+
+template< class T >
+using make_unsigned_t = typename std::make_unsigned<T>::type;
+
 
 /*####### remove cv-qualifiers ##################*/
 template< class T >
