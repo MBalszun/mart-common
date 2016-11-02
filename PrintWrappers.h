@@ -6,6 +6,7 @@
 namespace mart {
 namespace _impl_print_chrono {
 
+	//actual functions that take care of formatting
 	inline void printChronoUnit(std::ostream& out, std::chrono::nanoseconds v)	{ out << v.count << "ns"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::microseconds v) { out << v.count << "us"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::milliseconds v) { out << v.count << "ms"; };
@@ -13,12 +14,12 @@ namespace _impl_print_chrono {
 	inline void printChronoUnit(std::ostream& out, std::chrono::minutes v)		{ out << v.count << "min"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::hours v)		{ out << v.count << "h"; };
 
-
+	//wrapper for duration for which  operator<< gets overloaded in such a way, that the correct suffix is appended
 	template<typename rep, typename period>
 	struct PrintableDuration {
 		std::chrono::duration<rep, period> value;
 
-		friend std::ostream& operator<<(std::ostream& out, const PrintableDuration& dur){
+		inline friend std::ostream& operator<<(std::ostream& out, const PrintableDuration& dur){
 			printChronoUnit(out, dur.value);
 		}
 	};
@@ -26,16 +27,17 @@ namespace _impl_print_chrono {
 }//_impl_print
 
 /**
+ * function that wrapps a std::chrono duration into a wrapper with overloaded  operator<< which allows printing of the variable
  * Use:
- *	std::cout << mart::sformat(std::chrono::seconds(100)) << 'n';
+ *	std::cout << mart::sformat(std::chrono::seconds(100));
  *
  * Output:
  *  100s
  */
 template<typename rep, typename period>
-_impl_print_chrono::PrintableDuration<rep,period> sformat(std::chrono::duration<rep,period> dur)
+inline auto sformat(std::chrono::duration<rep,period> dur) -> _impl_print_chrono::PrintableDuration<rep, period>
 {
-	return{ dur };
+	return  _impl_print_chrono::PrintableDuration<rep, period>{ dur };
 }
 
 }//mart
