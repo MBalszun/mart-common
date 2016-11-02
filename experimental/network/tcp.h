@@ -90,6 +90,10 @@ public:
 	{
 		return _socket_handle;
 	}
+	const nw::socks::Socket& getSocket() const
+	{
+		return _socket_handle;
+	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
 		_socket_handle.setTxTimeout(timeout);

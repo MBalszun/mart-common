@@ -41,10 +41,16 @@ public:
 	Socket(Socket&&) = default;
 	Socket& operator=(Socket&&) = default;
 
+	const nw::socks::Socket& getSocket() const
+	{
+		return _socket_handle;
+	}
+
 	nw::socks::Socket& getSocket()
 	{
 		return _socket_handle;
 	}
+
 	void setDefaultRemoteEndpoint(endpoint ep)
 	{
 		_ep_remote = ep;
