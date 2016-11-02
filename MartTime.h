@@ -59,19 +59,38 @@
 /* Project Includes */
 
 namespace mart {
+// some shorthands
+using std::chrono::hours;
+using std::chrono::minutes;
+using std::chrono::seconds;
+using std::chrono::milliseconds;
+using std::chrono::microseconds;
+using std::chrono::nanoseconds;
+
+//replacement for the not-yet supported c++14's chrono literals
+namespace chrono_literals {
+// clang-format off
+constexpr mart::hours			operator "" _h	(unsigned long long v) { return mart::hours(v); }
+constexpr mart::minutes			operator "" _min(unsigned long long v) { return mart::minutes(v); }
+constexpr mart::seconds			operator "" _s	(unsigned long long v) { return mart::seconds(v); }
+constexpr mart::milliseconds	operator "" _ms	(unsigned long long v) { return mart::milliseconds(v); }
+constexpr mart::microseconds	operator "" _us	(unsigned long long v) { return mart::microseconds(v); }
+constexpr mart::nanoseconds		operator "" _ns	(unsigned long long v) { return mart::nanoseconds(v); }
+// clang-format on
+};
 
 
 /**
  * Default clock that is used by all other functions and classes
  */
-using copter_clock = std::chrono::system_clock;
-using copter_time_point = copter_clock::time_point;
+using copter_clock			= std::chrono::system_clock;
+using copter_time_point		= copter_clock::time_point;
 using copter_default_period = copter_clock::duration;
 
 //small wrapper to ensure consistent use of times
 inline copter_time_point now() noexcept
 {
-    return copter_clock::now();
+	return copter_clock::now();
 }
 
 /**
@@ -79,12 +98,18 @@ inline copter_time_point now() noexcept
  * in the classic posix way: as duration since epoch
  */
 template <class T = copter_default_period>
-T timeSinceEpoch() { return std::chrono::duration_cast<T>(mart::now().time_since_epoch()); }
+T timeSinceEpoch()
+{
+	return std::chrono::duration_cast<T>( mart::now().time_since_epoch() );
+}
 
 /*### for interfacing with legacy code, that expects integers representing a duration since epoch ###*/
+
+// clang-format off
 inline int64_t us_SinceEpoch() { return timeSinceEpoch<std::chrono::microseconds>().count(); }
 inline int64_t ms_SinceEpoch() { return timeSinceEpoch<std::chrono::milliseconds>().count(); }
 inline int64_t s_SinceEpoch()  { return timeSinceEpoch<std::chrono::seconds>().count(); }
+// clang-format on
 
 /**
  * Time that has elapsed since \p start. Units that can be defined by the user
@@ -99,9 +124,9 @@ inline int64_t s_SinceEpoch()  { return timeSinceEpoch<std::chrono::seconds>().c
  *
  */
 template <class TIME_T = copter_default_period>
-TIME_T passedTime(copter_time_point start)
+TIME_T passedTime( copter_time_point start )
 {
-    return std::chrono::duration_cast<TIME_T>(mart::now() - start);
+	return std::chrono::duration_cast<TIME_T>( mart::now() - start );
 }
 
 /**
@@ -110,58 +135,58 @@ TIME_T passedTime(copter_time_point start)
  * @param timeout
  * @return result of (mart::now() - \p start) > timeout
  */
-inline bool hasTimedOut(copter_time_point start, copter_default_period timeout)
+inline bool hasTimedOut( copter_time_point start, copter_default_period timeout )
 {
-    return (mart::now() - start) > timeout;
+	return ( mart::now() - start ) > timeout;
 }
 
 /**
  * Class to keep track of elapsed time / timeouts
  */
 struct Timer {
-    Timer()
-        : _start_time(mart::now())
-    {
-    }
+	Timer()
+		: _start_time( mart::now() )
+	{
+	}
 
-    Timer(copter_default_period timeout)
-        : _start_time(mart::now())
-        , _timeout{ timeout }
-    {
-    }
+	Timer( copter_default_period timeout )
+		: _start_time( mart::now() )
+		, _timeout{timeout}
+	{
+	}
 
-    /// Resets the timer and returns the elapsed time as if calling elapsed right before the reset
-    copter_default_period reset()
-    {
-        auto t = elapsed();
-        _start_time = mart::now();
-        return t;
-    }
+	/// Resets the timer and returns the elapsed time as if calling elapsed right before the reset
+	copter_default_period reset()
+	{
+		auto t		= elapsed();
+		_start_time = mart::now();
+		return t;
+	}
 
-    /// time elapsed since creation of Timer or last call to reset
-    template <class DUR = copter_default_period>
-    DUR elapsed() const
-    {
-        return std::chrono::duration_cast<DUR>(now() - _start_time);
-    }
+	/// time elapsed since creation of Timer or last call to reset
+	template <class DUR = copter_default_period>
+	DUR elapsed() const
+	{
+		return std::chrono::duration_cast<DUR>( now() - _start_time );
+	}
 
-    /// remaining time, before hasTimedOut will be true (will always return a non-negative number)
-    template <class DUR = copter_default_period>
-    DUR remaining() const
-    {
-        return std::max(std::chrono::duration_cast<DUR>(_timeout - (now() - _start_time)), DUR{});
-    }
+	/// remaining time, before hasTimedOut will be true (will always return a non-negative number)
+	template <class DUR = copter_default_period>
+	DUR remaining() const
+	{
+		return std::max( std::chrono::duration_cast<DUR>( _timeout - ( now() - _start_time ) ), DUR{} );
+	}
 
-    /// true if duration since creation or last call to reset is longer than the timeout that was specified upon creation
-    bool hasTimedOut() const
-    {
-        using namespace std::chrono;
-        return (mart::now() - _start_time) > _timeout;
-    }
+	/// true if duration since creation or last call to reset is longer than the timeout that was specified upon creation
+	bool hasTimedOut() const
+	{
+		using namespace std::chrono;
+		return ( mart::now() - _start_time ) > _timeout;
+	}
 
 private:
-    copter_time_point _start_time;
-    copter_default_period _timeout{ -1 };
+	copter_time_point	 _start_time;
+	copter_default_period _timeout{-1};
 };
 
 /**
@@ -176,26 +201,32 @@ private:
  */
 class PeriodicScheduler {
 public:
-    PeriodicScheduler(std::chrono::microseconds interval)
-        : _interval(interval)
-    {
-        _lastInvocation = mart::now();
-    }
-    copter_time_point getNextWakeTime() const
-    {
-        return _lastInvocation + _interval;
-    }
-    void sleep()
-    {
-        _lastInvocation += _interval;
-        std::this_thread::sleep_until(_lastInvocation);
-        _cnt++;
-    }
-    size_t invocationCnt() const { return _cnt; }
+	PeriodicScheduler( std::chrono::microseconds interval )
+		: _interval( interval )
+	{
+		_lastInvocation = mart::now();
+	}
+
+	copter_time_point getNextWakeTime() const
+	{
+		return _lastInvocation + _interval;
+	}
+
+	void sleep()
+	{
+		_lastInvocation += _interval;
+		std::this_thread::sleep_until( _lastInvocation );
+		_cnt++;
+	}
+	size_t invocationCnt() const
+	{
+		return _cnt;
+	}
+
 private:
-    std::chrono::microseconds _interval;
-    copter_time_point _lastInvocation;
-    size_t _cnt = 1;
+	std::chrono::microseconds _interval;
+	copter_time_point		  _lastInvocation;
+	size_t					  _cnt = 1;
 };
 
 } //mart
