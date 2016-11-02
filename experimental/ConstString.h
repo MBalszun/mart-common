@@ -139,6 +139,13 @@ public:
 private:
 	std::shared_ptr<const char> _data = nullptr;
 
+	friend void swap(ConstString& l, ConstString& r)
+	{
+		using std::swap;
+		swap(l._as_strview(), r._as_strview());
+		swap(l._data, r._data);
+	}
+
 	StringView& _as_strview()
 	{
 		return static_cast<StringView&>(*this);
@@ -200,7 +207,9 @@ private:
 
 		return ConstString(std::move(data),newSize	);
 	}
+
 };
+
 
 /**
  * Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
@@ -212,9 +221,9 @@ ConstString concat(ARGS&&...args)
 	return ConstString::_concat_impl(StringView(std::forward<ARGS>(args))...);
 }
 
-inline mart::ConstString& getEmptyConstString()
+inline const mart::ConstString& getEmptyConstString()
 {
-	static mart::ConstString str(mart::EmptyStringView);
+	const static mart::ConstString str(mart::EmptyStringView);
 	return str;
 }
 
