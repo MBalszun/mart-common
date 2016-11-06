@@ -149,7 +149,7 @@ namespace port_layer {
 	inline const char *inet_net_to_pres(int af, const void *src, char *dst, size_t size)
 	{
 		#ifdef MBA_UTILS_USE_WINSOCKS //detect windows os - use other guards if necessary
-			return InetNtop(af, src, dst, size);
+			return InetNtop(af, const_cast<void*>(src), dst, size);
 		#else
 			return inet_ntop(af, src, dst, size);
 		#endif
