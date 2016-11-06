@@ -71,11 +71,6 @@ public:
 	{
 	}
 
-	Logger( const LoggerConf_t& cfg )
-		: Logger( cfg.moduleName, cfg.logLvl )
-	{
-	}
-
 	/**
 	 * Constructor which takes a default sink.
 	 * @param moduleName Name of the module by which the logger is used (this will be printed at the beginning of each line in the log)
@@ -87,6 +82,11 @@ public:
 		addSink( sink );
 	}
 
+	Logger( const LoggerConf_t& cfg )
+		: Logger( cfg.moduleName, cfg.logLvl )
+	{
+	}
+
 	/**
 	 * Constructs logger from parent logger.
 	 *
@@ -95,13 +95,24 @@ public:
 	 * @param other
 	 */
 	Logger( const mart::StringView subModuleName, const Logger& other )
-		: _startTime		{ other._startTime }
-		, _currentLogLevel	{ other._currentLogLevel.load() }
-		, _enabled			{ other._enabled.load() }
-		, _sinks			{ other._sinks }
-		, _loggingName		{ _createLoggingName( subModuleName, other._loggingName ) }
+		: Logger(other)
 	{
+		_loggingName = _createLoggingName(subModuleName, other._loggingName);
 	}
+
+	Logger(Logger&& other) noexcept = default;
+	Logger(const Logger& other) = default;
+	Logger& operator=(Logger&& other) noexcept {//= default; doesn't work for some reason
+		_startTime			= other._startTime;
+		_currentLogLevel	= other._currentLogLevel;
+		_enabled			= other._enabled;
+		_sinks				= std::move(other._sinks);
+		_loggingName		= std::move(other._loggingName);
+		_spacer				= std::move(other._spacer);
+		return *this;
+	}
+
+	Logger& operator=(const Logger& other) = default;
 
 	/* ### Statics ### */
 	//NOTE: This is NOT a singleton
@@ -246,7 +257,7 @@ private:
 	/*### Variables controlling logging behavior ###*/
 	mart::copter_time_point		  _startTime;
 	mart::CopyableAtomic<LOG_LVL> _currentLogLevel;
-	mart::CopyableAtomic<bool>	_enabled;
+	mart::CopyableAtomic<bool>	  _enabled;
 
 	std::vector<std::shared_ptr<ILogSink>> _sinks;
 
