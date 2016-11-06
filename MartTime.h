@@ -145,12 +145,12 @@ inline bool hasTimedOut( copter_time_point start, copter_default_period timeout 
  */
 struct Timer {
 	Timer()
-		: _start_time( mart::now() )
+		: _start_time( now() )
 	{
 	}
 
-	Timer( copter_default_period timeout )
-		: _start_time( mart::now() )
+	explicit Timer( copter_default_period timeout )
+		: _start_time(now() )
 		, _timeout{timeout}
 	{
 	}
@@ -201,7 +201,7 @@ private:
  */
 class PeriodicScheduler {
 public:
-	PeriodicScheduler( std::chrono::microseconds interval )
+	explicit PeriodicScheduler( microseconds interval )
 		: _interval( interval )
 	{
 		_lastInvocation = mart::now();
@@ -224,7 +224,7 @@ public:
 	}
 
 private:
-	std::chrono::microseconds _interval;
+	microseconds		_interval;
 	copter_time_point		  _lastInvocation;
 	size_t					  _cnt = 1;
 };
