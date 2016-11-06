@@ -34,23 +34,34 @@ template<class T>
 class CopyableAtomic : public std::atomic<T>
 {
 public:
-    //defaultinitializes value
-    constexpr CopyableAtomic() :
+	static_assert(sizeof(T) < 8 && std::is_pod<T>::value,"Class is only meant for trivial buildin types");
+
+	//defaultinitializes value (std::atomic doesn't)
+    constexpr CopyableAtomic() noexcept :
         std::atomic<T>(T{})
     {}
 
-    constexpr CopyableAtomic(T desired) :
+    constexpr CopyableAtomic(T desired) noexcept :
         std::atomic<T>(desired)
     {}
 
-    constexpr CopyableAtomic(const CopyableAtomic<T>& other) :
+    constexpr CopyableAtomic(const CopyableAtomic<T>& other) noexcept :
         CopyableAtomic(other.load(std::memory_order_relaxed))
     {}
 
-    CopyableAtomic& operator=(const CopyableAtomic<T>& other) {
+    CopyableAtomic& operator=(const CopyableAtomic<T>& other) noexcept {
         this->store(other.load(std::memory_order_relaxed), std::memory_order_relaxed);
         return *this;
     }
+
+	constexpr CopyableAtomic(CopyableAtomic<T>&& other) noexcept:
+		CopyableAtomic(other.load(std::memory_order_relaxed))
+	{}
+
+	CopyableAtomic& operator=(CopyableAtomic<T>&& other) noexcept {
+		this->store(other.load(std::memory_order_relaxed), std::memory_order_relaxed);
+		return *this;
+	}
 };
 
 }
