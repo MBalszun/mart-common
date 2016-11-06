@@ -17,6 +17,9 @@ using conditional_t = typename std::conditional<B, T, F>::type;
 template< class T >
 using underlying_type_t = typename std::underlying_type<T>::type;
 
+template< class... T >
+using common_type_t = typename std::common_type<T...>::type;
+
 /*####### signed/unsigned ##################*/
 
 template< class T >
@@ -46,5 +49,10 @@ using add_const_t = typename std::add_const<T>::type;
 
 template< class T >
 using add_volatile_t = typename std::add_volatile<T>::type;
+
+
+
+template< class T >
+using decay_t = typename std::decay<T>::type;
 
 }
