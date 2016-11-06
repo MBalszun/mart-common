@@ -9,7 +9,7 @@ namespace mart {
 	class IIterator {
 		static_assert(std::is_integral<T>::value, "IIterator can only be used for integral values");
 	public:
-		using difference_type = std::make_signed_t<T>;
+		using difference_type = mart::make_signed_t<T>;
 		using value_type = T;
 		using pointer = T*;
 		using reference = const T&;
@@ -23,10 +23,10 @@ namespace mart {
 		pointer operator->() const { return &i; }
 
 		IIterator& operator++() { ++i; return *this; }
-		IIterator operator++(int) { return iterator{ i++ }; }
+		IIterator operator++(int) { return IIterator{ i++ }; }
 
 		IIterator& operator--() { --i; return *this; }
-		IIterator operator--(int) { return iterator{ i-- }; }
+		IIterator operator--(int) { return IIterator{ i-- }; }
 
 		IIterator& operator+=(difference_type diff) { i += diff; return *this; }
 		IIterator operator-=(difference_type diff) { i -= diff; return *this; }
