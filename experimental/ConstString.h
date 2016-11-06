@@ -72,17 +72,15 @@ protected:
 public:
 
 	/* ############### Special member functions ######################################## */
-	ConstString(const ConstString& other) = default;
-	ConstString& operator=(const ConstString& other) = default;
+	ConstString(const ConstString& other) noexcept = default;
+	ConstString& operator=(const ConstString& other) noexcept = default;
 
-	ConstString(ConstString&& other):
-		//string_view{ nullptr,other.size() },
-		StringView(other),
-		_data(std::move(other._data))
+	ConstString(ConstString&& other) noexcept
+		: StringView(mart::exchange(other._as_strview(), mart::EmptyStringView))
+		, _data(std::move(other._data))
 	{
-		other._as_strview() = mart::EmptyStringView;
 	}
-	ConstString& operator=(ConstString&& other)
+	ConstString& operator=(ConstString&& other) noexcept
 	{
 		this->_as_strview() = mart::exchange(other._as_strview(), mart::EmptyStringView);
 		_data = std::move(other._data);

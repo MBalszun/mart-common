@@ -35,7 +35,7 @@ public:
 
 public:
 	/* #### CTORS #### */
-	constexpr StringView() = default;
+	constexpr StringView() noexcept = default;
 
 	StringView( const std::string& other ) noexcept
 		: _start( other.data() )
@@ -63,8 +63,10 @@ public:
 	StringView( const T* const& other ) = delete;
 
 	/* #### Special member functions #### */
-	constexpr StringView( const StringView& other ) = default;
-	StringView& operator=( const StringView& other ) = default;
+	constexpr StringView( const StringView& other ) noexcept = default;
+	StringView& operator=( const StringView& other ) noexcept = default;
+	constexpr StringView(StringView&& other) noexcept = default;
+	StringView& operator=(StringView&& other) noexcept = default;
 
 	/*#### string functions ####*/
 	std::string to_string() const { return std::string( cbegin(), cend() ); }
