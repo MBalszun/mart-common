@@ -129,7 +129,7 @@ private:
 public:
 
 	/* #### CTORS #### */
-	constexpr ArrayView() = default;
+	constexpr ArrayView() noexcept = default;
 
 	//construction from a pointer and a size (c-style api)
 	constexpr ArrayView(pointer other, size_t size) noexcept :
@@ -189,9 +189,9 @@ public:
 	constexpr bool empty()				const noexcept { return this->size() == 0; }
 
 	constexpr size_type size_inBytes()	const noexcept { return _size * sizeof(value_type); }
-	ArrayView<transfer_constness_t<T, ByteType>> asBytes()	  {	return { reinterpret_cast<transfer_constness_t<T,ByteType>*>(_data), size_inBytes() }; }
-	constexpr ArrayView<const ByteType> asConstBytes() 	const { return { reinterpret_cast<const ByteType*>					(_data), size_inBytes() }; }
-	constexpr ArrayView<const ByteType> asBytes() 		const { return asConstBytes(); }
+	ArrayView<transfer_constness_t<T, ByteType>> asBytes()	 noexcept {	return { reinterpret_cast<transfer_constness_t<T,ByteType>*>(_data), size_inBytes() }; }
+	constexpr ArrayView<const ByteType> asConstBytes() 	const noexcept { return { reinterpret_cast<const ByteType*>					(_data), size_inBytes() }; }
+	constexpr ArrayView<const ByteType> asBytes() 		const noexcept { return asConstBytes(); }
 
 	constexpr const char* asConstCharPtr() const { return reinterpret_cast<const char*>(_data); }
 	constexpr const char* asCharPtr() const { return asConstCharPtr(); }
@@ -221,7 +221,7 @@ public:
 			ArrayView<T>{ _data + offset, _size - offset};
 	}
 
-	bool isValid() { return _data != nullptr; }
+	constexpr bool isValid() const noexcept { return _data != nullptr; }
 
 protected:
 	constexpr bool _throwIfOutOfRange(size_t idx) const { return idx < _size ? true : throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size)); }
@@ -240,9 +240,9 @@ protected:
 	size_type _size = 0;
 
 	//interface for ArrayViewAdaptor
-					pointer _arrayView_data()		{ return _data; }
-	constexpr const_pointer _arrayView_data() const { return _data; }
-	constexpr	  size_type _arrayView_size() const { return _size; }
+					pointer _arrayView_data()		noexcept { return _data; }
+	constexpr const_pointer _arrayView_data() const noexcept { return _data; }
+	constexpr	  size_type _arrayView_size() const noexcept { return _size; }
 	friend class ArrayViewAdaptor<T,ArrayView<T>>;
 };
 

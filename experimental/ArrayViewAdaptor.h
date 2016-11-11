@@ -69,15 +69,15 @@ class ArrayViewAdaptor {
 public:
 	static_assert(std::is_reference<T>::value == false, "T must not be a reference type");
 	//The usual type defs for c++ container
-	using value_type = T;
-	using size_type = std::size_t;
-	using difference_type = std::ptrdiff_t;
-	using		reference =			value_type&;
-	using const_reference = const	value_type&;
-	using		pointer =		value_type*;
-	using const_pointer = const value_type*; //const T*;
-	using		iterator =		 pointer;
-	using const_iterator = const_pointer;
+	using value_type		= T;
+	using size_type			= std::size_t;
+	using difference_type	= std::ptrdiff_t;
+	using		reference	=		value_type&;
+	using const_reference	= const	value_type&;
+	using		pointer		=		value_type*;
+	using const_pointer		= const value_type*; //const T*;
+	using		iterator	=		pointer;
+	using const_iterator	= const_pointer;
 	using		reverse_iterator = std::reverse_iterator<iterator>;
 	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -90,8 +90,8 @@ public:
 	constexpr const_iterator begin()	const noexcept { return cbegin(); }
 	constexpr const_iterator end()		const noexcept { return cend(); }
 
-	reverse_iterator rbegin()				  { return reverse_iterator(end()); }
-	reverse_iterator rend()					  { return reverse_iterator(begin()); }
+		  reverse_iterator rbegin()			  { return reverse_iterator(end()); }
+		  reverse_iterator rend()			  { return reverse_iterator(begin()); }
 	const_reverse_iterator crbegin()	const { return const_reverse_iterator(end()); }
 	const_reverse_iterator crend()		const { return const_reverse_iterator(begin()); }
 	const_reverse_iterator rbegin()		const { return crbegin(); }
@@ -112,9 +112,9 @@ public:
 	const_reference at(size_t idx)	const { _throwIfOutOfRange(idx); return _data()[idx]; }
 
 	/* #### container functions #### */
-	constexpr		size_type size() const 	{ return _size(); }
-					pointer data() 			{ return _data(); }
-	constexpr const_pointer data() const 	{ return _data(); }
+	constexpr		size_type size()	const noexcept { return _size(); }
+					pointer data() 			  noexcept { return _data(); }
+	constexpr const_pointer data()		const noexcept { return _data(); }
 
 protected:
 	//those special member functions are protected
