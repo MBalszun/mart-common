@@ -143,7 +143,7 @@ public:
 	*/
 	template<class IT, class = enable_if_random_it_t<IT>> //FIXME: random iterator is not good enough (e.g. deque), we need c++17 contiguous iterator
 	constexpr ArrayView(IT start, IT end) noexcept :
-		_data(end - start == 0 ? nullptr : &*start),
+		_data(&start[0]),
 		_size(end - start)
 	{}
 
