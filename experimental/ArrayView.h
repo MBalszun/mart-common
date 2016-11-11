@@ -197,6 +197,9 @@ public:
 	constexpr const char* asCharPtr() const { return asConstCharPtr(); }
 	transfer_constness_t<T, char>* asCharPtr() { return reinterpret_cast<transfer_constness_t<T, char>*>(_data); }
 
+	constexpr ArrayView<T> max_subview(size_t offset, size_t count) const {
+		return offset > _size ? ArrayView<T>{} : ArrayView<T>{_data + offset, std::min(count, _size-offset )};
+	}
 
 	constexpr ArrayView<T> subview(size_t offset, size_t count) const {
 		return  _throwIfInvalidSubview(offset, count), //found a usage for the comma (,) operator ;)
@@ -219,6 +222,11 @@ public:
 	constexpr ArrayView<T> subview(size_t offset) const {
 		return  _throwIfInvalidSubview(offset, _size - offset),//found a usage for the comma (,) operator ;)
 			ArrayView<T>{ _data + offset, _size - offset};
+	}
+
+
+	constexpr ArrayView<T> max_subview(size_t offset) const {
+		return offset > _size ? ArrayView{} : ArrayView{ _data + offset, _size - offset };
 	}
 
 	constexpr bool isValid() const noexcept { return _data != nullptr; }
