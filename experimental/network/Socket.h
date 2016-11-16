@@ -272,13 +272,24 @@ public:
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
+	#ifdef MBA_UTILS_USE_WINSOCKS
+		DWORD to_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to_ms);
+	#else
 		auto to = nw::to_timeval(timeout);
 		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+	#endif
 	}
+
 	void setRxTimeout(std::chrono::microseconds timeout)
 	{
+	#ifdef MBA_UTILS_USE_WINSOCKS
+		DWORD to_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+		this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, to_ms);
+	#else
 		auto to = nw::to_timeval(timeout);
-		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
+	#endif
 	}
 	std::chrono::microseconds getTxTimeout()
 	{

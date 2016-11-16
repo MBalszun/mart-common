@@ -109,7 +109,7 @@ public:
 	}
 	void setRxTimeout(std::chrono::microseconds timeout)
 	{
-		_socket_handle.setTxTimeout(timeout);
+		_socket_handle.setRxTimeout(timeout);
 	}
 	std::chrono::microseconds getTxTimeout()
 	{
