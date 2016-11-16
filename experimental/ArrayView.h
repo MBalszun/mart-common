@@ -283,6 +283,14 @@ auto copy(ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest) -> ArrayVie
 	return dest.subview(cnt);
 }
 
+template<class T>
+auto copy_some(ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest) -> ArrayView<mart::remove_const_t<T>>
+{
+	auto cnt = std::min(src.size(), dest.size());
+	std::copy_n(src.cbegin(), cnt, dest.begin());
+	return dest.subview(cnt);
+}
+
 
 template<class T>
 bool equal(ArrayView<T> l, ArrayView<T> r)
