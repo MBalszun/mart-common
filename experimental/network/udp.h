@@ -56,10 +56,10 @@ public:
 		_ep_remote = ep;
 		_sa_remote = ep.toSockAddr_in();
 	}
-	void connect(endpoint ep)
+	bool connect(endpoint ep)
 	{
 		setDefaultRemoteEndpoint(ep);
-		_socket_handle.connect(_sa_remote);
+		return _socket_handle.connect(_sa_remote) == 0;
 	}
 	bool bind(endpoint ep)
 	{
