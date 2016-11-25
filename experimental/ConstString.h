@@ -156,7 +156,7 @@ private:
 
 	static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
 	{
-		auto data = mart::make_unique<char[]>(size + 1);//std::unique_ptr<char[]>(new char[size + 1]); //c++14: auto data= std::make_unique<char[]>(size+1);
+		auto data = mart::make_unique<char[]>(size + 1);
 		data[size] = '\0'; //zero terminate
 		return data;
 	}
