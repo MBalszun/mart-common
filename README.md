@@ -1,4 +1,5 @@
-### mart-common
+# mart-common
+
 This is a small utilities library for usage in software related to the mart project at the chari for Real-Time Computer Systems (RCS) at TU-Munich, developed by Michael Balszun
 You can find the most recent version on the lrz gitlab server at https://gitlab.lrz.de/rcs_mart/mart-common.git. 
 

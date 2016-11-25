@@ -127,11 +127,11 @@ public:
 
 	static Logger& initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
 	{
-		std::cout << "Initializing default logger" << std::endl;
+		std::cout << "Initializing default logger\n";
 		Logger& lref = initDefaultLogger( conf );
 		for ( auto& sink : sinks ) {
 			lref.addSink( sink );
-			std::cout << "Added sink: " << sink->getName() << std::endl;
+			std::cout << "Added sink: " << sink->getName() << '\n';
 		}
 		return lref;
 	}
@@ -201,7 +201,7 @@ public:
 	{
 		_sinks.clear();
 	}
-	std::vector<std::shared_ptr<ILogSink>> getSinks()
+	std::vector<std::shared_ptr<ILogSink>> getSinks() const
 	{
 		return _sinks;
 	}
@@ -227,7 +227,10 @@ public:
 	struct IndentLevelGuard {
 		Logger* _log;
 		explicit IndentLevelGuard( Logger& logger )
-			: _log( &logger ){};
+			: _log( &logger )
+		{
+			logger.bumpIndentLevel();
+		}
 		IndentLevelGuard( IndentLevelGuard&& other ) noexcept
 			: _log( other._log )
 		{
@@ -249,7 +252,6 @@ public:
 	 */
 	IndentLevelGuard bumpIdentLevelGuarded()
 	{
-		bumpIndentLevel();
 		return IndentLevelGuard( *this );
 	}
 
@@ -291,7 +293,7 @@ private:
 	void _fillBuffer( LOG_LVL lvl, AddNewline newLine, ARGS&&... args )
 	{
 		//line prefix
-		formatForLog( _sbuffer(), lvl, " - At ", passedTime<milliseconds>( _startTime ), " - ", _loggingName, ": " );
+		formatForLog( _sbuffer(), lvl, " - At ", std::setw(7) , passedTime<milliseconds>( _startTime ), " - ", _loggingName, ": " );
 
 		//Add thread Id and spacer in trace mode
 		if ( _currentLogLevel == LOG_LVL::TRACE ) {
