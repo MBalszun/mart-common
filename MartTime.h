@@ -54,6 +54,7 @@
 #include <chrono>
 #include <thread>
 #include <type_traits>
+#include <algorithm>
 /* Proprietary Library Includes */
 
 /* Project Includes */
@@ -218,9 +219,17 @@ public:
 		std::this_thread::sleep_until( _lastInvocation );
 		_cnt++;
 	}
+
 	size_t invocationCnt() const
 	{
 		return _cnt;
+	}
+
+	/// time elapsed since creation of Timer or last call to reset
+	template <class DUR = copter_default_period>
+	DUR runtime() const
+	{
+		return std::chrono::duration_cast<DUR>(now() - _lastInvocation + _interval*(_cnt - 1));
 	}
 
 private:
