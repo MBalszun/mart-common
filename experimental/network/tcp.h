@@ -14,6 +14,7 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <chrono>
+#include <iostream>
 
 /* Proprietary Library Includes */
 #include "../../utils.h"
@@ -226,9 +227,10 @@ public:
 	{
 		return _socket_handle.isValid();
 	}
-	Socket accept()
+	Socket accept(std::chrono::microseconds timeout = std::chrono::hours(300))
 	{
 		_socket_handle.setBlocking(true);
+		_socket_handle.setRxTimeout(timeout);
 		sockaddr_in sa_remote{};
 		auto handle = _socket_handle.accept(sa_remote);
 		if (!handle.isValid()) {
