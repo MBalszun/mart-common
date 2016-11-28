@@ -95,4 +95,11 @@ _impl_irange::irange_t<T> irange(T end) {
 	return _impl_irange::irange_t<T>{0, end};
 }
 
+template<class C, class IT = typename C::iterator, class = mart::enable_if_t<std::is_base_of<std::random_access_iterator_tag, typename std::iterator_traits<IT>::iterator_category>::value> >
+_impl_irange::irange_t<typename C::size_type> irange(const C& container) {
+	return _impl_irange::irange_t<typename C::size_type>{0, container.size()};
+}
+
+
+
 }
