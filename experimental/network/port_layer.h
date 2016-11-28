@@ -11,7 +11,6 @@
 #ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_PORT_LAYER_H_
 #define LIBS_MART_COMMON_EXPERIMENTAL_NW_PORT_LAYER_H_
 #pragma once
-
 //detect windows os. TODO: use other guards if necessary
 #ifdef _MSC_VER
 #define MBA_UTILS_USE_WINSOCKS
@@ -28,6 +27,7 @@
 //Include OS-specific headers
 #ifdef MBA_UTILS_USE_WINSOCKS
 
+struct IUnknown; //This declaration will be needed when translating windows headers with clang/c2
 //Including Windows.h (indirectly) tentds to import some nasty macros. in particular min and max
 #ifndef WIN32_LEAN_AND_MEAN
 	#define WIN32_LEAN_AND_MEAN
@@ -140,6 +140,7 @@ inline bool waInit()
 	return true; //on linux we don't have to initialize anything
 #endif
 }
+
 } //port_layer
 } //sock
 
