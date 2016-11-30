@@ -59,6 +59,12 @@ public:
 	{
 	}
 
+	constexpr StringView(const char &other) noexcept
+		: _start(&other)
+		, _size(1)
+	{
+	}
+
 	template <class T>
 	StringView( const T* const& other ) = delete;
 
