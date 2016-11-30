@@ -80,12 +80,14 @@ private:
 			if ('0' <= c && c <= '9') {
 				blocks[idx] *= 10;
 				blocks[idx] += c - '0';
-			} else {
+			} else if (c == '.') {
 				//separator digit -> go to next block
 				idx++;
 				if (idx >= 4) {
 					break;
 				}
+			} else {
+				throw std::invalid_argument(mart::concat("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. Invalid_character: ", c).to_string());
 			}
 		}
 		return ret;
