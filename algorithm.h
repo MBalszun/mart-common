@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "./cpp_std/type_traits.h"
+#include "ranges.h"
 
 namespace mart {
 
@@ -13,16 +14,28 @@ void sort( C& c )
 	std::sort( c.begin(), c.end() );
 }
 
+//template <class C, class V>
+//auto find( C& c, const V& value ) -> decltype( c.begin() )
+//{
+//	return std::find( c.begin(), c.end(), value );
+//}
+//
+//template <class C, class UnaryPredicate>
+//auto find_if( C& c, UnaryPredicate p ) -> decltype( c.begin() )
+//{
+//	return std::find_if( c.begin(), c.end(), p );
+//}
+
 template <class C, class V>
-auto find( C& c, const V& value ) -> decltype( c.begin() )
+auto find(C& c, const V& value) -> mart::EndAwareIterator<decltype(c.begin())>
 {
-	return std::find( c.begin(), c.end(), value );
+	return{ std::find(c.begin(), c.end(), value), c };
 }
 
 template <class C, class UnaryPredicate>
-auto find_if( C& c, UnaryPredicate p ) -> decltype( c.begin() )
+auto find_if(C& c, UnaryPredicate p) -> mart::EndAwareIterator<decltype(c.begin())>
 {
-	return std::find_if( c.begin(), c.end(), p );
+	return{ std::find_if(c.begin(), c.end(), p), c };
 }
 
 /*### algorithm related ###*/

@@ -5,6 +5,47 @@
 
 
 namespace mart {
+	//wrapper around a pointer, that allows deriving from it
+	template<class T>
+	class Pointer {
+	public:
+		Pointer(T* p = nullptr):ptr{p} {}
+		//operator T* const &() const { return ptr; }
+		//operator T*&() { return ptr; }
+		T*& get() { return ptr; }
+		T*const & get() const { return ptr; }
+
+		T& operator*() const { return *ptr; }
+		T* operator->() const { return ptr; }
+
+		Pointer& operator++() { ++ptr; return *this; }
+		Pointer operator++(int) { return ptr++; }
+
+		Pointer& operator--() { --ptr; return *this; }
+		Pointer operator--(int) { return ptr--; }
+
+		Pointer& operator+=(std::ptrdiff_t diff) { ptr += diff; return *this; }
+		Pointer& operator-=(std::ptrdiff_t  diff) { ptr -= diff; return *this; }
+
+		T& operator[](std::ptrdiff_t  diff) const { return ptr + diff; }
+
+		friend bool operator!=(Pointer l, Pointer r) { return l.ptr != r.ptr; }
+		friend bool operator==(Pointer l, Pointer r) { return l.ptr == r.ptr; }
+		friend bool operator<(Pointer l, Pointer r) { return l.ptr < r.ptr; }
+		friend bool operator<=(Pointer l, Pointer r) { return l.ptr <= r.ptr; }
+		friend bool operator>(Pointer l, Pointer r) { return l.ptr > r.ptr; }
+		friend bool operator>=(Pointer l, Pointer r) { return l.ptr >= r.ptr; }
+
+		friend Pointer operator+(Pointer l, std::ptrdiff_t n) { return l.ptr + n; }
+		friend Pointer operator+(std::ptrdiff_t n, Pointer l) { return n + l.ptr; }
+
+		friend std::ptrdiff_t operator-(Pointer l, Pointer r) { return l.ptr - r.ptr; }
+		friend Pointer operator-(Pointer l, std::ptrdiff_t n) { return l.ptr - n; }
+	private:
+		T* ptr;
+	};
+
+
 	template<class T>
 	class IIterator {
 		static_assert(std::is_integral<T>::value, "IIterator can only be used for integral values");
@@ -50,37 +91,57 @@ namespace mart {
 		T i;
 	};
 
-namespace _impl_irange {
+	template <class IT>
+	class EndAwareIterator : public IT {
+	public:
+		template <class C>
+		EndAwareIterator( IT it, C& c )
+			: IT{ it }
+			, _is_end{ it == c.end() }
+		{};
 
-template<class T>
-struct irange_t {
-	static_assert(std::is_integral<T>::value, "irange can only be used for integral values");
-	using iterator = IIterator<T>;
+		explicit operator bool() const { return _is_end; }
+		bool is_end() const { return _is_end; }
+	private:
+		bool _is_end;
+	};
 
-	iterator begin() const { return _start; };
-	iterator end() const { return _past_end; };
+	template <class T>
+	class EndAwareIterator<T*> : public EndAwareIterator<mart::Pointer<T>> {
+		using EndAwareIterator<mart::Pointer<T>>::EndAwareIterator;
+	};
 
-	iterator _start;
-	iterator _past_end;
-};
+	namespace _impl_irange {
 
-template<class T>
-struct non_deduced {
-	using type = T;
-};
+	template <class T>
+	struct irange_t {
+		static_assert( std::is_integral<T>::value, "irange can only be used for integral values" );
+		using iterator = IIterator<T>;
 
-template<class T>
-using non_deduced_t = typename non_deduced<T>::type;
+		iterator begin() const { return _start; };
+		iterator end() const { return _past_end; };
 
-template<class IT>
-struct is_random_it {
-	static constexpr bool value = std::is_same< typename std::iterator_traits<IT>::iterator_category, std::random_access_iterator_tag	>::value;
-};
+		iterator _start;
+		iterator _past_end;
+	};
 
-template<class U, class = typename U::iterator>
-struct has_random_it {
-	static constexpr bool value = is_random_it<typename U::iterator>::value;
-};
+	template<class T>
+	struct non_deduced {
+		using type = T;
+	};
+
+	template<class T>
+	using non_deduced_t = typename non_deduced<T>::type;
+
+	template<class IT>
+	struct is_random_it {
+		static constexpr bool value = std::is_same< typename std::iterator_traits<IT>::iterator_category, std::random_access_iterator_tag	>::value;
+	};
+
+	template<class U, class = typename U::iterator>
+	struct has_random_it {
+		static constexpr bool value = is_random_it<typename U::iterator>::value;
+	};
 
 
 }//_impl_irange
@@ -101,5 +162,9 @@ _impl_irange::irange_t<typename C::size_type> irange(const C& container) {
 }
 
 
+}
 
+namespace std {
+	template<class IT>
+	struct std::iterator_traits<mart::EndAwareIterator<IT>> : public std::iterator_traits<IT>{};
 }
