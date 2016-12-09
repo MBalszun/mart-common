@@ -29,7 +29,7 @@ namespace mart {
 		IIterator operator--(int) { return IIterator{ i-- }; }
 
 		IIterator& operator+=(difference_type diff) { i += diff; return *this; }
-		IIterator operator-=(difference_type diff) { i -= diff; return *this; }
+		IIterator& operator-=(difference_type diff) { i -= diff; return *this; }
 
 		value_type operator[](difference_type diff) const { return i + diff; }
 
