@@ -166,5 +166,5 @@ _impl_irange::irange_t<typename C::size_type> irange(const C& container) {
 
 namespace std {
 	template<class IT>
-	struct std::iterator_traits<mart::EndAwareIterator<IT>> : public std::iterator_traits<IT>{};
+	struct iterator_traits<mart::EndAwareIterator<IT>> : public std::iterator_traits<IT>{};
 }
