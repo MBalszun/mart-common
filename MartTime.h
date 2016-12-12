@@ -215,8 +215,12 @@ public:
 
 	void sleep()
 	{
+		//workaround for bug in g++ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58038
+		auto sleep_duration = getNextWakeTime() - mart::now();
+		if (sleep_duration > std::chrono::seconds(0)) {
+			std::this_thread::sleep_for(sleep_duration);
+		}
 		_lastInvocation += _interval;
-		std::this_thread::sleep_until( _lastInvocation );
 		_cnt++;
 	}
 
