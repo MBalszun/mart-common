@@ -10,8 +10,8 @@
 
 #ifndef MART_LOG_MAX_LOG_LVL
 	//Every MARTE_LOG_<LVL> macro with a higher level (numerical number) will be compiled to a nop
-	#define MART_LOG_MAX_LOG_LVL MART_LOG_LOG_LVL_DEBUG
-	//#define MART_LOG_MAX_LOG_LVL MART_LOG_LOG_LVL_TRACE
+	//#define MART_LOG_MAX_LOG_LVL MART_LOG_LOG_LVL_DEBUG
+	#define MART_LOG_MAX_LOG_LVL MART_LOG_LOG_LVL_TRACE
 #endif
 
 #define MART_DEFLOG (::mart::log::Logger::getDefaultLogger())
