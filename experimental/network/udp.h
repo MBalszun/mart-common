@@ -81,15 +81,15 @@ public:
 	}
 	mart::MemoryView rec(mart::MemoryView buffer)
 	{
-		return _socket_handle.recv(buffer, 0).second;
+		return _socket_handle.recv(buffer, 0).first;
 	}
 	mart::MemoryView recvfrom(mart::MemoryView buffer, endpoint& src_addr)
 	{
 		sockaddr_in src{};
 		auto tmp = _socket_handle.recvfrom(buffer, 0, src);
-		if (tmp.second.isValid() && src.sin_family == mart::toUType(nw::socks::Domain::inet)) {
+		if (tmp.first.isValid() && src.sin_family == mart::toUType(nw::socks::Domain::inet)) {
 			src_addr = endpoint(src);
-			return tmp.second;
+			return tmp.first;
 		} else {
 			return mart::MemoryView{};
 		}
@@ -100,8 +100,16 @@ public:
 		_socket_handle.setBlocking(false);
 		uint64_t _tmp{};
 		auto tmp = mart::viewMemory(_tmp);
-		while (_socket_handle.recv(tmp, 0).first != EWOULDBLOCK) { ; }
-		_socket_handle.setBlocking(t);
+		//XXX: Make a RAII class for preserving the blocking state of the socket
+		try {
+			while (_socket_handle.recv(tmp, 0).first.isValid()) { ; }
+		} catch (...) {
+			try {
+				_socket_handle.setBlocking(t);
+			} catch(...) {}
+			throw;
+		}
+
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
@@ -127,8 +135,8 @@ public:
 	{
 		return _socket_handle.isValid();
 	}
-	const endpoint& getLocalEndpoint() { return _ep_local; }
-	const endpoint& getRemoteEndpoint() { return _ep_remote; }
+	const endpoint& getLocalEndpoint() const { return _ep_local; }
+	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
 private:
 	bool _txWasSuccess(mart::ConstMemoryView data, nw::socks::port_layer::txrx_size_t ret)
 	{

@@ -189,25 +189,25 @@ public:
 		return ::sendto(_handle, data.asConstCharPtr(), data.size(), flags, asSockAddrPtr(addr), sizeof(addr));
 	}
 
-	auto recv(mart::MemoryView buffer, int flags) -> std::pair<port_layer::txrx_size_t, mart::MemoryView>
+	auto recv(mart::MemoryView buffer, int flags) -> std::pair<mart::MemoryView, int>
 	{
 		auto ret = ::recv(_handle, buffer.asCharPtr(), buffer.size(), flags);
 		if (ret >= 0) {
-			return{ ret,buffer.subview(0,ret) };
+			return{ buffer.subview(0,ret),0 };
 		} else {
-			return{ ret, mart::MemoryView{} };
+			return{ mart::MemoryView{}, errno };
 		}
 	}
 
 	template<class AddrT>
-	auto recvfrom(mart::MemoryView buffer, int flags, AddrT& src_addr) -> std::pair<port_layer::txrx_size_t, mart::MemoryView>
+	auto recvfrom(mart::MemoryView buffer, int flags, AddrT& src_addr) -> std::pair<mart::MemoryView, int>
 	{
 		port_layer::address_len_t len = sizeof(src_addr);
 		port_layer::txrx_size_t ret = ::recvfrom(_handle, buffer.asCharPtr(), buffer.size(), flags, asSockAddrPtr(src_addr), &len);
 		if (ret >= 0 && len == sizeof(src_addr)) {
-			return{ ret,buffer.subview(0,ret) };
+			return{ buffer.subview(0,ret), 0 };
 		} else {
-			return{ ret, mart::MemoryView{} };
+			return{ mart::MemoryView{}, errno };
 		}
 	}
 

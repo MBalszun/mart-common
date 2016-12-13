@@ -85,7 +85,7 @@ public:
 	}
 	mart::MemoryView recv(mart::MemoryView buffer)
 	{
-		return _socket_handle.recv(buffer, 0).second;
+		return _socket_handle.recv(buffer, 0).first;
 	}
 	nw::socks::Socket& getSocket()
 	{
