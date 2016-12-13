@@ -93,7 +93,7 @@ inline bool set_blocking(handle_t socket, bool should_block)
 	ret = NO_ERROR == ioctlsocket(socket, FIONBIO, &non_blocking);
 #else
 	const int flags = fcntl(socket, F_GETFL, 0);
-	if (!(flags & O_NONBLOCK) == should_block) { return ret; }
+	if ((flags & O_NONBLOCK) == !should_block) { return ret; }
 	ret = 0 == fcntl(socket, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK);
 #endif
 	return ret;
