@@ -100,7 +100,7 @@ namespace mart {
 			, _is_end{ it == c.end() }
 		{};
 
-		explicit operator bool() const { return _is_end; }
+		explicit operator bool() const { return !_is_end; }
 		bool is_end() const { return _is_end; }
 	private:
 		bool _is_end;
