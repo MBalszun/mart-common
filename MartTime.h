@@ -213,6 +213,8 @@ public:
 		return _lastInvocation + _interval;
 	}
 
+
+
 	void sleep()
 	{
 		//workaround for bug in g++ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58038
@@ -234,6 +236,12 @@ public:
 	DUR runtime() const
 	{
 		return std::chrono::duration_cast<DUR>(now() - _lastInvocation + _interval*(_cnt - 1));
+	}
+
+	template <class DUR = copter_default_period>
+	DUR remainingIntervalTime() const
+	{
+		return std::chrono::duration_cast<DUR>(getNextWakeTime() - now());
 	}
 
 private:
