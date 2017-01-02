@@ -78,6 +78,9 @@ private:
 		int idx = 0;
 		for (auto c : str) {
 			if ('0' <= c && c <= '9') {
+				if (blocks[idx] > 25u || (255 - blocks[idx] * 10) > (c - '0')) {
+					_throw_tooLong(str);
+				}
 				blocks[idx] *= 10;
 				blocks[idx] += c - '0';
 			} else if (c == '.') {
@@ -87,10 +90,19 @@ private:
 					break;
 				}
 			} else {
-				throw std::invalid_argument(mart::concat("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. Invalid_character: ", c).to_string());
+				_throw_invalidChar(str,c);
 			}
 		}
 		return ret;
+	}
+
+	static void _throw_tooLong(mart::StringView str)
+	{
+		throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. a,b,c or d exeed maximum of 255"));
+	}
+	static void _throw_invalidChar(mart::StringView str, char c)
+	{
+		throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. Invalid_character: ", c));
 	}
 };
 
