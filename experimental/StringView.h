@@ -65,6 +65,9 @@ public:
 	{
 	}
 
+	template<class T, class = typename std::enable_if<std::is_integral<T>::value && (!std::is_same<T, char>::value)>::type >
+	constexpr StringView(const T &other) = delete;
+
 	template <class T>
 	StringView( const T* const& other ) = delete;
 
