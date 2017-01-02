@@ -126,6 +126,7 @@ public:
 			} catch(...) {}
 			throw;
 		}
+		_socket_handle.setBlocking(t);
 
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
