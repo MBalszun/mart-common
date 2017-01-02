@@ -87,11 +87,32 @@ public:
 				   : offset + count <= this->_size
 						 ? StringView{this->_start + offset, count}
 						 : throw std::out_of_range(
-							   "Tried to create a substring that would exceed the original string. Original string:\n\n"
-							   + this->to_string() + "\"\n" );
+							   "\nTried to create a substring that would exceed the original string. Original string:\n\n"
+							   + this->to_string() + "\n" );
 	}
 
 	constexpr StringView substr( size_t offset ) const { return substr( offset, size() - offset ); }
+
+	/**
+	 * Splits the string at given position and returns a pair holding both substrings
+	 *  - if 0 <= pos < size():
+	 *		return substrings [0...pos) [pos ... size())
+	 *	- if pos == size() or npos:
+	 *		returns a copy of the current stringview and a default constructed one
+	 *	- if pos > size()
+	 *		throws std::out_of_range exception
+	 */
+	constexpr std::pair<StringView,StringView> split(size_t pos) const
+	{
+		return pos <= _size
+					? std::pair<StringView, StringView>{ StringView{ this->_start, pos }, StringView{ this->_start + pos, _size-pos } }
+					: (pos == _size || pos == npos)
+							? std::pair<StringView, StringView>{ *this, StringView{} }
+							: throw std::out_of_range(	"\nTried to create a substring that would exceed the original string. "
+														"Original string:\n\n"
+														+ this->to_string()
+														+ "\n");
+	}
 
 	/*#### algorithms ####*/
 
