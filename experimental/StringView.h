@@ -136,6 +136,8 @@ public:
 		return out;
 	}
 
+	bool isValid() const { return _start != nullptr; }
+
 protected:
 	friend class ArrayViewAdaptor<const char, StringView>;
 	constexpr size_type		_arrayView_size() const { return _size; }
