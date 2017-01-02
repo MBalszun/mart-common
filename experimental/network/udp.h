@@ -15,6 +15,8 @@
 /* Standard Library Includes */
 #include <chrono>
 #include <iostream> //TODO: remove
+#include <cerrno>
+#include <cstring>
 
 /* Proprietary Library Includes */
 #include "../../utils.h"
@@ -38,6 +40,21 @@ public:
 	Socket() :
 		_socket_handle(socks::Domain::inet, socks::TransportType::datagram, 0)
 	{}
+	Socket(endpoint local, endpoint remote)
+		: Socket()
+	{
+		if (!isValid()) {
+			throw std::runtime_error(mart::concat("Could not open create udp socket | Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+		}
+		if (!bind(local)) {
+			throw std::runtime_error(mart::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+		}
+		if (!connect(remote)) {
+			throw std::runtime_error(mart::concat("Could not connect socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+		}
+	}
+
+
 	Socket(Socket&&) = default;
 	Socket& operator=(Socket&&) = default;
 
@@ -96,11 +113,11 @@ public:
 	}
 	void clearRxBuff()
 	{
+		//XXX: Make a RAII class for preserving the blocking state of the socket
 		auto t = _socket_handle.isBlocking();
 		_socket_handle.setBlocking(false);
 		uint64_t _tmp{};
 		auto tmp = mart::viewMemory(_tmp);
-		//XXX: Make a RAII class for preserving the blocking state of the socket
 		try {
 			while (_socket_handle.recv(tmp, 0).first.isValid()) { ; }
 		} catch (...) {
