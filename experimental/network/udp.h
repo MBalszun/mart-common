@@ -149,6 +149,10 @@ public:
 	{
 		return _socket_handle.setBlocking(should_block);
 	}
+	bool isBlocking()
+	{
+		return _socket_handle.isBlocking();
+	}
 	bool isValid() const
 	{
 		return _socket_handle.isValid();
