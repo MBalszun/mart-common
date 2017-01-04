@@ -36,9 +36,12 @@ using uint64_host_t = uint64_t;
 using uint32_host_t = uint32_t;
 using uint16_host_t = uint16_t;
 
+/*#### implement portable byte swap function that compiles down to a single bswap instruction on any platform I've tested so far #########*/
 namespace _impl_detail_bs {
-template<class T> constexpr T lb_mask(unsigned int N = sizeof(T)) { return (T(0x1) << (N / 2 * 8)) - T(0x1); }
-template<class T> constexpr T hb_mask(unsigned int N = sizeof(T)) { return lb_mask<T>(N) << N / 2 * 8; }
+//create a bitmasks of type t, where either bits [0...N/2) or [N/2...N) are set to one
+
+template<class T> constexpr T lb_mask(unsigned int N = sizeof(T)) { return (T(0x1) << (N * 8 / 2 )) - T(0x1); }
+template<class T> constexpr T hb_mask(unsigned int N = sizeof(T)) { return lb_mask<T>(N) << N * 8 / 2 ; }
 
 template<class T, size_t N = sizeof(T)>
 struct mbswap {
@@ -65,7 +68,7 @@ static constexpr T bswap(T d)
 	return _impl_detail_bs::mbswap<T, N>::calc(d);
 }
 
-#if MBA_BYTE_ORDER == MBA_ORDER_LITTLE_ENDIAN
+#if MBA_BYTE_ORDER == MBA_ORDER_LITTLE_ENDIAN //use whatever compiletime mechanism available to determine, if net byte order (big endian) is the same / or different than machine order
 
 constexpr uint16_net_t  to_net_order(uint16_host_t host_rep) { return uint16_net_t(bswap(host_rep)); }
 constexpr uint32_net_t  to_net_order(uint32_host_t host_rep) { return uint32_net_t(bswap(host_rep)); }
