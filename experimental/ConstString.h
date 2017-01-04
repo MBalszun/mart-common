@@ -62,7 +62,12 @@ public:
 		static_assert(N >= 1, "");
 	}
 protected:
-	//private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
+	/** private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
+	 *
+	 * Implementation notes:
+	 * - creating from shared_ptr doesn't bring any advantage, as you can't use std::make_shared for an array
+	 * - This automatically stores the correct deleter in the shared_ptr (by default shared_ptr<const char> would use delete instead of delete[]
+	 */
 	ConstString(std::unique_ptr<const char[]> data, size_t size) :
 		StringView(data.get(), size),
 		_data(std::move(data))
@@ -132,7 +137,10 @@ public:
 	}
 
 	template<class ...ARGS>
-	friend ConstString concat(ARGS&&...args);
+	friend ConstString concat(const ARGS&...args);
+
+	template<class ...ARGS>
+	friend std::string concat_cpp_str(const ARGS&...args);
 
 private:
 	std::shared_ptr<const char> _data = nullptr;
@@ -183,25 +191,30 @@ private:
 	}
 
 	template<class ...ARGS>
-	inline static ConstString _concat_impl(const ARGS& ...args)
+	inline static size_t _total_size(const ARGS& ...args)
 	{
-		//determine required size
 		//c++17: ~ const size_t newSize = 0 + ... + args.size();
-		//const size_t newSize = [&]() { //can't use lambdas here due to bug in g++ 4.8
 		size_t newSize = 0;
 		const int ignore1[] = { (newSize += args.size(),0)... };
 		(void)ignore1;
-		//	return newSize;
-		//}();
+		return newSize;
+	}
 
-		//construct buffer and copy data
-		//auto data = [&]() { //can't use lambdas here due to bug in g++ 4.8
+	template<class ...ARGS>
+	inline static void _write_to_buffer(char* buffer, const ARGS& ...args)
+	{
+		const int ignore[] = { (_addTo(buffer,args),0)... };
+		(void)ignore;
+	}
+
+	template<class ...ARGS>
+	inline static ConstString _concat_impl(const ARGS& ...args)
+	{
+		const size_t newSize = _total_size(args ...);
+
 		auto data = _allocate_null_terminated_char_buffer(newSize);
-		char * bufferStart = data.get();
-		const int ignore2[] = { (_addTo(bufferStart,args),0)... };
-		(void)ignore2;
-		//	return data;
-		//}();
+
+		_write_to_buffer(data.get(), args ...);
 
 		return ConstString(std::move(data),newSize	);
 	}
@@ -214,9 +227,21 @@ private:
  * returned constStr will always be zero terminated
  */
 template<class ...ARGS>
-ConstString concat(ARGS&&...args)
+ConstString concat(const ARGS& ...args)
 {
-	return ConstString::_concat_impl(StringView(std::forward<ARGS>(args))...);
+	return ConstString::_concat_impl(StringView(args)...);
+}
+
+template<class ...ARGS>
+std::string concat_cpp_str(const ARGS& ...args)
+{
+	const size_t newSize = ConstString::_total_size(StringView(args) ...);
+
+	std::string ret(newSize,' ');
+
+	ConstString::_write_to_buffer(&ret[0], StringView(args) ...);
+
+	return ret;
 }
 
 inline const mart::ConstString& getEmptyConstString()
