@@ -65,6 +65,7 @@ public:
 	{
 	}
 
+	//prevent construction from integral type except char
 	template<class T, class = typename std::enable_if<std::is_integral<T>::value && (!std::is_same<T, char>::value)>::type >
 	constexpr StringView(const T &other) = delete;
 
@@ -78,20 +79,18 @@ public:
 	StringView& operator=(StringView&& other) noexcept = default;
 
 	/*#### string functions ####*/
-	std::string to_string() const { return std::string( cbegin(), cend() ); }
+	std::string to_string() const { return std::string( this->cbegin(), this->cend() ); }
 
-	constexpr StringView substr( size_t offset, size_t count ) const
+	constexpr StringView substr( size_t offset, size_t count = npos) const
 	{
-		return count == npos
-				   ? substr( offset )
-				   : offset + count <= this->_size
-						 ? StringView{this->_start + offset, count}
-						 : throw std::out_of_range(
-							   "\nTried to create a substring that would exceed the original string. Original string:\n\n"
-							   + this->to_string() + "\n" );
+		return offset + count <= this->_size
+								? StringView{ this->_start + offset, count }
+								: count == npos
+										 ? substr(offset , size() - offset)
+										 : throw std::out_of_range(
+											   "Tried to create a substring that would exceed the original string. "
+											   "Original string:\n\n" + this->to_string() + "\n" );
 	}
-
-	constexpr StringView substr( size_t offset ) const { return substr( offset, size() - offset ); }
 
 	/**
 	 * Splits the string at given position and returns a pair holding both substrings
@@ -104,8 +103,8 @@ public:
 	 */
 	constexpr std::pair<StringView,StringView> split(size_t pos) const
 	{
-		return pos <= _size
-					? std::pair<StringView, StringView>{ StringView{ this->_start, pos }, StringView{ this->_start + pos, _size-pos } }
+		return pos < _size
+					? std::make_pair( StringView{ this->_start, pos }, StringView{ this->_start + pos + 1, _size-pos-1 } )
 					: (pos == _size || pos == npos)
 							? std::pair<StringView, StringView>{ *this, StringView{} }
 							: throw std::out_of_range(	"\nTried to create a substring that would exceed the original string. "
@@ -116,17 +115,36 @@ public:
 
 	/*#### algorithms ####*/
 
-	size_type find( StringView str, size_type pos = 0 ) const
+	size_type find( char c, size_type start_pos = 0 ) const
 	{
-		if( pos + str.size() >= size() ) return npos;
-		auto it = std::search( this->cbegin() + pos, this->cend(), str.cbegin(), str.cend() );
-		return it != this->cend() ? it - this->cbegin() : npos;
+		if (start_pos >= size()) {
+			return npos;
+		}
+
+		const size_t pos = std::find( this->cbegin() + start_pos, this->cend(), c ) - this->cbegin();
+		return pos < this->size() ? pos : npos;
 	}
-	size_type find( char c, size_type pos = 0 ) const
+
+	template <class P>
+	size_type find_if( P p, size_type start_pos = 0 ) const
 	{
-		if( pos + 1 >= size() ) return npos;
-		auto it = std::find( this->cbegin() + pos, this->cend(), c );
-		return it != this->cend() ? it - this->cbegin() : npos;
+		if (start_pos >= size()) {
+			return npos;
+		}
+
+		const size_t pos = std::find_if( this->cbegin() + start_pos, this->cend(), p ) - this->cbegin();
+		return pos < this->size() ? pos : npos;
+	}
+
+	StringView substr_sentinel(size_t offset, char sentinel ) const
+	{
+		return substr(offset, this->find(sentinel,offset));
+	}
+
+	template <class P>
+	StringView substr_predicate(size_t offset, P p) const
+	{
+		return substr(offset, this->find_if(p, offset));
 	}
 
 	friend int compare( StringView l, StringView r );
