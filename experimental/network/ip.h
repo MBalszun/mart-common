@@ -22,6 +22,7 @@
 #include "../../utils.h"
 #include "../../ConstString.h"
 #include "../../ArrayView.h"
+#include "../../algorithm.h"
 
 /* Project Includes */
 #include "basic_types.h"
@@ -71,38 +72,49 @@ public:
 private:
 	uint32_net_t _addr{};
 
-	static uint32_net_t _parseIpV4String(mart::StringView str)
+	static uint32_net_t _parseIpV4String( const mart::StringView str )
 	{
+		_throwOnInvalidChar( str );
+		_throwOnWrongBlockCount( str );
+
 		uint32_net_t ret{};
-		uint8_t * blocks = reinterpret_cast<uint8_t*>(&ret);
-		int idx = 0;
-		for (auto c : str) {
-			if ('0' <= c && c <= '9') {
-				if (blocks[idx] > 25u || (255 - blocks[idx] * 10) > (c - '0')) {
-					_throw_tooLong(str);
-				}
-				blocks[idx] *= 10;
-				blocks[idx] += c - '0';
-			} else if (c == '.') {
-				//separator digit -> go to next block
-				idx++;
-				if (idx >= 4) {
-					break;
-				}
-			} else {
-				_throw_invalidChar(str,c);
-			}
+		auto remaining = str;
+		for( uint8_t& b : mart::viewMemory(ret)) {
+			mart::StringView sblock;
+			std::tie(sblock, remaining) = remaining.split(remaining.find('.'));
+
+			b = static_cast<uint8_t>( _parseBlockChecked(sblock, str) );
 		}
 		return ret;
 	}
 
-	static void _throw_tooLong(mart::StringView str)
+	static int _parseBlockChecked(mart::StringView block, mart::StringView str )
 	{
-		throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. a,b,c or d exeed maximum of 255"));
+		if (block.size() < 4) {
+			auto num = mart::to_integral_unsafe<int>(block);
+			if (num <= 255) {
+				return num;
+			}
+		}
+		_throw_parse_error(str, "Block ", block, " exeeds allowed maximum of 255.");
+		//return 0;
 	}
-	static void _throw_invalidChar(mart::StringView str, char c)
+	static void _throwOnWrongBlockCount(mart::StringView str)
 	{
-		throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. Invalid_character: ", c));
+		if (std::count(str.begin(), str.end(), '.') != 3) {
+			_throw_parse_error(str, "String doesn't have 4 number blocks separated by '.'");
+		}
+	}
+	static void _throwOnInvalidChar(mart::StringView str)
+	{
+		if (auto it = mart::find_if_ex(str, [](char c) { return (c < '0' || '9' < c) && (c != '.'); })) {
+			_throw_parse_error(str, "Invalid char: '", *it, "'");
+		}
+	}
+	template<class ...ARGS>
+	[[noreturn]] static void _throw_parse_error(mart::StringView str, ARGS&& ... args)
+	{
+		throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. ", args ...));
 	}
 };
 
@@ -152,18 +164,35 @@ struct basic_endpoint_v4 {
 		valid{ true }
 	{}
 	//expects format XXX.XXX.XXX.XXX:pppp
-	explicit basic_endpoint_v4(mart::StringView str)
+	explicit basic_endpoint_v4( mart::StringView str )
 	{
-		auto sepIdx = str.find(':');
-		if (sepIdx == mart::StringView::npos) {
-			throw std::invalid_argument("Addess must have format a.b.c.d:p - colon is missing");
-		}
-		address = address_v4(str.substr(0,sepIdx));
-		port	= port_nr(mart::to_integral(str.substr(sepIdx+1)));
+		const auto addr_port_pair = [str] {
+										auto ps = str.split( str.find( ':' ) );
+										if( ps.second.size() < 1u ) {
+											throw std::invalid_argument( mart::concat_cpp_str(
+																			"Creating ipv4 endpoint from string \"", str,  "\" Failed. "
+																			"Addess must have format a.b.c.d:p - colon or p is missing"
+																		) );
+										}
+										return ps;
+									}();
+
+		address = address_v4( addr_port_pair.first );
+
+		port = [addr_port_pair, str] {
+								constexpr int max_port_nr = std::numeric_limits<uint16_t>::max();
+								const int  parsed_port_nr = mart::to_integral( addr_port_pair.second );
+								if(parsed_port_nr < 0 || parsed_port_nr > max_port_nr ) {
+									throw std::invalid_argument( mart::concat_cpp_str(
+																	"Creating ipv4 endpoint from string \"", str, "\" Failed. "
+																	"Portnumber was parsed as <",  std::to_string( parsed_port_nr ), "> "
+																	"which exeds the allowed range of [0..", std::to_string( max_port_nr ), "]"
+																) );
+								}
+								return port_nr{ static_cast<uint16_t>( parsed_port_nr ) };
+							}();
 		valid = true;
-
 	}
-
 
 	sockaddr_in toSockAddr_in() const
 	{
