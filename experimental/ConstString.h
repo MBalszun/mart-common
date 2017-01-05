@@ -203,8 +203,8 @@ private:
 	template<class ...ARGS>
 	inline static void _write_to_buffer(char* buffer, const ARGS& ...args)
 	{
-		const int ignore[] = { (_addTo(buffer,args),0)... };
-		(void)ignore;
+		const int tignore[] = { (_addTo(buffer,args),0)... };
+		(void)tignore;
 	}
 
 	template<class ...ARGS>
