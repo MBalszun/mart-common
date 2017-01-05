@@ -119,7 +119,7 @@ public:
 protected:
 	//those special member functions are protected
 	//in order to prevent ArrayViewAdaptor to be instantiated on it's own
-	constexpr ArrayViewAdaptor()=default;
+	constexpr ArrayViewAdaptor() noexcept = default;
 	~ArrayViewAdaptor() = default;
 	constexpr bool _throwIfOutOfRange(size_t idx) const { return idx < _size() ? true : throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size())); }
 
