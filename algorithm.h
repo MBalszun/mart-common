@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <numeric>
 
 #include "./cpp_std/type_traits.h"
 #include "ranges.h"
