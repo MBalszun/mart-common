@@ -67,6 +67,14 @@ using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::chrono::microseconds;
 using std::chrono::nanoseconds;
+using days = std::chrono::duration<int32_t, std::ratio_multiply<std::ratio<24>, hours::period>>;
+using years = std::chrono::duration<int32_t, std::ratio_multiply<std::ratio<365>, days::period>>;
+
+template <class Rep, class Period>
+	constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d)
+{
+	return d >= d.zero() ? d : -d;
+}
 
 //replacement for the not-yet supported c++14's chrono literals
 namespace chrono_literals {
