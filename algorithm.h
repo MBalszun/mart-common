@@ -75,6 +75,48 @@ auto find_first_of_ex(const C1& in1, const C2& in2, BinaryPredicate p)-> mart::E
 	return{ std::find_first_of(in1.begin(), in1.end(), in2.begin(), in2.end(), p), in1 };
 }
 
+//min/max
+
+template< class R, class Compare >
+auto min_element(R&& range) -> decltype(std::begin(range))
+{
+	return std::min_element(range.begin(), range.end());
+}
+
+template< class R, class Compare >
+auto min_element(R&& range, Compare comp) -> decltype(std::begin(range))
+{
+	return std::min_element(range.begin(), range.end(), comp);
+}
+
+template< class R>
+auto max_element(R&& range) -> decltype(std::begin(range))
+{
+	return std::max_element(range.begin(), range.end());
+}
+
+template< class R, class Compare >
+auto max_element(R&& range, Compare comp) -> decltype(std::begin(range))
+{
+	return std::max_element(range.begin(), range.end(), comp);
+}
+
+
+template< class R>
+auto minmax_element(R&& range) -> std::pair<decltype(std::begin(range)), decltype(std::begin(range))>
+{
+	return std::minmax_element(range.begin(), range.end());
+}
+
+template< class R, class Compare >
+auto minmax_element(R&& range, Compare comp) -> std::pair<decltype(std::begin(range)), decltype(std::begin(range))>
+{
+	return std::minmax_element(range.begin(), range.end(), comp);
+}
+
+
+
+
 
 
 /*### algorithm related ###*/
