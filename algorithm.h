@@ -144,7 +144,7 @@ auto result = std::find_if(ids.begin(),ids.end(),[](const Foo& foo)->bool{ retur
 namespace _impl_algo {
 
 template <class MTYPE, class VAL>
-struct ByMemberObjectHelper {
+struct EqualByMemberObjectHelper {
 	static_assert( std::is_member_object_pointer<MTYPE>::value,
 				   "First Template argument is not a member object pointer" );
 	MTYPE	  _mem;
@@ -157,8 +157,21 @@ struct ByMemberObjectHelper {
 	}
 };
 
+template <class MTYPE>
+struct LessByMemberObjectHelper {
+	static_assert(std::is_member_object_pointer<MTYPE>::value,
+				  "First Template argument is not a member object pointer");
+	MTYPE	  _mem;
+
+	template <class T>
+	bool operator()(const T& l, const T& r) const
+	{
+		return l.*_mem < r.*_mem;
+	}
+};
+
 template <class MTYPE, class VAL>
-struct ByMemberFunctionHelper {
+struct EqualByMemberFunctionHelper {
 	static_assert( std::is_member_function_pointer<MTYPE>::value,
 				   "First Template argument is not a member function pointer" );
 	MTYPE	  _mem;
@@ -171,19 +184,46 @@ struct ByMemberFunctionHelper {
 	}
 };
 
+template <class MTYPE>
+struct LessByMemberFunctionHelper {
+	static_assert(std::is_member_function_pointer<MTYPE>::value,
+				  "First Template argument is not a member function pointer");
+	MTYPE	  _mem;
+
+	template <class T>
+	bool operator()(const T& l, const T& r) const
+	{
+		return (l.*_mem)() < (r.*_mem)();
+	}
+};
+
 } // namespace _impl_algo
 
 template <class MTYPE, class VAL>
-mart::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::ByMemberObjectHelper<MTYPE, VAL>>
+mart::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::EqualByMemberObjectHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
 	return {member, &value};
 }
 
 template <class MTYPE, class VAL>
-mart::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::ByMemberFunctionHelper<MTYPE, VAL>>
+mart::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::EqualByMemberFunctionHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
 	return {member, &value};
+}
+
+template <class MTYPE>
+mart::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::LessByMemberObjectHelper<MTYPE>>
+byMember(MTYPE member)
+{
+	return{ member };
+}
+
+template <class MTYPE>
+mart::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::LessByMemberFunctionHelper<MTYPE>>
+byMember(MTYPE member)
+{
+	return{ member };
 }
 }
