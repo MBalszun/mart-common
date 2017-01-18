@@ -52,6 +52,9 @@ inline void defaultFormatForLog(std::ostream& out, std::chrono::seconds value)		
 inline void defaultFormatForLog(std::ostream& out, std::chrono::minutes value)		{ out << value.count() << "min"; }
 inline void defaultFormatForLog(std::ostream& out, std::chrono::hours value)		{ out << value.count() << "h"; }
 
+template<class Clock, class Dur>
+inline void defaultFormatForLog(std::ostream& out, std::chrono::time_point<Clock, Dur> value) { defaultFormatForLog(out, value.time_since_epoch()); }
+
 //make sure that string literals are not taken by the ConstMemoryView overload
 template <size_t N>
 inline void defaultFormatForLog(std::ostream& out, const char(&stringLit)[N])		{ out << mart::StringView(stringLit); }
