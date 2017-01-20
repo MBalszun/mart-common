@@ -47,20 +47,21 @@ public:
 		_copyFrom(other);
 	}
 
+	//NOTE: Use only for string literals (arrays with static storage duration)!!!
+	template<size_t N>
+	constexpr ConstString(const char(&other)[N]) noexcept :
+		StringView(other)
+		//we don't have to initialize the shared_ptr to anything as string litterals already have static lifetime
+	{
+		static_assert(N >= 1, "");
+	}
+
 	// don't accept c-strings in the form of pointer
 	// if you need to create a const_string from a c string use the <const_string(const char*, size_t)> constructor
 	// if you need to create a ConstString form a string literal, use the <ConstString(const char(&other)[N])> constructor
 	template<class T>
 	ConstString(T const * const& other) = delete;
 
-	//NOTE: Use only for string literals (arrays with static storage duration)!!!
-	template<size_t N>
-	ConstString(const char(&other)[N]) noexcept :
-		StringView(other)
-		//we don't have to initialize the shared_ptr to anything as string litterals already have static lifetime
-	{
-		static_assert(N >= 1, "");
-	}
 protected:
 	/** private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
 	 *
