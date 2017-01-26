@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include "./cpp_std/type_traits.h"
-#include "./random.h"
 
 namespace mart {
 
@@ -27,7 +26,7 @@ struct is_same_signedness
 
 template <class T, class U, bool SameSigndness= is_same_signedness<T,U>::value>
 struct sign_check {
-	//throws an narrowing error, of both parameters are of different signdness and one is negative
+	//throws an narrowing error, if both parameters are of different signdness and one is negative
 	static void check(T t,U u)
 	{
 		if ((t < T{}) != (u < U{})) {

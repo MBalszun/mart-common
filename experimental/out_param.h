@@ -19,7 +19,7 @@ namespace outp {
  *
  * }
  *
- * Use this when it is not bovius, that a parameter is an out/in-out parameter
+ * Use this when it is not bovius, that a parameter is an out parameter
  *
  */
 template<class T>
@@ -33,8 +33,8 @@ class out_param {
 public:
 	operator T&() { return _data; }
 			 T& get() { return _data; }
-	out_param& operator=(const T& other) { _data = other; return *this; }
-	out_param& operator=(T&& other) { _data = std::move(other); return *this; }
+	out_param& operator=(const T& other) { _data = other;			return *this; }
+	out_param& operator=(T&& other)		 { _data = std::move(other); return *this; }
 };
 
 template<class U>

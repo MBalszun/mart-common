@@ -194,7 +194,7 @@ struct Timer {
 	}
 
 private:
-	copter_time_point	 _start_time;
+	copter_time_point	  _start_time;
 	copter_default_period _timeout{-1};
 };
 
