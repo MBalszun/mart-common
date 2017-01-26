@@ -322,7 +322,8 @@ auto copy( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> ArrayV
 		assert( false );
 		return ArrayView<mart::remove_const_t<T>>{};
 	}
-	return copy_some( src, dest );
+	std::copy_n(src.cbegin(), src.size() , dest.begin());
+	return dest.subview( src.size() );
 }
 
 template <class T>
