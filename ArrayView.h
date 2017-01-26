@@ -4,61 +4,59 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <stdexcept>
-#include <cstddef>
-#include <cassert>
-
-#include "../cpp_std/type_traits.h"
 #include <algorithm>
-#include <iterator>
-#include <string>
 #include <array>
+#include <cassert>
+#include <cstddef>
+#include <iterator> //iterator tags
+#include <stdexcept>
+#include <string> //exception messages
 
 /* Proprietary Library Includes */
-#include "ArrayViewAdaptor.h"
+#include "./cpp_std/type_traits.h"
 
 /* Project Includes */
+#include "ArrayViewAdaptor.h"
 
 namespace mart {
 
-
 /**
-* Class that represents a range of elements, that are stored consecutive in memory,
-* like an array or the elements inside an std::vector.
-*
-* Essentially it is a wrapper around a pointer to first element and a length and
-* was inspired by (but is not compatible to) array_view proposed for the standard
-* and the gsl::span form the c++ guidelines support library.
-*
-* Purpose/Rational:
-* It is supposed to serve mainly as a generic function parameter that abstracts
-* away the difference between data that is stored in a c-style array, a std::array
-* a std::vector and similar non-standard containers but keeps the relation between
-* the pointer and the size, which makes it easier and safer to pass it around than
-* a the individual pointer / size variables. It also provides facilities for direct
-* access to the underlying storage as an array of bytes
-*
-* Contrary to pointers, and similar to c++ containers, constness on ArrayView is transitive,
-* meaning that const ArrayView<T> only allows non-modifying access to the referenced elements.
-* Similar to pointers, but contrary to some c++ containers, it is possible to declare a
-* ArrayView<const T> variable, that can e.g. be reassigned, but can't be used to modify the
-* referenced values.
-*
-* An ArrayView<T> can be implicitly converted to a ArrayView<const T>. So the default function
-* parameter type for ranges that are not modified by the function should be ArrayView<const T>:
-*
-* void foo (	   ArrayView<const T> range)  //or
-* void foo (const  ArrayView<const T> range)
-*
-* Here is an overview over the different types:
-* 1)       ArrayView<      T> v1 : A non-const ArrayView variable providing read/write access to the elements
-* 2)       ArrayView<const T> v2 : A non-const ArrayView variable providing only read access to the elements
-* 3) const ArrayView<      T> v3 : A const ArrayView object that only provides read access to the elements
-* 4) const ArrayView<const T> v4 : Although the type is distinct, it is supposed to behaves the same as v3
-*
-*
-*
-*/
+ * ArrayView
+ *
+ * @brief: Class that represents a sequence of elements stored consecutively in memory
+ *
+ *
+ * Essentially it is a wrapper around a pointer to first element and a length and
+ * was inspired by (but is not compatible to) array_view proposed for the standard
+ * and the gsl::span form the c++ guidelines support library.
+ *
+ * Purpose/Rational:
+ * It is supposed to serve mainly as a generic function parameter that abstracts
+ * away the difference between data that is stored in a c-style array, a std::array
+ * a std::vector and similar non-standard containers but keeps the relation between
+ * the pointer and the size, which makes it easier and safer to pass it around than
+ * a the individual pointer / size variables. It also provides facilities for direct
+ * access to the underlying storage as an array of bytes
+ *
+ * Contrary to pointers, and similar to c++ containers, constness on ArrayView is transitive,
+ * meaning that const ArrayView<T> only allows non-modifying access to the referenced elements.
+ * Similar to pointers, but contrary to some c++ containers, it is possible to declare a
+ * ArrayView<const T> variable, that can e.g. be reassigned, but can't be used to modify the
+ * referenced values.
+ *
+ * An ArrayView<T> can be implicitly converted to a ArrayView<const T>. So the default function
+ * parameter type for ranges that are not modified by the function should be ArrayView<const T>:
+ *
+ * void foo (	   ArrayView<const T> range)  //or
+ * void foo (const  ArrayView<const T> range)
+ *
+ * Here is an overview over the different types:
+ * 1)       ArrayView<      T> v1 : A non-const ArrayView variable providing read/write access to the elements
+ * 2)       ArrayView<const T> v2 : A non-const ArrayView variable providing only read access to the elements
+ * 3) const ArrayView<      T> v3 : A const ArrayView object that only provides read access to the elements
+ * 4) const ArrayView<const T> v4 : Although the type is distinct, it is supposed to behaves the same as v3
+ *
+ */
 
 template<class T>
 class ArrayView;
@@ -249,17 +247,17 @@ protected:
 
 
 template<class T>
-constexpr MemoryView viewMemory(T& e) {
+/*c++14: [[deprecated]] */ constexpr MemoryView viewMemory(T& e) {
 	return MemoryView(reinterpret_cast<ByteType*>(&e), sizeof(e));
 }
 
 template<class T>
-constexpr ConstMemoryView viewMemory(const T& e) {
+/*c++14: [[deprecated]] */ constexpr ConstMemoryView viewMemory(const T& e) {
 	return ConstMemoryView(reinterpret_cast<const ByteType*>(&e), sizeof(e));
 }
 
 template<class T>
-constexpr ConstMemoryView viewMemoryConst(const T& e) {
+/*c++14: [[deprecated]] */ constexpr ConstMemoryView viewMemoryConst(const T& e) {
 	return ConstMemoryView(reinterpret_cast<const ByteType*>(&e), sizeof(e));
 }
 
