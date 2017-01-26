@@ -196,6 +196,10 @@ struct Timer {
 private:
 	copter_time_point	  _start_time;
 	copter_default_period _timeout{-1};
+
+	//make sure we don't run into underflow issues
+	static_assert( std::is_signed<decltype(_timeout)::rep>::value, "");
+	static_assert( std::is_signed<decltype(_start_time)::duration::rep>::value, "");
 };
 
 /**
