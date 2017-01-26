@@ -132,10 +132,10 @@ inline int64_t s_SinceEpoch()  { return timeSinceEpoch<std::chrono::seconds>().c
  * std::cout << passedTime<std::chrono::milliseconds>(t1).count << "milliseconds have passed since begin of function\n");
  *
  */
-template <class TIME_T = copter_default_period>
-TIME_T passedTime( copter_time_point start )
+template <class Dur = copter_default_period>
+Dur passedTime( copter_time_point start )
 {
-	return std::chrono::duration_cast<TIME_T>( mart::now() - start );
+	return std::chrono::duration_cast<Dur>( mart::now() - start );
 }
 
 /**
@@ -173,17 +173,17 @@ struct Timer {
 	}
 
 	/// time elapsed since creation of Timer or last call to reset
-	template <class DUR = copter_default_period>
-	DUR elapsed() const
+	template <class Dur = copter_default_period>
+	Dur elapsed() const
 	{
-		return std::chrono::duration_cast<DUR>( now() - _start_time );
+		return std::chrono::duration_cast<Dur>( now() - _start_time );
 	}
 
 	/// remaining time, before hasTimedOut will be true (will always return a non-negative number)
-	template <class DUR = copter_default_period>
-	DUR remaining() const
+	template <class Dur = copter_default_period>
+	Dur remaining() const
 	{
-		return std::max( std::chrono::duration_cast<DUR>( _timeout - ( now() - _start_time ) ), DUR{} );
+		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( now() - _start_time ) ), Dur{} );
 	}
 
 	/// true if duration since creation or last call to reset is longer than the timeout that was specified upon creation
@@ -229,7 +229,7 @@ public:
 
 	void sleep()
 	{
-		//workaround for bug in g++ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58038
+		//workaround for bug in g++ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58038 -> should not need check for negative time
 		auto sleep_duration = getNextWakeTime() - mart::now();
 		if (sleep_duration > std::chrono::seconds(0)) {
 			std::this_thread::sleep_for(sleep_duration);
@@ -244,16 +244,16 @@ public:
 	}
 
 	/// time elapsed since creation of Timer or last call to reset
-	template <class DUR = copter_default_period>
-	DUR runtime() const
+	template <class Dur = copter_default_period>
+	Dur runtime() const
 	{
-		return std::chrono::duration_cast<DUR>(now() - _lastInvocation + _interval*(_cnt - 1));
+		return std::chrono::duration_cast<Dur>(now() - _lastInvocation + _interval*(_cnt - 1));
 	}
 
-	template <class DUR = copter_default_period>
-	DUR remainingIntervalTime() const
+	template <class Dur = copter_default_period>
+	Dur remainingIntervalTime() const
 	{
-		return std::chrono::duration_cast<DUR>(getNextWakeTime() - now());
+		return std::chrono::duration_cast<Dur>(getNextWakeTime() - now());
 	}
 
 private:
