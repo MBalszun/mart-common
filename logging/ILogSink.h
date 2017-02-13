@@ -36,12 +36,12 @@ public:
 		if( _threadSafe ) {
 			std::lock_guard<std::mutex> ul( _mux );
 			_writeToLogImpl( msg );
-			if( lvl <= LOG_LVL::ERROR ) {
+			if( lvl <= LOG_LVL::STATUS ) {
 				_flush();
 			}
 		} else {
 			_writeToLogImpl( msg );
-			if( lvl <= LOG_LVL::ERROR ) {
+			if( lvl <= LOG_LVL::STATUS ) {
 				_flush();
 			}
 		}
