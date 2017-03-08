@@ -1,6 +1,7 @@
 # mart-common
 
-This is a small utilities library for usage in software related to the mart project at the chari for Real-Time Computer Systems (RCS) at TU-Munich, developed by Michael Balszun
+This is a small utilities library for usage in software related to the mart project at the chari for Real-Time Computer Systems (RCS) at TU-Munich, developed by Michael Balszun.
+
 You can find the most recent version on the lrz gitlab server at https://gitlab.lrz.de/rcs_mart/mart-common.git. 
 
 The library is in an early (alpha) phase and currently, no versioning scheme is used. Compatibility may be broken between each and every commit. That being said, except for types in the subfolder "experimental", we try to keep the interfaces as stable as possible. 
@@ -9,8 +10,11 @@ The library is in an early (alpha) phase and currently, no versioning scheme is 
 This is a short (and probably out of data) overview over the content provided by this library
 
 - algorithm.h: 
-  Wrapper around some standard algorithms that take a range (anything with a begin and end) as a parameter instead of two iteraots.
-  `vector<int> v{...};sort(v); // instead of sort(v.begin(),v.end());`
+  Wrapper around some standard algorithms that take a range (anything with a begin and end) as a parameter instead of two iterators.
+  ```
+   vector<int> v{...};
+   sort(v); // instead of sort(v.begin(),v.end());
+  ```
   Currently (2016-11-08) only a few example algorithms are provided but expect more to come
 
 - ArrayView.h:
@@ -21,7 +25,7 @@ This is a short (and probably out of data) overview over the content provided by
   String that can't be modified after creation using a ref-counted implementation. 
   Main advantages over std::string (when applicable): 
 	- Doesn't allocate memory when constructed from string litteral
-	- Concatenation of multiple string-like object requires only a single dynamic memory allocation
+	- Concatenation of multiple string-like objects requires only a single dynamic memory allocation
 
 - MartLog.h:
   Header that provides a simple logging mechanism
@@ -32,10 +36,10 @@ This is a short (and probably out of data) overview over the content provided by
 
 
 - PrintWrappers.h
-  Wrapper classes for some types (currently only std::chrono::duration) that determin how those types are formatted when inserted into a stream
+  Wrapper classes for some types (currently only std::chrono::duration) that determine how those types are formatted when inserted into a stream
   `std::cout << sformat(std::chrono::milliseconds(10))  << '\n'; // prints "10ms"`
 
-- ranges.have
+- ranges.h
   Some utility range classes (mainly for usage with range based for)
   ` for (auto i : irange(0,20)){} // i will have values from 0 to 19 inclusive`
 
@@ -51,7 +55,7 @@ This is a short (and probably out of data) overview over the content provided by
   Contains c++14/c++17 types that are missing in the standard library shipped with gcc 4.8 / 4.9 which we have to use at the moment. They are designed to be an exact drop in replaccement for the standard types and once the compiler is upgraded they can directly be replaced
 
 - experimental
-  Contains new feature, classes, functions, whose interface might change at any point in the future
+  Contains new features, classes and functions, whose interface might change at any point in the future
   
 ### Contributing
   
