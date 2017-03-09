@@ -125,6 +125,12 @@ struct Vec {
 		return std::sqrt(squareNorm());
 	}
 
+	Vec<T, N>& operator+=(const Vec<T, N>& other);
+	Vec<T, N>& operator-=(const Vec<T, N>& other);
+	Vec<T, N>& operator*=(const Vec<T, N>& other);
+	Vec<T, N>& operator/=(const Vec<T, N>& other);
+
+
 	//Creates a vector of length 1 that points in the same direction as the original one
 	Vec<T,N> unityVec() const {
 		Vec<T,N> res(*this);
@@ -329,6 +335,18 @@ template<class T, int N>
 constexpr bool operator!=(const Vec<T,N> l, const Vec<T,N> r){
 	return !(l==r) ;
 }
+
+template<class T, int N>
+Vec<T, N>& Vec<T, N>::operator+=(const Vec<T, N>& other) { *this = *this + other; return *this; }
+
+template<class T, int N>
+Vec<T, N>& Vec<T, N>::operator-=(const Vec<T, N>& other) { *this = *this - other; return *this; };
+
+template<class T, int N>
+Vec<T, N>& Vec<T, N>::operator*=(const Vec<T, N>& other) { *this = *this * other; return *this; };
+
+template<class T, int N>
+Vec<T, N>& Vec<T, N>::operator/=(const Vec<T, N>& other) { *this = *this / other; return *this; };
 
 }
 
