@@ -22,9 +22,9 @@ auto partition(C& c, Pred p) -> decltype(c.begin())
 }
 
 template <class C, class T>
-void accumulate(C& c, T init)
+T accumulate(C& c, T init)
 {
-	std::accumulate(c.begin(), c.end(), init);
+	return std::accumulate(c.begin(), c.end(), init);
 }
 
 template <class C, class T, class BinaryOperation>
