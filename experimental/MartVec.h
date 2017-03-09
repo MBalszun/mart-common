@@ -156,6 +156,68 @@ private:
 	}
 };
 
+
+template<class T>
+struct Vec<T,2> {
+	static constexpr size_t N = 2;
+	using value_type = T;
+	using square_type = decltype(std::declval<T>()*std::declval<T>());
+	T x;
+	T y;
+	//c++14:
+	//	constexpr Vec(std::initializer_list<T> init){
+	//		std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
+	//	}
+
+	//### Data access ###
+	T &operator[](int idx)
+	{
+		assert(0 <= idx && idx < N);
+		return idx == 0 ? x : y ;
+	}
+
+	const T &operator[](int idx) const
+	{
+		assert(0 <= idx && idx < N);
+		return idx == 0 ? x : y;
+	}
+	static constexpr int size() { return N; }
+
+	T squareNorm() const {
+		return x*x+y*y;
+	}
+
+	T norm() const {
+		return std::sqrt(squareNorm());
+	}
+
+	Vec<T, 2>& operator+=(const Vec<T, 2>& other);
+	Vec<T, 2>& operator-=(const Vec<T, 2>& other);
+	Vec<T, 2>& operator*=(const Vec<T, 2>& other);
+	Vec<T, 2>& operator/=(const Vec<T, 2>& other);
+
+
+	//Creates a vector of length 1 that points in the same direction as the original one
+	Vec<T, 2> unityVec() const {
+		auto abs = norm();
+		return { x / abs, y / abs };
+	}
+
+	//returns a K dimensional vector
+	//if K<=N, the first K values are copied
+	//if K>N, all values are copied and the remaining values are zero-initialized
+	template<int K>
+	Vec<T, K> toKDim() const {
+		return toKDim_helper<K>(mp::make_index_sequence<(K < N ? K : N)>{});
+	}
+
+private:
+	template<int K, int ...I>
+	Vec<T, K> toKDim_helper(mp::index_sequence<I...>) const {
+		return Vec<T, K>{(*this)[I]...};
+	}
+};
+
 //there should be a check for any instantiated vector type, but this has to do for now
 static_assert(std::is_trivial < Vec<int, 5>>::value, "mart::Vec is not a trivial type");
 
