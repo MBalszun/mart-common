@@ -388,9 +388,9 @@ namespace _impl_vec {
 }
 
 template<class T, int N>
-constexpr bool operator==(const Vec<T,N> l, const Vec<T,N> r){
+constexpr bool operator==(const Vec<T,N>& l, const Vec<T,N>& r){
 	//first compare the vectors element wise and then fold the results voer &&
-	return _impl_vec::Fold<T,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{},true) ;
+	return _impl_vec::Fold<bool,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{},true) ;
 }
 
 template<class T, int N>
