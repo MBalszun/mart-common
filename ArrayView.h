@@ -233,6 +233,16 @@ public:
 		return offset > _size ? ArrayView{} : ArrayView{_data + offset, _size - offset};
 	}
 
+	constexpr std::pair<ArrayView<T>, ArrayView<T>> split(size_t offset) const
+	{
+		return _throwIfOffsetOutOfRange(offset), std::pair<ArrayView<T>, ArrayView<T>>{ ArrayView<T>{_data,offset}, ArrayView<T>{_data + offset,_size - offset} };
+	}
+
+	constexpr std::pair<ArrayView<T>, ArrayView<T>> split(const_iterator splitpoint) const
+	{
+		return split(&*splitpoint - _data);
+	}
+
 	constexpr bool isValid() const noexcept { return _data != nullptr; }
 
 protected:
@@ -241,6 +251,12 @@ protected:
 		return idx < _size ? true : throw std::out_of_range( "Tried to access " + std::to_string( idx )
 															 + "th element of an Array view of size"
 															 + std::to_string( _size ) );
+	}
+	constexpr bool _throwIfOffsetOutOfRange(size_t idx) const
+	{
+		return idx <= _size ? true : throw std::out_of_range("Tried to specify offset " + std::to_string(idx)
+															+ "into an Array view of size"
+															+ std::to_string(_size));
 	}
 	constexpr bool _throwIfInvalidSubview( size_t offset, size_t count ) const
 	{
