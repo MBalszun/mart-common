@@ -69,10 +69,12 @@ using ConstMemoryView = ArrayView<const ByteType>;
 template <class T>
 class ArrayView : public ArrayViewAdaptor<T, ArrayView<T>> {
 public:
-	using value_type	= T;
-	using size_type		= std::size_t;
-	using pointer		= T*;
-	using const_pointer = const T*;
+	using value_type	= typename ArrayViewAdaptor<T, ArrayView<T>>::value_type;
+	using size_type		= typename ArrayViewAdaptor<T, ArrayView<T>>::size_type;
+	using pointer		= typename ArrayViewAdaptor<T, ArrayView<T>>::pointer;
+	using const_pointer = typename ArrayViewAdaptor<T, ArrayView<T>>::const_pointer;
+	using iterator		= typename ArrayViewAdaptor<T, ArrayView<T>>::iterator;
+	using const_iterator = typename ArrayViewAdaptor<T, ArrayView<T>>::const_iterator;
 
 private:
 	/* ### Type traits short hands ### */
