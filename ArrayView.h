@@ -84,21 +84,21 @@ private:
 												   std::random_access_iterator_tag>::value;
 	};
 
-	template <class U, class = typename U::iterator>
-	struct has_random_it {
-		static constexpr bool value = is_random_it<typename U::iterator>::value;
-	};
-
 	template <class IT>
 	using enable_if_random_it_t = mart::enable_if_t<is_random_it<IT>::value>;
 
 	template <class U>
 	static constexpr auto is_compatible_container_helper( std::nullptr_t )
-		-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == nullptr )
+		-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == std::declval<U>().data() )
 	{
-		return has_random_it<U>::value
-			   && ( std::is_same<typename U::value_type, mart::remove_const_t<value_type>>::value
-					|| std::is_same<typename U::value_type, value_type>::value );
+		return
+			std::is_same<
+				typename std::iterator_traits<typename U::iterator>::iterator_category,
+				std::random_access_iterator_tag
+			>::value
+		 && (	 std::is_same<typename U::value_type, mart::remove_const_t<value_type>>::value
+			  || std::is_same<typename U::value_type,						value_type>::value
+			);
 	};
 
 	template <class U>
@@ -109,6 +109,18 @@ private:
 
 	template <class U>
 	struct is_compatible_container {
+		/* IMPLEMENTATION NOTE:
+		 * There are two overloads of is_compatible_container_helper:
+		 * one taking an argument of type nullptr_t
+		 * one taking an argument of type U*
+		 *
+		 * If U doesn't have the member functions data() and size(), the first overload SFINAEs away,
+		 * leaving only the second one which always returns false
+		 *
+		 * If U has both member functions the first one winns as nullptr_t is an exact match, whereas U* needs a conversion.
+		 * The first one then checks if the container has the correct value type
+		 *
+		 */
 		static constexpr bool value = is_compatible_container_helper<U>( nullptr );
 	};
 
