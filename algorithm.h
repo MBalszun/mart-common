@@ -87,6 +87,18 @@ auto find_first_of_ex(const C1& in1, const C2& in2, BinaryPredicate p)-> mart::E
 	return{ std::find_first_of(in1.begin(), in1.end(), in2.begin(), in2.end(), p), in1 };
 }
 
+template< class C, class T>
+auto lower_bound(const C& c, const T& value) -> decltype(std::begin(c))
+{
+	return std::lower_bound(std::begin(c),value);
+}
+
+template< class C, class T, class Compare>
+auto lower_bound(const C& c, const T& value, Compare cmp) -> decltype(std::begin(c))
+{
+	return std::lower_bound(std::begin(c), value, cmp);
+}
+
 //min/max
 
 template< class R, class Compare >
