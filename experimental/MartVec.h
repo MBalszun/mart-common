@@ -308,6 +308,22 @@ namespace _impl_vec {
 		}
 	};
 
+	template<class T>
+	struct ceil {
+		T operator()(const T& l) {
+			using std::ceil;
+			return ceil(l);
+		}
+	};
+
+	template<class T>
+	struct floor {
+		T operator()(const T& l) {
+			using std::floor;
+			return floor(l);
+		}
+	};
+
 }
 
 /**
@@ -342,6 +358,9 @@ DEFINE_ND_VECTOR_OP(operator+,std::plus)
 DEFINE_ND_VECTOR_OP(operator*,std::multiplies)
 DEFINE_ND_VECTOR_OP(operator-,std::minus)
 DEFINE_ND_VECTOR_OP(operator/,std::divides)
+
+DEFINE_UNARY_ND_VECTOR_OP(ceil, _impl_vec::ceil)
+DEFINE_UNARY_ND_VECTOR_OP(floor, _impl_vec::floor)
 
 //min max
 DEFINE_ND_VECTOR_OP(max,_impl_vec::maximum)
