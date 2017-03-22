@@ -56,7 +56,7 @@ template <class T>
 using Vec4D = Vec<T, 4>;
 
 template <class T, int N>
-using Matrix = Vec<Vec<T,N>,N>;
+using Matrix = Vec<Vec<T,N>,N>; //each vector is a colum
 
 //some metaprogramming stuff
 namespace mp{
@@ -238,6 +238,7 @@ Vec<T, N1+N2> concat(const Vec<T, N1>& v1, const Vec<T,N2>& v2)
 
 /**
  * Left-Multiplies a (colum) vector with a square matrix.
+ * mx * vec
  *
  * Main purpose is coordinate transformation. For that,
  * the colums of the matrix shall correspond to the
@@ -247,19 +248,35 @@ Vec<T, N1+N2> concat(const Vec<T, N1>& v1, const Vec<T,N2>& v2)
  * @param mx matrix to multiply vector with
  * @return
  */
-template<class T,int N>
-Vec<T,N> mx_multiply(const Matrix<T,N>& mx,const Vec<T,N>& vec) {
-	Vec<T,N> ret{};
+//template<class T,int N>
+//Vec<T,N> mx_multiply(const Matrix<T,N>& mx,const Vec<T,N>& vec) {
+//	Vec<T,N> ret{};
+//
+//	for (int i=0;i<N;++i) {
+//		ret = ret+ mx[i]*vec[i];
+//	}
+//	return ret;
+//}
 
-	for (int i=0;i<N;++i) {
-		ret = ret+ mx[i]*vec[i];
+
+template<class T,int N>
+T inner_product(const Vec<T,N>& l, const Vec<T,N>& r){
+	T ret{};
+	for (int i = 0; i < N; ++i) {
+		ret += l[i] * r[i];
 	}
 	return ret;
 }
 
-template<class T,int N>
-T inner_product(const Vec<T,N>& l, const Vec<T,N>& r){
-	return std::inner_product(l.data.begin(),l.data.end(),r.data.begin(),T{});
+
+template<class T, int N>
+Vec<T, N> mx_multiply(const Matrix<T, N>& mx, const Vec<T, N>& vec) {
+	Vec<T, N> ret{};
+
+	for (int i = 0; i<N; ++i) {
+		ret[i] = inner_product(mx[i], vec);
+	}
+	return ret;
 }
 
 namespace _impl_vec {
