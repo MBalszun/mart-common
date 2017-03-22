@@ -15,6 +15,12 @@ void sort( C& c )
 	std::sort( c.begin(), c.end() );
 }
 
+template <class C, class Comp>
+void sort(C& c, Comp comp)
+{
+	std::sort(c.begin(), c.end(),comp);
+}
+
 template <class C, class Pred>
 auto partition(C& c, Pred p) -> decltype(c.begin())
 {
