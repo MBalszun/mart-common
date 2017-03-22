@@ -130,6 +130,13 @@ public:
 		}
 	}
 
+	const char* c_str() const {
+		if (!isZeroTerminated()) {
+			throw std::exception("Called c_str on ConstString that is not zero terminated -> create zero terminated version wihth createZStr() first");
+		}
+		return _start;
+	}
+
 	template<class ...ARGS>
 	friend ConstString concat(const ARGS&...args);
 
