@@ -283,6 +283,15 @@ private:
 	}
 };
 
+template<int K, class T>
+Vec<T, K> expand_to_dim(T v) {
+	Vec<T, K> vec;
+	for (int i = 0; i < K; ++i) {
+		vec[i] = v;
+	}
+	return vec;
+}
+
 //there should be a check for any instantiated vector type, but this has to do for now
 static_assert(std::is_trivial < Vec<int, 5>>::value, "mart::Vec is not a trivial type");
 
