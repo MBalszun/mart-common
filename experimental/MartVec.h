@@ -93,6 +93,7 @@ namespace mp{
 template<class T, int N>
 struct Vec {
 	static_assert(N>0, "mart::Vector must at least have a size of 1");
+	static constexpr size_t Dim = N;
 	using value_type = T;
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	std::array<T, N> data;
@@ -160,6 +161,7 @@ private:
 template<class T>
 struct Vec<T,2> {
 	static constexpr size_t N = 2;
+	static constexpr size_t Dim = 2;
 	using value_type = T;
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	T x;
@@ -201,6 +203,69 @@ struct Vec<T,2> {
 	Vec<T, 2> unityVec() const {
 		auto abs = norm();
 		return { x / abs, y / abs };
+	}
+
+	//returns a K dimensional vector
+	//if K<=N, the first K values are copied
+	//if K>N, all values are copied and the remaining values are zero-initialized
+	template<int K>
+	Vec<T, K> toKDim() const {
+		return toKDim_helper<K>(mp::make_index_sequence<(K < N ? K : N)>{});
+	}
+
+private:
+	template<int K, int ...I>
+	Vec<T, K> toKDim_helper(mp::index_sequence<I...>) const {
+		return Vec<T, K>{(*this)[I]...};
+	}
+};
+
+template<class T>
+struct Vec<T, 3> {
+	static constexpr size_t N = 3;
+	static constexpr size_t Dim = 3;
+	using value_type = T;
+	using square_type = decltype(std::declval<T>()*std::declval<T>());
+	T x;
+	T y;
+	T z;
+	//c++14:
+	//	constexpr Vec(std::initializer_list<T> init){
+	//		std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
+	//	}
+
+	//### Data access ###
+	T &operator[](int idx)
+	{
+		assert(0 <= idx && idx < N);
+		return idx == 0 ? x : idx == 1? y : z;
+	}
+
+	const T &operator[](int idx) const
+	{
+		assert(0 <= idx && idx < N);
+		return idx == 0 ? x : idx == 1 ? y : z;
+	}
+	static constexpr int size() { return N; }
+
+	T squareNorm() const {
+		return x*x + y*y + z*z;
+	}
+
+	T norm() const {
+		return std::sqrt(squareNorm());
+	}
+
+	Vec& operator+=(const Vec& other);
+	Vec& operator-=(const Vec& other);
+	Vec& operator*=(const Vec& other);
+	Vec& operator/=(const Vec& other);
+
+
+	//Creates a vector of length 1 that points in the same direction as the original one
+	Vec unityVec() const {
+		auto abs = norm();
+		return { x / abs, y / abs, z/abs };
 	}
 
 	//returns a K dimensional vector
