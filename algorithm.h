@@ -34,7 +34,7 @@ T accumulate(C& c, T init)
 }
 
 template <class C, class T, class BinaryOperation>
-T accumulate(C& c, T init, BinaryOperation op)
+T accumulate(const C& c, T init, BinaryOperation op)
 {
 	return std::accumulate(c.begin(), c.end(), init, op);
 }
