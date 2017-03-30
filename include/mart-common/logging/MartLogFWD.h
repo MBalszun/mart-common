@@ -1,5 +1,18 @@
 #ifndef LIB_MART_COMMON_GUARD_LOGGING_MART_LOG_FWD_H
 #define LIB_MART_COMMON_GUARD_LOGGING_MART_LOG_FWD_H
+/**
+ * MartLogFWD.h (mart-common/logging)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:	Provides logging macros - was designed to forward declare enough such that Logger.h needn't be included into other headerfiles - but failse
+ *
+ */
 
 #define MART_LOG_LOG_LVL_ERROR 0
 #define MART_LOG_LOG_LVL_STATUS 1
@@ -25,7 +38,7 @@
  *	#define MY_MACRO(X,Y,Z) X*Y*Z
  *  #define MY_V_MACRO (...) MART_LOG_IMPL_EXPAND(MY_MACRO(__VA_ARGS__))
  *
- **/
+ */
 #define MART_LOG_IMPL_EXPAND( X ) X
 
 #define MART_DEFLOG (::mart::log::Logger::getDefaultLogger())

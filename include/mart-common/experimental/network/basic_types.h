@@ -1,15 +1,20 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_BASIC_TYPES_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_BASIC_TYPES_H
-/*
-* basic_types.h
-*
-*  Created on: 2016-09-29
-*      Author: Michael Balszun <michael.balszun@tum.de>
-*
-*      This file provides some basic types used in networking
-*      Currently (2016-09-29) this is mainly about network vs host order integer types
-*/
-
+/**
+ * basic_types.h (mart-common/experimental/nw)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:  This file provides some basic types used in networking
+ *
+ * Currently (2017-04) this is mainly about network vs host order integer types
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -17,11 +22,12 @@
 #include <chrono>
 
 /* Proprietary Library Includes */
-
-/* Project Includes */
 #include "../../utils.h"
 
+/* Project Includes */
 #include "port_layer.h"
+
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace experimental {

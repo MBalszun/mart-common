@@ -32,16 +32,16 @@
 namespace mart {
 
 /**
-* ConstString is a ref-counted String implementation, that doesn't allow the modification of the underlying storage at all.
-*
-* One particular property is that when it is constructed from a "const char [N]" argument it is assumed, that this represents
-* a string litteral, in which case ConstString doesn't perform any copy or dynamic memory allocation and also
-* copying the ConstString will not result in any copyies or refcount updates.
-*
-* This header also provides a function that can efficently concatenate multiple string like objects, because it
-* needs only a single dynamic memory allocation
-*
-*/
+ * ConstString is a ref-counted String implementation, that doesn't allow the modification of the underlying storage at all.
+ *
+ * One particular property is that when it is constructed from a "const char [N]" argument it is assumed, that this represents
+ * a string litteral, in which case ConstString doesn't perform any copy or dynamic memory allocation and also
+ * copying the ConstString will not result in any copyies or refcount updates.
+ *
+ * This header also provides a function that can efficently concatenate multiple string like objects, because it
+ * needs only a single dynamic memory allocation
+ *
+ */
 class ConstString : public StringView {
 public:
 	/* #################### CTORS ########################## */

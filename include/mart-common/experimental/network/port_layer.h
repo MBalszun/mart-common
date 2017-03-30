@@ -1,14 +1,18 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_PORT_LAYER_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_PORT_LAYER_H
-/*
-* port_layer.h
-*
-*  Created on: 2016-09-29
-*      Author: Michael Balszun <michael.balszun@tum.de>
-*
-*      This header provides a compatibility layer by defining basic functions and
-*      types that differ between windows and linux
-*/
+/**
+ * port_layer.h (mart-common/experimental/nw)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:  Contains all network related functions that need platform specific implementation
+ *
+ */
 
 //detect windows os. TODO: use other guards if necessary
 #ifdef _MSC_VER
@@ -23,11 +27,15 @@
 #define MBA_BYTE_ORDER			__BYTE_ORDER__
 #endif
 
+/* ######## INCLUDES ######### */
+
 //Include OS-specific headers
 #ifdef MBA_UTILS_USE_WINSOCKS
 
+/* ######## WINDOWS ######### */
+
 struct IUnknown; //This declaration will be needed when translating windows headers with clang/c2
-//Including Windows.h (indirectly) tentds to import some nasty macros. in particular min and max
+//Including Windows.h (indirectly) tends to import some nasty macros. in particular min and max
 #ifndef WIN32_LEAN_AND_MEAN
 	#define WIN32_LEAN_AND_MEAN
 	#define MBA_UTILS_DEFINED_WIN_LEAN_AND_MEAN
@@ -60,6 +68,7 @@ struct IUnknown; //This declaration will be needed when translating windows head
 	#include <unistd.h> //close
 	#include <fcntl.h>
 #endif
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace experimental {

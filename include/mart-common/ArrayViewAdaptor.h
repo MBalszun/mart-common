@@ -1,7 +1,6 @@
 #ifndef LIB_MART_COMMON_GUARD_ARRAY_VIEW_ADAPTOR_H
 #define LIB_MART_COMMON_GUARD_ARRAY_VIEW_ADAPTOR_H
-
- /**
+/**
  * ArrayViewAdaptor.h (mart-common)
  *
  * Copyright (C) 2016-2017: Michael Balszun <michael.balszun@mytum.de>
@@ -11,7 +10,7 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief: mart::ArrayViewAdaptor, a crtp-style mixin to generate memberfunctions similar to array view from a pointer and a length
+ * @brief:  mart::ArrayViewAdaptor, a crtp-style mixin to generate memberfunctions similar to array view from a pointer and a length
  *
  */
 

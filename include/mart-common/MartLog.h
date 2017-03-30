@@ -13,8 +13,8 @@
  * @brief: Provides simple logging facilities.
  */
 
-#include "logging/Logger.h"
-#include "logging/Sinks.h"
+#include "./logging/Logger.h"
+#include "./logging/Sinks.h"
 
 namespace mart {
 namespace log {

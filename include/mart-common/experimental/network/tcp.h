@@ -1,14 +1,18 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_TCP_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_TCP_H
-/*
-* tcp.h
-*
-*  Created on: 2016-09-29
-*      Author: Michael Balszun <michael.balszun@tum.de>
-*
-*      This file provides a simple tcp socket implementation
-*/
-
+/**
+ * tcp.h (mart-common/experimental/nw)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:	This file provides a simple tcp socket implementation
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -23,6 +27,7 @@
 /* Project Includes */
 #include "ip.h"
 #include "Socket.h"
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace experimental {

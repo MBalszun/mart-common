@@ -1,28 +1,31 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_MART_VEC_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_MART_VEC_H
 /**
- *  MartVec.h
+ * MartVec.h (mart-common/experimental)
  *
- *  @date: 2016.04.22
- *  @author: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
  *
- *  @brief Provides mathematical vector  with some default operations
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
  *
- *  The main goal of this file is to provide simple structures that
- *  can describe a 2D or 3D position, but it was generalized to
- *  N-Dimensional vectors.
- *  It also provides the common operator overloads, but doesn't aim
- *  at providing a full fledged linear algebra library with matrices
- *  and so on (if you need something like this look for one of the
- *  millions of libraries out there.
+ * @author:	Michael Balszun <michael.balszun@mytum.de>
+ * @brief:	Provides mathematical vector  with some default operations
  *
  *
- *  TODO:
- *  	- Add functions for coordinate transformation
+ * The main goal of this file is to provide simple structures that
+ * can describe a 2D or 3D position, but it was generalized to
+ * N-Dimensional vectors.
+ * It also provides the common operator overloads, but doesn't aim
+ * at providing a full fledged linear algebra library with matrices
+ * and so on (if you need something like this look for one of the
+ * millions of libraries out there.
  *
+ *
+ * TODO:
+ * 	- Add functions for coordinate transformation
  *
  */
-
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -35,8 +38,8 @@
 #include <numeric>
 
 /* Proprietary Library Includes */
-
 /* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 //### forward declarations ###

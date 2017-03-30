@@ -1,48 +1,62 @@
 #ifndef LIB_MART_COMMON_GUARD_LOGGING_LOGGER_H
 #define LIB_MART_COMMON_GUARD_LOGGING_LOGGER_H
+/**
+ * Logger.h (mart-common/Logging)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:	Provides the actual logger class
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <mutex>
-#include <sstream>
-#include <string>
-#include <thread>
 #include <type_traits>
 #include <vector>
 
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+
+#include <thread>
+#include <mutex>
+
 /* Proprietary Library Includes */
-#include <mart-common/ConstString.h>
-#include <mart-common/MartTime.h>
-#include <mart-common/StringView.h>
-#include <mart-common/experimental/CopyableAtomic.h>
-#include <mart-common/utils.h>
+#include "../ConstString.h"
+#include "../MartTime.h"
+#include "../StringView.h"
+#include "../experimental/CopyableAtomic.h"
+#include "../utils.h"
 
 /* Project Includes */
 #include "MartLogFWD.h"
 #include "types.h"
 #include "default_formatter.h"
 #include "ILogSink.h"
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace log {
 
-/*########### LOGGER ##########*/
-
-class ILogSink;
-
-/**
- * @brief Logger class
- *
- * CAN'T be used from multiple threads
- * Can write to multiple logs
- */
+//TODO: move to separate file
 struct LoggerConf_t {
 	mart::ConstString moduleName;
 	LOG_LVL			  logLvl;
 };
+
+/**
+* @brief Logger class
+*
+* CAN'T be used from multiple threads
+* Can write to multiple logs
+*/
 
 class Logger {
 	enum class AddNewline { No, Yes };

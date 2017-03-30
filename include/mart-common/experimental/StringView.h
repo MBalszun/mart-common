@@ -1,6 +1,5 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_STRINGVIEW_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_STRINGVIEW_H
-#pragma once
 
 #include "../StringView.h"
 

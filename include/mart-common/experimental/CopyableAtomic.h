@@ -1,10 +1,17 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_COPYABLE_ATOMIC_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_COPYABLE_ATOMIC_H
-/*
- * CopyableAtomic.h
+/**
+ * CopyableAtomic.h (mart-common/experimental)
  *
- *  Created on: Dec 16, 2015
- *      Author: balszun
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:  Wrappper around std::atomic that provides default copy operations
+ *
  */
 
 

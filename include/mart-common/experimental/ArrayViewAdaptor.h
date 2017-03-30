@@ -1,5 +1,18 @@
 #ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_ADAPTOR_H
 #define LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_ADAPTOR_H
+/**
+* utils.h (mart-common)
+*
+* Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+*
+* This software may be modified and distributed under the terms
+* of the MIT license. See either the LICENSE file in the library's root
+* directory or http://opensource.org/licenses/MIT for details.
+*
+* @author: Michael Balszun <michael.balszun@mytum.de>
+* @brief: mixed set of utility functions
+*
+*/
 #include "../ArrayViewAdaptor.h"
 
 //
@@ -128,4 +141,4 @@
 
 
 
-#endif /* LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEWADAPTOR_H_ */
+#endif

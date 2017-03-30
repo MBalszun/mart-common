@@ -1,6 +1,18 @@
 #ifndef LIB_MART_COMMON_GUARD_ARRAY_VIEW_H
 #define LIB_MART_COMMON_GUARD_ARRAY_VIEW_H
-#pragma once
+/**
+ * ArrayView.h (mart-common)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief:	Provides ArrayView - a wrapper aroudn a pointer and a size
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -17,6 +29,7 @@
 
 /* Project Includes */
 #include "ArrayViewAdaptor.h"
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 
