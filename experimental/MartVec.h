@@ -415,6 +415,30 @@ namespace _impl_vec {
 		}
 	};
 
+	template<class T>
+	struct round {
+		auto operator()(const T& l) {
+			using std::round;
+			return round(l);
+		}
+	};
+
+	template<class T>
+	struct lround {
+		long operator()(const T& l) {
+			using std::lround;
+			return lround(l);
+		}
+	};
+
+	template<class T>
+	struct iround {
+		int operator()(const T& l) {
+			using std::lround;
+			return lround(l);
+		}
+	};
+
 }
 
 /**
@@ -452,6 +476,9 @@ DEFINE_ND_VECTOR_OP(operator/,std::divides)
 
 DEFINE_UNARY_ND_VECTOR_OP(ceil, _impl_vec::ceil)
 DEFINE_UNARY_ND_VECTOR_OP(floor, _impl_vec::floor)
+DEFINE_UNARY_ND_VECTOR_OP(round, _impl_vec::round)
+DEFINE_UNARY_ND_VECTOR_OP(lround, _impl_vec::lround)
+DEFINE_UNARY_ND_VECTOR_OP(iround, _impl_vec::iround)
 
 //min max
 DEFINE_ND_VECTOR_OP(max,_impl_vec::maximum)
