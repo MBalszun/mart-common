@@ -1,13 +1,5 @@
-/*
- * ConstString.h
- *
- *  Created on: Jun 20, 2016
- *      Author: balszun
- */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_CONSTSTR_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_CONSTSTR_H_
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_CONST_STRING_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_CONST_STRING_H
 
 #include "../ConstString.h"
 

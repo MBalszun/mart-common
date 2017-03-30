@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_SOCKET_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_SOCKET_H
 /*
 * NativesocketWrapper.h
 *
@@ -6,10 +8,6 @@
 *
 *      This file provides the Socket class
 */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_SOCKET_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_SOCKET_H_
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

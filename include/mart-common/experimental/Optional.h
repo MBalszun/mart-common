@@ -1,13 +1,6 @@
-/*
- * Optional.h
- *
- *  Created on: Oct 13, 2015
- *      Author: balszun
- */
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_OPTIONAL_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_OPTIONAL_H
 
-#ifndef LIBS_C2_API_LIBS_COMMON_OPTIONAL_H_
-#define LIBS_C2_API_LIBS_COMMON_OPTIONAL_H_
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

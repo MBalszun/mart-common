@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_OUT_PARAM_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_OUT_PARAM_H
+
 
 namespace mart {
 namespace outp {
@@ -13,10 +15,8 @@ namespace outp {
  * }
  *
  * void bar() {
- * std::string tmp;
- *
- * read(out(tmp));
- *
+ *     std::string tmp;
+ *     read(out(tmp));
  * }
  *
  * Use this when it is not bovius, that a parameter is an out parameter
@@ -50,3 +50,4 @@ using outp::out_param;
 
 }
 
+#endif

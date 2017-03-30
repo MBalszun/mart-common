@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_CPP_STD_TUPLE_H
+#define LIB_MART_COMMON_GUARD_CPP_STD_TUPLE_H
+
 #include <tuple>
 
 
@@ -27,3 +29,4 @@ constexpr const T& get(const std::tuple<R, Types...>& t) {
 }
 
 }
+#endif

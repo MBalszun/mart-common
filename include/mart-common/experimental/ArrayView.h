@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_H
 /*
  * ArrayView.h
  *
@@ -5,9 +7,6 @@
  *      Author: balszun
  */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEW_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEW_H_
-#pragma once
 
 #include "../ArrayView.h"
 

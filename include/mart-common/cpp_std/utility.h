@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef LIB_MART_COMMON_GUARD_CPP_STD_UTILITY_H
+#define LIB_MART_COMMON_GUARD_CPP_STD_UTILITY_H
 
 #include <utility>
 
@@ -14,4 +14,6 @@ namespace mart {
 		return old_value;
 	}
 }
+#endif
+
 

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_MART_VEC_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_MART_VEC_H
 /**
  *  MartVec.h
  *
@@ -23,8 +23,6 @@
  *
  */
 
-#ifndef MARTVEC_H_
-#define MARTVEC_H_
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -549,4 +547,4 @@ Vec<T, N>& Vec<T, N>::operator/=(const Vec<T, N>& other) { *this = *this / other
 
 }
 
-#endif /* MARTVEC_H_ */
+#endif

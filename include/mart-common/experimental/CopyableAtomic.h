@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_COPYABLE_ATOMIC_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_COPYABLE_ATOMIC_H
 /*
  * CopyableAtomic.h
  *
@@ -5,9 +7,6 @@
  *      Author: balszun
  */
 
-#ifndef SRC_UTILS_COPYABLEATOMIC_H_
-#define SRC_UTILS_COPYABLEATOMIC_H_
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -37,22 +36,22 @@ public:
 	static_assert(sizeof(T) < 8 && std::is_pod<T>::value,"Class is only meant for trivial buildin types");
 
 	//defaultinitializes value (std::atomic doesn't)
-    constexpr CopyableAtomic() noexcept :
-        std::atomic<T>(T{})
-    {}
+	constexpr CopyableAtomic() noexcept :
+		std::atomic<T>(T{})
+	{}
 
-    constexpr CopyableAtomic(T desired) noexcept :
-        std::atomic<T>(desired)
-    {}
+	constexpr CopyableAtomic(T desired) noexcept :
+		std::atomic<T>(desired)
+	{}
 
-    constexpr CopyableAtomic(const CopyableAtomic<T>& other) noexcept :
-        CopyableAtomic(other.load(std::memory_order_relaxed))
-    {}
+	constexpr CopyableAtomic(const CopyableAtomic<T>& other) noexcept :
+		CopyableAtomic(other.load(std::memory_order_relaxed))
+	{}
 
-    CopyableAtomic& operator=(const CopyableAtomic<T>& other) noexcept {
-        this->store(other.load(std::memory_order_relaxed), std::memory_order_relaxed);
-        return *this;
-    }
+	CopyableAtomic& operator=(const CopyableAtomic<T>& other) noexcept {
+		this->store(other.load(std::memory_order_relaxed), std::memory_order_relaxed);
+		return *this;
+	}
 
 	constexpr CopyableAtomic(CopyableAtomic<T>&& other) noexcept:
 		CopyableAtomic(other.load(std::memory_order_relaxed))
@@ -66,4 +65,4 @@ public:
 
 }
 
-#endif /* SRC_UTILS_COPYABLEATOMIC_H_ */
+#endif

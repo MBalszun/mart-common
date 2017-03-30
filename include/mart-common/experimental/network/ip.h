@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_IP_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_IP_H
 /*
 * ip.h
 *
@@ -6,10 +8,6 @@
 *
 *      This file provides some basic types related to the ip protocol
 */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_IP_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_IP_H_
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

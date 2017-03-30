@@ -1,14 +1,5 @@
-/*
- * Logger.h
- *
- *  Created on: Nov 12, 2015
- *      Author: balszun
- */
-
-#ifndef MART_COMMON_LOGGING_LOGGER_H_
-#define MART_COMMON_LOGGING_LOGGER_H_
-
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_LOGGING_LOGGER_H
+#define LIB_MART_COMMON_GUARD_LOGGING_LOGGER_H
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

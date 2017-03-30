@@ -1,4 +1,8 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_ALGORITHM_H
+#define LIB_MART_COMMON_GUARD_ALGORITHM_H
+
+
+
 #include <algorithm>
 #include <numeric>
 
@@ -257,3 +261,5 @@ byMember(MTYPE member)
 	return{ member };
 }
 }
+
+#endif // !LIB_MART_COMMON_GUARD_ALGORITHM_H

@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_NETWORKING_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_NETWORKING_H
 /*
 * networking.h
 *
@@ -6,10 +8,6 @@
 *
 *      This is a catch all header that includes the headers fo all supported protocols
 */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_NETWORKING_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_NETWORKING_H_
-#pragma once
 
 #include "ip.h"
 #include "udp.h"

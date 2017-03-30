@@ -1,5 +1,5 @@
-#ifndef LIBS_MART_COMMON_ARRAY_VIEW_H
-#define LIBS_MART_COMMON_ARRAY_VIEW_H
+#ifndef LIB_MART_COMMON_GUARD_ARRAY_VIEW_H
+#define LIB_MART_COMMON_GUARD_ARRAY_VIEW_H
 #pragma once
 
 /* ######## INCLUDES ######### */

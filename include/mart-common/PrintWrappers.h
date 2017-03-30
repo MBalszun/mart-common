@@ -1,7 +1,27 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_PRINT_WRAPPERS_H
+#define LIB_MART_COMMON_GUARD_PRINT_WRAPPERS_H
+/**
+ * PrintWrappers.h (mart-common)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: Wrapper objects that add formatting information to a type
+ *
+ */
 
+/* ######## INCLUDES ######### */
+/* Standard Library Includes */
 #include <ostream>
 #include <chrono>
+
+/* Proprietary Library Includes */
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace _impl_print_chrono {
@@ -43,5 +63,7 @@ inline auto sformat(std::chrono::duration<rep,period> dur) -> _impl_print_chrono
 }
 
 }//mart
+
+#endif
 
 

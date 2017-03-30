@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_MT_CHANNEL_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_MT_CHANNEL_H
 
 #include "UnblockException.h"
 
@@ -135,3 +136,5 @@ private:
 }
 }
 }
+
+#endif

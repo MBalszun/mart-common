@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_MT_UNBLOCK_EXCPETION_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_MT_UNBLOCK_EXCPETION_H
 
 #include <stdexcept>
 
@@ -12,3 +12,5 @@ struct Canceled : std::exception {
 }
 }
 }
+
+#endif

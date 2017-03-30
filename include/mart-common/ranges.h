@@ -1,8 +1,28 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_RANGES_H
+#define LIB_MART_COMMON_GUARD_RANGES_H
+/**
+ * ranges.h (mart-common)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: utilities for ranged for loop and combining iterator pairs into a single object
+ *
+ */
 
+/* ######## INCLUDES ######### */
+/* Standard Library Includes */
 #include <iterator>
-#include "cpp_std/type_traits.h"
 
+/* Proprietary Library Includes */
+#include "./cpp_std/type_traits.h"
+
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 	//wrapper around a pointer, that allows deriving from it
@@ -289,3 +309,5 @@ namespace std {
 	template<class IT>
 	struct iterator_traits<mart::EndAwareIterator<IT>> : public std::iterator_traits<IT>{};
 }
+
+#endif

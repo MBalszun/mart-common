@@ -1,25 +1,30 @@
-#pragma once
-/*
- * ArrayViewAdaptor.h
- *
- *  Created on: Jun 20, 2016
- *      Author: balszun
- */
+#ifndef LIB_MART_COMMON_GUARD_ARRAY_VIEW_ADAPTOR_H
+#define LIB_MART_COMMON_GUARD_ARRAY_VIEW_ADAPTOR_H
 
-#ifndef LIBS_MART_COMMON_ARRAYVIEWADAPTOR_H_
-#define LIBS_MART_COMMON_ARRAYVIEWADAPTOR_H_
+ /**
+ * ArrayViewAdaptor.h (mart-common)
+ *
+ * Copyright (C) 2016-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: mart::ArrayViewAdaptor, a crtp-style mixin to generate memberfunctions similar to array view from a pointer and a length
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-
-/* Proprietary Library Includes */
-
-/* Project Includes */
-
 #include <iterator>
 #include <type_traits>
 #include <stdexcept>
 #include <string>
+
+/* Proprietary Library Includes */
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 /**
@@ -134,4 +139,4 @@ private:
 
 
 
-#endif /* LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEWADAPTOR_H_ */
+#endif

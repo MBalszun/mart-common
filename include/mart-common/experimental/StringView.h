@@ -1,12 +1,5 @@
-/*
- * StringView.h
- *
- *  Created on: Jun 20, 2016
- *      Author: balszun
- */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_STRINGVIEW_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_STRINGVIEW_H_
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_STRINGVIEW_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_STRINGVIEW_H
 #pragma once
 
 #include "../StringView.h"

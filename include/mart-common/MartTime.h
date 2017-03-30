@@ -1,11 +1,16 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_MART_TIME_H
+#define LIB_MART_COMMON_GUARD_MART_TIME_H
 /**
- * MartTime.h
+ * MartTime.h (mart-common)
  *
- *  @date: 2016.04.22
- *  @author: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
  *
- *  @brief Time related functions
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: Time related functions
  *
  *  This file mainly provides some simple wrappers around common,
  *  but rather verbose expressions related to the std::chrono
@@ -45,9 +50,6 @@
  *
  *
  */
-
-#ifndef SRC_UTILS_MARTTIME_H_
-#define SRC_UTILS_MARTTIME_H_
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

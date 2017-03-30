@@ -1,13 +1,5 @@
-#pragma once
-/*
- * ArrayViewAdaptor.h
- *
- *  Created on: Jun 20, 2016
- *      Author: balszun
- */
-
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEWADAPTOR_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_ARRAYVIEWADAPTOR_H_
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_ADAPTOR_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_ARRAY_VIEW_ADAPTOR_H
 #include "../ArrayViewAdaptor.h"
 
 //

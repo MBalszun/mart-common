@@ -1,3 +1,6 @@
+#ifndef LIB_MART_COMMON_GUARD_CPP_STD_ARRAY_H
+#define LIB_MART_COMMON_GUARD_CPP_STD_ARRAY_H
+
 #pragma once
 
 #include <array>
@@ -27,3 +30,5 @@ constexpr inline auto make_array( ARGS&&... args ) -> _helper_make_array::return
 	return {std::forward<ARGS>( args )...};
 }
 }
+
+#endif

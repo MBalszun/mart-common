@@ -1,18 +1,35 @@
+#ifndef LIB_MART_COMMON_GUARD_UTILS_H
+#define LIB_MART_COMMON_GUARD_UTILS_H
 /**
- * @author Michael Balszun <michael.balszun@tum.de>
+ * utils.h (mart-common)
+ *
+ * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: mixed set of utility functions
+ *
  */
 
-#pragma once
-#include <type_traits>
+/* ######## INCLUDES ######### */
+/* Standard Library Includes */
 #include <stdexcept>
 
+/* Proprietary Library Includes */
 #include "./cpp_std/type_traits.h"
+
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
+
 
 namespace mart {
 
 /* ######## narrowing ################################################ */
 
-// narrow_cast(): a searchable way to do narrowing casts of values
+// narrow_cast(): a searchable way to do unchecked narrowing casts of values
 template <class T, class U>
 inline constexpr T narrow_cast(U u) noexcept
 {
@@ -89,7 +106,7 @@ constexpr uType_t<E> toUType(E e) { return static_cast<uType_t<E>>(e); }
  * you can write
  *
  *  auto vec = mart::make_with_capacity<std::vector<int>(100);
- **/
+ */
 
 template<class T>
 T make_with_capacity(size_t i)
@@ -109,3 +126,5 @@ T clamp(T val, const T& min_val, const T& max_val) {
 }
 
 }//mart
+
+#endif //LIB_MART_COMMON_GUARD_UTILS_H

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_RANGES_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_RANGES_H
+
 #include "../ranges.h"
 
 
@@ -22,3 +24,5 @@ auto view_reversed(R&& r) -> range<std::reverse_iterator<decltype(r.begin())>> {
 
 }
 }
+
+#endif

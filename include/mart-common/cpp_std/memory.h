@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_CPP_STD_MEMORY_H
+#define LIB_MART_COMMON_GUARD_CPP_STD_MEMORY_H
+
 #include <memory>
 #include "type_traits.h"
 
@@ -22,3 +24,5 @@ inline auto make_unique(std::size_t size) -> mart::enable_if_t<
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_PORT_LAYER_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_PORT_LAYER_H
 /*
 * port_layer.h
 *
@@ -8,9 +10,6 @@
 *      types that differ between windows and linux
 */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_PORT_LAYER_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_PORT_LAYER_H_
-#pragma once
 //detect windows os. TODO: use other guards if necessary
 #ifdef _MSC_VER
 #define MBA_UTILS_USE_WINSOCKS

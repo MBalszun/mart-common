@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_LOGGING_ILOG_SINK_H
+#define LIB_MART_COMMON_GUARD_LOGGING_ILOG_SINK_H
+
 
 #include <atomic>
 #include <mutex>
@@ -77,3 +79,5 @@ private:
 };
 }
 }
+
+#endif

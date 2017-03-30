@@ -1,14 +1,6 @@
-/*
- * Sinks.h
- *
- *  Created on: Nov 12, 2015
- *      Author: balszun
- */
+#ifndef LIB_MART_COMMON_GUARD_LOGGING_SINKS_H
+#define LIB_MART_COMMON_GUARD_LOGGING_SINKS_H
 
-#ifndef MART_COMMON_LOGGING_SINKS_H_
-#define MART_COMMON_LOGGING_SINKS_H_
-
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

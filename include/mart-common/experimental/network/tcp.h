@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_TCP_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_TCP_H
 /*
 * tcp.h
 *
@@ -7,9 +9,6 @@
 *      This file provides a simple tcp socket implementation
 */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_TCP_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_TCP_H_
-#pragma once
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

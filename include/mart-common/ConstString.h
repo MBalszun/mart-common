@@ -1,6 +1,18 @@
-#ifndef LIBS_MART_COMMON_CONST_STRING_H
-#define LIBS_MART_COMMON_CONST_STRING_H
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_CONST_STRING_H
+#define LIB_MART_COMMON_GUARD_CONST_STRING_H
+/**
+ * ConstString.h (mart-common)
+ *
+ * Copyright (C) 2016-2017: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@mytum.de>
+ * @brief: Provides ConstString.h a refcounted implementation of an immutable string
+ *
+ */
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
@@ -14,6 +26,8 @@
 
 /* Project Includes */
 #include "StringView.h"
+
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 

@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_BASIC_TYPES_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_BASIC_TYPES_H
 /*
 * basic_types.h
 *
@@ -8,8 +10,6 @@
 *      Currently (2016-09-29) this is mainly about network vs host order integer types
 */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_BASIC_TYPES_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_BASIC_TYPES_H_
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_LOGGING_DEFAULT_FORMATTER_H
+#define LIB_MART_COMMON_GUARD_LOGGING_DEFAULT_FORMATTER_H
+
 
 #include <algorithm>
 #include <chrono>
@@ -157,3 +159,5 @@ inline void formatForLog( std::ostream& out, const ARGS&... args )
 }
 }
 }
+
+#endif

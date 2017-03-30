@@ -1,3 +1,5 @@
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_UDP_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_UDP_H
 /*
 * udp.h
 *
@@ -7,9 +9,7 @@
 *      This file provides a simple udp socket implementation
 */
 
-#ifndef LIBS_MART_COMMON_EXPERIMENTAL_NW_UDP_H_
-#define LIBS_MART_COMMON_EXPERIMENTAL_NW_UDP_H_
-#pragma once
+
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_DEV_TOOLS_H
+#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_DEV_TOOLS_H
 
 #include <chrono>
 
@@ -19,3 +20,5 @@ std::chrono::nanoseconds execTimed(F&& f)
 }
 }
 }
+
+#endif
