@@ -39,6 +39,7 @@ T accumulate(const C& c, T init, BinaryOperation op)
 	return std::accumulate(c.begin(), c.end(), init, op);
 }
 
+//find
 template <class C, class V>
 auto find( C& c, const V& value ) -> decltype( c.begin() )
 {
@@ -97,6 +98,11 @@ template< class C, class T, class Compare>
 auto lower_bound(const C& c, const T& value, Compare cmp) -> decltype(std::begin(c))
 {
 	return std::lower_bound(std::begin(c), std::end(c), value, cmp);
+}
+
+template< class C, class Pred>
+bool all_of(const C& c, Pred p) {
+	return std::all_of(c.begin(), c.end(), p);
 }
 
 //min/max
