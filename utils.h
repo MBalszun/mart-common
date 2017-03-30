@@ -1,3 +1,7 @@
+/**
+ * @author Michael Balszun <michael.balszun@tum.de>
+ */
+
 #pragma once
 #include <type_traits>
 #include <stdexcept>
@@ -93,6 +97,15 @@ T make_with_capacity(size_t i)
 	T t;
 	t.reserve(i);
 	return t;
+}
+/* ######## math ################################################ */
+template<class T>
+T clamp(T val, const T& min_val, const T& max_val) {
+	using std::min;
+	using std::max;
+	using mart::min;
+	using mart::max;
+	return min(max_val, max(min_val,val));
 }
 
 }//mart
