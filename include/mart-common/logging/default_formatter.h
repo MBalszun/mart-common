@@ -26,8 +26,6 @@
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
-
-
 namespace mart {
 namespace log {
 
