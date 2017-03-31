@@ -417,7 +417,7 @@ namespace _impl_vec {
 
 	template<class T>
 	struct round {
-		auto operator()(const T& l) {
+		T operator()(const T& l) {
 			using std::round;
 			return round(l);
 		}
