@@ -103,8 +103,8 @@ template<class T>
 T clamp(T val, const T& min_val, const T& max_val) {
 	using std::min;
 	using std::max;
-	using mart::min;
-	using mart::max;
+	//using mart::min;
+	//using mart::max;
 	return min(max_val, max(min_val,val));
 }
 
