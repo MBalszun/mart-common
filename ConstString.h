@@ -6,6 +6,7 @@
 /* Standard Library Includes */
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/utility.h"
@@ -132,7 +133,7 @@ public:
 
 	const char* c_str() const {
 		if (!isZeroTerminated()) {
-			throw std::exception("Called c_str on ConstString that is not zero terminated -> create zero terminated version wihth createZStr() first");
+			throw std::runtime_error("Called c_str on ConstString that is not zero terminated -> create zero terminated version wihth createZStr() first");
 		}
 		return _start;
 	}
