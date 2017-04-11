@@ -5,6 +5,7 @@
 
 
 namespace mart {
+	//from cppreference.com
 	template<class T, class U = T>
 	T exchange(T& obj, U&& new_value)
 	{
