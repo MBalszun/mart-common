@@ -125,6 +125,12 @@ T clamp(T val, const T& min_val, const T& max_val) {
 	return min(max_val, max(min_val,val));
 }
 
+//Flag that is sometimes used as a template parameter for policy based design
+enum class Synchonized {
+	False,
+	True
+};
+
 }//mart
 
 #endif //LIB_MART_COMMON_GUARD_UTILS_H
