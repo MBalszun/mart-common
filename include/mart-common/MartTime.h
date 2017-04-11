@@ -156,15 +156,15 @@ inline bool hasTimedOut( copter_time_point start, copter_default_period timeout 
  * Class to keep track of elapsed time / timeouts
  */
 class Timer {
-	using Clock = std::chrono::steady_clock;
+	using Clock_t = std::chrono::steady_clock;
 public:
 	Timer()
-		: _start_time( Clock::now() )
+		: _start_time( Clock_t::now() )
 	{
 	}
 
 	explicit Timer( copter_default_period timeout )
-		: _start_time(Clock::now() )
+		: _start_time(Clock_t::now() )
 		, _timeout{timeout}
 	{
 	}
@@ -173,7 +173,7 @@ public:
 	copter_default_period reset()
 	{
 		auto t		= elapsed();
-		_start_time = Clock::now();
+		_start_time = Clock_t::now();
 		return t;
 	}
 
@@ -181,7 +181,7 @@ public:
 	template <class Dur = copter_default_period>
 	Dur elapsed() const
 	{
-		return std::chrono::duration_cast<Dur>(Clock::now() - _start_time );
+		return std::chrono::duration_cast<Dur>(Clock_t::now() - _start_time );
 	}
 
 	/// remaining time, before hasTimedOut will be true (will always return a non-negative number)
@@ -189,18 +189,18 @@ public:
 	Dur remaining() const
 	{
 		using namespace std::chrono;
-		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( Clock::now() - _start_time ) ), Dur{} );
+		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( Clock_t::now() - _start_time ) ), Dur{} );
 	}
 
 	/// true if duration since creation or last call to reset is longer than the timeout that was specified upon creation
 	bool hasTimedOut() const
 	{
 		using namespace std::chrono;
-		return ( Clock::now() - _start_time ) > _timeout;
+		return ( Clock_t::now() - _start_time ) > _timeout;
 	}
 
 private:
-	std::chrono::steady_clock::time_point	  _start_time;
+	Clock_t::time_point	  _start_time;
 	copter_default_period _timeout{-1};
 
 	//make sure we don't run into underflow issues
@@ -219,12 +219,12 @@ private:
  *
  */
 class PeriodicScheduler {
-	using Clock = mart::copter_clock;
+	using Clock_t = mart::copter_clock;
 public:
 	explicit PeriodicScheduler( microseconds interval )
 		: _interval( interval )
 	{
-		_lastInvocation = Clock::now();
+		_lastInvocation = Clock_t::now();
 	}
 
 	copter_time_point getNextWakeTime() const
@@ -257,18 +257,18 @@ public:
 	template <class Dur = copter_default_period>
 	Dur runtime() const
 	{
-		return std::chrono::duration_cast<Dur>(Clock::now() - _lastInvocation + _interval*(_cnt ));
+		return std::chrono::duration_cast<Dur>(Clock_t::now() - _lastInvocation + _interval*(_cnt ));
 	}
 
 	template <class Dur = copter_default_period>
 	Dur remainingIntervalTime() const
 	{
-		return std::chrono::duration_cast<Dur>(getNextWakeTime() - Clock::now());
+		return std::chrono::duration_cast<Dur>(getNextWakeTime() - Clock_t::now());
 	}
 
 private:
 	microseconds		_interval;
-	Clock::time_point	_lastInvocation;
+	Clock_t::time_point	_lastInvocation;
 	std::ptrdiff_t		_cnt = 0;
 };
 
