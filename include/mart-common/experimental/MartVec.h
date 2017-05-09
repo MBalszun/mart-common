@@ -66,7 +66,8 @@ namespace mp{
 	template< int... I> struct index_sequence
 	{
 		typedef int value_type;
-		static constexpr size_t size() noexcept { return sizeof...(I) ; }
+		/*                                           v--- we might need a cast here... */
+		static constexpr int size() noexcept { return sizeof...(I) ; }
 	};
 
 	namespace impl_helper {
@@ -94,7 +95,7 @@ namespace mp{
 template<class T, int N>
 struct Vec {
 	static_assert(N>0, "mart::Vector must at least have a size of 1");
-	static constexpr size_t Dim = N;
+	static constexpr int Dim = N;
 	using value_type = T;
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	std::array<T, N> data;
@@ -137,7 +138,7 @@ struct Vec {
 	Vec<T,N> unityVec() const {
 		Vec<T,N> res(*this);
 		auto abs = norm();
-		for (size_t i=0;i<N;++i) {
+		for (int i=0;i<N;++i) {
 			res[i]/= abs;
 		}
 		return res;
@@ -161,8 +162,8 @@ private:
 
 template<class T>
 struct Vec<T,2> {
-	static constexpr size_t N = 2;
-	static constexpr size_t Dim = 2;
+	static constexpr int N = 2;
+	static constexpr int Dim = 2;
 	using value_type = T;
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	T x;
@@ -223,8 +224,8 @@ private:
 
 template<class T>
 struct Vec<T, 3> {
-	static constexpr size_t N = 3;
-	static constexpr size_t Dim = 3;
+	static constexpr int N = 3;
+	static constexpr int Dim = 3;
 	using value_type = T;
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	T x;
@@ -378,7 +379,7 @@ namespace _impl_vec {
 
 	//general dispatcher for applying functor that forwards the call to the respective apply_helper- functions
 	//c++14: remove -> decltype(...)
-	template<size_t N, class F, class ... ARGS>
+	template<int N, class F, class ... ARGS>
 	constexpr auto apply(F func, ARGS&& ... args) -> decltype(_impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{}))	{
 		return _impl_vec::apply_helper(std::forward<ARGS>(args)...,func,mp::make_index_sequence<N>{});
 	}
@@ -510,14 +511,14 @@ DEFINE_ND_VECTOR_OP(elementGreaterEqual,std::greater_equal)
 #undef DEFINE_ND_VECTOR_OP
 
 namespace _impl_vec {
-	template<class T, size_t N, class F, size_t I=0>
+	template<class T, int N, class F, int I=0>
 	struct Fold {
 		constexpr auto operator()(const Vec<T,N>& l, F op, T init) const ->decltype(op(init,init))  {
 			return Fold<T,N,F,I+1>{}(l,op,op(init,  l[I]));
 		}
 	};
 
-	template<class T, size_t N, class F>
+	template<class T, int N, class F>
 	struct Fold<T,N,F,N> {
 		constexpr auto operator()(const Vec<T,N>& , F , T init) const -> T  {
 			return init;
