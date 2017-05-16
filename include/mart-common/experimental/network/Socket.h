@@ -184,18 +184,18 @@ public:
 
 	auto send(mart::ConstMemoryView data, int flags) -> port_layer::txrx_size_t
 	{
-		return ::send(_handle, data.asConstCharPtr(), data.size(), flags);
+		return ::send(_handle, data.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(data.size()), flags);
 	}
 
 	template<class AddrT>
 	auto sendto(mart::ConstMemoryView data, int flags, const AddrT& addr) -> port_layer::txrx_size_t
 	{
-		return ::sendto(_handle, data.asConstCharPtr(), data.size(), flags, asSockAddrPtr(addr), sizeof(addr));
+		return ::sendto(_handle, data.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(data.size()), flags, asSockAddrPtr(addr), sizeof(addr));
 	}
 
 	auto recv(mart::MemoryView buffer, int flags) -> std::pair<mart::MemoryView, int>
 	{
-		auto ret = ::recv(_handle, buffer.asCharPtr(), buffer.size(), flags);
+		auto ret = ::recv(_handle, buffer.asCharPtr(), static_cast<port_layer::txrx_size_t>(buffer.size()), flags);
 		if (ret >= 0) {
 			return{ buffer.subview(0,ret),0 };
 		} else {
@@ -207,7 +207,7 @@ public:
 	auto recvfrom(mart::MemoryView buffer, int flags, AddrT& src_addr) -> std::pair<mart::MemoryView, int>
 	{
 		port_layer::address_len_t len = sizeof(src_addr);
-		port_layer::txrx_size_t ret = ::recvfrom(_handle, buffer.asCharPtr(), buffer.size(), flags, asSockAddrPtr(src_addr), &len);
+		port_layer::txrx_size_t ret = ::recvfrom(_handle, buffer.asCharPtr(), static_cast<port_layer::txrx_size_t>(buffer.size()), flags, asSockAddrPtr(src_addr), &len);
 		if (ret >= 0 && len == sizeof(src_addr)) {
 			return{ buffer.subview(0,ret), 0 };
 		} else {
@@ -258,7 +258,7 @@ public:
 	int setsockopt(int level, int optname, const T& option_data)
 	{
 		auto opmem = mart::viewMemoryConst(option_data);
-		return ::setsockopt(_handle, level, optname, opmem.asConstCharPtr(), opmem.size());
+		return ::setsockopt(_handle, level, optname, opmem.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(opmem.size()));
 	}
 	template<class T>
 	int getsockopt(int level, int optname, T& option_data)
@@ -277,7 +277,7 @@ public:
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
 	#ifdef MBA_UTILS_USE_WINSOCKS
-		DWORD to_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+		DWORD to_ms = static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
 		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to_ms);
 	#else
 		auto to = nw::to_timeval(timeout);
@@ -288,7 +288,7 @@ public:
 	void setRxTimeout(std::chrono::microseconds timeout)
 	{
 	#ifdef MBA_UTILS_USE_WINSOCKS
-		DWORD to_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+		DWORD to_ms = static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
 		this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, to_ms);
 	#else
 		auto to = nw::to_timeval(timeout);
