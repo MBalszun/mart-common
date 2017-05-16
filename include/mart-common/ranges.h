@@ -182,7 +182,7 @@ _impl_irange::irange_t<typename C::size_type> irange(const C& container) {
 }
 
 template<class T, size_t N >
-_impl_irange::irange_t<size_t> irange(const T(&other)[N]) {
+_impl_irange::irange_t<size_t> irange(const T(&)[N]) {
 	return _impl_irange::irange_t<size_t>{0, N};
 }
 
