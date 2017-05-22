@@ -126,6 +126,16 @@ bool all_of(const C& c, Pred p) {
 	return std::all_of(c.begin(), c.end(), p);
 }
 
+template< class C, class Pred>
+bool any_of(const C& c, Pred p) {
+	return std::any_of(c.begin(), c.end(), p);
+}
+
+template< class C>
+bool any_of(const C& c) {
+	return std::any_of(c.begin(), c.end(), [](bool e) {return e; });
+}
+
 //min/max
 
 template< class R, class Compare >
@@ -166,7 +176,12 @@ auto minmax_element(R&& range, Compare comp) -> std::pair<decltype(std::begin(ra
 }
 
 
+//transform
 
+template< class Input, class Output, class UnaryOperation >
+void transform(const Input& in, Output& out, UnaryOperation unary_op) {
+	std::transform(in.begin(), in.end(), out.begin(), unary_op);
+}
 
 
 
