@@ -101,7 +101,7 @@ private:
 	using enable_if_random_it_t = mart::enable_if_t<is_random_it<IT>::value>;
 
 	template <class U>
-	static constexpr auto is_compatible_container_helper( std::nullptr_t )
+	static constexpr auto is_compatible_container_helper( int )
 		-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == std::declval<U>().data() )
 	{
 		return
@@ -115,7 +115,7 @@ private:
 	};
 
 	template <class U>
-	static constexpr auto is_compatible_container_helper( U* ) -> bool
+	static constexpr auto is_compatible_container_helper( char ) -> bool
 	{
 		return false;
 	};
@@ -134,7 +134,7 @@ private:
 		 * The first one then checks if the container has the correct value type
 		 *
 		 */
-		static constexpr bool value = is_compatible_container_helper<U>( nullptr );
+		static constexpr bool value = is_compatible_container_helper<U>( 0 );
 	};
 
 	template <class U, class K>
