@@ -165,7 +165,10 @@ auto minmax_element(R&& range, Compare comp) -> std::pair<decltype(std::begin(ra
 	return std::minmax_element(range.begin(), range.end(), comp);
 }
 
-
+template< class R, class T >
+void fill(R& range, const T& value) {
+	std::fill(range.begin(), range.end(), value);
+}
 
 
 
