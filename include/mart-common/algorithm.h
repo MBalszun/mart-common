@@ -175,15 +175,16 @@ auto minmax_element(R&& range, Compare comp) -> std::pair<decltype(std::begin(ra
 	return std::minmax_element(range.begin(), range.end(), comp);
 }
 
-
 //transform
-
 template< class Input, class Output, class UnaryOperation >
 void transform(const Input& in, Output& out, UnaryOperation unary_op) {
 	std::transform(in.begin(), in.end(), out.begin(), unary_op);
 }
 
-
+template< class R, class T >
+void fill(R& range, const T& value) {
+	std::fill(range.begin(), range.end(), value);
+}
 
 /*### algorithm related ###*/
 

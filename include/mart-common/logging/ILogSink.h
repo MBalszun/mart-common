@@ -60,11 +60,6 @@ public:
 				_flush();
 			}
 		}
-
-		// flush important messages directly
-		if( lvl <= LOG_LVL::ERROR ) {
-			flush();
-		}
 	}
 
 	void flush()
