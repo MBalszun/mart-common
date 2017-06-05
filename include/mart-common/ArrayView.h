@@ -10,7 +10,7 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief:	Provides ArrayView - a wrapper aroudn a pointer and a size
+ * @brief:	Provides ArrayView - a wrapper around a pointer and a size
  *
  */
 
