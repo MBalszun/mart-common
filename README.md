@@ -6,10 +6,17 @@ You can find the most recent version on the lrz gitlab server at https://gitlab.
 
 The library is in an early (alpha) phase and currently, no versioning scheme is used. Compatibility may be broken between each and every commit. That being said, except for types in the subfolder "experimental", we try to keep the interfaces as stable as possible. 
 
-### Structure
+# Targets 
+the library is specifically designed to work with the toolchains used in the mart project. That particularly means
+- g++-4.8 on Ubuntu-14.04 (with -std=c++11 flag)
+- g++-4.9 yocto cross compiler for arm (with -std=c++11 flag)
+- MSVS 2017
+
+
+# Structure
 Currently this is a header-only library. For usage either add "./include" to your include path or add it as a module in cmake
 
-### Content
+# Content
 This is a short (and probably out of data) overview over the content provided by this library
 
 - `algorithm.h`:     
@@ -22,13 +29,14 @@ This is a short (and probably out of data) overview over the content provided by
 
 - `ArrayView.h`:   
   Contains an array view class similar to `gsl::span`. Basically a wrapper around a pointer and a length. 
-  Can be used as a parameter for many functions that ordinarily would e.g. take a `vector<T>` but is more generic than that 
+  Can be used as a parameter for many functions that ordinarily would e.g. take a `vector<T>&` but is more generic than that 
  
 - `ConstString.h`:   
   String that can't be modified after creation using a ref-counted implementation. 
-  Main advantages over std::string (when applicable): 
+  Main advantages over std::string: 
 	- Doesn't allocate memory when constructed from string litteral
 	- Concatenation of multiple string-like objects requires only a single dynamic memory allocation
+  - Copying and creating substrings is pretty cheap
 
 - `MartLog.h`:  
   Header that provides a simple logging mechanism
@@ -52,17 +60,23 @@ This is a short (and probably out of data) overview over the content provided by
 - `utils.h`:  
   Random collection of small helper functions and classes
  
- ####### Folders #######
+## Folders
  The following folders are inside include/mart-common:
   
 - `cpp_std`:  
   Contains c\++14/c++17 types that are missing in the standard library shipped with gcc 4.8 / 4.9 which we have to use at the moment. They are designed to be an exact drop in replaccement for the standard types and once the compiler is upgraded they can directly be replaced
 
 - `experimental`:  
-  Contains new features, classes and functions, whose interface might change at any point in the future
+  Contains new features, classes and functions, whose interface might change at any point in the future. Noticable this currently (2017-06-07) e.g. contains:
+   - `CopyableAtomic`: Atomics that can used as member objects without disabeling the copy and move operations
+   - `DevTools`: A few utility classes that can be helpfull when evaluating a certain design.
+   - `DynLimArray.h` (Name subject to change in the near future). A stack allocated array with compiletime capacity but a size that is determined at runtime during construction. Ideally suited to return e.g. a short array of numbers from a function
+   - `Optional.h`: A class similar to std::optional
+   - `out_param.h`: Class to make outparameter explicit at call site
+   - `network`: Folder containing slim abstraction layer above sockets for compatibility across windows and linux udp and tcp sockets 
 
 - `logging`: Subfolder for classes related to logging. If you jsut want to use mar tlog, simply include MartLog.h from the main include directoy
   
-### Contributing
+# Contributing
   
   For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de or raise an issue at the gitlab repository at https://gitlab.lrz.de/rcs_mart/mart-common (you might need to get the access rights first)
