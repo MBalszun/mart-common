@@ -314,6 +314,16 @@ protected:
 	friend class ArrayViewAdaptor<T, ArrayView<T>>;
 };
 
+template<class C, class = typename C::value_type>
+auto view_elements(const C& c) -> mart::ArrayView<mart::remove_reference_t<decltype(*c.data())>> {
+	return { c };
+}
+
+template<class C, class = typename C::value_type>
+auto view_elements_mutable(C& c) -> mart::ArrayView<mart::remove_const_t<mart::remove_reference_t<decltype(*c.data())>>> {
+	return { c };
+}
+
 template <class T>
 /*c++14: [[deprecated]] */ constexpr MemoryView viewMemory( T& e )
 {
