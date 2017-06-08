@@ -35,6 +35,9 @@ using underlying_type_t = typename std::underlying_type<T>::type;
 template< class... T >
 using common_type_t = typename std::common_type<T...>::type;
 
+template< class T >
+using remove_reference_t = typename std::remove_reference<T>::type;
+
 /*####### signed/unsigned ##################*/
 
 template< class T >
