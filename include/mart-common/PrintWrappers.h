@@ -43,6 +43,10 @@ namespace _impl_print_chrono {
 			printChronoUnit(out, dur.value);
 			return out;
 		}
+		template<class Dur>
+		PrintableDuration<typename Dur::rep, typename Dur::period> as() {
+			return { std::chrono::duration_cast<Dur>(value) };
+		}
 	};
 
 }//_impl_print
