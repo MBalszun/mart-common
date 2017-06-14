@@ -2,19 +2,16 @@
 
 This is a small utilities library for usage in software related to the mart project at the chair for Real-Time Computer Systems (RCS) at TU-Munich, developed by Michael Balszun.
 
-You can find the most recent version on the lrz gitlab server at https://gitlab.lrz.de/rcs_mart/mart-common.git. 
-
 The library is in an early (alpha) phase and currently, no versioning scheme is used. Compatibility may be broken between each and every commit. That being said, except for types in the subfolder "experimental", we try to keep the interfaces as stable as possible. 
 
-# Targets 
-the library is specifically designed to work with the toolchains used in the mart project. That particularly means
+# Target 
+The library is specifically designed to work with the toolchains used in the mart project. That particularly means
 - g++-4.8 on Ubuntu-14.04 (with -std=c++11 flag)
-- g++-4.9 yocto cross compiler for arm (with -std=c++11 flag)
+- poky (Fido) g++-4.9 cross compiler for arm (with -std=c++11 flag)
 - MSVS 2017
 
-
 # Structure
-Currently this is a header-only library. For usage either add "./include" to your include path or add it as a module in cmake
+Currently this is a header-only library with all header files lying in the `./mart-common/include` sub folder. For usage either add "./include" to your include path or add the root folder as a subfolder in cmake
 
 # Content
 This is a short (and probably out of data) overview over the content provided by this library
@@ -73,10 +70,14 @@ This is a short (and probably out of data) overview over the content provided by
    - `DynLimArray.h` (Name subject to change in the near future). A stack allocated array with compiletime capacity but a size that is determined at runtime during construction. Ideally suited to return e.g. a short array of numbers from a function
    - `Optional.h`: A class similar to std::optional
    - `out_param.h`: Class to make outparameter explicit at call site
-   - `network`: Folder containing slim abstraction layer above sockets for compatibility across windows and linux udp and tcp sockets 
+   - `network`: Folder containing slim abstraction layer above (win/unix) sockets for compatibility across windows and linux udp and tcp sockets 
 
 - `logging`: Subfolder for classes related to logging. If you jsut want to use mar tlog, simply include MartLog.h from the main include directoy
   
 # Contributing
   
   For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de or raise an issue at the gitlab repository at https://gitlab.lrz.de/rcs_mart/mart-common (you might need to get the access rights first)
+
+# Tests
+**TBD**  
+The repository currently doesn't provide unit tests
