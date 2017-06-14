@@ -54,7 +54,6 @@ public:
 		std::copy(container.begin(), container.end(), _data.begin());
 	}
 
-
 	explicit DynLimArray(int size)
 		: _size(size)
 	{
@@ -87,16 +86,16 @@ public:
 	template<int OtherCapacity>
 	DynLimArray& operator=(const DynLimArray<T, OtherCapacity>& other)
 	{
+		throwIfTooBig(other._size);
 		_size = other._size;
-		throwIfTooBig(_size);
 		mart::copy(other._data, _data.begin());
 	}
 
 	template<int OtherCapacity>
 	DynLimArray& operator=(DynLimArray<T, OtherCapacity>&& other)
 	{
+		throwIfTooBig(other._size);
 		_size = other._size;
-		throwIfTooBig(_size);
 		mart::move(std::move(other._data), _data.begin());
 	}
 
