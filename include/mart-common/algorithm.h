@@ -48,6 +48,18 @@ auto partition(C& c, Pred p) -> decltype(c.begin())
 	return std::partition(c.begin(), c.end(),p);
 }
 
+template <class C>
+auto unique(C& c) -> decltype(c.begin())
+{
+	return std::unique(c.begin(), c.end());
+}
+
+template <class C, class Pred>
+auto unique(C& c, Pred p) -> decltype(c.begin())
+{
+	return std::unique(c.begin(), c.end(), p);
+}
+
 template <class C, class T>
 T accumulate(C& c, T init)
 {
