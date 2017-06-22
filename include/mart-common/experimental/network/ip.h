@@ -73,6 +73,10 @@ public:
 	friend bool operator==(address_v4 l, address_v4 r) {
 		return l._addr == r._addr;
 	}
+
+	friend bool operator<(address_v4 l, address_v4 r) {
+		return l._addr < r._addr;
+	}
 private:
 	uint32_net_t _addr{};
 
@@ -135,6 +139,9 @@ public:
 	constexpr uint16_host_t inHostOrder() const { return to_host_order(_p); }
 	friend bool operator==(port_nr l, port_nr r) {
 		return l._p == r._p;
+	}
+	friend bool operator<(port_nr l, port_nr r) {
+		return l._p < r._p;
 	}
 private:
 	uint16_net_t _p{};
