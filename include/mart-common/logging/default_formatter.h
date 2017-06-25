@@ -101,14 +101,12 @@ template <class T>
 inline void defaultFormatForLog( std::ostream& out, mart::ArrayView<T> arr )
 {
 	out << '[';
-	bool first = true;
-	for ( auto&& e : arr ) {
-		if ( first ) {
-			first = false;
-		} else {
+	if ( arr.size() > 0 ) {
+		formatForLog(out, arr[0]);
+		for (auto&& e : arr.subview(1)) {
 			out << ", ";
+			formatForLog(out, e);
 		}
-		formatForLog( out, e );
 	}
 	out << ']';
 }
@@ -116,15 +114,15 @@ inline void defaultFormatForLog( std::ostream& out, mart::ArrayView<T> arr )
 namespace _impl_log {
 inline void printOneLine( std::ostream& out, mart::ConstMemoryView mem, size_t fillto = 0 )
 {
-	//you can use space.substr(0,x)
 	constexpr StringView space("                                                                                                                                                     ");
+	const auto spaces = [&](size_t cnt) { return space.substr(0, std::min(cnt,space.size())); };
 
 	out << '[';
-	for ( uint8_t b : mem ) {
-		out << ' ' << std::setw( 2 ) << (int)b;
+	for ( ByteType b : mem ) {
+		out << ' ' << std::setw( 2 ) << static_cast<int>( b );
 	}
 	if ( fillto > mem.size() ) {
-		out << space.substr( 0, ( fillto - mem.size() ) * 3 );
+		out << spaces( ( fillto - mem.size() ) * 3 );
 	}
 	out << " ]";
 }
@@ -132,17 +130,19 @@ inline void printOneLine( std::ostream& out, mart::ConstMemoryView mem, size_t f
 
 inline void defaultFormatForLog( std::ostream& out, mart::ConstMemoryView mem )
 {
+	constexpr std::size_t ElementsPerLine = 20;
+
 	ostream_flag_saver _( out );
 	out << std::right << std::hex << std::setfill( '0' );
-	bool oneLine = mem.size() <= 20;
-	if ( oneLine ) {
+
+	if ( mem.size() <= ElementsPerLine ) {
 		_impl_log::printOneLine( out, mem );
 	} else {
 		while ( !mem.empty() ) {
 			out << "\n\t";
-			auto t = mem.subview( 0, std::min<size_t>( 20ul, mem.size() ) );
-			_impl_log::printOneLine( out, t, 20 );
-			mem = mem.subview( t.size() );
+			auto parts = mem.split( std::min( ElementsPerLine, mem.size() ) );
+			_impl_log::printOneLine( out, parts.first, ElementsPerLine );
+			mem = parts.second;
 		}
 		out << '\n';
 	}
