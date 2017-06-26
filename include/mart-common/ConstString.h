@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
+#include <atomic>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/utility.h"
@@ -69,21 +70,6 @@ public:
 	// if you need to create a ConstString form a string literal, use the <ConstString(const char(&other)[N])> constructor
 	template<class T>
 	ConstString(T const * const& other) = delete;
-
-protected:
-	/** private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
-	*
-	* Implementation notes:
-	* - creating from shared_ptr doesn't bring any advantage, as you can't use std::make_shared for an array
-	* - This automatically stores the correct deleter in the shared_ptr (by default shared_ptr<const char> would use delete instead of delete[]
-	*/
-	ConstString(std::unique_ptr<const char[]> data, size_t size) :
-		StringView(data.get(), size),
-		_data(std::move(data))
-	{
-		assert(_start != nullptr);
-	}
-public:
 
 	/* ############### Special member functions ######################################## */
 	ConstString(const ConstString& other) noexcept = default;
@@ -159,7 +145,84 @@ public:
 	friend std::string concat_cpp_str(const ARGS&...args);
 
 private:
-	std::shared_ptr<const char> _data = nullptr;
+	class atomic_ref_cnt {
+		using Cnt_t = std::atomic_int;
+
+	public:
+		static constexpr size_t required_space = sizeof(Cnt_t);
+
+		atomic_ref_cnt() = default;
+		explicit atomic_ref_cnt( std::unique_ptr<char[]>&& location ) noexcept
+			: _cnt{new( location.release() ) Cnt_t{1}}
+		{
+		}
+		atomic_ref_cnt( const atomic_ref_cnt& other ) noexcept
+			: _cnt{other._cnt}
+		{
+			_incref();
+		}
+		atomic_ref_cnt( atomic_ref_cnt&& other ) noexcept
+			: _cnt{other._cnt}
+		{
+			other._cnt = nullptr;
+		}
+		atomic_ref_cnt& operator=( const atomic_ref_cnt& other ) noexcept
+		{
+			//inc before dec to protect against self assignment
+			other._incref();
+			_decref();
+			_cnt = other._cnt;
+
+			return *this;
+		}
+		atomic_ref_cnt& operator=( atomic_ref_cnt&& other ) noexcept
+		{
+			_decref();
+			_cnt	   = other._cnt;
+			other._cnt = nullptr;
+			return *this;
+		}
+		~atomic_ref_cnt() { _decref(); }
+
+		char* get() noexcept { return reinterpret_cast<char*>( _cnt ) + sizeof( Cnt_t ); }
+
+		friend void swap( atomic_ref_cnt& l, atomic_ref_cnt& r ) noexcept  { std::swap( l._cnt, r._cnt ); }
+
+	private:
+		void _decref() const noexcept
+		{
+			if( _cnt ) {
+				if( _cnt->fetch_sub( 1 ) == 1 ) {
+					delete[]( reinterpret_cast<char*>( _cnt ) );
+				}
+			}
+		}
+		void _incref() const noexcept
+		{
+			if( _cnt ) {
+				_cnt->fetch_add( 1, std::memory_order_relaxed );
+			}
+		}
+		Cnt_t* _cnt = nullptr;
+	};
+
+	atomic_ref_cnt _data;
+
+	//std::shared_ptr<const char> _data = nullptr;
+
+	/** private constructor, that takes ownership of a buffer and a size (used in _copyFrom and _concat_impl)
+	*
+	* Implementation notes:
+	* - creating from shared_ptr doesn't bring any advantage, as you can't use std::make_shared for an array
+	* - This automatically stores the correct deleter in the shared_ptr (by default shared_ptr<const char> would use delete instead of delete[]
+	*/
+	ConstString(atomic_ref_cnt&& data, size_t size) :
+		StringView(data.get(), size),
+		_data(std::move(data))
+	{
+		assert(_start != nullptr);
+	}
+
 
 	friend void swap(ConstString& l, ConstString& r)
 	{
@@ -178,10 +241,17 @@ private:
 		return static_cast<const StringView&>(*this);
 	}
 
-	static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
+	//static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
+	//{
+	//	auto data = mart::make_unique<char[]>(size + 1);
+	//	data[size] = '\0'; //zero terminate
+	//	return data;
+	//}
+
+	static inline atomic_ref_cnt _allocate_null_terminated_char_buffer(size_t size)
 	{
-		auto data = mart::make_unique<char[]>(size + 1);
-		data[size] = '\0'; //zero terminate
+		atomic_ref_cnt data{ mart::make_unique<char[]>(size + 1 + atomic_ref_cnt::required_space) };
+		data.get()[size] = '\0'; //zero terminate
 		return data;
 	}
 
@@ -192,8 +262,8 @@ private:
 			return;
 		}
 		//create buffer and copy data over
-		auto data = _allocate_null_terminated_char_buffer(other.size());
-		std::copy_n(other.data(), other.size(), data.get());
+		auto data = _allocate_null_terminated_char_buffer( other.size() );
+		std::copy_n( other.data(), other.size(), data.get() );
 
 		//initialize ConstString data fields;
 		*this = ConstString(std::move(data), other.size());
@@ -228,13 +298,12 @@ private:
 	{
 		const size_t newSize = _total_size(args ...);
 
-		auto data = _allocate_null_terminated_char_buffer(newSize);
+		auto data = _allocate_null_terminated_char_buffer( newSize );
 
-		_write_to_buffer(data.get(), args ...);
+		_write_to_buffer(data.get() , args ...);
 
 		return ConstString(std::move(data), newSize);
 	}
-
 };
 
 
