@@ -73,5 +73,19 @@ using add_volatile_t = typename std::add_volatile<T>::type;
 template< class T >
 using decay_t = typename std::decay<T>::type;
 
+// from http://en.cppreference.com/w/cpp/types/conjunction
+template<class...> struct conjunction : std::true_type {};
+template<class B1> struct conjunction<B1> : B1 {};
+template<class B1, class... Bn>
+struct conjunction<B1, Bn...>
+	: conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+
+// from http://en.cppreference.com/w/cpp/types/disjunction
+template<class...> struct disjunction : std::false_type {};
+template<class B1> struct disjunction<B1> : B1 {};
+template<class B1, class... Bn>
+struct disjunction<B1, Bn...>
+	: conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+
 }
 #endif
