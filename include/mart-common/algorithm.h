@@ -48,6 +48,19 @@ auto partition(C& c, Pred p) -> decltype(c.begin())
 	return std::partition(c.begin(), c.end(),p);
 }
 
+
+template <class C, class It, class Pred>
+void nth_element(C& c, It nth_pos, Pred p)
+{
+	return std::nth_element(c.begin(),nth_pos,  c.end(), p);
+}
+
+template <class C, class It>
+void nth_element(C& c, It nth_pos)
+{
+	return std::nth_element(c.begin(), nth_pos, c.end());
+}
+
 template <class C>
 auto unique(C& c) -> decltype(c.begin())
 {
