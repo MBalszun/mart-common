@@ -48,7 +48,7 @@ namespace log {
 //TODO: move to separate file
 struct LoggerConf_t {
 	mart::ConstString moduleName;
-	LOG_LVL			  logLvl;
+	Level			  logLvl;
 };
 
 /**
@@ -67,7 +67,7 @@ public:
 	 * Normal constructor only requiring a module name
 	 * @param moduleName Name of the module by which the logger is used (this will be printed at the beginning of each line in the log)
 	 */
-	Logger( const mart::StringView moduleName, LOG_LVL logLvl = defaultLogLevel )
+	Logger( const mart::StringView moduleName, Level logLvl = defaultLogLevel )
 		: _startTime{mart::now()}
 		, _currentLogLevel{logLvl}
 		, _enabled{true}
@@ -81,7 +81,7 @@ public:
 	 * @param moduleName Name of the module by which the logger is used (this will be printed at the beginning of each line in the log)
 	 * @param sink pointer to sink, where the output is written to MUST NOT BE NULL!
 	 */
-	Logger( mart::StringView moduleName, std::shared_ptr<ILogSink> sink, LOG_LVL logLvl = defaultLogLevel )
+	Logger( mart::StringView moduleName, std::shared_ptr<ILogSink> sink, Level logLvl = defaultLogLevel )
 		: Logger( moduleName, logLvl )
 	{
 		addSink( sink );
@@ -149,7 +149,7 @@ public:
 
 	/* ####### log interface #######*/
 	template <class... ARGS>
-	void log( LOG_LVL lvl, ARGS&&... args )
+	void log( Level lvl, ARGS&&... args )
 	{
 		//Bail out of formatting and stuff early, if message should not be logged in the first place
 		if ( !_shouldBeLogged( lvl ) )
@@ -164,11 +164,11 @@ public:
 	 * Gets the highest (TRACE > ERROR) log level with which messages are currently written to log
 	 * @return current log level
 	 */
-	LOG_LVL getLogLevel() const
+	Level getLogLevel() const
 	{
 		return _currentLogLevel.load( std::memory_order_relaxed );
 	}
-	void setLogLevel( LOG_LVL lvl )
+	void setLogLevel( Level lvl )
 	{
 		_currentLogLevel.store( lvl, std::memory_order_relaxed );
 	}
@@ -263,7 +263,7 @@ public:
 private:
 	/*### Variables controlling logging behavior ###*/
 	mart::copter_time_point		  _startTime;
-	mart::CopyableAtomic<LOG_LVL> _currentLogLevel;
+	mart::CopyableAtomic<Level> _currentLogLevel;
 	mart::CopyableAtomic<bool>	  _enabled;
 
 	std::vector<std::shared_ptr<ILogSink>> _sinks;
@@ -280,7 +280,7 @@ private:
 
 	// checks if a message  with priority <lvl> should be logged or not
 	// Note, this is thread safe, but doesn't synchronize with e.g. disable()
-	bool _shouldBeLogged( LOG_LVL lvl )
+	bool _shouldBeLogged( Level lvl )
 	{
 		//TODO: look at log Level of attached logger?
 		return _enabled.load( std::memory_order_relaxed )
@@ -295,13 +295,13 @@ private:
 
 	//Function where the actual message gets composed
 	template <class... ARGS>
-	void _fillBuffer( LOG_LVL lvl, AddNewline newLine, ARGS&&... args )
+	void _fillBuffer( Level lvl, AddNewline newLine, ARGS&&... args )
 	{
 		//line prefix
 		formatForLog( _sbuffer(), lvl, " - At ", std::setw(7) , passedTime<milliseconds>( _startTime ), " - ", _loggingName, ": " );
 
 		//Add thread Id and spacer in trace mode
-		if ( _currentLogLevel == LOG_LVL::TRACE ) {
+		if ( _currentLogLevel == Level::TRACE ) {
 			ostream_flag_saver _( _sbuffer() );
 			formatForLog( _sbuffer(), "[ThreadID: ", std::this_thread::get_id(), "]: ", _spacer );
 		}
@@ -316,7 +316,7 @@ private:
 	}
 
 	//write contents to all registered log sinks and reset buffer
-	void _writeBufferToSinks( LOG_LVL lvl )
+	void _writeBufferToSinks( Level lvl )
 	{
 		auto text = _sbuffer().str();
 		_sbuffer().str( std::string{} );

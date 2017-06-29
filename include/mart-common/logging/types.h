@@ -10,7 +10,7 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief:	Provides LOG_LVL type and helper functions
+ * @brief:	Provides log Level type and helper functions
  *
  */
 
@@ -31,17 +31,17 @@ namespace mart {
 namespace log {
 
 //TODO: rename to LogLvl
-enum class LOG_LVL {
+enum class Level {
 	ERROR = MART_LOG_LOG_LVL_ERROR,
 	STATUS = MART_LOG_LOG_LVL_STATUS,
 	DEBUG = MART_LOG_LOG_LVL_DEBUG,
 	TRACE = MART_LOG_LOG_LVL_TRACE
 };
 
-constexpr LOG_LVL defaultLogLevel = LOG_LVL::STATUS;
+constexpr Level defaultLogLevel = Level::STATUS;
 
 //clang-format off
-inline mart::StringView toStringView(LOG_LVL lvl)
+inline mart::StringView toStringView(Level lvl)
 {
 	static constexpr std::array<mart::StringView, 4> names{ {
 			mart::StringView{ "ERROR" },
@@ -52,7 +52,7 @@ inline mart::StringView toStringView(LOG_LVL lvl)
 	return names[mart::toUType(lvl)];
 }
 
-inline const std::string& toString(LOG_LVL lvl)
+inline const std::string& toString(Level lvl)
 {
 	static const std::array<std::string, 4> names{ {
 			std::string{ "ERROR" },

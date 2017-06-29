@@ -31,7 +31,7 @@ namespace log {
  */
 class ILogSink {
 public:
-	ILogSink( LOG_LVL lvl = LOG_LVL::TRACE )
+	ILogSink( Level lvl = Level::TRACE )
 		: maxlvl( lvl )
 	{
 	}
@@ -41,7 +41,7 @@ public:
 
 	bool isInThreadSafeMode() const { return _threadSafe; }
 
-	void writeToLog( mart::StringView msg, LOG_LVL lvl )
+	void writeToLog( mart::StringView msg, Level lvl )
 	{
 		// only log messages with lower or equal log level (higher importance) than maxlvl
 		if( lvl > maxlvl ) {
@@ -51,12 +51,12 @@ public:
 		if( _threadSafe ) {
 			std::lock_guard<std::mutex> ul( _mux );
 			_writeToLogImpl( msg );
-			if( lvl <= LOG_LVL::STATUS ) {
+			if( lvl <= Level::STATUS ) {
 				_flush();
 			}
 		} else {
 			_writeToLogImpl( msg );
-			if( lvl <= LOG_LVL::STATUS ) {
+			if( lvl <= Level::STATUS ) {
 				_flush();
 			}
 		}
@@ -75,7 +75,7 @@ public:
 	virtual mart::ConstString getName() const = 0;
 
 	// Maximum level up to which messages are actually written to this sink
-	std::atomic<LOG_LVL> maxlvl;
+	std::atomic<Level> maxlvl;
 
 private:
 	std::mutex		  _mux;

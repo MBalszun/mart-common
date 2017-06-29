@@ -34,15 +34,15 @@ namespace log {
 /*###### File log ######*/
 
 class FileLog : public ILogSink {
-	std::ofstream	 file;
-	mart::ConstString _fileName;
-	void _writeToLogImpl( mart::StringView msg ) override { file << msg; }
-	void _flush() override { file.flush(); }
+	std::ofstream		_file;
+	mart::ConstString	_fileName;
+	void _writeToLogImpl( mart::StringView msg ) override { _file << msg; }
+	void _flush() override { _file.flush(); }
 
 public:
-	FileLog( mart::ConstString name, LOG_LVL lvl = LOG_LVL::TRACE )
+	FileLog( mart::ConstString name, Level lvl = Level::TRACE )
 		: ILogSink( lvl )
-		, file( name.to_string() )
+		, _file( name.to_string() )
 		, _fileName( name ){};
 
 	mart::ConstString getName() const override { return _fileName; }
@@ -50,7 +50,7 @@ public:
 
 struct FileLogConfig_t {
 	mart::ConstString fileName;
-	LOG_LVL			  maxLogLvl;
+	Level			  maxLogLvl;
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const FileLogConfig_t& cfg )
@@ -80,7 +80,7 @@ public:
 };
 
 struct StdOutLogConfig_t {
-	LOG_LVL maxLogLvl;
+	Level maxLogLvl;
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const StdOutLogConfig_t& cfg )
