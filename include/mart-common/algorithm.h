@@ -163,28 +163,72 @@ bool any_of(const C& c) {
 
 //min/max
 
-template< class R, class Compare >
+template< class R>
 auto min_element(R&& range) -> decltype(std::begin(range))
 {
-	return std::min_element(range.begin(), range.end());
+	using std::begin;
+	using std::end;
+	return std::min_element(begin(range), end(range));
 }
 
 template< class R, class Compare >
-auto min_element(R&& range, Compare comp) -> decltype(std::begin(range))
+auto min_element(R&& range, Compare comp) -> decltype(comp(*std::begin(range), *std::begin(range)), std::begin(range))
 {
-	return std::min_element(range.begin(), range.end(), comp);
+	using std::begin;
+	using std::end;
+	return std::min_element(begin(range), end(range), comp);
+}
+
+template< class R, class Projection >
+auto min_element(R&& range, const Projection pr) -> decltype(pr(*std::begin(range)), std::begin(range))
+{
+	using std::begin;
+	using std::end;
+	if (begin(range) == end(range)) {
+		return end(range);
+	}
+	auto it_min = begin(range);
+	const auto it_end = end(range);
+	for (auto it = it_min; it != it_end; ++it) {
+		if (pr(*it) < pr(*it_min)) {
+			it_min = it;
+		}
+	}
+	return it_min;
 }
 
 template< class R>
 auto max_element(R&& range) -> decltype(std::begin(range))
 {
-	return std::max_element(range.begin(), range.end());
+	using std::begin;
+	using std::end;
+	return std::max_element(begin(range), end(range));
 }
 
 template< class R, class Compare >
-auto max_element(R&& range, Compare comp) -> decltype(std::begin(range))
+auto max_element(R&& range, Compare comp) -> decltype(comp(*std::begin(range), *std::begin(range)),std::begin(range))
 {
-	return std::max_element(range.begin(), range.end(), comp);
+	using std::begin;
+	using std::end;
+	return std::max_element(begin(range), end(range), comp);
+}
+
+template< class R, class Projection >
+auto max_element(R&& range, Projection pr) -> decltype(pr(*std::begin(range)), std::begin(range))
+{
+	using std::begin;
+	using std::end;
+	if (begin(range) == end(range)) {
+		return end(range);
+	}
+	auto it_max = begin(range);
+	const auto it_end = end(range);
+	for (auto it = it_max; it != it_end; ++it) {
+		if (pr(*it) > pr(*it_max)) {
+			it_max = it;
+		}
+	}
+	return it_max;
 }
 
 
