@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT(mart-common)
+PROJECT(mart-common LANGUAGES CXX)
 
 #create library
 if(TARGET ${PROJECT_NAME} )
