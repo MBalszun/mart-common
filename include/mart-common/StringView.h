@@ -173,6 +173,8 @@ protected:
 	size_type   _size = 0;
 };
 
+static_assert(sizeof(StringView) == sizeof(char*) + sizeof(std::size_t), "");
+
 inline int compare(StringView l, StringView r)
 {
 	if ((l._start == r._start) && (l.size() == l.size())) {
