@@ -43,25 +43,19 @@ struct EnumIdxArray : std::array<T, N> {
 	using typename Storage_t::const_reference;
 
 	/* ###### CTORS ###### */
-	using Storage_t::Storage_t;
-
-	template<class ... ARGS>
-	constexpr EnumIdxArray(ARGS&& ... args)
-		: Storage_t{ { std::forward<ARGS>(args)... } }
-	{
-	}
-
-	constexpr EnumIdxArray() noexcept : Storage_t{} {};
+	constexpr EnumIdxArray() noexcept : Storage_t{}{};
 	constexpr EnumIdxArray(const EnumIdxArray<T, ENUM, N>& other) = default;
-	// This constructor is neccessary in addition to the default copy constructor (which takes a const ref)
-	// in order to beat the variadic forwarding constructor further above
-	constexpr EnumIdxArray(		 EnumIdxArray<T, ENUM, N>& other) :
-		EnumIdxArray(const_cast<const EnumIdxArray<T, ENUM, N>&>(other))
-	{}
-	constexpr EnumIdxArray(EnumIdxArray<T, ENUM, N>&& ) = default;
+	constexpr EnumIdxArray(      EnumIdxArray<T, ENUM, N>&& ) = default;
 	EnumIdxArray& operator=(const EnumIdxArray& ) = default;
 	EnumIdxArray& operator=(	  EnumIdxArray&&) = default;
 
+	// This is a constructor forwarding the arguments to the internal array,
+	// but we have to make sure it doesn't superseed the copy constructor -> hence the enable_if
+	template<class A1, class ... ARGS ,class = mart::enable_if_t<!std::is_same<EnumIdxArray<T,ENUM,N>, mart::decay_t<A1>>::value>>
+	constexpr EnumIdxArray(A1&& arg, ARGS&& ... args)
+		: Storage_t{ { std::forward<A1>(arg), std::forward<ARGS>(args)... } }
+	{
+	}
 private:
 	/*#### data ####*/
 	static constexpr auto toIdx(ENUM e) -> size_type {
