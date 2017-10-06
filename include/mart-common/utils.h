@@ -116,14 +116,15 @@ T make_with_capacity(size_t i)
 	return t;
 }
 /* ######## math ################################################ */
+// TODO: Chek if this still causes an internal CEin visual studio
+#ifndef _MSC_VER
 template<class T>
 T clamp(T val, const T& min_val, const T& max_val) {
 	using std::min;
 	using std::max;
-	//using mart::min;
-	//using mart::max;
 	return min(max_val, max(min_val,val));
 }
+#endif
 
 //Flag that is sometimes used as a template parameter for policy based design
 enum class Synchonized {
