@@ -40,7 +40,7 @@ public:
 
 	template<class InputIt, class = decltype(*std::declval<InputIt>())>
 	DynLimArray(InputIt begin, InputIt end)
-		: _size(end-begin)
+		: _size(static_cast<int>(end-begin))
 	{
 		throwIfTooBig(_size);
 		std::copy(begin, end, _data.begin());
