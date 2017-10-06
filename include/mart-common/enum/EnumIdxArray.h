@@ -32,9 +32,9 @@ namespace mart {
 *
 * NOTE: Currently the enums have to be values that directly translate to 0-based indexes
 */
-template<class T, class ENUM, std::size_t N>
-struct EnumIdxArray : std::array<T, N> {
-	using Storage_t = std::array<T, N>;
+template<class T, class ENUM, mart::underlying_type_t<ENUM> N>
+struct EnumIdxArray : std::array<T, (std::size_t)N> {
+	using Storage_t = std::array<T, (std::size_t)N>;
 
 	//only explicitly importing types used in the new memberfunctions to reduce typing
 	//(user will have automatically access to all member types of the base
