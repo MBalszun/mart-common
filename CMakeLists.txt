@@ -9,14 +9,12 @@ if(TARGET ${PROJECT_NAME} )
 	message(WARNING "-- Library \"${PROJECT_NAME}\" included multiple times --\n-- Only one directory will be built --")
 
 else()
-
-	#create library
-	file(GLOB_RECURSE SOURCES *.h *.hpp)
-
+	# Header only library for consumption by other project
 	add_library(${PROJECT_NAME} INTERFACE)
 	target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 	# interface libraries don't create their own project in IDES, so we create an additional _dev library '
+	file(GLOB_RECURSE SOURCES *.h *.hpp)
 	add_library(${PROJECT_NAME}_dev ${SOURCES})
 	set_target_properties(${PROJECT_NAME}_dev PROPERTIES LINKER_LANGUAGE CXX)
 	target_include_directories(${PROJECT_NAME}_dev PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
