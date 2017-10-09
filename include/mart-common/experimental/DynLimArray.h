@@ -111,8 +111,8 @@ protected:
 
 	friend class ArrayViewAdaptor<T, DynLimArray<T, Capacity>>;
 	// interface for ArrayViewAdaptor
-	T*						_arrayView_data()		noexcept { return _data.data(); }
-	constexpr const T* _arrayView_data() const noexcept { return _data.data(); }
+	T*					_arrayView_data()		noexcept { return _data.data(); }
+	constexpr const T*  _arrayView_data() const noexcept { return _data.data(); }
 	constexpr int		_arrayView_size() const noexcept { return _size; }
 };
 
