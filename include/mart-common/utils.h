@@ -132,6 +132,24 @@ enum class Synchonized {
 	True
 };
 
+namespace detail {
+template<class T>
+constexpr bool isOneOf_impl(T*) {
+	return true;
+}
+
+template<class T, class T1, class ... Ts>
+constexpr bool isOneOf_impl(T* p, T1*, Ts* ... ps) {
+	return std::is_same<T, T1>::value || isOneOf_impl(p, ps...);
+}
+
+}
+
+template<class T, class T1, class ... Ts>
+constexpr bool isOneOf() {
+	return detail::isOneOf_impl((T*)nullptr, (T1*)nullptr, ((Ts*)nullptr) ...);
+}
+
 }//mart
 
 #endif //LIB_MART_COMMON_GUARD_UTILS_H
