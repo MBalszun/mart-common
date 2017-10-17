@@ -174,6 +174,10 @@ private:
 	nw::socks::Socket _socket_handle;
 };
 
+inline mart::Optional<endpoint> parse_v4_endpoint(mart::StringView str) {
+	return ip::_impl_details_ip::parse_v4_endpoint<ip::TransportProtocol::UDP>(str);
+}
+
 }//ns udp
 
 }//ns ip

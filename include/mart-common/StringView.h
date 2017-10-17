@@ -125,7 +125,7 @@ public:
 
 	std::pair<StringView, StringView> split(char c) const
 	{
-		auto it = mart::find_ex(*this, 'c');
+		auto it = mart::find_ex(*this, c);
 		if (!it) {
 			return { *this,{} };
 		} else {

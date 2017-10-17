@@ -259,6 +259,10 @@ private:
 	State _state = State::closed;
 };
 
+inline mart::Optional<endpoint> parse_v4_endpoint(mart::StringView str) {
+	return ip::_impl_details_ip::parse_v4_endpoint<ip::TransportProtocol::TCP>(str);
+}
+
 }//ns udp
 
 }//ns ip

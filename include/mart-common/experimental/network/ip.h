@@ -26,6 +26,7 @@
 #include "../../ConstString.h"
 #include "../../ArrayView.h"
 #include "../../algorithm.h"
+#include "../Optional.h"
 
 /* Project Includes */
 #include "basic_types.h"
@@ -37,6 +38,80 @@ namespace nw {
 
 //classes related to the ip protocol in general
 namespace ip {
+
+namespace impl_addr_v4 {
+
+inline bool has_wrong_length(mart::StringView str)
+{
+	return (str.size() > 4 * 3 + 3) || (str.size() < 4+3); // max length: aaa.bbb.ccc.dddd  (4blocks of 3 digits + 3 '.')
+}
+
+inline bool has_invalid_char(mart::StringView str)
+{
+	return str.end() != mart::find_if(str, [](char c) { return !(('0' <= c && c <= '9') || (c == '.')); });
+}
+
+inline bool has_wrong_block_count(mart::StringView str)
+{
+	return std::count(str.begin(), str.end(), '.') != 3;
+}
+
+inline bool is_malformed(mart::StringView str)
+{
+	return has_wrong_length(str) || has_invalid_char(str) || has_wrong_block_count(str);
+}
+
+inline mart::Optional<std::uint32_t> parse_block(mart::StringView block) {
+	if (block.size() > 3) {
+		return {};
+	}
+	const auto num = mart::to_integral_unsafe<std::uint32_t>(block);
+	if (num > 255) {
+		return {};
+	}
+	return num;
+}
+
+inline bool is_invalid_number(mart::StringView block) {
+	return !parse_block(block);
+}
+
+inline std::array<mart::StringView, 4> split_blocks_unchecked(const mart::StringView str) {
+	std::array<mart::StringView, 4> ret{};
+	int cnt = 0;
+	mart::StringView::size_type start = 0;
+	for (auto pos = start; pos < str.size(); ++pos) {
+		if (str[pos] == '.') {
+			ret[cnt++] = str.substr(start, pos - start);
+			start = pos + 1;
+		}
+	}
+	ret[3] = str.substr(start /*, str.size()-start*/);
+	return ret;
+}
+
+inline mart::Optional<uint32_host_t> parse_address(const mart::StringView string)
+{
+	if (is_malformed(string)) {
+		return {};
+	}
+	std::uint32_t accum = 0;
+	for (const auto block : split_blocks_unchecked(string)) {
+		auto b = parse_block(block);
+		if (!b) {
+			return {};
+		}
+		auto v = *b;
+		assert(v <= 255u);
+		accum <<= 8;
+		accum |= v;
+	}
+	return accum;
+}
+
+}
+
+
 
 
 class address_v4 {
@@ -53,7 +128,7 @@ public:
 		}
 	}
 	explicit address_v4(mart::StringView str) :
-		_addr(_parseIpV4String(str))
+		address_v4(_parseIpV4String(str))
 	{}
 
 	mart::ConstString asString() const
@@ -66,6 +141,8 @@ public:
 
 		return mart::ConstString(mart::StringView::fromZString(ret.data()));
 	}
+
+
 
 	constexpr uint32_net_t inNetOrder() const { return _addr; }
 	constexpr uint32_host_t inHostOrder() const { return to_host_order(_addr); }
@@ -80,45 +157,15 @@ public:
 private:
 	uint32_net_t _addr{};
 
-	static uint32_net_t _parseIpV4String( const mart::StringView str )
+	static uint32_host_t _parseIpV4String( const mart::StringView str )
 	{
-		_throwOnInvalidChar( str );
-		_throwOnWrongBlockCount( str );
-
-		uint32_net_t ret{};
-		auto remaining = str;
-		for( uint8_t& b : mart::viewMemory(ret)) {
-			mart::StringView sblock;
-			std::tie(sblock, remaining) = remaining.split(remaining.find('.'));
-
-			b = static_cast<uint8_t>( _parseBlockChecked(sblock, str) );
+		mart::Optional<uint32_host_t> res = impl_addr_v4::parse_address(str);
+		if (!res) {
+			throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. "));
 		}
-		return ret;
+		return *res;
 	}
 
-	static int _parseBlockChecked(mart::StringView block, mart::StringView str )
-	{
-		if (block.size() < 4) {
-			auto num = mart::to_integral_unsafe<int>(block);
-			if (num <= 255) {
-				return num;
-			}
-		}
-		_throw_parse_error(str, "Block ", block, " exeeds allowed maximum of 255.");
-		//return 0;
-	}
-	static void _throwOnWrongBlockCount(mart::StringView str)
-	{
-		if (std::count(str.begin(), str.end(), '.') != 3) {
-			_throw_parse_error(str, "String doesn't have 4 number blocks separated by '.'");
-		}
-	}
-	static void _throwOnInvalidChar(mart::StringView str)
-	{
-		if (auto it = mart::find_if_ex(str, [](char c) { return (c < '0' || '9' < c) && (c != '.'); })) {
-			_throw_parse_error(str, "Invalid char: '", *it, "'");
-		}
-	}
 	template<class ...ARGS>
 	[[noreturn]] static void _throw_parse_error(mart::StringView str, ARGS&& ... args)
 	{
@@ -128,6 +175,33 @@ private:
 
 constexpr address_v4 address_any{};
 constexpr address_v4 address_local_host(uint32_host_t{ 0x7F000001 });
+
+inline mart::Optional< address_v4> parse_v4_address(const mart::StringView string)
+{
+	auto res = impl_addr_v4::parse_address(string);
+	if (res) {
+		return { address_v4{*res} };
+	} else {
+		return {};
+	}
+}
+
+inline bool is_valid_v4_address(const mart::StringView string)
+{
+	return impl_addr_v4::parse_address(string).isValid();
+}
+
+namespace impl_port_v4 {
+	inline bool has_wrong_length(mart::StringView str)
+	{
+		return str.size() > (4 * 3 + 3) || str.empty();
+	}
+
+	inline bool has_invalid_char(mart::StringView str)
+	{
+		return str.end() != mart::find_if(str, [](char c) { return !('0' <= c && c <= '9') ; });
+	}
+}
 
 class port_nr {
 public:
@@ -146,6 +220,19 @@ public:
 private:
 	uint16_net_t _p{};
 };
+
+inline mart::Optional< port_nr> parse_v4_port(const mart::StringView string)
+{
+	using namespace impl_port_v4;
+	if (has_wrong_length(string) || has_invalid_char(string)) { //maximal 6 digits
+		return {};
+	}
+	auto parsed = mart::to_integral_unsafe<std::uint32_t>(string);
+	if (parsed > std::numeric_limits<std::uint16_t>::max()) {
+		return {};
+	}
+	return port_nr(parsed);
+}
 
 enum class TransportProtocol {
 	UDP,
@@ -239,7 +326,35 @@ struct basic_endpoint_v4 {
 	}
 };
 
+template<TransportProtocol p>
+mart::Optional<basic_endpoint_v4<p>> parse_v4_endpoint(mart::StringView str)
+{
+	auto ps = str.split(':');
+	auto o_address = parse_v4_address(ps.first);
+	auto o_port = parse_v4_port(ps.second);
+	if (!o_address) {
+		return {};
+	}
+	if (!o_port) {
+		return {};
+	}
+	return basic_endpoint_v4<p>{ *o_address, *o_port };
+}
+
+template<TransportProtocol p>
+inline bool is_valid_v4_endpoint(mart::StringView str)
+{
+	return parse_v4_endpoint<p>(str).isValid();
+}
+
 }//ns _impl_details_ip
+
+inline bool is_valid_v4_endpoint(mart::StringView str)
+{
+	return _impl_details_ip::is_valid_v4_endpoint<TransportProtocol::TCP>(str);
+}
+
+
 }//ns ip
 }//ns nw
 }//experimental
