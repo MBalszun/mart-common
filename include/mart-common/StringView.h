@@ -121,6 +121,17 @@ public:
 								  + "\n");
 	}
 
+	std::pair<StringView, StringView> split(char c) const
+	{
+		auto it = mart::find_ex(*this, 'c');
+		if (!it) {
+			return { *this,{} };
+		} else {
+			auto cnt = it - this->begin();
+			return { this->substr(0,cnt),this->substr(cnt + 1,this->size() - cnt - 1) };
+		}
+	}
+
 	/*#### algorithms ####*/
 
 	size_type find(char c, size_type start_pos = 0) const
