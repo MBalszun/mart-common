@@ -24,10 +24,10 @@ class FastMutex {
 public:
 	// Make mutex copy / movable
 	FastMutex() = default;
-	FastMutex(FastMutex&& other) {};
-	FastMutex(const FastMutex& other) {};
-	FastMutex& operator=(FastMutex&& other) { return *this; };
-	FastMutex& operator=(const FastMutex& other) { return *this; };
+	FastMutex(FastMutex&& ) {};
+	FastMutex(const FastMutex& ) {};
+	FastMutex& operator=(FastMutex&& ) { return *this; };
+	FastMutex& operator=(const FastMutex& ) { return *this; };
 
 	void lock() {
 		if (try_lock()) {
