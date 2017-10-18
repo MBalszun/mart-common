@@ -91,13 +91,15 @@ public:
 
 	constexpr StringView substr(size_t offset, size_t count = npos) const
 	{
-		return offset + count <= this->_size
-			? StringView{ this->_start + offset, count }
-			: count == npos
-			? substr(offset, size() - offset)
-			: throw std::out_of_range(
-				"Tried to create a substring that would exceed the original string. "
-				"Original string:\n\n" + this->to_string() + "\n");
+		;
+		return count <= this->_size - offset
+								? StringView{ this->_start + offset, count }
+								: (count == npos
+										? substr(offset, size() - offset)
+										: throw std::out_of_range(
+												"Tried to create a substring that would exceed the original string. "
+												"Original string:\n\n" + this->to_string() + "\n")
+								   );
 	}
 
 	/**
