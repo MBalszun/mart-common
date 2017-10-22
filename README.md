@@ -75,9 +75,10 @@ This is a short (and probably out of data) overview over the content provided by
 - `logging`: Subfolder for classes related to logging. If you jsut want to use mar tlog, simply include MartLog.h from the main include directoy
   
 # Contributing
-  
-  For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de or raise an issue at the gitlab repository at https://gitlab.lrz.de/rcs_mart/mart-common (you might need to get the access rights first)
+
+  For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de or raise an issue at the gitlab repository at https://github.com/tum-ei-rcs/mart-common
 
 # Tests
-**TBD**  
-The repository currently doesn't provide unit tests
+**TBD**
+The repository currently doesn't provide unit tests. What unit tests exist (we are far from full coverage) are part of a different application using this library.
+We are still considering how to best ship them while minimizing impact on projects that just want to include the library as a git submodule.
