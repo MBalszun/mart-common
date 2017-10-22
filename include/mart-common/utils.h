@@ -134,20 +134,20 @@ enum class Synchonized {
 
 namespace detail {
 template<class T>
-constexpr bool isOneOf_impl(T*) {
-	return true;
+constexpr bool type_is_one_of_impl(T*) {
+	return false;
 }
 
 template<class T, class T1, class ... Ts>
-constexpr bool isOneOf_impl(T* p, T1*, Ts* ... ps) {
-	return std::is_same<T, T1>::value || isOneOf_impl(p, ps...);
+constexpr bool type_is_one_of_impl(T* p, T1*, Ts* ... ps) {
+	return std::is_same<T, T1>::value || type_is_one_of_impl(p, ps...);
 }
 
 }
 
 template<class T, class T1, class ... Ts>
-constexpr bool isOneOf() {
-	return detail::isOneOf_impl((T*)nullptr, (T1*)nullptr, ((Ts*)nullptr) ...);
+constexpr bool type_is_one_of() {
+	return detail::type_is_one_of_impl((T*)nullptr, (T1*)nullptr, ((Ts*)nullptr) ...);
 }
 
 }//mart
