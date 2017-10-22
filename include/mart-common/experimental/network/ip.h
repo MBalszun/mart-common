@@ -231,7 +231,7 @@ inline mart::Optional< port_nr> parse_v4_port(const mart::StringView string)
 	if (parsed > std::numeric_limits<std::uint16_t>::max()) {
 		return {};
 	}
-	return port_nr(parsed);
+	return port_nr(static_cast<std::uint16_t>(parsed));
 }
 
 enum class TransportProtocol {
