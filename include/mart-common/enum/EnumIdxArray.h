@@ -32,7 +32,7 @@ namespace mart {
 *
 * NOTE: Currently the enums have to be values that directly translate to 0-based indexes
 */
-template<class T, class ENUM, mart::underlying_type_t<ENUM> N>
+template<class T, class EnumT, mart::underlying_type_t<EnumT> N>
 struct EnumIdxArray : std::array<T, (std::size_t)N> {
 	using Storage_t = std::array<T, (std::size_t)N>;
 
@@ -44,32 +44,32 @@ struct EnumIdxArray : std::array<T, (std::size_t)N> {
 
 	/* ###### CTORS ###### */
 	constexpr EnumIdxArray() noexcept : Storage_t{}{};
-	constexpr EnumIdxArray(const EnumIdxArray<T, ENUM, N>& other) = default;
-	constexpr EnumIdxArray(      EnumIdxArray<T, ENUM, N>&& ) = default;
+	constexpr EnumIdxArray(const EnumIdxArray<T, EnumT, N>& other) = default;
+	constexpr EnumIdxArray(      EnumIdxArray<T, EnumT, N>&& ) = default;
 	EnumIdxArray& operator=(const EnumIdxArray& ) = default;
 	EnumIdxArray& operator=(	  EnumIdxArray&&) = default;
 
 	// This is a constructor forwarding the arguments to the internal array,
 	// but we have to make sure it doesn't superseed the copy constructor -> hence the enable_if
-	template<class A1, class ... ARGS ,class = mart::enable_if_t<!std::is_same<EnumIdxArray<T,ENUM,N>, mart::decay_t<A1>>::value>>
+	template<class A1, class ... ARGS ,class = mart::enable_if_t<!std::is_same<EnumIdxArray<T,EnumT,N>, mart::decay_t<A1>>::value>>
 	constexpr EnumIdxArray(A1&& arg, ARGS&& ... args)
 		: Storage_t{ { std::forward<A1>(arg), std::forward<ARGS>(args)... } }
 	{
 	}
 private:
 	/*#### data ####*/
-	static constexpr auto toIdx(ENUM e) -> size_type {
-		return static_cast<size_type>(static_cast< underlying_type_t<ENUM> >(e));
+	static constexpr auto toIdx(EnumT e) -> size_type {
+		return static_cast<size_type>(static_cast< underlying_type_t<EnumT> >(e));
 	};
 					Storage_t& as_array()		{ return static_cast<Storage_t&>(*this); }
 	constexpr const Storage_t& as_array() const { return static_cast< const Storage_t&>(*this); }
 public:
 	/*#### container interface ####*/
-					reference	at(ENUM pos)		{ return as_array().at(toIdx(pos)); }
-	constexpr const_reference	at(ENUM pos) const	{ return as_array().at(toIdx(pos)); }
+					reference	at(EnumT pos)		{ return as_array().at(toIdx(pos)); }
+	constexpr const_reference	at(EnumT pos) const	{ return as_array().at(toIdx(pos)); }
 
-					reference	operator[](ENUM pos)		{ return as_array()[toIdx(pos)]; }
-	constexpr const_reference	operator[](ENUM pos) const	{ return as_array()[toIdx(pos)]; }
+					reference	operator[](EnumT pos)		{ return as_array()[toIdx(pos)]; }
+	constexpr const_reference	operator[](EnumT pos) const	{ return as_array()[toIdx(pos)]; }
 };
 
 
