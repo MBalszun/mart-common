@@ -20,6 +20,7 @@
 
 /* Proprietary Library Includes */
 #include "./cpp_std/type_traits.h"
+#include "./enum/EnumHelpers.h"
 
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -83,16 +84,6 @@ inline T narrow(U u)
 
 	return t;
 }
-
-/* ######## enum ################################################ */
-template<class E>
-using uType_t = underlying_type_t<E>;
-
-//cast to underlying type
-template<class E>
-constexpr uType_t<E> toUType(E e) { return static_cast<uType_t<E>>(e); }
-
-
 
 /* ######## container ################################################ */
 

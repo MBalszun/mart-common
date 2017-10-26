@@ -15,6 +15,7 @@
  */
 
 #include "../ranges.h"
+#include "../enum/EnumHelpers.h"
 
 namespace mart {
 namespace experimental {
@@ -33,7 +34,37 @@ auto view_reversed(R&& r) -> range<std::reverse_iterator<decltype(r.begin())>> {
 	return{ Rit{ r.end() },Rit{ r.begin() } };
 }
 
+template <class Enum, class Ut = mart::underlying_type_t<Enum>>
+class DefaultEnumRange {
+public:
+	constexpr Enum operator[](int i) const { return static_cast<Enum>(i); }
+
+	struct Iterator {
+		constexpr Iterator(Enum e)
+			: idx{ toUType(e) }
+		{
+		}
+		constexpr Enum		   operator*() const { return static_cast<Enum>(idx); }
+		/*constexpr*/ Iterator operator++() { return ++idx; }
+		Iterator			   operator++(int)
+		{
+			auto t = *this;
+			idx++;
+			return t;
+		}
+		friend bool operator!=(Iterator l, Iterator r) { return l.idx != r.idx; }
+		friend bool operator!=(Iterator l, Iterator r) { return l.idx == r.idx; }
+
+	private:
+		Ut idx;
+	};
+	constexpr Iterator begin() const { return Iterator{ first }; }
+	constexpr Iterator end() const { return Iterator{ static_cast<Enum>(static_cast<Ut>(last) + Ut{ 1 }) }; }
+	const Enum		   first;
+	const Enum		   last;
+};
 }
+
 }
 
 #endif
