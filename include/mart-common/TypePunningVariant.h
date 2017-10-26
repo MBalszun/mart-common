@@ -1,0 +1,150 @@
+#ifndef LIB_MART_COMMON_GUARD_TYPE_PUNNING_VARIANT_H
+#define LIB_MART_COMMON_GUARD_TYPE_PUNNING_VARIANT_H
+/**
+* TypePunningVariant.h (mart-common)
+*
+* Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+*
+* This software may be modified and distributed under the terms
+* of the MIT license. See either the LICENSE file in the library's root
+* directory or http://opensource.org/licenses/MIT for details.
+*
+* @author: Michael Balszun <michael.balszun@mytum.de>
+* @brief: A type similar to variant/union that can be used as a rx buffer in networking and safely(standard compliant) cast the bytes to a pod
+*
+*/
+
+/* ######## INCLUDES ######### */
+/* Standard Library Includes */
+#include <type_traits>
+#include <cstdint>
+
+/* Proprietary Library Includes */
+#include "utils.h"	 // type_is_one_of
+#include "./cpp_std/type_traits.h"
+#include "ArrayView.h"
+
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
+
+namespace mart {
+
+template <class... Types>
+class TypePunningVariant {
+public:
+	// ###### Helper ######
+	template<class T>
+	struct is_compatible {
+		static constexpr bool value = std::is_standard_layout<T>::value;
+		// c++11: || std::is_trivially_destructible<T>::value
+		// c++11: || std::is_trivially_copyable<T>::value
+	};
+
+	template<class T>
+	static constexpr bool is_member_type()
+	{
+		return mart::type_is_one_of<T, Types...>();
+	}
+
+	static_assert(mart::conjunction<is_compatible<Types> ...>::value, "");
+
+	// ###### Special member functions #####
+	TypePunningVariant() = default;
+	TypePunningVariant(const TypePunningVariant& other) = default;
+	TypePunningVariant& operator=(const TypePunningVariant& other) = default;
+
+	// ###### construction from POD #####
+	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
+	TypePunningVariant(const T& msg)
+	{
+		new(&data) T(msg);
+		_size = sizeof(msg);
+	}
+
+	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
+	TypePunningVariant& operator=(const T& msg)
+	{
+		new(&data) T(msg);
+		_size = sizeof(msg);
+		return *this;
+	}
+
+	TypePunningVariant& operator=(mart::ConstMemoryView new_data)
+	{
+		assert(new_data.size() <= sizeof(data) && "Buffer not big enough");
+		mart::copy(new_data, all_bytes());
+		_size = new_data.size();
+		return *this;
+	}
+
+	// ###### Rest #####
+	// we can't be const correct here, as casting implies (conceptually) copying data forward and backwward in the buffer
+	template <class T>
+	T& as()
+	{
+		static_assert(is_member_type<T>(), "");
+		assert(_size >= sizeof(T) && "Stored object is smaller than the type you want to cast it to");
+		return inplace_cast_to<T>(data);
+	}
+
+	std::size_t size()	const { return _size; }
+	bool		empty()	const { return size() == 0; }
+
+	// used, to tell the buffer which bytes have been filled with active data, after the
+	// result of all_bytes() has been filled e.g. from the network.
+	void set_active_range(mart::MemoryView range)
+	{
+		if (range.size() != 0) {
+			assert(range.begin() == all_bytes().begin());
+		}
+		_size = range.size();
+	}
+
+	mart::MemoryView	  all_bytes()		{ return mart::viewMemory(data); }
+	mart::ConstMemoryView all_bytes() const { return mart::viewMemoryConst(data); }
+
+	mart::MemoryView	  valid_bytes()		  { return all_bytes().subview(0, _size); }
+	mart::ConstMemoryView valid_bytes() const { return all_bytes().subview(0, _size); }
+
+protected:
+	typename mart::aligned_union<0, Types...>::type data;
+	std::size_t _size = 0;
+
+	template<class T>
+	static void copy_bytes(const void* from, void* to) {
+		std::copy_n(
+			reinterpret_cast<const unsigned char*>(from),
+			sizeof(T),
+			reinterpret_cast<unsigned char*>(to)
+		);
+	}
+
+	//the actual magic
+	template <class T, class B>
+	static T& inplace_cast_to(B& data)
+	{
+		// c++11:
+		static_assert(is_compatible<T>::value, "");
+
+		// 1) create uninitialized local temporary of correct type
+		// 2) copy bytes from buffer to temporary
+		// 3) use placement new to create object in buffer
+		// 4) copy bytes back from temporary into buffer
+		//
+		// Result:
+		//	- We don't violate aliasing rules as we create an actual object of type T in the storage
+		//  - Compiler will see that we don't actually change the bytes stored at <data> and
+		//		optimize away the whole function
+
+		T tbuf;
+		copy_bytes<T>(&data, &tbuf);
+		auto* const ptr = new(&data) T;
+		copy_bytes<T>(&tbuf, &data);
+
+		return *ptr;
+	}
+};
+
+}
+
+#endif
