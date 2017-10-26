@@ -16,6 +16,7 @@
  */
 
 #include <type_traits>
+#include <algorithm>
 
 
 namespace mart {
@@ -86,6 +87,28 @@ template<class B1> struct disjunction<B1> : B1 {};
 template<class B1, class... Bn>
 struct disjunction<B1, Bn...>
 	: conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+
+// from http://en.cppreference.com/w/cpp/types/aligned_union
+template <std::size_t Len, class... Types>
+struct aligned_union {
+	//std::max is not constexpr in c++11 :(
+	static constexpr size_t _max(size_t l) {
+		return l;
+	}
+	static constexpr size_t _max(size_t l, size_t r) {
+		return l < r ? r : l;
+	}
+	template<class ... ARGS>
+	static constexpr size_t _max(size_t s1, size_t s2, size_t s3, ARGS... s) {
+		return _max(_max(_max(s1, s2), s3), s ...);
+	}
+
+	static constexpr std::size_t alignment_value = _max( alignof(Types)... );
+
+	struct type {
+		alignas(alignment_value) char _s[_max(Len, sizeof(Types)... )];
+	};
+};
 
 }
 #endif

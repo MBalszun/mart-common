@@ -107,7 +107,7 @@ public:
 	mart::ConstMemoryView valid_bytes() const { return all_bytes().subview(0, _size); }
 
 protected:
-	typename std::aligned_union<0, Types...>::type data;
+	typename mart::aligned_union<0, Types...>::type data;
 	std::size_t _size = 0;
 
 	template<class T>
