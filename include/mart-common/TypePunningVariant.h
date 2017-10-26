@@ -124,9 +124,7 @@ protected:
 	static T& inplace_cast_to(B& data)
 	{
 		// c++11:
-		static_assert(std::is_trivially_copyable<T>::value, "");
-		static_assert(std::is_standard_layout<T>::value, "");
-		static_assert(sizeof(T) <= sizeof(data), "");
+		static_assert(is_compatible<T>::value, "");
 
 		// 1) create uninitialized local temporary of correct type
 		// 2) copy bytes from buffer to temporary
