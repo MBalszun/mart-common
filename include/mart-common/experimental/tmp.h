@@ -34,14 +34,16 @@ struct c_array {
 	constexpr T operator[](size_t i) const {
 		return t[i];
 	}
+	static constexpr size_t size() { return N; }
 };
 
-// get single element from integer_sequence
-template <class T, T ... Is>
-constexpr T get(std::size_t I,mart::integer_sequence<T,Is...>)
-{
-	return (c_array<T,sizeof...(Is)>{ { Is... } })[I];
+template<class T, T ... Is, template<class, T...> class sequence>
+constexpr c_array<T, sizeof...(Is)> to_carray(sequence<T, Is...>) {
+	return { {Is...}};
+
 }
+
+// watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the type
 
 namespace detail_cartesian_value_product {
 template<
@@ -52,12 +54,13 @@ template<
 	class List2,
 	std::size_t ... Is
 >
-auto impl(List1 l1, List2 l2, mart::index_sequence<Is...>)
-->Comb < T <
-	mart::tmp::get(Is / l2.size(), l1),
-	mart::tmp::get(Is % l2.size(), l2)
-> ...
+auto impl(List1, List2, mart::index_sequence<Is...>)
+-> Comb < T <
+	to_carray(List1{})[Is / List2::size()],
+	to_carray(List2{})[Is % List2::size()]
+	> ...
 >;
+
 }
 
 template<
@@ -68,7 +71,7 @@ template<
 	class List2
 >
 auto cartesian_value_product(List1 l1, List2 l2 )
--> decltype(detail_cartesian_value_product::impl<Comb,V1,V2,T>(l1, l2, mart::make_index_sequence<l1.size()*l2.size()>{}));
+-> decltype(detail_cartesian_value_product::impl<Comb,V1,V2,T>(l1, l2, mart::make_index_sequence<List1::size()*List2::size()>{}));
 
 
 }
