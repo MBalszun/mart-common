@@ -106,7 +106,7 @@ struct aligned_union {
 	static constexpr std::size_t alignment_value = _max( alignof(Types)... );
 
 	struct type {
-		alignas(alignment_value) char _s[_max(Len, sizeof(Types)... )];
+		alignas(8) char _s[_max(Len, sizeof(Types)... )];
 	};
 };
 
