@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.9)
 #TODO: Specify required language standard when CMAKE VERISION 2.8 (Ubuntu14.04) no longer has to be supported
 
 PROJECT(mart-common LANGUAGES CXX)
 
 if(TARGET ${PROJECT_NAME} )
 
-	#TODO cmake 2.8.12 doesn't have standrdized way of querying the soiurce directory of the previously build target
+	#TODO cmake 2.8.9 doesn't have standrdized way of querying the soiurce directory of the previously build target
 	message(WARNING "-- Library \"${PROJECT_NAME}\" included multiple times --\n-- Only one directory will be built --")
 
 else()
