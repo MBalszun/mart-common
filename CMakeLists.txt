@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 #TODO: Specify required language standard when CMAKE VERISION 2.8 (Ubuntu14.04) no longer has to be supported
 
-PROJECT(mart-common LANGUAGES CXX)
+PROJECT(mart-common)
 
 if(TARGET ${PROJECT_NAME} )
 
