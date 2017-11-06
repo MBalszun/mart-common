@@ -66,6 +66,12 @@ inline auto sformat(std::chrono::duration<rep,period> dur) -> _impl_print_chrono
 	return  _impl_print_chrono::PrintableDuration<rep, period>{ dur };
 }
 
+template<typename rep, typename period, typename repto=rep, typename periodto=period >
+inline auto sformat(std::chrono::duration<rep, period> dur, std::chrono::duration<repto, periodto>) -> _impl_print_chrono::PrintableDuration<repto, periodto>
+{
+	return  _impl_print_chrono::PrintableDuration<repto, periodto>{ std::chrono::duration_cast<std::chrono::duration<repto, periodto>>(dur) };
+}
+
 }//mart
 
 #endif
