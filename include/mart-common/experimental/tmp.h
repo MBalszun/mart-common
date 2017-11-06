@@ -27,7 +27,6 @@
 namespace mart {
 namespace tmp {
 
-
 template<class T, std::size_t N>
 struct c_array {
 	const T t[N];
@@ -40,11 +39,15 @@ struct c_array {
 template<class T, T ... Is, template<class, T...> class sequence>
 constexpr c_array<T, sizeof...(Is)> to_carray(sequence<T, Is...>) {
 	return { {Is...}};
-
 }
 
-// watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the type
+template<class T, T ...Is >
+constexpr T get_Nth_element(size_t Idx, mart::integer_sequence<T, Is ...> sequ) {
+	return to_carray(sequ)[Idx];
+}
 
+#ifndef _MSC_VER
+// watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the type
 namespace detail_cartesian_value_product {
 template<
 	template<class ... > class Comb,
@@ -72,6 +75,7 @@ template<
 >
 auto cartesian_value_product(List1 l1, List2 l2 )
 -> decltype(detail_cartesian_value_product::impl<Comb,V1,V2,T>(l1, l2, mart::make_index_sequence<List1::size()*List2::size()>{}));
+#endif // !_MSVC
 
 
 }
