@@ -335,8 +335,8 @@ Vec<T, N1+N2> concat(const Vec<T, N1>& v1, const Vec<T,N2>& v2)
 //}
 
 
-template<class T,int N>
-T inner_product(const Vec<T,N>& l, const Vec<T,N>& r){
+template<class T, class U,int N>
+auto inner_product(const Vec<T,N>& l, const Vec<U,N>& r) -> decltype(l[0]*r[0]) {
 	T ret{};
 	for (int i = 0; i < N; ++i) {
 		ret += l[i] * r[i];
@@ -371,11 +371,11 @@ namespace _impl_vec {
 	using Type=T;
 
 	//applies unary function F to each element of l and stores the results in a new vector
-	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l, F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0])	),sizeof...(I)>	{ return {func(l[I])...};	}
+	template<class T,		class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l, F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0])	),sizeof...(I)>	{ return {func(l[I])...};	}
 
-	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r[0])	),sizeof...(I)>	{ return {func(l[I],r[I])...};	}
-	template<class T, class F, int ...I> constexpr auto apply_helper(Type<T> l, 					const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l,r[0])	),sizeof...(I)> { return {func(l,r[I])...};		}
-	template<class T, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	Type<T> r, 						F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r)	),sizeof...(I)>	{ return {func(l[I],r)...};		}
+	template<class T, class U, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const Vec<U,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r[0])	),sizeof...(I)>	{ return {func(l[I],r[I])...};	}
+	template<class T, class U, class F, int ...I> constexpr auto apply_helper(const U& l, 					const Vec<T,sizeof...(I)>& r, 	F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l,r[0])	),sizeof...(I)> { return {func(l,r[I])...};		}
+	template<class T, class U, class F, int ...I> constexpr auto apply_helper(const Vec<T,sizeof...(I)>& l,	const U& r,						F func, mp::index_sequence<I...>) -> mart::Vec<decltype(func(l[0],r)	),sizeof...(I)>	{ return {func(l[I],r)...};		}
 
 	//general dispatcher for applying functor that forwards the call to the respective apply_helper- functions
 	//c++14: remove -> decltype(...)
@@ -385,59 +385,97 @@ namespace _impl_vec {
 	}
 
 	//std::plus,td::multiplies,... - like function objects for maximum and minimum
-	template<class T>
 	struct maximum {
+		template<class T>
 		T operator()(const T& l, const T& r){
 			using std::max;
 			return max(l,r);
 		}
 	};
 
-	template<class T>
 	struct minimum {
+		template<class T>
 		T operator()(const T& l, const T& r){
 			using std::min;
 			return min(l,r);
 		}
 	};
 
-	template<class T>
 	struct ceil {
+		template<class T>
 		T operator()(const T& l) {
 			using std::ceil;
 			return ceil(l);
 		}
 	};
 
-	template<class T>
 	struct floor {
+		template<class T>
 		T operator()(const T& l) {
 			using std::floor;
 			return floor(l);
 		}
 	};
 
-	template<class T>
 	struct round {
+		template<class T>
 		T operator()(const T& l) {
 			using std::round;
 			return round(l);
 		}
 	};
 
-	template<class T>
 	struct lround {
+		template<class T>
 		long operator()(const T& l) {
 			using std::lround;
 			return lround(l);
 		}
 	};
 
-	template<class T>
 	struct iround {
+		template<class T>
 		int operator()(const T& l) {
 			using std::lround;
 			return lround(l);
+		}
+	};
+
+	struct multiplies {
+		template<class T, class U>
+		auto operator()(const T& l, const U& r) {
+			return l*r;
+		}
+	};
+
+	struct divides {
+		template<class T, class U>
+		auto operator()(const T& l, const U& r) {
+			return l/r;
+		}
+	};
+	struct plus {
+		template<class T, class U>
+		auto operator()(const T& l, const U& r) {
+			return l + r;
+		}
+	};
+	struct minus {
+		template<class T, class U>
+		auto operator()(const T& l, const U& r) {
+			return l - r;
+		}
+	};
+	struct negate {
+		template<class T>
+		auto operator()(const T& l) {
+			return -l;
+		}
+	};
+	struct logical_not {
+		template<class T>
+		auto operator()(const T& l) {
+			return !l;
 		}
 	};
 
@@ -455,26 +493,38 @@ namespace _impl_vec {
  */
 //c++14: remove "-> decltype(...)"
 #define DEFINE_ND_VECTOR_OP(OP,FUNC) \
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
-template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
+template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const Vec<U,N>& r ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); } \
+template<class T, class U,int N> constexpr auto OP(const U& l,			const Vec<T,N>& r ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
+template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const U& r		  ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
 
 /**
  * same as DEFINE_ND_VECTOR_OP for unary operations on vec
  */
-#define DEFINE_UNARY_ND_VECTOR_OP(OP,FUNC) \
+#define DEFINE_UNARY_ND_VECTOR_OP_2(OP,FUNC) \
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l)) { return _impl_vec::apply<N>(FUNC<T>{},l); }
+
+ //c++14: remove "-> decltype(...)"
+#define DEFINE_ND_VECTOR_OP_2(OP,FUNC) \
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
+template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
+
+ /**
+ * same as DEFINE_ND_VECTOR_OP for unary operations on vec
+ */
+#define DEFINE_UNARY_ND_VECTOR_OP(OP,FUNC) \
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC{},l)) { return _impl_vec::apply<N>(FUNC{},l); }
 
 
 //#### Define actual vector functions ######
 
 //overloaded operators
 //math operators
-DEFINE_UNARY_ND_VECTOR_OP(operator-,std::negate)
-DEFINE_ND_VECTOR_OP(operator+,std::plus)
-DEFINE_ND_VECTOR_OP(operator*,std::multiplies)
-DEFINE_ND_VECTOR_OP(operator-,std::minus)
-DEFINE_ND_VECTOR_OP(operator/,std::divides)
+DEFINE_UNARY_ND_VECTOR_OP(operator-, _impl_vec::negate)
+DEFINE_ND_VECTOR_OP(operator+, _impl_vec::plus)
+DEFINE_ND_VECTOR_OP(operator*, _impl_vec::multiplies)
+DEFINE_ND_VECTOR_OP(operator-, _impl_vec::minus)
+DEFINE_ND_VECTOR_OP(operator/, _impl_vec::divides)
 
 DEFINE_UNARY_ND_VECTOR_OP(ceil, _impl_vec::ceil)
 DEFINE_UNARY_ND_VECTOR_OP(floor, _impl_vec::floor)
@@ -487,18 +537,18 @@ DEFINE_ND_VECTOR_OP(max,_impl_vec::maximum)
 DEFINE_ND_VECTOR_OP(min,_impl_vec::minimum)
 
 //element wise logical ops
-DEFINE_UNARY_ND_VECTOR_OP(operator!,std::logical_not)
-DEFINE_ND_VECTOR_OP(elementAnd,std::logical_and)
-DEFINE_ND_VECTOR_OP(elementOr,std::logical_or)
+DEFINE_UNARY_ND_VECTOR_OP_2(operator!, std::logical_not)
+DEFINE_ND_VECTOR_OP_2(elementAnd,std::logical_and)
+DEFINE_ND_VECTOR_OP_2(elementOr,std::logical_or)
 
 //element wise comparison operations
-DEFINE_ND_VECTOR_OP(elementEquals,std::equal_to)
-DEFINE_ND_VECTOR_OP(elementNE,std::not_equal_to)
+DEFINE_ND_VECTOR_OP_2(elementEquals,std::equal_to)
+DEFINE_ND_VECTOR_OP_2(elementNE,std::not_equal_to)
 
-DEFINE_ND_VECTOR_OP(elementLess,std::less)
-DEFINE_ND_VECTOR_OP(elementLessEqual,std::less_equal)
-DEFINE_ND_VECTOR_OP(elementGreater,std::greater)
-DEFINE_ND_VECTOR_OP(elementGreaterEqual,std::greater_equal)
+DEFINE_ND_VECTOR_OP_2(elementLess,std::less)
+DEFINE_ND_VECTOR_OP_2(elementLessEqual,std::less_equal)
+DEFINE_ND_VECTOR_OP_2(elementGreater,std::greater)
+DEFINE_ND_VECTOR_OP_2(elementGreaterEqual,std::greater_equal)
 
 //comparison operators TODO: should those operator overloads be implemented or is this confusing?
 //DEFINE_ND_VECTOR_OP(operator<,std::less)
