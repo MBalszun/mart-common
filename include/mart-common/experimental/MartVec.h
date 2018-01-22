@@ -120,12 +120,13 @@ struct Vec {
 
 
 
-	T squareNorm() const {
+	square_type squareNorm() const {
 		return std::inner_product(data.begin(), data.end(), data.begin(), T{});
 	}
 
 	T norm() const {
-		return std::sqrt(squareNorm());
+		using std::sqrt;
+		return sqrt(squareNorm());
 	}
 
 	Vec<T, N>& operator+=(const Vec<T, N>& other);
@@ -187,12 +188,13 @@ struct Vec<T,2> {
 	}
 	static constexpr int size() { return N; }
 
-	T squareNorm() const {
+	constexpr square_type squareNorm() const {
 		return x*x+y*y;
 	}
 
 	T norm() const {
-		return std::sqrt(squareNorm());
+		using std::sqrt;
+		return sqrt(squareNorm());
 	}
 
 	Vec<T, 2>& operator+=(const Vec<T, 2>& other);
@@ -250,12 +252,13 @@ struct Vec<T, 3> {
 	}
 	static constexpr int size() { return N; }
 
-	T squareNorm() const {
+	constexpr square_type squareNorm() const {
 		return x*x + y*y + z*z;
 	}
 
 	T norm() const {
-		return std::sqrt(squareNorm());
+		using std::sqrt;
+		return sqrt(squareNorm());
 	}
 
 	Vec& operator+=(const Vec& other);
