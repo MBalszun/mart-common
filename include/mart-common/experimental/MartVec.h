@@ -446,38 +446,38 @@ namespace _impl_vec {
 
 	struct multiplies {
 		template<class T, class U>
-		auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) {
 			return l*r;
 		}
 	};
 
 	struct divides {
 		template<class T, class U>
-		auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) {
 			return l/r;
 		}
 	};
 	struct plus {
 		template<class T, class U>
-		auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) {
 			return l + r;
 		}
 	};
 	struct minus {
 		template<class T, class U>
-		auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) {
 			return l - r;
 		}
 	};
 	struct negate {
 		template<class T>
-		auto operator()(const T& l) {
+		constexpr auto operator()(const T& l) {
 			return -l;
 		}
 	};
 	struct logical_not {
 		template<class T>
-		auto operator()(const T& l) {
+		constexpr auto operator()(const T& l) {
 			return !l;
 		}
 	};
