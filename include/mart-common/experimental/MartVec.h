@@ -105,15 +105,15 @@ struct Vec {
 //	}
 
 	//### Data access ###
-	T &operator[](int idx)
+	constexpr T &operator[](int idx)
 	{
-		assert(0 <= idx && idx < N);
+		//assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 
-	const T &operator[](int idx) const
+	constexpr T &operator[](int idx) const
 	{
-		assert(0 <= idx && idx < N);
+		//assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 	static constexpr int size() { return N; }
@@ -175,15 +175,15 @@ struct Vec<T,2> {
 	//	}
 
 	//### Data access ###
-	T &operator[](int idx)
+	constexpr T &operator[](int idx)
 	{
-		assert(0 <= idx && idx < N);
+///		assert(0 <= idx && idx < N);
 		return idx == 0 ? x : y ;
 	}
 
-	const T &operator[](int idx) const
+	constexpr const T &operator[](int idx) const
 	{
-		assert(0 <= idx && idx < N);
+//		assert(0 <= idx && idx < N);
 		return idx == 0 ? x : y;
 	}
 	static constexpr int size() { return N; }
@@ -239,15 +239,15 @@ struct Vec<T, 3> {
 	//	}
 
 	//### Data access ###
-	T &operator[](int idx)
+	constexpr T &operator[](int idx)
 	{
-		assert(0 <= idx && idx < N);
+		//assert(0 <= idx && idx < N);
 		return idx == 0 ? x : idx == 1? y : z;
 	}
 
-	const T &operator[](int idx) const
+	constexpr const T &operator[](int idx) const
 	{
-		assert(0 <= idx && idx < N);
+		//assert(0 <= idx && idx < N);
 		return idx == 0 ? x : idx == 1 ? y : z;
 	}
 	static constexpr int size() { return N; }
@@ -446,38 +446,38 @@ namespace _impl_vec {
 
 	struct multiplies {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l*r) {
 			return l*r;
 		}
 	};
 
 	struct divides {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l/r) {
 			return l/r;
 		}
 	};
 	struct plus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l+r) {
 			return l + r;
 		}
 	};
 	struct minus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l-r) {
 			return l - r;
 		}
 	};
 	struct negate {
 		template<class T>
-		constexpr auto operator()(const T& l) {
+		constexpr auto operator()(const T& l) -> decltype(-l) {
 			return -l;
 		}
 	};
 	struct logical_not {
 		template<class T>
-		constexpr auto operator()(const T& l) {
+		constexpr auto operator()(const T& l) -> decltype(!l) {
 			return !l;
 		}
 	};
