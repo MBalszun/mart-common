@@ -46,6 +46,11 @@ constexpr T get_Nth_element(size_t Idx, mart::integer_sequence<T, Is ...> sequ) 
 	return to_carray(sequ)[Idx];
 }
 
+template<class T, class ... ARGS >
+constexpr decltype(auto) first(T&& t, ARGS ...) {
+	return std::forward<T>(t);
+}
+
 #ifndef _MSC_VER
 // watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the type
 namespace detail_cartesian_value_product {
