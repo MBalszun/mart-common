@@ -251,7 +251,7 @@ T core(mart::StringView str)
 		}
 		if (tmp >= std::numeric_limits<T>::max() / 16) { // quick check against simple constant
 			if ( tmp > (std::numeric_limits<T>::max() - d) / 10 ) {
-				throw std::out_of_range("String representing an integral (\"" + str.to_string() + "\") overflows overflows type " + typeid(T).name());
+				throw std::out_of_range("String representing an integral (\"" + str.to_string() + "\") overflows type " + typeid(T).name());
 			}
 		}
 		tmp = tmp * 10 + d;
