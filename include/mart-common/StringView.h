@@ -216,6 +216,14 @@ inline bool operator<=(const StringView& l, const StringView& r) { return !(l>r)
 inline bool operator>=(const StringView& l, const StringView& r) { return !(l < r); }
 // clang-format on
 constexpr StringView EmptyStringView{ "" };
+namespace _impl {
+	constexpr StringView ViewOfSpaces{ "                                                                                                                                           " };
+}
+constexpr StringView getSpaces(size_t count)
+{
+	return _impl::ViewOfSpaces.substr(0, count);
+}
+
 }
 
 namespace std {

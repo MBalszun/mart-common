@@ -21,6 +21,7 @@
 
 /* Proprietary Library Includes */
 /* Project Includes */
+#include "./StringView.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
@@ -71,6 +72,51 @@ inline auto sformat(std::chrono::duration<rep, period> dur, std::chrono::duratio
 {
 	return  _impl_print_chrono::PrintableDuration<repto, periodto>{ std::chrono::duration_cast<std::chrono::duration<repto, periodto>>(dur) };
 }
+
+enum class Pad : std::uint8_t {
+	Middle, Left, Right
+};
+
+namespace _impl_print {
+struct PaddedStringView {
+
+	const mart::StringView string;
+	const std::size_t total_length;
+	const Pad side;
+
+	inline friend std::ostream& operator<<(std::ostream& out, const PaddedStringView& e) {
+		switch (e.side) {
+		case Pad::Left: {
+			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+			out << mart::getSpaces(space_cnt);
+			out << e.string;
+			break;
+		}
+		case Pad::Right: {
+			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+			out << e.string;
+			out << mart::getSpaces(space_cnt);
+			break;
+		}
+		case Pad::Middle: {
+			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+			const size_t left_cnt = space_cnt / 2;
+			const size_t right_cnt = space_cnt - left_cnt;
+			out << mart::getSpaces(left_cnt);
+			out << e.string;
+			out << mart::getSpaces(right_cnt);
+		}
+		}
+		return out;
+	}
+};
+}
+
+
+inline auto padded(mart::StringView str, size_t total_length, Pad pad)  ->_impl_print::PaddedStringView {
+	return { str, total_length,pad };
+}
+
 
 }//mart
 
