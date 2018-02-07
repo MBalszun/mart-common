@@ -498,6 +498,7 @@ template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const Vec<
 template<class T, class U,int N> constexpr auto OP(const U& l,			const Vec<T,N>& r ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
 template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const U& r		  ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
 
+
 /**
  * same as DEFINE_ND_VECTOR_OP for unary operations on vec
  */
@@ -509,6 +510,13 @@ template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
 template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
+
+//c++14: remove "-> decltype(...)"
+#define DEFINE_ND_VECTOR_OP_3(OP,FUNC) \
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); } \
+template<class T, int N> constexpr auto OP(_impl_vec::Type<T>& l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T>& r) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
+
 
  /**
  * same as DEFINE_ND_VECTOR_OP for unary operations on vec
@@ -534,8 +542,8 @@ DEFINE_UNARY_ND_VECTOR_OP(lround, _impl_vec::lround)
 DEFINE_UNARY_ND_VECTOR_OP(iround, _impl_vec::iround)
 
 //min max
-DEFINE_ND_VECTOR_OP(max,_impl_vec::maximum)
-DEFINE_ND_VECTOR_OP(min,_impl_vec::minimum)
+DEFINE_ND_VECTOR_OP_3(max,_impl_vec::maximum)
+DEFINE_ND_VECTOR_OP_3(min,_impl_vec::minimum)
 
 //element wise logical ops
 DEFINE_UNARY_ND_VECTOR_OP_2(operator!, std::logical_not)
