@@ -46,6 +46,7 @@ constexpr T get_Nth_element(size_t Idx, mart::integer_sequence<T, Is ...> sequ) 
 	return to_carray(sequ)[Idx];
 }
 
+
 template<class T, class ... ARGS >
 constexpr decltype(auto) first(T&& t, ARGS ...) {
 	return std::forward<T>(t);
@@ -81,6 +82,16 @@ template<
 auto cartesian_value_product(List1 l1, List2 l2 )
 -> decltype(detail_cartesian_value_product::impl<Comb,V1,V2,T>(l1, l2, mart::make_index_sequence<List1::size()*List2::size()>{}));
 #endif // !_MSVC
+
+template<class T, T ... VALS>
+struct value_list {
+	static constexpr std::size_t size() { return sizeof...(VALS); };
+};
+
+template<class T, T ...Is >
+constexpr T get_Nth_element(size_t Idx, value_list<T, Is ...> sequ) {
+	return to_carray(sequ)[Idx];
+}
 
 
 }
