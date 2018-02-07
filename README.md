@@ -4,14 +4,8 @@ This is a small utilities library for usage in software related to the mart proj
 
 The library is in an early (alpha) phase and currently, no versioning scheme is used. Compatibility may be broken between each and every commit. That being said, except for types in the subfolder "experimental", we try to keep the interfaces as stable as possible. 
 
-# Target 
-The library is specifically designed to work with the toolchains used in the mart project. That particularly means
-- g++-4.8 on Ubuntu-14.04 (with -std=c++11 flag)
-- poky (Fido) g++-4.9 cross compiler for arm (with -std=c++11 flag)
-- MSVS 2017
-
 # Structure
-Currently this is a header-only library with all header files lying in the `./mart-common/include` sub folder. For usage either add "./include" to your include path or add the root folder as a subfolder in cmake
+Currently this is a header-only library with all header files lying in the `./include/mart-common` sub folder. For usage either add "./include" to your include path or add the root folder as a subfolder in cmake
 
 # Content
 This is a short (and probably out of data) overview over the content provided by this library
