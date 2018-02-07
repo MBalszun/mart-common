@@ -103,13 +103,13 @@ struct Vec {
 //	}
 
 	//### Data access ###
-	constexpr T &operator[](int idx)
+	constexpr T& operator[](int idx)
 	{
 		//assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 
-	constexpr T &operator[](int idx) const
+	constexpr const T& operator[](int idx) const
 	{
 		//assert(0 <= idx && idx < N);
 		return data[idx];
