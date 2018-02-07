@@ -388,7 +388,7 @@ namespace _impl_vec {
 	//std::plus,td::multiplies,... - like function objects for maximum and minimum
 	struct maximum {
 		template<class T>
-		T operator()(const T& l, const T& r){
+		T operator()(const T& l, const T& r) const {
 			using std::max;
 			return max(l,r);
 		}
@@ -396,7 +396,7 @@ namespace _impl_vec {
 
 	struct minimum {
 		template<class T>
-		T operator()(const T& l, const T& r){
+		T operator()(const T& l, const T& r) const {
 			using std::min;
 			return min(l,r);
 		}
@@ -404,7 +404,7 @@ namespace _impl_vec {
 
 	struct ceil {
 		template<class T>
-		T operator()(const T& l) {
+		T operator()(const T& l) const {
 			using std::ceil;
 			return ceil(l);
 		}
@@ -412,7 +412,7 @@ namespace _impl_vec {
 
 	struct floor {
 		template<class T>
-		T operator()(const T& l) {
+		T operator()(const T& l) const {
 			using std::floor;
 			return floor(l);
 		}
@@ -420,7 +420,7 @@ namespace _impl_vec {
 
 	struct round {
 		template<class T>
-		T operator()(const T& l) {
+		T operator()(const T& l) const {
 			using std::round;
 			return round(l);
 		}
@@ -428,7 +428,7 @@ namespace _impl_vec {
 
 	struct lround {
 		template<class T>
-		long operator()(const T& l) {
+		long operator()(const T& l) const {
 			using std::lround;
 			return lround(l);
 		}
@@ -436,7 +436,7 @@ namespace _impl_vec {
 
 	struct iround {
 		template<class T>
-		int operator()(const T& l) {
+		int operator()(const T& l) const {
 			using std::lround;
 			return lround(l);
 		}
@@ -444,26 +444,26 @@ namespace _impl_vec {
 
 	struct multiplies {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l*r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l*r) const {
 			return l*r;
 		}
 	};
 
 	struct divides {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l/r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l/r) const {
 			return l/r;
 		}
 	};
 	struct plus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l+r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l+r) const {
 			return l + r;
 		}
 	};
 	struct minus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l-r) {
+		constexpr auto operator()(const T& l, const U& r) -> decltype(l-r) const {
 			return l - r;
 		}
 	};
