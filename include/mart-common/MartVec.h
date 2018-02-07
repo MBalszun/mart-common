@@ -444,38 +444,38 @@ namespace _impl_vec {
 
 	struct multiplies {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l*r) const {
+		constexpr auto operator()(const T& l, const U& r) const -> decltype(l*r) {
 			return l*r;
 		}
 	};
 
 	struct divides {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l/r) const {
+		constexpr auto operator()(const T& l, const U& r) const -> decltype(l/r) {
 			return l/r;
 		}
 	};
 	struct plus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l+r) const {
+		constexpr auto operator()(const T& l, const U& r) const -> decltype(l+r) {
 			return l + r;
 		}
 	};
 	struct minus {
 		template<class T, class U>
-		constexpr auto operator()(const T& l, const U& r) -> decltype(l-r) const {
+		constexpr auto operator()(const T& l, const U& r) const -> decltype(l-r) {
 			return l - r;
 		}
 	};
 	struct negate {
 		template<class T>
-		constexpr auto operator()(const T& l) -> decltype(-l) {
+		constexpr auto operator()(const T& l) const -> decltype(-l) {
 			return -l;
 		}
 	};
 	struct logical_not {
 		template<class T>
-		constexpr auto operator()(const T& l) -> decltype(!l) {
+		constexpr auto operator()(const T& l) const -> decltype(!l) {
 			return !l;
 		}
 	};
