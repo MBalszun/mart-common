@@ -27,28 +27,11 @@ namespace mart {
 		return old_value;
 	}
 
-	template<class T, T... Vals>
-	struct integer_sequence {
-		using value_type = T;
-		static constexpr std::size_t size() { return sizeof...(Vals); };
-	};
-
-	template<std::size_t ... Vals>
-	using index_sequence = integer_sequence<std::size_t, Vals ...>;
-
-	template <std::size_t N, size_t ... Vals>
-	struct make_index_sequence_impl {
-		using type = typename make_index_sequence_impl<N - 1, N, Vals ...>::type;
-	};
-
-	template < std::size_t ... Vals>
-	struct make_index_sequence_impl<0, Vals...> {
-		using type = index_sequence<0, Vals ...>;
-	};
-
-	template < std::size_t N>
-	using make_index_sequence = typename make_index_sequence_impl<N-1>::type;
-
+	using std::integer_sequence;
+	using std::index_sequence;
+	using std::make_integer_sequence;
+	using std::make_index_sequence;
+	using std::index_sequence_for;
 }
 
 #endif
