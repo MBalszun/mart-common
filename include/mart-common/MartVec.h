@@ -103,13 +103,13 @@ struct Vec {
 //	}
 
 	//### Data access ###
-	constexpr T &operator[](int idx)
+	T& operator[](int idx)
 	{
 		//assert(0 <= idx && idx < N);
 		return data[idx];
 	}
 
-	constexpr T &operator[](int idx) const
+	constexpr const T&operator[](int idx) const
 	{
 		//assert(0 <= idx && idx < N);
 		return data[idx];
@@ -173,13 +173,13 @@ struct Vec<T,2> {
 	//	}
 
 	//### Data access ###
-	constexpr T &operator[](int idx)
+	T& operator[](int idx)
 	{
 ///		assert(0 <= idx && idx < N);
 		return idx == 0 ? x : y ;
 	}
 
-	constexpr const T &operator[](int idx) const
+	constexpr const T& operator[](int idx) const
 	{
 //		assert(0 <= idx && idx < N);
 		return idx == 0 ? x : y;
@@ -237,13 +237,13 @@ struct Vec<T, 3> {
 	//	}
 
 	//### Data access ###
-	constexpr T &operator[](int idx)
+	T& operator[](int idx)
 	{
 		//assert(0 <= idx && idx < N);
 		return idx == 0 ? x : idx == 1? y : z;
 	}
 
-	constexpr const T &operator[](int idx) const
+	constexpr const T& operator[](int idx) const
 	{
 		//assert(0 <= idx && idx < N);
 		return idx == 0 ? x : idx == 1 ? y : z;
