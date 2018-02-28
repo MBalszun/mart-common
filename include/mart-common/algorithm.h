@@ -110,6 +110,26 @@ auto find_if_ex(C& c, UnaryPredicate p) -> mart::EndAwareIterator<decltype(c.beg
 	return{ std::find_if(c.begin(), c.end(), p), c };
 }
 
+template <class C, class UnaryPredicate>
+auto wrapped_find_if(const C& c, decltype(c.cbegin()) start, UnaryPredicate p) -> decltype(c.begin())
+{
+	auto it = std::find_if(start, c.end(), p);
+	if (it != c.end()) {
+		return it;
+	}
+	it = std::find_if(c.begin(), start, p);
+	if (it != start) {
+		return it
+	}
+	return c.end();
+}
+
+template <class C, class UnaryPredicate>
+auto wrapped_find_if_ex(const C& c, decltype(c.cbegin()) start, UnaryPredicate p) -> mart::EndAwareIterator<decltype(c.begin())>
+{
+	return{ wrapped_find_if(c,start,p), c };
+}
+
 template< class C1, class C2 >
 auto find_first_of(const C1& in1, const C2& in2) -> decltype(std::begin(in1))
 {
