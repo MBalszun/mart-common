@@ -115,7 +115,7 @@ namespace mart {
 	class EndAwareIterator : public IT {
 	public:
 		template <class C>
-		EndAwareIterator( IT it, C& c )
+		EndAwareIterator( IT it, const C& c )
 			: IT{ it }
 			, _is_end{ it == c.end() }
 		{};
