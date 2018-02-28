@@ -74,7 +74,7 @@ auto unique(C& c, Pred p) -> decltype(c.begin())
 }
 
 template <class C, class T>
-T accumulate(C& c, T init)
+T accumulate(const C& c, T init)
 {
 	return std::accumulate(c.begin(), c.end(), init);
 }
@@ -87,19 +87,19 @@ T accumulate(const C& c, T init, BinaryOperation op)
 
 //find
 template <class C, class V>
-auto find( C& c, const V& value ) -> decltype( c.begin() )
+auto find(const C& c, const V& value ) -> decltype( c.begin() )
 {
 	return std::find( c.begin(), c.end(), value );
 }
 
 template <class C, class UnaryPredicate>
-auto find_if( C& c, UnaryPredicate p ) -> decltype( c.begin() )
+auto find_if(const C& c, UnaryPredicate p ) -> decltype( c.begin() )
 {
 	return std::find_if( c.begin(), c.end(), p );
 }
 
 template <class C, class V>
-auto find_ex(C& c, const V& value) -> mart::EndAwareIterator<decltype(c.begin())>
+auto find_ex(const C& c, const V& value) -> mart::EndAwareIterator<decltype(c.begin())>
 {
 	return{ std::find(c.begin(), c.end(), value), c };
 }
