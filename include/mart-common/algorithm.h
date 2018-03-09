@@ -86,31 +86,31 @@ T accumulate( const C& c, T init, BinaryOperation op )
 
 // find
 template< class C, class V >
-auto find( const C& c, const V& value ) -> decltype( c.begin() )
+auto find( C&& c, const V& value ) -> decltype( c.begin() )
 {
 	return std::find( c.begin(), c.end(), value );
 }
 
 template< class C, class UnaryPredicate >
-auto find_if( const C& c, UnaryPredicate p ) -> decltype( c.begin() )
+auto find_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
 {
 	return std::find_if( c.begin(), c.end(), p );
 }
 
 template< class C, class V >
-auto find_ex( const C& c, const V& value ) -> mart::EndAwareIterator< decltype( c.begin() ) >
+auto find_ex( C&& c, const V& value ) -> mart::EndAwareIterator< decltype( c.begin() ) >
 {
 	return {std::find( c.begin(), c.end(), value ), c};
 }
 
 template< class C, class UnaryPredicate >
-auto find_if_ex( C& c, UnaryPredicate p ) -> mart::EndAwareIterator< decltype( c.begin() ) >
+auto find_if_ex( C&& c, UnaryPredicate p ) -> mart::EndAwareIterator< decltype( c.begin() ) >
 {
 	return {std::find_if( c.begin(), c.end(), p ), c};
 }
 
 template< class C, class UnaryPredicate >
-auto wrapped_find_if( const C& c, decltype( c.cbegin() ) start, UnaryPredicate p ) -> decltype( c.begin() )
+auto wrapped_find_if( C&& c, decltype( c.cbegin() ) start, UnaryPredicate p ) -> decltype( c.begin() )
 {
 	auto it = std::find_if( start, c.end(), p );
 	if( it != c.end() ) {
@@ -124,45 +124,45 @@ auto wrapped_find_if( const C& c, decltype( c.cbegin() ) start, UnaryPredicate p
 }
 
 template< class C, class UnaryPredicate >
-auto wrapped_find_if_ex( const C& c, decltype( c.cbegin() ) start, UnaryPredicate p )
+auto wrapped_find_if_ex( C&& c, decltype( c.cbegin() ) start, UnaryPredicate p )
 	-> mart::EndAwareIterator< decltype( c.begin() ) >
 {
 	return {wrapped_find_if( c, start, p ), c};
 }
 
 template< class C1, class C2 >
-auto find_first_of( const C1& in1, const C2& in2 ) -> decltype( std::begin( in1 ) )
+auto find_first_of( C1&& in1, const C2& in2 ) -> decltype( std::begin( in1 ) )
 {
 	return std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end() );
 }
 
 template< class C1, class C2, class BinaryPredicate >
-auto find_first_of( const C1& in1, const C2& in2, BinaryPredicate p ) -> decltype( std::begin( in1 ) )
+auto find_first_of( C1&& in1, const C2& in2, BinaryPredicate p ) -> decltype( std::begin( in1 ) )
 {
 	return std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p );
 }
 
 template< class C1, class C2 >
-auto find_first_of_ex( const C1& in1, const C2& in2 ) -> mart::EndAwareIterator< decltype( std::begin( in1 ) ) >
+auto find_first_of_ex( C1&& in1, C2&& in2 ) -> mart::EndAwareIterator< decltype( std::begin( in1 ) ) >
 {
 	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end() ), in1};
 }
 
 template< class C1, class C2, class BinaryPredicate >
-auto find_first_of_ex( const C1& in1, const C2& in2, BinaryPredicate p )
+auto find_first_of_ex( C1&& in1, C2&& in2, BinaryPredicate p )
 	-> mart::EndAwareIterator< decltype( std::begin( in1 ) ) >
 {
 	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p ), in1};
 }
 
 template< class C, class T >
-auto lower_bound( const C& c, const T& value ) -> decltype( std::begin( c ) )
+auto lower_bound( C&& c, const T& value ) -> decltype( std::begin( c ) )
 {
 	return std::lower_bound( std::begin( c ), std::end( c ), value );
 }
 
 template< class C, class T, class Compare >
-auto lower_bound( const C& c, const T& value, Compare cmp ) -> decltype( std::begin( c ) )
+auto lower_bound( C&& c, const T& value, Compare cmp ) -> decltype( std::begin( c ) )
 {
 	return std::lower_bound( std::begin( c ), std::end( c ), value, cmp );
 }
