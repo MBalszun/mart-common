@@ -118,7 +118,7 @@ auto wrapped_find_if( const C& c, decltype( c.cbegin() ) start, UnaryPredicate p
 	}
 	it = std::find_if( c.begin(), start, p );
 	if( it != start ) {
-		return it
+		return it;
 	}
 	return c.end();
 }
