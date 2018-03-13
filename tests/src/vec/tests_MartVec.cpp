@@ -17,10 +17,10 @@ namespace {
 TEST_CASE("Some_random_vector_math_code", "[vec]")
 {
 
-	const mart::Vec3D<Wrapper> expected{ 1, 2 };
+	const mart::Vec3D<Wrapper> expected{ {1}, {2}, {-2} };
 
-	const mart::Vec3D<Wrapper> base{ 1,1 };
-	const auto 	r = base * mart::Vec3D<int>{1, 2};
+	const mart::Vec3D<Wrapper> base{ {1}, {1}, {2} };
+	const auto 	r = base * mart::Vec3D<int>{1, 2, -1};
 	static_assert(std::is_same_v<decltype(expected), decltype(r)>);
 	CHECK(expected == r);
 }
