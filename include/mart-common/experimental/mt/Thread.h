@@ -38,6 +38,7 @@ public:
 		execute_exit_action();
 		_thread = std::move(other._thread);
 		_onExit = other._onExit;
+		return *this;
 	}
 
 	void setExitAction(OnDestruction action) {
