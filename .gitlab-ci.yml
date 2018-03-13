@@ -1,0 +1,29 @@
+before_script:
+  - apt-get update -yqq
+  - apt-get install cmake -y
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+build_7:
+  image: gcc:7
+  stage: build
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make all
+	- make testing_mart-common
+    - ctest .
+
+build_latest:
+  image: gcc:latest
+  stage: build
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make all
+	- make testing_mart-common
+    - ctest .
+
