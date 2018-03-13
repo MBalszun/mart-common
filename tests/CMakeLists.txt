@@ -12,7 +12,11 @@ add_executable(testing_mart-common
 	${TEST_RCS}
 )
 
-target_link_libraries(testing_mart-common PRIVATE Mart::common)
+find_package(Threads REQUIRED)
+
+target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads)
+
+
 
 if(MSVC)
 string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
