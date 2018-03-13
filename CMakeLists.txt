@@ -25,6 +25,9 @@ else()
 	add_library(Mart::common ALIAS mart-common)
 	add_library(Mart::common_dev ALIAS mart-common_dev)
 
+	enable_testing()
+	add_subdirectory(tests EXCLUDE_FROM_ALL)
+
 endif()
 
 
