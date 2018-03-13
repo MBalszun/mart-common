@@ -14,8 +14,8 @@
  *
  */
 
-#include <atomic>
 #include <array>
+#include <atomic>
 #include <cstdint>
 
 namespace mart {
@@ -43,62 +43,57 @@ namespace mt {
  * 	}
  * }
  */
-template< class T >
+
+template<class T>
 class TrippleBuffer {
 	// The three buffer slots
 	// - One which we are currently reading from
 	// - One which we are currently writing to
 	// - One intermediate buffer
 	// Which position in the array fulfills which role changes dynamically
-	std::array< T, 3 > data{};
+	std::array<T, 3> data{};
 
-	// NOTE: Those pointers could be replaced by indexes
-	// TODO: Investigate if those could be merged with the
-	//		 counter variables
-	T*				   read_ptr   = &data[0];
-	T*				   write_ptr  = &data[1];
-	std::atomic< T* >  buffer_ptr = &data[2];
+	struct alignas( 2 * sizeof( std::uint16_t ) ) Index {
+		std::uint16_t idx;
+		bool		  new_data;
+	};
 
-	// NOTE: We rely on overflowing unsigned integers wrapping around
-	std::uint32_t				 read_cnt{ 0 };
-	std::atomic< std::uint32_t > write_cnt{ 0 };
+	Index read_idx{0, false};
+	Index write_idx{1, false};
+
+	std::atomic<Index> buffer_idx{Index{2, false}};
 
 public:
-	T& get_write_buffer() { return *write_ptr; }
-	T& get_read_buffer() { return *read_ptr; }
+	T& get_write_buffer() { return data[write_idx.idx]; }
+	T& get_read_buffer() { return data[read_idx.idx]; }
 
 	TrippleBuffer() = default;
-	explicit TrippleBuffer(const T& init)
-		: data{init,init,init}
+	explicit TrippleBuffer( const T& init )
+		: data{init, init, init}
 	{
 	}
 
 	bool fetch_update()
 	{
-		//MAINTENENCE NOTE:
-		// The logic in this function is such that it works
-		// in case of unsigned integer overflow (wrap around)
-		// DON'T break that assumption!
-
-		if( read_cnt == write_cnt ) {
+		if( !buffer_idx.load().new_data ) {
 			// no new content since last fetch
 			return false;
 		}
-		do {
-			read_cnt = write_cnt;
-			read_ptr = buffer_ptr.exchange( read_ptr );
-			// if the writer just published another update we do the swap again
-		} while( read_cnt != write_cnt );
+		// mark current slot as outdated so we don't refetch it later
+		// and swap with buffer slot
+		read_idx.new_data = false;
+		read_idx		  = buffer_idx.exchange( read_idx );
 		return true;
 	}
 
 	void commit()
 	{
-		write_ptr = buffer_ptr.exchange( write_ptr );
-		write_cnt++;
+		// mart current slot as new
+		// and swap with buffer slot
+		write_idx.new_data = true;
+		write_idx		   = buffer_idx.exchange( write_idx );
 	}
 };
-
 }
 }
 }
