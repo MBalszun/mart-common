@@ -227,6 +227,7 @@ struct Vec<T, 3> {
 	static constexpr int N = 3;
 	static constexpr int Dim = 3;
 	using value_type = T;
+	//TODO: should not require std::declval<T>()*std::declval<T>() to be valid expression if not used
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	T x;
 	T y;
@@ -588,7 +589,7 @@ namespace _impl_vec {
 template<class T, int N>
 constexpr bool operator==(const Vec<T,N>& l, const Vec<T,N>& r){
 	//first compare the vectors element wise and then fold the results voer &&
-	return _impl_vec::Fold<bool,N,std::logical_and<T>,0>{}(elementEquals(l,r),std::logical_and<T>{},true) ;
+	return _impl_vec::Fold<bool,N,std::logical_and<bool>,0>{}(elementEquals(l,r),std::logical_and<bool>{},true) ;
 }
 
 template<class T, int N>
