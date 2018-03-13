@@ -89,7 +89,8 @@ public:
 	void clear()
 	{
 		std::lock_guard<std::mutex> _( _mx );
-		decltype( _fifo ){}.swap( _fifo );
+		using f_type = decltype(_fifo);
+			f_type{}.swap(_fifo);
 	}
 
 	void operator<<( const T& v ) { send( v ); }
