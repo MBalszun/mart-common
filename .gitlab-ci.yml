@@ -13,7 +13,7 @@ build_7:
     - cd build
     - cmake ..
     - make all
-	- make testing_mart-common
+    - make testing_mart-common
     - ctest .
 
 build_latest:
@@ -24,6 +24,6 @@ build_latest:
     - cd build
     - cmake ..
     - make all
-	- make testing_mart-common
+    - make testing_mart-common
     - ctest .
 
