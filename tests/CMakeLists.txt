@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 
 project(mart-common_testing)
 
@@ -16,21 +16,19 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads)
 
-
-
 if(MSVC)
-string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-target_compile_definitions(testing_mart-common PRIVATE _CRT_SECURE_NO_WARNINGS _SCL_SECURE_NO_WARNINGS)
+	string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	target_compile_definitions(testing_mart-common PRIVATE _CRT_SECURE_NO_WARNINGS _SCL_SECURE_NO_WARNINGS)
 else()
-target_compile_options(testing_mart-common PRIVATE -Wall -Wextra)
+	target_compile_options(testing_mart-common PRIVATE -Wall -Wextra)
 endif()
 
 
 enable_testing()
-include(libs/catch2/ParseAndAddCatchTests.cmake)
-include(libs/catch2/Catch.cmake)
 
+# The new style below doesn't work with msvc test explorer
 set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS ON)
+include(libs/catch2/ParseAndAddCatchTests.cmake)
 ParseAndAddCatchTests(testing_mart-common)
-catch_discover_tests(testing_mart-common)
+
 
