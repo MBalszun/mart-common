@@ -19,9 +19,8 @@ install:
   - ./cmake-3.10.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
 
 script:
-  - mkdir -p build
-  - cd build
   - export CXX=g++-7
+  - mkdir -p build && cd build
   - cmake ..
   - make all
   - make testing_mart-common
