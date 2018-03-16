@@ -1,4 +1,4 @@
-# mart-common
+# mart-common [![Build Status](https://travis-ci.org/tum-ei-rcs/mart-common.svg?branch=master)](https://travis-ci.org/tum-ei-rcs/mart-common)
 
 This is a small utilities library for usage in software related to the mart project at the chair for Real-Time Computer Systems (RCS) at TU-Munich, developed by Michael Balszun.
 
