@@ -1,0 +1,27 @@
+language: cpp
+git:
+  depth: 1
+os: linux
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+
+install:
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
+  - chmod +x cmake-3.10.2-Linux-x86_64.sh
+  - ./cmake-3.10.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+
+script:
+  - export CXX=g++-7
+  - mkdir -p build && cd build
+  - cmake ..
+  - make all
+  - make testing_mart-common
+  - ctest .
