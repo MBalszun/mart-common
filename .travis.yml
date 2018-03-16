@@ -1,0 +1,21 @@
+language: cpp
+git:
+  depth: 1
+os: linux
+sudo: false
+
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+
+script:
+  - mkdir -p build
+  - cd build
+  - cmake ..
+  - make all
+  - make testing_mart-common
+  - ctest .
