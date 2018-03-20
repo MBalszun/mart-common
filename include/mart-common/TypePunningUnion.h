@@ -1,7 +1,7 @@
-#ifndef LIB_MART_COMMON_GUARD_TYPE_PUNNING_VARIANT_H
-#define LIB_MART_COMMON_GUARD_TYPE_PUNNING_VARIANT_H
+#ifndef LIB_MART_COMMON_GUARD_TYPE_PUNNING_UNION_H
+#define LIB_MART_COMMON_GUARD_TYPE_PUNNING_UNION_H
 /**
-* TypePunningVariant.h (mart-common)
+* TypePunningUnion.h (mart-common)
 *
 * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
 *
@@ -10,7 +10,7 @@
 * directory or http://opensource.org/licenses/MIT for details.
 *
 * @author: Michael Balszun <michael.balszun@mytum.de>
-* @brief: A type similar to variant/union that can be used as a rx buffer in networking and safely(standard compliant) cast the bytes to a pod
+* @brief: A type similar to union that can be used as a rx buffer in networking and safely(standard compliant) cast the bytes to a pod
 *
 */
 
@@ -30,7 +30,7 @@
 namespace mart {
 
 template <class... Types>
-class TypePunningVariant {
+class TypePunningUnion {
 public:
 	// ###### Helper ######
 	template<class T>
@@ -49,27 +49,27 @@ public:
 	static_assert(mart::conjunction<is_compatible<Types> ...>::value, "");
 
 	// ###### Special member functions #####
-	TypePunningVariant() = default;
-	TypePunningVariant(const TypePunningVariant& other) = default;
-	TypePunningVariant& operator=(const TypePunningVariant& other) = default;
+	TypePunningUnion() = default;
+	TypePunningUnion(const TypePunningUnion& other) = default;
+	TypePunningUnion& operator=(const TypePunningUnion& other) = default;
 
 	// ###### construction from POD #####
 	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
-	TypePunningVariant(const T& msg)
+	TypePunningUnion(const T& msg)
 	{
 		new(&data) T(msg);
 		_size = sizeof(msg);
 	}
 
 	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
-	TypePunningVariant& operator=(const T& msg)
+	TypePunningUnion& operator=(const T& msg)
 	{
 		new(&data) T(msg);
 		_size = sizeof(msg);
 		return *this;
 	}
 
-	TypePunningVariant& operator=(mart::ConstMemoryView new_data)
+	TypePunningUnion& operator=(mart::ConstMemoryView new_data)
 	{
 		assert(new_data.size() <= sizeof(data) && "Buffer not big enough");
 		mart::copy(new_data, all_bytes());
