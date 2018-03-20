@@ -32,6 +32,8 @@
 //Include OS-specific headers
 #ifdef MBA_UTILS_USE_WINSOCKS
 
+#include <cstdio>
+
 /* ######## WINDOWS ######### */
 
 struct IUnknown; //This declaration will be needed when translating windows headers with clang/c2
@@ -67,6 +69,7 @@ struct IUnknown; //This declaration will be needed when translating windows head
 	#include <arpa/inet.h>
 	#include <unistd.h> //close
 	#include <fcntl.h>
+	#include <errno.h>
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -140,7 +143,7 @@ inline bool waInit()
 	if (err != 0) {
 		/* Tell the user that we could not find a usable */
 		/* Winsock DLL.                                  */
-		printf("WSAStartup failed with error: %d\n", err);
+		std::printf("WSAStartup failed with error: %d\n", err);
 		return false;
 	}
 	return true;
