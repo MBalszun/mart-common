@@ -84,6 +84,18 @@ T accumulate( const C& c, T init, BinaryOperation op )
 	return std::accumulate( c.begin(), c.end(), init, op );
 }
 
+template<class R>
+bool is_sortded( const R& r )
+{
+	return std::is_sorted( r.begin(), r.end() );
+}
+
+template<class R1, class R2>
+bool equal(const R1& r1, const R2& r2)
+{
+	return std::equal(r1.begin(), r2.end(), r2.begin(), r2.end());
+}
+
 // find
 template< class C, class V >
 auto find( C&& c, const V& value ) -> decltype( c.begin() )
