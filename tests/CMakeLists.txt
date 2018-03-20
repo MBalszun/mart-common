@@ -26,9 +26,11 @@ endif()
 
 enable_testing()
 
-# The new style below doesn't work with msvc test explorer
-set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS ON)
 include(libs/catch2/ParseAndAddCatchTests.cmake)
+
+set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS ON)
+set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME OFF)
+
 ParseAndAddCatchTests(testing_mart-common)
 
 
