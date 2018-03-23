@@ -35,9 +35,10 @@ public:
 	// ###### Helper ######
 	template<class T>
 	struct is_compatible {
-		static constexpr bool value = std::is_standard_layout<T>::value;
-		// c++11: || std::is_trivially_destructible<T>::value
-		// c++11: || std::is_trivially_copyable<T>::value
+		static constexpr bool value =
+			std::is_standard_layout<T>::value
+			|| std::is_trivially_destructible<T>::value
+			|| std::is_trivially_copyable<T>::value;
 	};
 
 	template<class T>
@@ -54,16 +55,18 @@ public:
 	TypePunningUnion& operator=(const TypePunningUnion& other) = default;
 
 	// ###### construction from POD #####
-	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
+	template <class T>
 	TypePunningUnion(const T& msg)
 	{
+		static_assert( is_member_type<T>(), "Can't assign type that is not member of the union");
 		new(&data) T(msg);
 		_size = sizeof(msg);
 	}
 
-	template <class T, class = mart::enable_if_t<is_member_type<T>()>>
+	template <class T>
 	TypePunningUnion& operator=(const T& msg)
 	{
+		static_assert(is_member_type<T>(), "Can't assign type that is not member of the union");
 		new(&data) T(msg);
 		_size = sizeof(msg);
 		return *this;
@@ -94,7 +97,7 @@ public:
 	// result of all_bytes() has been filled e.g. from the network.
 	void set_active_range(mart::MemoryView range)
 	{
-		if (range.size() != 0) {
+		if (range.isValid()) {
 			assert(range.begin() == all_bytes().begin());
 		}
 		_size = range.size();
@@ -141,6 +144,8 @@ protected:
 		auto* const ptr = new(&data) T;
 		copy_bytes<T>(&tbuf, &data);
 
+		// NOTE: We MUST use the pointer returned by new.
+		// A reinterpret cast of &data is not ok (see explanation about std::launder)
 		return *ptr;
 	}
 };
