@@ -491,7 +491,10 @@ namespace _impl_vec {
  *
  * Macro parameters:
  * OP: name of the resulting function
- * FUNC: name of functor template that will be used to perform individual operations e.g. std::plus
+ * FUNC: name of functor that will be used to perform individual operations e.g. std::plus
+ *
+ * This macro is for operations where the scalar type on the left and right side can be different (e.g. multiplying meters and seconds is fine)
+ * Also FUNC needs to be a full class name (not just a template)
  */
 //c++14: remove "-> decltype(...)"
 #define DEFINE_ND_VECTOR_OP(OP,FUNC) \
@@ -500,30 +503,31 @@ template<class T, class U,int N> constexpr auto OP(const U& l,			const Vec<T,N>&
 template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const U& r		  ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
 
 
-/**
- * same as DEFINE_ND_VECTOR_OP for unary operations on vec
- */
-#define DEFINE_UNARY_ND_VECTOR_OP_2(OP,FUNC) \
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l)) { return _impl_vec::apply<N>(FUNC<T>{},l); }
-
- //c++14: remove "-> decltype(...)"
-#define DEFINE_ND_VECTOR_OP_2(OP,FUNC) \
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
-template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
-
+/** Same as DEFINE_ND_VECTOR_OP, but scalar types of left and right side have to  be identical */
 //c++14: remove "-> decltype(...)"
 #define DEFINE_ND_VECTOR_OP_3(OP,FUNC) \
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); } \
 template<class T, int N> constexpr auto OP(_impl_vec::Type<T>& l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T>& r) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
 
+/** Same as DEFINE_ND_VECTOR_OP_3, but FUNC has to be a template with the scalar type as template parameter */
+//c++14: remove "-> decltype(...)"
+#define DEFINE_ND_VECTOR_OP_2(OP,FUNC) \
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
+template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
 
- /**
+/**
  * same as DEFINE_ND_VECTOR_OP for unary operations on vec
  */
 #define DEFINE_UNARY_ND_VECTOR_OP(OP,FUNC) \
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC{},l)) { return _impl_vec::apply<N>(FUNC{},l); }
+
+/**
+ * same as DEFINE_ND_VECTOR_OP_2 for unary operations on vec
+ */
+#define DEFINE_UNARY_ND_VECTOR_OP_2(OP,FUNC) \
+template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l)) { return _impl_vec::apply<N>(FUNC<T>{},l); }
 
 
 //#### Define actual vector functions ######
@@ -568,7 +572,10 @@ DEFINE_ND_VECTOR_OP_2(elementGreaterEqual,std::greater_equal)
 
 
 #undef DEFINE_UNARY_ND_VECTOR_OP
+#undef DEFINE_UNARY_ND_VECTOR_OP_2
 #undef DEFINE_ND_VECTOR_OP
+#undef DEFINE_ND_VECTOR_OP_2
+#undef DEFINE_ND_VECTOR_OP_3
 
 namespace _impl_vec {
 	template<class T, int N, class F, int I=0>
