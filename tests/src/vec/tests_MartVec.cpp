@@ -87,9 +87,9 @@ mart::Vec<T, N> generate3()
 template<class T, int N>
 void check_addition_subtraction()
 {
-	auto v1		= generate1<T, N>();
-	auto v2		= generate2<T, N>();
-	auto v3		= v1 + v2;
+	auto v1 = generate1<T, N>();
+	auto v2 = generate2<T, N>();
+	auto v3 = v1 + v2;
 
 	CHECK( v1 == v3 - v2 );
 }
@@ -97,9 +97,9 @@ void check_addition_subtraction()
 template<class T, int N>
 void check_multiplication_division()
 {
-	auto v1		= generate1<T, N>();
-	auto v2		= generate1<T, N>() * generate1<T, N>() + generateOnes<T, N>();
-	auto v3		= v1 * v2;
+	auto v1 = generate1<T, N>();
+	auto v2 = generate1<T, N>() * generate1<T, N>() + generateOnes<T, N>();
+	auto v3 = v1 * v2;
 
 	CHECK( v1 == v3 / v2 );
 }
@@ -127,29 +127,54 @@ TEST_CASE( "MartVec_same_type_3d_operations", "[vec]" )
 	check_multiplication_division<int, 7>();
 }
 
-
-TEST_CASE("MartVec_element_comparison", "[vec]")
+TEST_CASE( "MartVec_element_comparison", "[vec]" )
 {
 	using Vec_t = mart::Vec<int, 5>;
-	Vec_t vec1{ 1, 2, 3, 4, 5 };
-	Vec_t vec2{ 2, 2, 2, 2, 2 };
+	Vec_t vec1{1, 2, 3, 4, 5};
+	Vec_t vec2{2, 2, 2, 2, 2};
 
 	using BVec_t = mart::Vec<bool, 5>;
 
-	CHECK(mart::elementLess(vec1, vec2) == BVec_t{ true, false, false, false, false });
-	CHECK(mart::elementLessEqual(vec1, vec2) == BVec_t{ true, true, false, false, false });
-	CHECK(mart::elementGreater(vec1, vec2) == BVec_t{ false, false, true, true, true });
-	CHECK(mart::elementGreaterEqual(vec1, vec2) == BVec_t{ false, true, true, true, true });
-	CHECK(mart::elementNE(vec1, vec2) == BVec_t{ true, false, true, true, true });
-	CHECK(mart::elementEquals(vec1, vec2) == BVec_t{ false, true, false, false, false });
+	CHECK( mart::elementLess( vec1, vec2 ) == BVec_t{true, false, false, false, false} );
+	CHECK( mart::elementLessEqual( vec1, vec2 ) == BVec_t{true, true, false, false, false} );
+	CHECK( mart::elementGreater( vec1, vec2 ) == BVec_t{false, false, true, true, true} );
+	CHECK( mart::elementGreaterEqual( vec1, vec2 ) == BVec_t{false, true, true, true, true} );
+	CHECK( mart::elementNE( vec1, vec2 ) == BVec_t{true, false, true, true, true} );
+	CHECK( mart::elementEquals( vec1, vec2 ) == BVec_t{false, true, false, false, false} );
 }
 
-TEST_CASE("MartVec_element_logic", "[vec]")
+TEST_CASE( "MartVec_element_logic", "[vec]" )
 {
 	using BVec_t = mart::Vec<bool, 5>;
-	BVec_t vec1{ true, false, true, false, true };
-	BVec_t vec2{ true, true, false, false, false };
+	BVec_t vec1{true, false, true, false, true};
+	BVec_t vec2{true, true, false, false, false};
 
-	CHECK(mart::elementAnd(vec1, vec2) == BVec_t{ true, false, false, false, false });
-	CHECK(mart::elementOr(vec1, vec2) == BVec_t{ true, true, true, false, true });
+	CHECK( mart::elementAnd( vec1, vec2 ) == BVec_t{true, false, false, false, false} );
+	CHECK( mart::elementOr( vec1, vec2 ) == BVec_t{true, true, true, false, true} );
+}
+
+TEST_CASE( "MartVec_element_min_max", "[vec]" )
+{
+	using Vec_t = mart::Vec<int, 5>;
+	Vec_t vec1{1, 4, -2, 3, -10};
+	Vec_t vec2{2, -4, -2, 3, 5};
+
+	CHECK( mart::max( vec1, vec2 ) == Vec_t{2, 4, -2, 3, 5} );
+	CHECK( mart::min( vec1, vec2 ) == Vec_t{1, -4, -2, 3, -10} );
+}
+
+TEST_CASE( "MartVec_decimal_to_integral", "[vec]" )
+{
+	using DVec_t = mart::Vec<double, 5>;
+	using IVec_t = mart::Vec<int, 5>;
+	DVec_t vec1{2.3, 2.7, 0.0, -2.3, -2.7};
+	// BVec_t vec2{ true, true, false, false, false };
+
+	CHECK( mart::ceil( vec1 ) == DVec_t{3, 3, 0, -2, -2} );
+	CHECK( mart::floor( vec1 ) == DVec_t{2, 2, 0, -3, -3} );
+	CHECK( mart::round( vec1 ) == DVec_t{2, 3, 0, -2, -3} );
+	CHECK( mart::iround( vec1 ) == IVec_t{2, 3, 0, -2, -3} );
+	CHECK( mart::lround( vec1 ) == mart::Vec<long, 5>{2, 3, 0, -2, -3} );
+
+	// CHECK(mart::lround(vec1) == IVec_t{ 2, 3, 0, -2, -3 });
 }
