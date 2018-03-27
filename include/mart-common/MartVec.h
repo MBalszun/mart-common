@@ -389,7 +389,7 @@ namespace _impl_vec {
 	//std::plus,td::multiplies,... - like function objects for maximum and minimum
 	struct maximum {
 		template<class T>
-		T operator()(const T& l, const T& r) const {
+		constexpr T operator()(const T& l, const T& r) const {
 			using std::max;
 			return max(l,r);
 		}
@@ -397,7 +397,7 @@ namespace _impl_vec {
 
 	struct minimum {
 		template<class T>
-		T operator()(const T& l, const T& r) const {
+		constexpr T operator()(const T& l, const T& r) const {
 			using std::min;
 			return min(l,r);
 		}
@@ -497,25 +497,18 @@ namespace _impl_vec {
  * Also FUNC needs to be a full class name (not just a template)
  */
 //c++14: remove "-> decltype(...)"
-#define DEFINE_ND_VECTOR_OP(OP,FUNC) \
+#define DEFINE_HETEROGEN_ND_VECTOR_OP(OP,FUNC) \
 template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const Vec<U,N>& r ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); } \
 template<class T, class U,int N> constexpr auto OP(const U& l,			const Vec<T,N>& r ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
 template<class T, class U,int N> constexpr auto OP(const Vec<T,N>& l,	const U& r		  ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
 
 
-/** Same as DEFINE_ND_VECTOR_OP, but scalar types of left and right side have to  be identical */
+/** Same as DEFINE_HETEROGEN_ND_VECTOR_OP, but scalar types of left and right side have to  be identical */
 //c++14: remove "-> decltype(...)"
-#define DEFINE_ND_VECTOR_OP_3(OP,FUNC) \
+#define DEFINE_HOMOGEN_ND_VECTOR_OP(OP,FUNC) \
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); } \
 template<class T, int N> constexpr auto OP(_impl_vec::Type<T>& l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }\
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T>& r) -> decltype(_impl_vec::apply<N>(FUNC{},l,r)) { return _impl_vec::apply<N>(FUNC{},l,r); }
-
-/** Same as DEFINE_ND_VECTOR_OP_3, but FUNC has to be a template with the scalar type as template parameter */
-//c++14: remove "-> decltype(...)"
-#define DEFINE_ND_VECTOR_OP_2(OP,FUNC) \
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); } \
-template<class T, int N> constexpr auto OP(_impl_vec::Type<T> l, const Vec<T,N>& r	 ) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }\
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T> r) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l,r)) { return _impl_vec::apply<N>(FUNC<T>{},l,r); }
 
 /**
  * same as DEFINE_ND_VECTOR_OP for unary operations on vec
@@ -523,22 +516,15 @@ template<class T, int N> constexpr auto OP(const Vec<T,N>& l,	 _impl_vec::Type<T
 #define DEFINE_UNARY_ND_VECTOR_OP(OP,FUNC) \
 template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC{},l)) { return _impl_vec::apply<N>(FUNC{},l); }
 
-/**
- * same as DEFINE_ND_VECTOR_OP_2 for unary operations on vec
- */
-#define DEFINE_UNARY_ND_VECTOR_OP_2(OP,FUNC) \
-template<class T, int N> constexpr auto OP(const Vec<T,N>& l) -> decltype(_impl_vec::apply<N>(FUNC<T>{},l)) { return _impl_vec::apply<N>(FUNC<T>{},l); }
-
-
 //#### Define actual vector functions ######
 
 //overloaded operators
 //math operators
 DEFINE_UNARY_ND_VECTOR_OP(operator-, _impl_vec::negate)
-DEFINE_ND_VECTOR_OP(operator+, _impl_vec::plus)
-DEFINE_ND_VECTOR_OP(operator*, _impl_vec::multiplies)
-DEFINE_ND_VECTOR_OP(operator-, _impl_vec::minus)
-DEFINE_ND_VECTOR_OP(operator/, _impl_vec::divides)
+DEFINE_HETEROGEN_ND_VECTOR_OP(operator+, _impl_vec::plus)
+DEFINE_HETEROGEN_ND_VECTOR_OP(operator*, _impl_vec::multiplies)
+DEFINE_HETEROGEN_ND_VECTOR_OP(operator-, _impl_vec::minus)
+DEFINE_HETEROGEN_ND_VECTOR_OP(operator/, _impl_vec::divides)
 
 DEFINE_UNARY_ND_VECTOR_OP(ceil, _impl_vec::ceil)
 DEFINE_UNARY_ND_VECTOR_OP(floor, _impl_vec::floor)
@@ -547,56 +533,41 @@ DEFINE_UNARY_ND_VECTOR_OP(lround, _impl_vec::lround)
 DEFINE_UNARY_ND_VECTOR_OP(iround, _impl_vec::iround)
 
 //min max
-DEFINE_ND_VECTOR_OP_3(max,_impl_vec::maximum)
-DEFINE_ND_VECTOR_OP_3(min,_impl_vec::minimum)
+DEFINE_HOMOGEN_ND_VECTOR_OP(max,_impl_vec::maximum)
+DEFINE_HOMOGEN_ND_VECTOR_OP(min,_impl_vec::minimum)
 
 //element wise logical ops
-DEFINE_UNARY_ND_VECTOR_OP_2(operator!, std::logical_not)
-DEFINE_ND_VECTOR_OP_2(elementAnd,std::logical_and)
-DEFINE_ND_VECTOR_OP_2(elementOr,std::logical_or)
+DEFINE_UNARY_ND_VECTOR_OP(operator!, std::logical_not<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementAnd,std::logical_and<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementOr,std::logical_or<void>)
 
 //element wise comparison operations
-DEFINE_ND_VECTOR_OP_2(elementEquals,std::equal_to)
-DEFINE_ND_VECTOR_OP_2(elementNE,std::not_equal_to)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementEquals,std::equal_to<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementNE,std::not_equal_to<void>)
 
-DEFINE_ND_VECTOR_OP_2(elementLess,std::less)
-DEFINE_ND_VECTOR_OP_2(elementLessEqual,std::less_equal)
-DEFINE_ND_VECTOR_OP_2(elementGreater,std::greater)
-DEFINE_ND_VECTOR_OP_2(elementGreaterEqual,std::greater_equal)
-
-//comparison operators TODO: should those operator overloads be implemented or is this confusing?
-//DEFINE_ND_VECTOR_OP(operator<,std::less)
-//DEFINE_ND_VECTOR_OP(operator<=,std::less_equal)
-//DEFINE_ND_VECTOR_OP(operator>,std::greater)
-//DEFINE_ND_VECTOR_OP(operator>=,std::greater_equal)
-
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementLess,std::less<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementLessEqual,std::less_equal<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementGreater,std::greater<void>)
+DEFINE_HETEROGEN_ND_VECTOR_OP(elementGreaterEqual,std::greater_equal<void>)
 
 #undef DEFINE_UNARY_ND_VECTOR_OP
-#undef DEFINE_UNARY_ND_VECTOR_OP_2
-#undef DEFINE_ND_VECTOR_OP
-#undef DEFINE_ND_VECTOR_OP_2
-#undef DEFINE_ND_VECTOR_OP_3
+#undef DEFINE_HETEROGEN_ND_VECTOR_OP
+#undef DEFINE_HOMOGEN_ND_VECTOR_OP
 
-namespace _impl_vec {
-	template<class T, int N, class F, int I=0>
-	struct Fold {
-		constexpr auto operator()(const Vec<T,N>& l, F op, T init) const ->decltype(op(init,init))  {
-			return Fold<T,N,F,I+1>{}(l,op,op(init,  l[I]));
-		}
-	};
 
-	template<class T, int N, class F>
-	struct Fold<T,N,F,N> {
-		constexpr auto operator()(const Vec<T,N>& , F , T init) const -> T  {
-			return init;
-		}
-	};
+template<class T, int N, class F, class Init_t>
+constexpr auto reduce(const Vec<T, N>& v, F f, Init_t init)
+{
+	for (int i = 0; i < N; ++i) {
+		init = f(v[i], init);
+	}
+	return init;
 }
 
 template<class T, int N>
-constexpr bool operator==(const Vec<T,N>& l, const Vec<T,N>& r){
+constexpr bool operator==(const Vec<T, N>& l, const Vec<T, N>& r) {
 	//first compare the vectors element wise and then fold the results voer &&
-	return _impl_vec::Fold<bool,N,std::logical_and<bool>,0>{}(elementEquals(l,r),std::logical_and<bool>{},true) ;
+	return reduce(elementEquals(l, r), std::logical_and<bool>{}, true);
 }
 
 template<class T, int N>
