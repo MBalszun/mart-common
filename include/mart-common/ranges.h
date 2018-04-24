@@ -187,8 +187,6 @@ _impl_irange::irange_t<size_t> irange(const T(&)[N]) {
 }
 
 
-
-namespace experimental {
 namespace _impl_frange {
 	template <class T>
 	struct frange_t;
@@ -297,7 +295,6 @@ _impl_frange::frange_t<T> frange(_impl_irange::non_deduced_t<T> start, T end) {
 
 
 
-} //experimental
 
 
 
