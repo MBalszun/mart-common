@@ -293,10 +293,135 @@ _impl_frange::frange_t<T> frange(_impl_irange::non_deduced_t<T> start, T end) {
 	return _impl_frange::frange_t<T>{ start,end};
 }
 
+namespace _impl_vrange {
+template <class T>
+struct vrange_t;
+
+template<class T>
+class VIterator {
+public:
+	using difference_type = std::ptrdiff_t;
+	using value_type = T;
+	using pointer = T * ;
+	using reference = const T&;
+	using iterator_category = std::random_access_iterator_tag;
+
+	VIterator(T value = T(), T step = T(1.0))
+		: i{ 0 }
+		, offset{ value }
+		, step{ step }
+	{}
+
+	value_type operator*() const { return step * i + offset; }
+	//pointer operator->() const { return &i; }
+
+	VIterator& operator++() { ++i; return *this; }
+	VIterator operator++(int) { return FIterator{ i++ }; }
+
+	VIterator& operator--() { --i; return *this; }
+	VIterator operator--(int) { return VIterator{ i-- }; }
+
+	VIterator& operator+=(difference_type diff) { i += diff; return *this; }
+	VIterator& operator-=(difference_type diff) { i -= diff; return *this; }
+
+	value_type operator[](difference_type diff) const { return i + diff; }
+
+	friend bool operator!=(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i != r.i; }
+	friend bool operator==(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i == r.i; }
+	friend bool operator<(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i < r.i; }
+	friend bool operator<=(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i <= r.i; }
+	friend bool operator>(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i > r.i; }
+	friend bool operator>=(VIterator l, VIterator r) { assert(l.offset == r.offset && l.step == r.step); return l.i >= r.i; }
+
+	friend VIterator operator+(VIterator it, difference_type n) {
+		it.i += n;
+		return it;
+	}
+	friend VIterator operator+(difference_type n, VIterator it) { return it + n; }
+
+	friend difference_type operator-(VIterator l, VIterator r) {
+		assert(l.offset == r.offset && l.step == r.step);
+		return l.i - r.i;
+	}
+	friend VIterator operator-(VIterator it, difference_type n) {
+		it.i -= n;
+		return it;
+	}
+	friend VIterator operator-(difference_type n, VIterator it) { return it - n; }
+
+private:
+	template<class>
+	friend struct _impl_vrange::vrange_t;
+
+	std::ptrdiff_t i;
+	T offset;
+	T step;
+};
+
+template<class T>
+using can_perform_arithmetic_t = decltype( static_cast<std::ptrdiff_t>( ( T{} - T{} ) / T{} ) );
 
 
 
+template<class T>
+constexpr bool teatsd(T*) {
+	return false;
+}
 
+template<class T, class = can_perform_arithmetic_t<T> >
+constexpr bool teatsd(nullptr_t) {
+	return true;
+}
+
+template<class T>
+constexpr bool decide() {
+	return teatsd<T>(nullptr);
+}
+
+template <class T>
+struct vrange_t {
+	using iterator = VIterator<T>;
+
+	iterator begin() const {
+		return iterator{ _start_v,_step };
+
+	};
+	iterator end() const {
+		iterator ret{ _start_v,_step };
+		if constexpr(_impl_vrange::decide<T>()) {
+			ret.i = static_cast<std::ptrdiff_t>((_end_v - _start_v) / _step) + 1;
+		} else {
+			for (T value = _start_v; value < _end_v; value += _step) {
+				ret.i++;
+			}
+		}
+		return ret;
+	};
+
+	vrange_t(T start, T end)
+		:_start_v{ start }
+		, _end_v{ end }
+	{
+	}
+
+	T _start_v;
+	T _end_v;
+	T _step{};
+	vrange_t step(T value) const {
+		vrange_t n(*this);
+		n._step = value;
+		return n;
+	}
+};
+
+} //_impl_vrange
+
+
+
+template<class T>
+_impl_vrange::vrange_t<T> vrange(_impl_irange::non_deduced_t<T> start,  T end) {
+	return _impl_vrange::vrange_t<T>{ start, end};
+}
 
 }
 
