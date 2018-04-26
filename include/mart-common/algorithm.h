@@ -26,9 +26,35 @@
 #include "ranges.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
+//used to enable and disable certain overloads - will be undefined at end of file
+#define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 0
+
+#ifdef _MSC_VER
+#	if	_MSC_VER >= 1913
+#		undef MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
+#		define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 1
+#	endif
+#endif
 namespace mart {
 
 /*############## Wrapper around standard algorithms ################ */
+
+template<class ExecutionPolicy, class RNG, class F>
+void for_each(RNG&& rng, F f)
+{
+	std::for_each(rng.begin(), rng.end(), std::move(f));
+}
+
+template<class ExecutionPolicy, class RNG, class F>
+void for_each( ExecutionPolicy&& p, RNG&& rng, F f )
+{
+#if MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
+	std::for_each( std::forward<ExecutionPolicy>( p ), rng.begin(), rng.end(), std::move( f ) );
+#else
+	std::for_each( rng.begin(), rng.end(), std::move( f ) );
+	(void)p;
+#endif
+}
 
 template< class C >
 void sort( C& c )
@@ -36,11 +62,30 @@ void sort( C& c )
 	std::sort( c.begin(), c.end() );
 }
 
+#if MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
+template< class C, class Comp, class = std::enable_if_t<!std::is_execution_policy_v<std::decay_t<C>>> >
+#else
 template< class C, class Comp >
+#endif
 void sort( C& c, Comp comp )
 {
 	std::sort( c.begin(), c.end(), comp );
 }
+
+
+#if MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
+template< class ExecutionPolicy, class C, class = std::enable_if_t<std::is_execution_policy_v<std::decay_t<ExecutionPolicy>>> >
+void sort(ExecutionPolicy&& policy, C& c)
+{
+	std::sort(std::forward<ExecutionPolicy>(policy), c.begin(), c.end());
+}
+
+template< class ExecutionPolicy, class C, class Comp >
+void sort(ExecutionPolicy&& policy, C& c, Comp comp)
+{
+	std::sort(std::forward<ExecutionPolicy>(policy), c.begin(), c.end(), comp);
+}
+#endif
 
 template< class C, class Pred >
 auto partition( C& c, Pred p ) -> decltype( c.begin() )
@@ -430,5 +475,7 @@ byMember( MTYPE member )
 	return {member};
 }
 }
+
+#undef MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
 
 #endif // !LIB_MART_COMMON_GUARD_ALGORITHM_H
