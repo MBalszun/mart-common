@@ -22,6 +22,7 @@ BreakConstructorInitializersBeforeComma: 'true'
 ColumnLimit: '120'
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'false'
 Cpp11BracedListStyle: 'true'
+FixNamespaceComments : 'true'
 Language: Cpp
 NamespaceIndentation: None
 SortIncludes: 'true'
