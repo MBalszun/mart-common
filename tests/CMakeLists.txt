@@ -5,7 +5,7 @@ project(mart-common_testing)
 include_directories(libs)
 file(GLOB_RECURSE TEST_RCS tests_*.cpp)
 
-message(STATUS "Found test files: ${TEST_RCS}")
+# message(STATUS "Found test files: ${TEST_RCS}")
 
 add_executable(testing_mart-common
 	main.cpp
