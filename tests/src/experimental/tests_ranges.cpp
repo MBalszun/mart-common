@@ -10,6 +10,6 @@ TEST_CASE( "experimental_frange_compiles", "[experimental][ranges]" )
 
 TEST_CASE( "experimental_vrange_compiles", "[experimental][ranges]" )
 {
-	auto r = mart::experimental::vrange<float>( 0.1, 0.3 ).step( 0.1 );
+	auto r = mart::experimental::vrange<float>( 0.1f, 0.3f ).step( 0.1f );
 	(void)r;
 }
