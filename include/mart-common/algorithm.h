@@ -350,6 +350,12 @@ void fill( R& range, const T& value )
 	std::fill( range.begin(), range.end(), value );
 }
 
+template< class R, class Generator >
+void generate(R& range, Generator g)
+{
+	std::generate( range.begin(), range.end(), std::move( g ) );
+}
+
 // set algorithms
 
 template< class InputC1, class InputC2, class OutputIt >
