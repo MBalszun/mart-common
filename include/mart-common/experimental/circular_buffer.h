@@ -28,42 +28,51 @@
 namespace mart {
 
 template<class T, int N>
-struct circular_buffer {
+class circular_buffer {
 	static_assert( std::is_trivially_destructible_v<T>,
 				   "This circular buffer implementation currently only supports trivially destructible types" );
-
-	std::array<T, (std::size_t)N> data;
 	using index_type = int;
-	index_type next_read{};
-	index_type next_write{};
+
+	std::array<T, (std::size_t)N> data{};
+
+	index_type m_next_read{};
+	index_type m_next_write{};
 
 	static index_type next( index_type current ) { return ( current + 1 ) % N; }
 
+public:
+	constexpr circular_buffer() = default;
 	void push_back( const T& value )
 	{
-		data[(std::size_t)next_write] = value;
-		next_write					  = next( next_write );
+		data[(std::size_t)m_next_write] = value;
+		m_next_write					  = next( m_next_write );
 	};
 
 	T pop_front()
 	{
-		auto ti   = next_read;
-		next_read = next( next_read );
+		const auto ti   = m_next_read;
+		m_next_read = next( m_next_read );
 		return data[(std::size_t)ti];
 	};
 
 	void pop_front( T& out )
 	{
-		out		  = data[(std::size_t)next_read];
-		next_read = next( next_read );
+		out		  = data[(std::size_t)m_next_read];
+		m_next_read = next( m_next_read );
 	};
 
-	int size() const {
-		if( next_write >= next_read )
-			return next_write - next_read;
+	constexpr auto operator[]( int i )		 { return data[( m_next_read + i ) % N]; }
+	constexpr auto operator[]( int i ) const { return data[( m_next_read + i ) % N]; }
+
+	constexpr int size() const
+	{
+		if( m_next_write >= m_next_read )
+			return m_next_write - m_next_read;
 		else
-			return next_write + N - next_read;
+			return m_next_write + N - m_next_read;
 	}
+
+	constexpr bool empty() const { return size() == 0; }
 };
 
 } // namespace mart

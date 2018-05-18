@@ -2,6 +2,9 @@
 
 #include <catch2/catch.hpp>
 
+// check if buffer can be used as part of a constexpr variable
+constexpr mart::circular_buffer<int, 10> buffer;
+
 TEST_CASE("circular_buffer_various", "[circular_buffer]")
 {
 	mart::circular_buffer<int,10> buffer;
@@ -32,7 +35,15 @@ TEST_CASE("circular_buffer_various", "[circular_buffer]")
 	buffer.push_back( 11 );
 	buffer.push_back( 12 );
 	buffer.push_back( 13 );
+
 	CHECK( buffer.size() == 6 );
+	CHECK( buffer[0] == 8 );
+	CHECK( buffer[1] == 9 );
+	CHECK( buffer[2] == 10 );
+	CHECK( buffer[3] == 11 );
+	CHECK( buffer[4] == 12 );
+	CHECK( buffer[5] == 13 );
+
 	CHECK( buffer.pop_front() == 8 );
 	CHECK( buffer.pop_front() == 9 );
 	CHECK( buffer.pop_front() == 10 );
@@ -40,4 +51,5 @@ TEST_CASE("circular_buffer_various", "[circular_buffer]")
 	CHECK( buffer.pop_front() == 12 );
 	CHECK( buffer.pop_front() == 13 );
 	CHECK( buffer.size() == 0 );
+	CHECK( buffer.empty() );
 }
