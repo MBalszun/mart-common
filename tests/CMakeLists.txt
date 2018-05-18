@@ -23,13 +23,16 @@ else()
 	target_compile_options(testing_mart-common PRIVATE -Wall -Wextra)
 endif()
 
+## Make ctest run build.
+# idea taken from https://stackoverflow.com/questions/733475/cmake-ctest-make-test-doesnt-build-tests
+# TODO: DOES NOT WORK with MSVC open folder (${CMAKE_COMMAND} seems to be the problem, but a plain "cmake" doesn't pass the correct incldue directories)
 
-enable_testing()
-
-include(libs/catch2/ParseAndAddCatchTests.cmake)
+ADD_TEST(NAME ctest_build_test_code COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target testing_mart-common)
 
 set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS ON)
 set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME OFF)
+
+include(libs/catch2/ParseAndAddCatchTests.cmake)
 
 ParseAndAddCatchTests(testing_mart-common)
 
