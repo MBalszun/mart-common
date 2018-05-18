@@ -14,9 +14,8 @@ build_7:
   script:
     - mkdir -p build
     - cd build
-    - cmake ..
+    - cmake .. -DMART_COMMON_INCLUDE_TESTS=ON
     - make all
-    - make testing_mart-common
     - ctest .
 
 build_latest:
@@ -25,7 +24,7 @@ build_latest:
   script:
     - mkdir -p build
     - cd build
-    - cmake ..
+    - cmake .. -DMART_COMMON_INCLUDE_TESTS=ON
     - make all
     - make testing_mart-common
     - ctest .

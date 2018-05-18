@@ -29,7 +29,6 @@ install:
 script:
   - export CXX=g++-7
   - mkdir -p build && cd build
-  - cmake ..
+  - cmake .. -DMART_COMMON_INCLUDE_TESTS=ON
   - make all
-  - make testing_mart-common
   - ctest .
