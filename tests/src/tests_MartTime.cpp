@@ -39,7 +39,7 @@ TEST_CASE( "MartTime_dummy", "[MartTime]" )
 
 	for( mart::PeriodicScheduler sched( 500_us ); sched.loopCnt() < 3; sched.sleep() ) {
 
-		CHECK( sched.invocationCnt() == sched.loopCnt() + 1 );
+		CHECK( sched.invocationCnt() == (std::size_t) (sched.loopCnt() + 1) );
 		[[maybe_unused]] auto time1 = sched.getNextWakeTime();
 		[[maybe_unused]] auto time2 = sched.remainingIntervalTime();
 		[[maybe_unused]] auto time3 = sched.runtime();
