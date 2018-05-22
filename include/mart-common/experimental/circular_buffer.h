@@ -52,7 +52,7 @@ public:
 	{
 		const auto ti   = m_next_read;
 		m_next_read = next( m_next_read );
-		return data[(std::size_t)ti];
+		return std::move( data[(std::size_t)ti] );
 	};
 
 	void pop_front( T& out )

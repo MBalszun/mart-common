@@ -3,7 +3,7 @@
 #include <catch2/catch.hpp>
 
 // check if buffer can be used as part of a constexpr variable
-constexpr mart::circular_buffer<int, 10> buffer;
+constexpr mart::circular_buffer<int, 10> cxpr_buffer;
 
 TEST_CASE("circular_buffer_various", "[circular_buffer]")
 {
