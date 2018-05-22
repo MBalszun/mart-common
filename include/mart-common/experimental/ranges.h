@@ -410,7 +410,7 @@ constexpr bool can_perform_arithmetic( T* )
 }
 
 template<class T, class = decltype( static_cast<std::ptrdiff_t>( ( T{} - T{} ) / T{} ) )>
-constexpr bool can_perform_arithmetic( nullptr_t )
+constexpr bool can_perform_arithmetic( std::nullptr_t )
 {
 	return true;
 }
