@@ -55,7 +55,7 @@ template <class T>
 using Vec4D = Vec<T, 4>;
 
 template <class T, int N>
-using Matrix = Vec<Vec<T,N>,N>; //each vector is a colum
+using Matrix = Vec<Vec<T,N>,N>; //each vector is a row
 
 //some metaprogramming stuff
 namespace mp{
@@ -167,10 +167,6 @@ struct Vec<T,2> {
 	using square_type = decltype(std::declval<T>()*std::declval<T>());
 	T x;
 	T y;
-	//c++14:
-	//	constexpr Vec(std::initializer_list<T> init){
-	//		std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
-	//	}
 
 	//### Data access ###
 	constexpr T &operator[](int idx)
