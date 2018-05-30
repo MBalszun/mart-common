@@ -164,6 +164,16 @@ auto find_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
 	return std::find_if( c.begin(), c.end(), p );
 }
 
+template<class C, class UnaryPredicate>
+auto find_last_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
+{
+	auto last = c.end();
+	for( auto it = mart::find_if( c, p ); it != c.end(); it = std::find_if( std::next(it), c.end(), p ) ) {
+		last = it;
+	}
+	return last;
+}
+
 template< class C, class V >
 auto find_ex( C&& c, const V& value ) -> mart::EndAwareIterator< decltype( c.begin() ) >
 {
