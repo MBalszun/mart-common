@@ -17,7 +17,6 @@
 
 #include <tuple>
 
-
 namespace mart {
 
 using std::get;

@@ -15,8 +15,9 @@
  *
  */
 
-#include <memory>
 #include "type_traits.h"
+
+#include <memory>
 
 namespace mart {
 

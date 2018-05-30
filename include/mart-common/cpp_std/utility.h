@@ -18,13 +18,12 @@
 #include <utility>
 
 namespace mart {
-	using std::exchange;
-
-	using std::integer_sequence;
-	using std::index_sequence;
-	using std::make_integer_sequence;
-	using std::make_index_sequence;
-	using std::index_sequence_for;
-}
+using std::exchange;
+using std::index_sequence;
+using std::index_sequence_for;
+using std::integer_sequence;
+using std::make_index_sequence;
+using std::make_integer_sequence;
+} // namespace mart
 
 #endif

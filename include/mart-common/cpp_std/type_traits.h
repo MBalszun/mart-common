@@ -16,17 +16,15 @@
  */
 
 #include <type_traits>
-#include <algorithm>
-
 
 namespace mart {
 
+using std::common_type_t;
+using std::conditional_t;
 using std::enable_if_t;
 using std::remove_extent_t;
-using std::conditional_t;
-using std::underlying_type_t;
-using std::common_type_t;
 using std::remove_reference_t;
+using std::underlying_type_t;
 
 /*####### signed/unsigned ##################*/
 
@@ -35,16 +33,14 @@ using std::make_unsigned_t;
 
 /*####### remove cv-qualifiers ##################*/
 
-using std::remove_cv_t;
 using std::remove_const_t;
+using std::remove_cv_t;
 using std::remove_volatile_t;
 
-
 /*####### add cv-qualifiers ##################*/
-using std::add_cv_t;
 using std::add_const_t;
+using std::add_cv_t;
 using std::add_volatile_t;
-
 
 using std::decay_t;
 
