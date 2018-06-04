@@ -34,7 +34,7 @@ namespace mart {
 template <class T, class U>
 inline constexpr T narrow_cast(U u) noexcept
 {
-	static_assert(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value, "Narrow cast can only be used for arithmetic types");
+	static_assert(std::is_arithmetic<T>::value, "Narrow cast can only be used for arithmetic types");
 	return static_cast<T>(u);
 }
 
