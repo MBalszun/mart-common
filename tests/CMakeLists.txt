@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(mart-common_testing)
 
+option(MART_COMMON_RUN_BENCHMARKS "run benchmarks as part of unit_test source" OFF)
+
 include_directories(libs)
 file(GLOB_RECURSE TEST_RCS tests_*.cpp)
 
@@ -15,6 +17,10 @@ add_executable(testing_mart-common
 find_package(Threads REQUIRED)
 
 target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads)
+
+if(MART_COMMON_RUN_BENCHMARKS)
+	target_compile_definitions(testing_mart-common PRIVATE /DMART_COMMON_RUN_BENCHMARK)
+endif()
 
 if(MSVC)
 	string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -45,4 +51,10 @@ include(libs/catch2/ParseAndAddCatchTests.cmake)
 
 ParseAndAddCatchTests(testing_mart-common)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+	include(libs/CodeCoverage.cmake)
+	APPEND_COVERAGE_COMPILER_FLAGS()
+	set(COVERAGE_EXCLUDES '/usr/include/*' '${PROJECT_SOURCE_DIR}/*')
+	setup_target_for_coverage(NAME testing_mart-common_coverage EXECUTABLE testing_mart-common DEPENDENCIES testing_mart-common)
+endif()
 
