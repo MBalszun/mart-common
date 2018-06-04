@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 
+#include "./testranges.h"
 #include <mart-common/cpp_std/execution.h>
 
 TEST_CASE( "algo_sort_range_is_sorted_after_sorting", "[algorithm][sort]" )
@@ -37,4 +38,103 @@ TEST_CASE( "algo_sort_range_is_reverse_sorted_after_parallel_reverse_sorting", "
 
 	mart::sort( mart::execution::par, v, std::greater<>{} );
 	CHECK( mart::is_sorted( v, std::greater<>{} ) );
+}
+
+TEST_CASE( "sort_compare_mart_output_to_std_output", "[algoriths][sort]" )
+{
+	for( auto&& rng1 : test_ranges ) {
+		auto cpy_mart = rng1;
+		auto cpy_std  = rng1;
+
+		CHECK( mart::is_sorted( cpy_mart ) == std::is_sorted( cpy_std.begin(), cpy_std.end() ) );
+		CHECK( mart::is_sorted_until( cpy_std ) == std::is_sorted_until( cpy_std.begin(), cpy_std.end() ) );
+
+		mart::sort( cpy_mart );
+		std::sort( cpy_std.begin(), cpy_std.end() );
+
+		CHECK( cpy_mart == cpy_std );
+		CHECK( mart::is_sorted( cpy_mart ) == std::is_sorted( cpy_std.begin(), cpy_std.end() ) );
+		for( auto cmp : comps ) {
+
+			CHECK( mart::is_sorted_until( cpy_mart, cmp ) - cpy_mart.begin()
+				   == std::is_sorted_until( cpy_std.begin(), cpy_std.end(), cmp ) - cpy_std.begin() );
+
+			mart::sort( cpy_mart, cmp );
+			std::sort( cpy_std.begin(), cpy_std.end(), cmp );
+
+			CHECK( cpy_mart == cpy_std );
+			CHECK( mart::is_sorted( cpy_mart, cmp ) == std::is_sorted( cpy_std.begin(), cpy_std.end(), cmp ) );
+		}
+	}
+}
+
+TEST_CASE( "stable_sort_compare_mart_output_to_std_output", "[algoriths][stable_sort]" )
+{
+	for( auto&& rng1 : test_ranges ) {
+		auto cpy_mart = rng1;
+		auto cpy_std  = rng1;
+
+		mart::stable_sort( cpy_mart );
+		std::stable_sort( cpy_std.begin(), cpy_std.end() );
+
+		CHECK( cpy_mart == cpy_std );
+
+		for( auto cmp : comps ) {
+
+			mart::stable_sort( cpy_mart, cmp );
+			std::stable_sort( cpy_std.begin(), cpy_std.end(), cmp );
+
+			CHECK( cpy_mart == cpy_std );
+		}
+	}
+}
+
+TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partial_sort]" )
+{
+	std::vector<std::size_t> indexes = {0, 1, 2, 3, 4, 5, 6, 7};
+	for( auto&& rng1 : test_ranges ) {
+		auto cpy_mart = rng1;
+		auto cpy_std  = rng1;
+
+		for( int i = 0; i < rng1.size(); ++i ) {
+			mart::partial_sort( cpy_mart, cpy_mart.begin() + i );
+			std::partial_sort( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end() );
+			CHECK( cpy_mart == cpy_std );
+		}
+
+		CHECK( cpy_mart == cpy_std );
+
+		for( auto cmp : comps ) {
+			for( int i = 0; i < rng1.size(); ++i ) {
+				mart::partial_sort( cpy_mart, cpy_mart.begin() + i, cmp );
+				std::partial_sort( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end(), cmp );
+				CHECK( cpy_mart == cpy_std );
+			}
+		}
+	}
+}
+
+TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_element]" )
+{
+	std::vector<std::size_t> indexes = {0, 1, 2, 3, 4, 5, 6, 7};
+	for( auto&& rng1 : test_ranges ) {
+		auto cpy_mart = rng1;
+		auto cpy_std  = rng1;
+
+		for( int i = 0; i < rng1.size(); ++i ) {
+			mart::nth_element( cpy_mart, cpy_mart.begin() + i );
+			std::nth_element( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end() );
+			CHECK( cpy_mart == cpy_std );
+		}
+
+		CHECK( cpy_mart == cpy_std );
+
+		for( auto cmp : comps ) {
+			for( int i = 0; i < rng1.size(); ++i ) {
+				mart::nth_element( cpy_mart, cpy_mart.begin() + i, cmp );
+				std::nth_element( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end(), cmp );
+				CHECK( cpy_mart == cpy_std );
+			}
+		}
+	}
 }
