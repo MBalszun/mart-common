@@ -46,17 +46,18 @@ TEST_CASE( "narrow_is_silent_when_no_loss", "[utils]" )
 	bool no_exception = true;
 	try {
 		auto i = mart::narrow<unsigned int>( 1000 );
+		CHECK( i == 1000u );
 	} catch( ... ) {
 		no_exception = false;
 	}
-	CHECK( no_exception == true );
+	CHECK( no_exception );
 }
 
 TEST_CASE( "narrow_throws_when_negative_int_is_cast_to_unsigned", "[utils]" )
 {
 	bool no_exception = true;
 	try {
-		auto i = mart::narrow<unsigned int>( -1000 );
+		[[maybe_unused]] auto i = mart::narrow<unsigned int>( -1000 );
 	} catch( ... ) {
 		no_exception = false;
 	}
