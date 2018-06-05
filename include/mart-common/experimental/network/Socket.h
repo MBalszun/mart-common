@@ -257,7 +257,7 @@ public:
 	template<class T>
 	int setsockopt(int level, int optname, const T& option_data)
 	{
-		auto opmem = mart::viewMemoryConst(option_data);
+		auto opmem = mart::asBytes(option_data);
 		return ::setsockopt(_handle, level, optname, opmem.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(opmem.size()));
 	}
 	template<class T>

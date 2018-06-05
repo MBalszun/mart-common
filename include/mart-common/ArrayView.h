@@ -325,39 +325,40 @@ auto view_elements_mutable(C& c) -> mart::ArrayView<mart::remove_const_t<mart::r
 }
 
 template <class T>
-/*c++14: [[deprecated]] */ constexpr MemoryView viewMemory( T& e )
-{
-	return MemoryView( reinterpret_cast<ByteType*>( &e ), sizeof( e ) );
-}
-
-template <class T>
-/*c++14: [[deprecated]] */ constexpr ConstMemoryView viewMemory( const T& e )
-{
-	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
-}
-
-template <class T>
-/*c++14: [[deprecated]] */ constexpr ConstMemoryView viewMemoryConst( const T& e )
-{
-	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
-}
-
-template <class T>
-constexpr MemoryView asBytes( T& e )
-{
-	return MemoryView( reinterpret_cast<ByteType*>( &e ), sizeof( e ) );
-}
-
-template <class T>
 constexpr ConstMemoryView asBytes( const T& e )
 {
 	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
 }
 
-template <class T>
+// This is actually the same as "asBytes", but might be usefull, when you have to make it clear in code
+template<class T>
 constexpr ConstMemoryView asConstBytes( const T& e )
 {
 	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
+}
+
+template<class T>
+constexpr MemoryView asMutableBytes( T& e )
+{
+	return MemoryView( reinterpret_cast<ByteType*>( &e ), sizeof( e ) );
+}
+
+template<class T>
+[[deprecated( "Use asMutableBytes instead" )]] constexpr MemoryView viewMemory( T& e )
+{
+	return asMutableBytes( e );
+}
+
+template<class T>
+[[deprecated( "Please use asBytes instead" )]] constexpr ConstMemoryView viewMemory( const T& e )
+{
+	return asBytes( e );
+}
+
+template<class T>
+[[deprecated( "Please use asBytes instead" )]] constexpr ConstMemoryView viewMemoryConst( const T& e )
+{
+	return asBytes( e );
 }
 
 template <class T>
@@ -371,21 +372,12 @@ auto copy_some( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> A
 template <class T>
 auto copy( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> ArrayView<mart::remove_const_t<T>>
 {
+	assert( src.size() <= dest.size() );
 	if( src.size() > dest.size() ) {
-		assert( false );
 		return ArrayView<mart::remove_const_t<T>>{};
 	}
 	std::copy_n(src.cbegin(), src.size() , dest.begin());
 	return dest.subview( src.size() );
-}
-
-template <class T>
-bool equal( ArrayView<T> l, ArrayView<T> r )
-{
-	if( l.size() != r.size() ) {
-		return false;
-	}
-	return std::equal( l.begin(), l.end(), r.begin() );
 }
 
 } // namespace mart

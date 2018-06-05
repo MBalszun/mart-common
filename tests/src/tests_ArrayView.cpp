@@ -64,12 +64,34 @@ TEST_CASE( "array_view_subview_throws_when_invalid_range_is_specified", "[ArrayV
 TEST_CASE( "array_view_copy_works_and_doesnt_collide_with_general_std_copy_wrapper", "[ArrayView]" )
 {
 	const std::vector<int> src = {-3, 1, 5, 6, 7, 8};
-	std::vector<int>	   dest( src.size() );
+	std::vector<int>	   dest( src.size() + 5 );
 
 	mart::ArrayView<const int> view_src( src );
 	mart::ArrayView<int>	   view_dest( dest );
 
-	mart::copy( view_src, view_dest );
+	auto rem = mart::copy( view_src, view_dest );
 
-	CHECK( mart::equal( view_src, view_dest ) );
+	CHECK( mart::equal( view_src, view_dest.subview( 0, view_src.size() ) ) );
+	CHECK( rem.size() == dest.size() - src.size() );
+}
+
+TEST_CASE( "asBytes", "[ArrayView]" )
+{
+	int		  i{1};
+	const int ci{2};
+
+	auto crange1 = mart::asBytes( i );
+	auto crange2 = mart::asConstBytes( i );
+	auto crange3 = mart::asBytes( ci );
+	auto range1  = mart::asMutableBytes( i );
+
+	static_assert( std::is_same_v<decltype( crange1 ), mart::ConstMemoryView> );
+	static_assert( std::is_same_v<decltype( crange2 ), mart::ConstMemoryView> );
+	static_assert( std::is_same_v<decltype( crange3 ), mart::ConstMemoryView> );
+	static_assert( std::is_same_v<decltype( range1 ), mart::MemoryView> );
+
+	CHECK( crange1.size() == sizeof( ci ) );
+	CHECK( crange2.size() == sizeof( ci ) );
+	CHECK( crange3.size() == sizeof( ci ) );
+	CHECK( range1.size() == sizeof( i ) );
 }

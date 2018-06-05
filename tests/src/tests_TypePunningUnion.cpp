@@ -37,7 +37,7 @@ TEST_CASE( "TypePunningUnion_dummy", "[TypePunningUnion]" )
 
 	my_union3 = S3{ 1.0,1.0,2.0 };
 	const S1 s1{2.0,2.0,3.0};
-	auto mem_view_s1 = mart::viewMemoryConst(s1);
+	auto mem_view_s1 = mart::asBytes(s1);
 
 	my_union3 = mem_view_s1;
 

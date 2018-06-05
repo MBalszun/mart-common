@@ -103,8 +103,8 @@ public:
 		_size = range.size();
 	}
 
-	mart::MemoryView	  all_bytes()		{ return mart::viewMemory(data); }
-	mart::ConstMemoryView all_bytes() const { return mart::viewMemoryConst(data); }
+	mart::MemoryView	  all_bytes()		{ return mart::asMutableBytes(data); }
+	mart::ConstMemoryView all_bytes() const { return mart::asBytes( data ); }
 
 	mart::MemoryView	  valid_bytes()		  { return all_bytes().subview(0, _size); }
 	mart::ConstMemoryView valid_bytes() const { return all_bytes().subview(0, _size); }
