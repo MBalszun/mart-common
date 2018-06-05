@@ -251,7 +251,7 @@ public:
 
 	value_type operator*() const
 	{
-#ifdef MSC_VER
+#ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 		// we have to suppress the warning about implicit conversion from ptrdiff_t to double here,
@@ -259,7 +259,7 @@ public:
 		// (so an explicit cast might result in the wrong type)
 #endif
 		return step * i + offset;
-#ifdef MSC_VER
+#ifdef _MSC_VER
 #pragma warning( pop )
 #endif
 	}
