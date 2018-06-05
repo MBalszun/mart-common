@@ -95,14 +95,14 @@ TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partia
 		auto cpy_mart = rng1;
 		auto cpy_std  = rng1;
 
-		for( int i = 0; i < rng1.size(); ++i ) {
+		for( auto i = 0u; i < rng1.size(); ++i ) {
 			mart::partial_sort( cpy_mart, cpy_mart.begin() + i );
 			std::partial_sort( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end() );
 			CHECK( cpy_mart == cpy_std );
 		}
 
 		for( auto cmp : comps ) {
-			for( int i = 0; i < rng1.size(); ++i ) {
+			for( auto i = 0u; i < rng1.size(); ++i ) {
 
 				mart::partial_sort( cpy_mart, cpy_mart.begin() + i, cmp );
 				std::partial_sort( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end(), cmp );
@@ -117,7 +117,7 @@ TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][p
 {
 	for( auto&& rng : test_ranges ) {
 
-		for( int i = 0; i < rng.size()*2; ++i ) {
+		for( auto i = 0u; i < rng.size() * 2; ++i ) {
 			std::vector<int> dest_mart( i );
 			std::vector<int> dest_std( i );
 
@@ -128,7 +128,7 @@ TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][p
 		}
 
 		for( auto cmp : comps ) {
-			for( int i = 0; i < rng.size(); ++i ) {
+			for( auto i = 0u; i < rng.size(); ++i ) {
 
 				std::vector<int> dest_mart( i );
 				std::vector<int> dest_std( i );
@@ -149,7 +149,7 @@ TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_ele
 		auto cpy_mart = rng1;
 		auto cpy_std  = rng1;
 
-		for( int i = 0; i < rng1.size(); ++i ) {
+		for( auto i = 0u; i < rng1.size(); ++i ) {
 			mart::nth_element( cpy_mart, cpy_mart.begin() + i );
 			std::nth_element( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end() );
 			CHECK( cpy_mart == cpy_std );
@@ -158,7 +158,7 @@ TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_ele
 		CHECK( cpy_mart == cpy_std );
 
 		for( auto cmp : comps ) {
-			for( int i = 0; i < rng1.size(); ++i ) {
+			for( auto i = 0u; i < rng1.size(); ++i ) {
 				mart::nth_element( cpy_mart, cpy_mart.begin() + i, cmp );
 				std::nth_element( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end(), cmp );
 				CHECK( cpy_mart == cpy_std );

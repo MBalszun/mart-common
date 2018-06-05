@@ -50,7 +50,7 @@ TEST_CASE( "TypePunningUnion_dummy", "[TypePunningUnion]" )
 	auto vb3 = my_union3.valid_bytes();
 	CHECK(vb3.size() == sizeof(S4));
 
-	S4 data = my_union3.as<S4>();
+	[[maybe_unused]] S4 data = my_union3.as<S4>();
 
 	mart::copy(mem_view_s1, ab3);
 	my_union3.set_active_range(ab3.subview(0, mem_view_s1.size()));
