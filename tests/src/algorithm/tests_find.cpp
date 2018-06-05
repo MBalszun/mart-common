@@ -6,35 +6,35 @@
 
 #include "./testranges.h"
 
-TEST_CASE( "find_returns_iterator_to_element", "[algorithms][find]" )
+TEST_CASE( "find_returns_iterator_to_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find( data, 2 );
 	CHECK( it == data.begin() + 1 );
 }
 
-TEST_CASE( "find_returns_end_iterator_if_element_doesnt_exist", "[algorithms][find]" )
+TEST_CASE( "find_returns_end_iterator_if_element_doesnt_exist", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find( data, 0 );
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_returns_end_iterator_on_empty_range", "[algorithms][find]" )
+TEST_CASE( "find_returns_end_iterator_on_empty_range", "[algorithm][find]" )
 {
 	std::array<int, 0> data{};
 	auto			   it = mart::find( data, 0 );
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_finds_first_element", "[algorithms][find]" )
+TEST_CASE( "find_finds_first_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find( data, 1 );
 	CHECK( it == data.begin() );
 }
 
-TEST_CASE( "find_finds_last_element", "[algorithms][find]" )
+TEST_CASE( "find_finds_last_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find( data, 5 );
@@ -42,35 +42,35 @@ TEST_CASE( "find_finds_last_element", "[algorithms][find]" )
 }
 
 /* find_if*/
-TEST_CASE( "find_if_returns_iterator_to_element", "[algorithms][find]" )
+TEST_CASE( "find_if_returns_iterator_to_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if( data, []( auto e ) { return e == 2; } );
 	CHECK( it == data.begin() + 1 );
 }
 
-TEST_CASE( "find_if_returns_end_iterator_if_element_doesnt_exist", "[algorithms][find]" )
+TEST_CASE( "find_if_returns_end_iterator_if_element_doesnt_exist", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if( data, []( auto e ) { return e == 0; } );
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_if_returns_end_iterator_on_empty_range", "[algorithms][find]" )
+TEST_CASE( "find_if_returns_end_iterator_on_empty_range", "[algorithm][find]" )
 {
 	std::array<int, 0> data{};
 	auto			   it = mart::find_if( data, []( auto e ) { return e == 0; } );
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_if_finds_first_element", "[algorithms][find]" )
+TEST_CASE( "find_if_finds_first_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if( data, []( auto e ) { return e == 1; } );
 	CHECK( it == data.begin() );
 }
 
-TEST_CASE( "find_if_finds_last_element", "[algorithms][find]" )
+TEST_CASE( "find_if_finds_last_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if( data, []( auto e ) { return e == 5; } );
@@ -78,7 +78,7 @@ TEST_CASE( "find_if_finds_last_element", "[algorithms][find]" )
 }
 
 /* find_if_ex*/
-TEST_CASE( "find_if_ex_returns_iterator_to_element", "[algorithms][find]" )
+TEST_CASE( "find_if_ex_returns_iterator_to_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if_ex( data, []( auto e ) { return e == 2; } );
@@ -86,7 +86,7 @@ TEST_CASE( "find_if_ex_returns_iterator_to_element", "[algorithms][find]" )
 	CHECK( it == data.begin() + 1 );
 }
 
-TEST_CASE( "find_if_ex_returns_end_iterator_if_element_doesnt_exist", "[algorithms][find]" )
+TEST_CASE( "find_if_ex_returns_end_iterator_if_element_doesnt_exist", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if_ex( data, []( auto e ) { return e == 0; } );
@@ -94,7 +94,7 @@ TEST_CASE( "find_if_ex_returns_end_iterator_if_element_doesnt_exist", "[algorith
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_if_ex_returns_end_iterator_on_empty_range", "[algorithms][find]" )
+TEST_CASE( "find_if_ex_returns_end_iterator_on_empty_range", "[algorithm][find]" )
 {
 	std::array<int, 0> data{};
 	auto			   it = mart::find_if_ex( data, []( auto e ) { return e == 0; } );
@@ -102,7 +102,7 @@ TEST_CASE( "find_if_ex_returns_end_iterator_on_empty_range", "[algorithms][find]
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_if_ex_finds_first_element", "[algorithms][find]" )
+TEST_CASE( "find_if_ex_finds_first_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if_ex( data, []( auto e ) { return e == 1; } );
@@ -110,7 +110,7 @@ TEST_CASE( "find_if_ex_finds_first_element", "[algorithms][find]" )
 	CHECK( it == data.begin() );
 }
 
-TEST_CASE( "find_if_ex_finds_last_element", "[algorithms][find]" )
+TEST_CASE( "find_if_ex_finds_last_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	auto			   it = mart::find_if_ex( data, []( auto e ) { return e == 5; } );
@@ -120,7 +120,7 @@ TEST_CASE( "find_if_ex_finds_last_element", "[algorithms][find]" )
 
 /* find_last_if*/
 
-TEST_CASE( "find_last_if_finds_last_matching_element", "[algorithms][find]" )
+TEST_CASE( "find_last_if_finds_last_matching_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{5, 2, 5, 5, 4};
 
@@ -128,7 +128,7 @@ TEST_CASE( "find_last_if_finds_last_matching_element", "[algorithms][find]" )
 	CHECK( it == data.begin() + 3 );
 }
 
-TEST_CASE( "find_last_if_returns_end_when_no_match", "[algorithms][find]" )
+TEST_CASE( "find_last_if_returns_end_when_no_match", "[algorithm][find]" )
 {
 	std::array<int, 5> data{1, 2, 3, 3, 4};
 
@@ -136,7 +136,7 @@ TEST_CASE( "find_last_if_returns_end_when_no_match", "[algorithms][find]" )
 	CHECK( it == data.end() );
 }
 
-TEST_CASE( "find_last_if_returns_fist_element", "[algorithms][find]" )
+TEST_CASE( "find_last_if_returns_fist_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{5, 2, 3, 3, 4};
 
@@ -144,7 +144,7 @@ TEST_CASE( "find_last_if_returns_fist_element", "[algorithms][find]" )
 	CHECK( it == data.begin() );
 }
 
-TEST_CASE( "find_end_returns_fist_element", "[algorithms][find]" )
+TEST_CASE( "find_end_returns_fist_element", "[algorithm][find]" )
 {
 	std::array<int, 5> data{5, 2, 3, 3, 4};
 
@@ -152,7 +152,7 @@ TEST_CASE( "find_end_returns_fist_element", "[algorithms][find]" )
 	CHECK( it == data.begin() );
 }
 
-TEST_CASE( "find_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "find_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -163,7 +163,7 @@ TEST_CASE( "find_compare_mart_output_to_std_output", "[algoriths][find]" )
 	}
 }
 
-TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -172,7 +172,7 @@ TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algoriths][find]" )
 	}
 }
 
-TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -181,7 +181,7 @@ TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algoriths][find]" 
 	}
 }
 
-TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -191,7 +191,7 @@ TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algoriths][find]" 
 	}
 }
 
-TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -205,7 +205,7 @@ TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algoriths][find]
 	}
 }
 
-TEST_CASE( "adjacent_find_compare_mart_output_to_std_output", "[algoriths][find]" )
+TEST_CASE( "adjacent_find_compare_mart_output_to_std_output", "[algorithm][find]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		CHECK( mart::adjacent_find( rng1 ) == std::adjacent_find( rng1.begin(), rng1.end() ) );

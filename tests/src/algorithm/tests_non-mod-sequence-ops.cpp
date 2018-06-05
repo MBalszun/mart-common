@@ -4,7 +4,7 @@
 
 #include "./testranges.h"
 
-TEST_CASE( "none_of_compare_mart_output_to_std_output", "[algoriths][none_of]" )
+TEST_CASE( "none_of_compare_mart_output_to_std_output", "[algorithm][none_of]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -13,7 +13,7 @@ TEST_CASE( "none_of_compare_mart_output_to_std_output", "[algoriths][none_of]" )
 	}
 }
 
-TEST_CASE( "any_of_compare_mart_output_to_std_output", "[algoriths][any_of]" )
+TEST_CASE( "any_of_compare_mart_output_to_std_output", "[algorithm][any_of]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -22,7 +22,7 @@ TEST_CASE( "any_of_compare_mart_output_to_std_output", "[algoriths][any_of]" )
 	}
 }
 
-TEST_CASE( "all_of_compare_mart_output_to_std_output", "[algoriths][all_of]" )
+TEST_CASE( "all_of_compare_mart_output_to_std_output", "[algorithm][all_of]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -31,7 +31,7 @@ TEST_CASE( "all_of_compare_mart_output_to_std_output", "[algoriths][all_of]" )
 	}
 }
 
-TEST_CASE( "count_if_compare_mart_output_to_std_output", "[algoriths][count_if]" )
+TEST_CASE( "count_if_compare_mart_output_to_std_output", "[algorithm][count_if]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -40,7 +40,7 @@ TEST_CASE( "count_if_compare_mart_output_to_std_output", "[algoriths][count_if]"
 	}
 }
 
-TEST_CASE( "count_compare_mart_output_to_std_output", "[algoriths][count]" )
+TEST_CASE( "count_compare_mart_output_to_std_output", "[algorithm][count]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -51,7 +51,7 @@ TEST_CASE( "count_compare_mart_output_to_std_output", "[algoriths][count]" )
 	}
 }
 
-TEST_CASE( "search_compare_mart_output_to_std_output", "[algoriths][search]" )
+TEST_CASE( "search_compare_mart_output_to_std_output", "[algorithm][search]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -64,7 +64,7 @@ TEST_CASE( "search_compare_mart_output_to_std_output", "[algoriths][search]" )
 	}
 }
 
-TEST_CASE( "search_n_compare_mart_output_to_std_output", "[algoriths][search]" )
+TEST_CASE( "search_n_compare_mart_output_to_std_output", "[algorithm][search]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -82,7 +82,7 @@ TEST_CASE( "search_n_compare_mart_output_to_std_output", "[algoriths][search]" )
 	}
 }
 
-TEST_CASE( "for_each_compare_mart_output_to_std_output", "[algoriths][search]" )
+TEST_CASE( "for_each_compare_mart_output_to_std_output", "[algorithm][search]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		std::vector<int> accum_mart;
@@ -93,7 +93,7 @@ TEST_CASE( "for_each_compare_mart_output_to_std_output", "[algoriths][search]" )
 	}
 }
 
-TEST_CASE( "mismatch_compare_mart_output_to_std_output", "[algoriths][search]" )
+TEST_CASE( "mismatch_compare_mart_output_to_std_output", "[algorithm][search]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {

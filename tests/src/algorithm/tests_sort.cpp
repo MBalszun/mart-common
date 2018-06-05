@@ -40,7 +40,7 @@ TEST_CASE( "algo_sort_range_is_reverse_sorted_after_parallel_reverse_sorting", "
 	CHECK( mart::is_sorted( v, std::greater<>{} ) );
 }
 
-TEST_CASE( "sort_compare_mart_output_to_std_output", "[algoriths][sort]" )
+TEST_CASE( "sort_compare_mart_output_to_std_output", "[algorithm][sort]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;
@@ -68,7 +68,7 @@ TEST_CASE( "sort_compare_mart_output_to_std_output", "[algoriths][sort]" )
 	}
 }
 
-TEST_CASE( "stable_sort_compare_mart_output_to_std_output", "[algoriths][stable_sort]" )
+TEST_CASE( "stable_sort_compare_mart_output_to_std_output", "[algorithm][stable_sort]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;
@@ -89,7 +89,7 @@ TEST_CASE( "stable_sort_compare_mart_output_to_std_output", "[algoriths][stable_
 	}
 }
 
-TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partial_sort]" )
+TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algorithm][partial_sort]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;
@@ -113,7 +113,7 @@ TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partia
 	}
 }
 
-TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][partial_sort_copy]" )
+TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algorithm][partial_sort_copy]" )
 {
 	for( auto&& rng : test_ranges ) {
 
@@ -142,7 +142,7 @@ TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][p
 	}
 }
 
-TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_element]" )
+TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algorithm][nth_element]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;

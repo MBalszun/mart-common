@@ -4,7 +4,7 @@
 
 #include <array>
 
-TEST_CASE( "generate_fills_array", "[algorithms][generate]" )
+TEST_CASE( "generate_fills_array", "[algorithm][generate]" )
 {
 	auto gen1 = [i = 0] () mutable { return i++; };
 	auto gen2 = gen1;

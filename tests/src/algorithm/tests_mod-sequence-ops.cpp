@@ -6,7 +6,7 @@
 
 #include "./testranges.h"
 
-TEST_CASE( "copy_compare_mart_output_to_std_output", "[algoriths][copy]" )
+TEST_CASE( "copy_compare_mart_output_to_std_output", "[algorithm][copy]" )
 {
 	for( auto&& rng : test_ranges ) {
 		std::vector<int> dest_mart;
@@ -18,7 +18,7 @@ TEST_CASE( "copy_compare_mart_output_to_std_output", "[algoriths][copy]" )
 	}
 }
 
-TEST_CASE( "move_compare_mart_output_to_std_output", "[algoriths][move]" )
+TEST_CASE( "move_compare_mart_output_to_std_output", "[algorithm][move]" )
 {
 	for( auto&& rng : test_ranges ) {
 		std::vector<int> src_mart( rng );
@@ -32,7 +32,7 @@ TEST_CASE( "move_compare_mart_output_to_std_output", "[algoriths][move]" )
 	}
 }
 
-TEST_CASE( "copy_if_compare_mart_output_to_std_output", "[algoriths][copy_if]" )
+TEST_CASE( "copy_if_compare_mart_output_to_std_output", "[algorithm][copy_if]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto pred : unary_preds ) {
@@ -46,7 +46,7 @@ TEST_CASE( "copy_if_compare_mart_output_to_std_output", "[algoriths][copy_if]" )
 	}
 }
 
-TEST_CASE( "fill_compare_mart_output_to_std_output", "[algoriths][fill]" )
+TEST_CASE( "fill_compare_mart_output_to_std_output", "[algorithm][fill]" )
 {
 	for( int i = -5; i < 5; i++ ) {
 		std::vector<int> rng_mart( 10 );
@@ -57,7 +57,7 @@ TEST_CASE( "fill_compare_mart_output_to_std_output", "[algoriths][fill]" )
 	}
 }
 
-TEST_CASE( "fill_n_compare_mart_output_to_std_output", "[algoriths][fill_n]" )
+TEST_CASE( "fill_n_compare_mart_output_to_std_output", "[algorithm][fill_n]" )
 {
 	for( int v = -5; v < 5; v++ ) {
 		std::vector<int> rng_mart( 10 );
@@ -70,7 +70,7 @@ TEST_CASE( "fill_n_compare_mart_output_to_std_output", "[algoriths][fill_n]" )
 	}
 }
 
-TEST_CASE( "generate_compare_mart_output_to_std_output", "[algoriths][generate]" )
+TEST_CASE( "generate_compare_mart_output_to_std_output", "[algorithm][generate]" )
 {
 
 	for( auto&& gen : generators ) {
@@ -84,7 +84,7 @@ TEST_CASE( "generate_compare_mart_output_to_std_output", "[algoriths][generate]"
 	}
 }
 
-TEST_CASE( "generate_n_compare_mart_output_to_std_output", "[algoriths][generate_n]" )
+TEST_CASE( "generate_n_compare_mart_output_to_std_output", "[algorithm][generate_n]" )
 {
 	for( auto&& gen : generators ) {
 		std::vector<int> rng_mart( 10 );
