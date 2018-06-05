@@ -36,12 +36,6 @@ namespace mart {
 
 /*############## Wrapper around standard algorithms ################ */
 
-//template<class ExecutionPolicy, class RNG, class F>
-//void for_each( RNG&& rng, F f )
-//{
-//	std::for_each( rng.begin(), rng.end(), std::move( f ) );
-//}
-
 template<class ExecutionPolicy, class RNG, class F>
 void for_each( ExecutionPolicy&& p, RNG&& rng, F f )
 {
@@ -52,12 +46,6 @@ void for_each( ExecutionPolicy&& p, RNG&& rng, F f )
 	(void)p;
 #endif
 }
-
-//template<class C>
-//void sort( C& c )
-//{
-//	std::sort( c.begin(), c.end() );
-//}
 
 template<class C, class Comp, class = std::enable_if_t<!mart::is_execution_policy_v<std::decay_t<C>>>>
 void sort( C& c, Comp comp )
@@ -95,18 +83,6 @@ auto partition( C& c, Pred p ) -> decltype( c.begin() )
 	return std::partition( c.begin(), c.end(), p );
 }
 
-//template<class C, class It, class Pred>
-//void nth_element( C& c, It nth_pos, Pred p )
-//{
-//	return std::nth_element( c.begin(), nth_pos, c.end(), p );
-//}
-//
-//template<class C, class It>
-//void nth_element( C& c, It nth_pos )
-//{
-//	return std::nth_element( c.begin(), nth_pos, c.end() );
-//}
-
 template<class C>
 auto unique( C& c ) -> decltype( c.begin() )
 {
@@ -131,30 +107,11 @@ T accumulate( const C& c, T init, BinaryOperation op )
 	return std::accumulate( c.begin(), c.end(), init, op );
 }
 
-//template<class R>
-//bool is_sorted( const R& r )
-//{
-//	return std::is_sorted( r.begin(), r.end() );
-//}
-
 template<class R1, class R2>
 bool equal( const R1& r1, const R2& r2 )
 {
 	return std::equal( r1.begin(), r2.end(), r2.begin(), r2.end() );
 }
-
-// find
-//template<class C, class V>
-//auto find( C&& c, const V& value ) -> decltype( c.begin() )
-//{
-//	return std::find( c.begin(), c.end(), value );
-//}
-//
-//template<class C, class UnaryPredicate>
-//auto find_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
-//{
-//	return std::find_if( c.begin(), c.end(), p );
-//}
 
 template<class C, class UnaryPredicate>
 auto find_last_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
@@ -199,18 +156,6 @@ auto wrapped_find_if_ex( C&& c, decltype( c.cbegin() ) start, UnaryPredicate p )
 	return {wrapped_find_if( c, start, p ), c};
 }
 
-//template<class C1, class C2>
-//auto find_first_of( C1&& in1, const C2& in2 ) -> decltype( std::begin( in1 ) )
-//{
-//	return std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end() );
-//}
-//
-//template<class C1, class C2, class BinaryPredicate>
-//auto find_first_of( C1&& in1, const C2& in2, BinaryPredicate p ) -> decltype( std::begin( in1 ) )
-//{
-//	return std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p );
-//}
-
 template<class C1, class C2>
 auto find_first_of_ex( C1&& in1, C2&& in2 ) -> mart::EndAwareIterator<decltype( std::begin( in1 ) )>
 {
@@ -234,18 +179,6 @@ auto lower_bound( C&& c, const T& value, Compare cmp ) -> decltype( std::begin( 
 {
 	return std::lower_bound( std::begin( c ), std::end( c ), value, cmp );
 }
-
-//template<class C, class Pred>
-//bool all_of( const C& c, Pred p )
-//{
-//	return std::all_of( c.begin(), c.end(), p );
-//}
-//
-//template<class C, class Pred>
-//bool any_of( const C& c, Pred p )
-//{
-//	return std::any_of( c.begin(), c.end(), p );
-//}
 
 template<class C>
 bool any_of( const C& c )

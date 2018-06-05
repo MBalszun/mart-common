@@ -144,7 +144,6 @@ TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][p
 
 TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_element]" )
 {
-	std::vector<std::size_t> indexes = {0, 1, 2, 3, 4, 5, 6, 7};
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;
 		auto cpy_std  = rng1;
@@ -154,8 +153,6 @@ TEST_CASE( "nth_element_compare_mart_output_to_std_output", "[algoriths][nth_ele
 			std::nth_element( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end() );
 			CHECK( cpy_mart == cpy_std );
 		}
-
-		CHECK( cpy_mart == cpy_std );
 
 		for( auto cmp : comps ) {
 			for( auto i = 0u; i < rng1.size(); ++i ) {
