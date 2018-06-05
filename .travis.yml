@@ -26,3 +26,6 @@ script:
   - cmake .. -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON
   - make all
   - ctest .
+  - make testing_mart-common_coverage
+  - bash <(curl -s https://codecov.io/bash)
+
