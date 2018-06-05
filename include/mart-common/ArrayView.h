@@ -71,7 +71,7 @@ namespace mart {
  *
  */
 
-template <class T>
+template<class T>
 class ArrayView;
 
 using ByteType = uint8_t;
@@ -79,48 +79,44 @@ using ByteType = uint8_t;
 using MemoryView	  = ArrayView<ByteType>;
 using ConstMemoryView = ArrayView<const ByteType>;
 
-template <class T>
+template<class T>
 class ArrayView : public ArrayViewAdaptor<T, ArrayView<T>> {
 public:
-	using value_type	= typename ArrayViewAdaptor<T, ArrayView<T>>::value_type;
-	using size_type		= typename ArrayViewAdaptor<T, ArrayView<T>>::size_type;
-	using pointer		= typename ArrayViewAdaptor<T, ArrayView<T>>::pointer;
-	using const_pointer = typename ArrayViewAdaptor<T, ArrayView<T>>::const_pointer;
-	using iterator		= typename ArrayViewAdaptor<T, ArrayView<T>>::iterator;
+	using value_type	 = typename ArrayViewAdaptor<T, ArrayView<T>>::value_type;
+	using size_type		 = typename ArrayViewAdaptor<T, ArrayView<T>>::size_type;
+	using pointer		 = typename ArrayViewAdaptor<T, ArrayView<T>>::pointer;
+	using const_pointer  = typename ArrayViewAdaptor<T, ArrayView<T>>::const_pointer;
+	using iterator		 = typename ArrayViewAdaptor<T, ArrayView<T>>::iterator;
 	using const_iterator = typename ArrayViewAdaptor<T, ArrayView<T>>::const_iterator;
 
 private:
 	/* ### Type traits short hands ### */
-	template <class IT>
+	template<class IT>
 	struct is_random_it {
 		static constexpr bool value = std::is_same<typename std::iterator_traits<IT>::iterator_category,
 												   std::random_access_iterator_tag>::value;
 	};
 
-	template <class IT>
+	template<class IT>
 	using enable_if_random_it_t = mart::enable_if_t<is_random_it<IT>::value>;
 
-	template <class U>
+	template<class U>
 	static constexpr auto is_compatible_container_helper( int )
 		-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == std::declval<U>().data() )
 	{
-		return
-			std::is_same<
-				typename std::iterator_traits<typename U::iterator>::iterator_category,
-				std::random_access_iterator_tag
-			>::value
-		 && (	 std::is_same<typename U::value_type, mart::remove_const_t<value_type>>::value
-			  || std::is_same<typename U::value_type,						value_type>::value
-			);
+		return std::is_same<typename std::iterator_traits<typename U::iterator>::iterator_category,
+							std::random_access_iterator_tag>::value
+			   && ( std::is_same<typename U::value_type, mart::remove_const_t<value_type>>::value
+					|| std::is_same<typename U::value_type, value_type>::value );
 	};
 
-	template <class U>
+	template<class U>
 	static constexpr auto is_compatible_container_helper( char ) -> bool
 	{
 		return false;
 	};
 
-	template <class U>
+	template<class U>
 	struct is_compatible_container {
 		/* IMPLEMENTATION NOTE:
 		 * There are two overloads of is_compatible_container_helper:
@@ -130,22 +126,22 @@ private:
 		 * If U doesn't have the member functions data() and size(), the first overload SFINAEs away,
 		 * leaving only the second one which always returns false
 		 *
-		 * If U has both member functions the first one winns as nullptr_t is an exact match, whereas U* needs a conversion.
-		 * The first one then checks if the container has the correct value type
+		 * If U has both member functions the first one winns as nullptr_t is an exact match, whereas U* needs a
+		 * conversion. The first one then checks if the container has the correct value type
 		 *
 		 */
 		static constexpr bool value = is_compatible_container_helper<U>( 0 );
 	};
 
-	template <class U, class K>
+	template<class U, class K>
 	struct transfer_constness {
 		using type = mart::conditional_t<std::is_const<U>::value, mart::add_const_t<K>, K>;
 	};
 
-	template <class U, class K>
+	template<class U, class K>
 	using transfer_constness_t = typename transfer_constness<U, K>::type;
 
-	//const ByteType if T is const, ByteType otherwise
+	// const ByteType if T is const, ByteType otherwise
 	using matching_byte_t = transfer_constness_t<T, ByteType>;
 
 public:
@@ -163,8 +159,8 @@ public:
 	 * Construction from a pair of random access iterators denoting a range
 	 * (like from calling v.begin() and v.end())
 	 */
-	template <class IT, class = enable_if_random_it_t<IT>> // FIXME: random iterator is not good enough (e.g. deque), we
-	constexpr ArrayView(IT start, IT end) noexcept		   // need c++17 contiguous iterator
+	template<class IT, class = enable_if_random_it_t<IT>> // FIXME: random iterator is not good enough (e.g. deque), we
+	constexpr ArrayView( IT start, IT end ) noexcept	  // need c++17 contiguous iterator
 		: _data( &start[0] )
 		, _size( end - start )
 	{
@@ -173,7 +169,7 @@ public:
 	/**
 	 * construction from a c-style array
 	 */
-	template <size_t N>
+	template<size_t N>
 	constexpr ArrayView( T ( &other )[N] ) noexcept
 		: _data( other )
 		, _size( N )
@@ -184,7 +180,7 @@ public:
 	 * construction from a container, in case T is not const (using SFINAE for disambiguation with the other
 	 * constructor).
 	 */
-	template <class U, class = mart::enable_if_t<!std::is_const<T>::value && is_compatible_container<U>::value>>
+	template<class U, class = mart::enable_if_t<!std::is_const<T>::value && is_compatible_container<U>::value>>
 	constexpr ArrayView( U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
@@ -194,7 +190,7 @@ public:
 	/**
 	 * construction from a container, in case T is const (using SFINAE for disambiguation with the other constructor).
 	 */
-	template <class U, class = mart::enable_if_t<std::is_const<T>::value && is_compatible_container<U>::value>>
+	template<class U, class = mart::enable_if_t<std::is_const<T>::value && is_compatible_container<U>::value>>
 	constexpr ArrayView( const U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
@@ -210,7 +206,7 @@ public:
 
 	/* #### view functions #### */
 	constexpr size_type length() const noexcept { return this->size(); }
-	constexpr bool		empty()  const noexcept { return this->size() == 0; }
+	constexpr bool		empty() const noexcept { return this->size() == 0; }
 
 	constexpr size_type size_inBytes() const noexcept { return _size * sizeof( value_type ); }
 
@@ -260,14 +256,16 @@ public:
 		return offset > _size ? ArrayView{} : ArrayView{_data + offset, _size - offset};
 	}
 
-	constexpr std::pair<ArrayView<T>, ArrayView<T>> split(size_t offset) const
+	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( size_t offset ) const
 	{
-		return _throwIfOffsetOutOfRange(offset), std::pair<ArrayView<T>, ArrayView<T>>{ ArrayView<T>{_data,offset}, ArrayView<T>{_data + offset,_size - offset} };
+		return _throwIfOffsetOutOfRange( offset ),
+			   std::pair<ArrayView<T>, ArrayView<T>>{ArrayView<T>{_data, offset},
+													 ArrayView<T>{_data + offset, _size - offset}};
 	}
 
-	constexpr std::pair<ArrayView<T>, ArrayView<T>> split(const_iterator splitpoint) const
+	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( const_iterator splitpoint ) const
 	{
-		return split(&*splitpoint - _data);
+		return split( &*splitpoint - _data );
 	}
 
 	constexpr bool isValid() const noexcept { return _data != nullptr; }
@@ -275,15 +273,16 @@ public:
 protected:
 	constexpr bool _throwIfOutOfRange( size_t idx ) const
 	{
-		return idx < _size ? true : throw std::out_of_range( "Tried to access " + std::to_string( idx )
-															 + "th element of an Array view of size"
-															 + std::to_string( _size ) );
+		return idx < _size
+				   ? true
+				   : throw std::out_of_range( "Tried to access " + std::to_string( idx )
+											  + "th element of an Array view of size" + std::to_string( _size ) );
 	}
-	constexpr bool _throwIfOffsetOutOfRange(size_t idx) const
+	constexpr bool _throwIfOffsetOutOfRange( size_t idx ) const
 	{
-		return idx <= _size ? true : throw std::out_of_range("Tried to specify offset " + std::to_string(idx)
-															+ "into an Array view of size"
-															+ std::to_string(_size));
+		return idx <= _size ? true
+							: throw std::out_of_range( "Tried to specify offset " + std::to_string( idx )
+													   + "into an Array view of size" + std::to_string( _size ) );
 	}
 	constexpr bool _throwIfInvalidSubview( size_t offset, size_t count ) const
 	{
@@ -295,36 +294,34 @@ protected:
 				   ? true
 				   : throw std::out_of_range(
 						 std::string( "Tried to create a subview that would exceed the original array view." )
-						 + "Original size: "
-						 + std::to_string( _size )
-						 + ". Offset/Count:"
-						 + std::to_string( offset )
-						 + "/"
-						 + std::to_string( count )
-						 + "\n" );
+						 + "Original size: " + std::to_string( _size ) + ". Offset/Count:" + std::to_string( offset )
+						 + "/" + std::to_string( count ) + "\n" );
 	}
 
 	pointer   _data = nullptr;
 	size_type _size = 0;
 
 	// interface for ArrayViewAdaptor
-	pointer					_arrayView_data()		noexcept { return _data; }
+	pointer					_arrayView_data() noexcept { return _data; }
 	constexpr const_pointer _arrayView_data() const noexcept { return _data; }
 	constexpr size_type		_arrayView_size() const noexcept { return _size; }
 	friend class ArrayViewAdaptor<T, ArrayView<T>>;
 };
 
 template<class C, class = typename C::value_type>
-auto view_elements(const C& c) -> mart::ArrayView<mart::remove_reference_t<decltype(*c.data())>> {
-	return { c };
+auto view_elements( const C& c ) -> mart::ArrayView<mart::remove_reference_t<decltype( *c.data() )>>
+{
+	return {c};
 }
 
 template<class C, class = typename C::value_type>
-auto view_elements_mutable(C& c) -> mart::ArrayView<mart::remove_const_t<mart::remove_reference_t<decltype(*c.data())>>> {
-	return { c };
+auto view_elements_mutable( C& c )
+	-> mart::ArrayView<mart::remove_const_t<mart::remove_reference_t<decltype( *c.data() )>>>
+{
+	return {c};
 }
 
-template <class T>
+template<class T>
 constexpr ConstMemoryView asBytes( const T& e )
 {
 	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
@@ -361,7 +358,7 @@ template<class T>
 	return asBytes( e );
 }
 
-template <class T>
+template<class T>
 auto copy_some( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> ArrayView<mart::remove_const_t<T>>
 {
 	auto cnt = std::min( src.size(), dest.size() );
@@ -369,14 +366,12 @@ auto copy_some( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> A
 	return dest.subview( cnt );
 }
 
-template <class T>
+template<class T>
 auto copy( ArrayView<T> src, ArrayView<mart::remove_const_t<T>> dest ) -> ArrayView<mart::remove_const_t<T>>
 {
 	assert( src.size() <= dest.size() );
-	if( src.size() > dest.size() ) {
-		return ArrayView<mart::remove_const_t<T>>{};
-	}
-	std::copy_n(src.cbegin(), src.size() , dest.begin());
+	if( src.size() > dest.size() ) { return ArrayView<mart::remove_const_t<T>>{}; }
+	std::copy_n( src.cbegin(), src.size(), dest.begin() );
 	return dest.subview( src.size() );
 }
 
