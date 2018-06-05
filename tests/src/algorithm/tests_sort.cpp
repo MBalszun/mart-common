@@ -91,7 +91,6 @@ TEST_CASE( "stable_sort_compare_mart_output_to_std_output", "[algoriths][stable_
 
 TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partial_sort]" )
 {
-	std::vector<std::size_t> indexes = {0, 1, 2, 3, 4, 5, 6, 7};
 	for( auto&& rng1 : test_ranges ) {
 		auto cpy_mart = rng1;
 		auto cpy_std  = rng1;
@@ -102,13 +101,42 @@ TEST_CASE( "partial_sort_compare_mart_output_to_std_output", "[algoriths][partia
 			CHECK( cpy_mart == cpy_std );
 		}
 
-		CHECK( cpy_mart == cpy_std );
-
 		for( auto cmp : comps ) {
 			for( int i = 0; i < rng1.size(); ++i ) {
+
 				mart::partial_sort( cpy_mart, cpy_mart.begin() + i, cmp );
 				std::partial_sort( cpy_std.begin(), cpy_std.begin() + i, cpy_std.end(), cmp );
+
 				CHECK( cpy_mart == cpy_std );
+			}
+		}
+	}
+}
+
+TEST_CASE( "partial_sort_copy_compare_mart_output_to_std_output", "[algoriths][partial_sort_copy]" )
+{
+	for( auto&& rng : test_ranges ) {
+
+		for( int i = 0; i < rng.size()*2; ++i ) {
+			std::vector<int> dest_mart( i );
+			std::vector<int> dest_std( i );
+
+			mart::partial_sort_copy( rng, dest_mart );
+			std::partial_sort_copy( rng.begin(), rng.end(), dest_std.begin(), dest_std.end() );
+
+			CHECK( dest_mart == dest_std );
+		}
+
+		for( auto cmp : comps ) {
+			for( int i = 0; i < rng.size(); ++i ) {
+
+				std::vector<int> dest_mart( i );
+				std::vector<int> dest_std( i );
+
+				mart::partial_sort_copy( rng, dest_mart, cmp );
+				std::partial_sort_copy( rng.begin(), rng.end(), dest_std.begin(), dest_std.end(), cmp );
+
+				CHECK( dest_mart == dest_std );
 			}
 		}
 	}

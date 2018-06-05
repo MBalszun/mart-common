@@ -61,6 +61,18 @@ void partial_sort( R& rng, RandomIt middle, Compare cmp )
 	std::partial_sort( rng.begin(), middle, rng.end(), cmp );
 }
 
+template<class SR, class DR>
+void partial_sort_copy( const SR& src, DR& dest )
+{
+	std::partial_sort_copy( MART_COMMON_ALL( src ), MART_COMMON_ALL( dest ) );
+}
+
+template<class SR, class DR, class Compare>
+void partial_sort_copy( const SR& src, DR& dest, Compare cmp )
+{
+	std::partial_sort_copy( MART_COMMON_ALL( src ), MART_COMMON_ALL( dest ), cmp );
+}
+
 template<class R, class RandomIt>
 void nth_element( R& rng, RandomIt nth )
 {
