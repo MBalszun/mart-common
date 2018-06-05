@@ -19,6 +19,7 @@
 /* Proprietary Library Includes */
 /* Standard Library Includes */
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -35,7 +36,8 @@ auto copy( const SrcRng& src, DestIt dest_it ) -> decltype( std::copy( MART_COMM
 }
 
 template<class SrcRng, class DestIt, class Pred>
-auto copy_if( const SrcRng& src, DestIt dest_it, Pred p ) -> decltype( std::copy_if( MART_COMMON_ALL( src ), dest_it, p ) )
+auto copy_if( const SrcRng& src, DestIt dest_it, Pred p )
+	-> decltype( std::copy_if( MART_COMMON_ALL( src ), dest_it, p ) )
 {
 	return std::copy_if( MART_COMMON_ALL( src ), dest_it, p );
 }
@@ -46,7 +48,31 @@ auto move( C1&& src, DestIt dest_it ) -> DestIt
 	return std::move( MART_COMMON_ALL( src ), dest_it );
 }
 
+template<class R, class T>
+void fill( R& range, const T& value )
+{
+	std::fill( MART_COMMON_ALL( range ), value );
+}
 
+template<class R, class T>
+void fill_n( R& range, std::size_t n, const T& value )
+{
+	assert( n < range.size() );
+	std::fill_n( range.begin(), n, value );
+}
+
+template<class R, class Generator>
+void generate( R& range, Generator g )
+{
+	std::generate( MART_COMMON_ALL( range ), std::move( g ) );
+}
+
+template<class R, class Generator>
+void generate_n( R& range, std::size_t n, Generator g )
+{
+	assert( range.size() >= n );
+	std::generate_n( range.begin(), n, std::move( g ) );
+}
 
 } // namespace mart
 

@@ -1,3 +1,4 @@
+#include <functional>
 #include <vector>
 
 namespace {
@@ -37,9 +38,19 @@ const std::vector<binary_pred_func_t*> binary_preds = {[]( int, int ) { return t
 													   []( int l, int r ) { return l != r; },
 													   []( int l, int r ) { return l % 2 == r % 2; }};
 
-using comp_func_t					 = bool( int, int );
+using comp_func_t					  = bool( int, int );
 const std::vector<comp_func_t*> comps = {[]( int l, int r ) { return l < r; },
-										[]( int l, int r ) { return l > r; },
-										[]( int l, int r ) { return l / 4 < r / 4; }};
+										 []( int l, int r ) { return l > r; },
+										 []( int l, int r ) { return l / 4 < r / 4; }};
+
+const std::vector<std::function<int()>> generators = {[]() { return 5; }, [i = 0]() mutable {return i++;
+} // namespace
+, [i = 1]() mutable
+{
+	i *= 2;
+	return i;
+}
+}
+;
 
 } // namespace
