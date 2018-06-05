@@ -110,7 +110,7 @@ T accumulate( const C& c, T init, BinaryOperation op )
 template<class R1, class R2>
 bool equal( const R1& r1, const R2& r2 )
 {
-	return std::equal( r1.begin(), r2.end(), r2.begin(), r2.end() );
+	return std::equal( r1.begin(), r1.end(), r2.begin(), r2.end() );
 }
 
 template<class C, class UnaryPredicate>
