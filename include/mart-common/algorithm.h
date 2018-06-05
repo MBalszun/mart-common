@@ -304,18 +304,6 @@ OutputIt set_union( const InputC1& first1, const InputC2& first2, OutputIt d_fir
 	return set_union( first1.begin(), first1.end(), first2.begin(), first2.end(), d_first );
 }
 
-template<class C1, class DestIt>
-auto copy( const C1& src, DestIt dest_it ) -> DestIt
-{
-	return std::copy( src.begin(), src.end(), dest_it );
-}
-
-template<class C1, class DestIt>
-auto move( C1&& src, DestIt dest_it ) -> DestIt
-{
-	return std::move( src.begin(), src.end(), dest_it );
-}
-
 /*### algorithm related ###*/
 
 /*

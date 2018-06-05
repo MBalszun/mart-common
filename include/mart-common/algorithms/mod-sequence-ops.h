@@ -28,6 +28,26 @@
 
 namespace mart {
 
+template<class SrcRng, class DestIt>
+auto copy( const SrcRng& src, DestIt dest_it ) -> decltype( std::copy( MART_COMMON_ALL( src ), dest_it ) )
+{
+	return std::copy( MART_COMMON_ALL( src ), dest_it );
+}
+
+template<class SrcRng, class DestIt, class Pred>
+auto copy_if( const SrcRng& src, DestIt dest_it, Pred p ) -> decltype( std::copy_if( MART_COMMON_ALL( src ), dest_it, p ) )
+{
+	return std::copy_if( MART_COMMON_ALL( src ), dest_it, p );
+}
+
+template<class C1, class DestIt>
+auto move( C1&& src, DestIt dest_it ) -> DestIt
+{
+	return std::move( MART_COMMON_ALL( src ), dest_it );
+}
+
+
+
 } // namespace mart
 
 #undef MART_COMMON_ALL
