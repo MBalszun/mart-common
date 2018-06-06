@@ -16,6 +16,7 @@
 
 /* ######## INCLUDES ######### */
 /* Project Includes */
+#include "./OutputRange.h"
 /* Proprietary Library Includes */
 /* Standard Library Includes */
 #include <algorithm>
@@ -29,23 +30,25 @@
 
 namespace mart {
 
-template<class SrcRng, class DestIt>
-auto copy( const SrcRng& src, DestIt dest_it ) -> decltype( std::copy( MART_COMMON_ALL( src ), dest_it ) )
+template<class SrcRng, class Dest>
+auto copy( const SrcRng& src, Dest&& dest ) -> detail::OutputRange<decltype( dest )>
 {
-	return std::copy( MART_COMMON_ALL( src ), dest_it );
+	assert( src.size() <= dest.size() );
+	return {std::copy( MART_COMMON_ALL( src ), dest.begin() ),dest.end()};
 }
 
-template<class SrcRng, class DestIt, class Pred>
-auto copy_if( const SrcRng& src, DestIt dest_it, Pred p )
-	-> decltype( std::copy_if( MART_COMMON_ALL( src ), dest_it, p ) )
+template<class SrcRng, class Dest, class Pred>
+auto copy_if( const SrcRng& src, Dest&& dest, Pred p ) -> detail::OutputRange<decltype( dest )>
 {
-	return std::copy_if( MART_COMMON_ALL( src ), dest_it, p );
+	assert( src.size() <= dest.size() );
+	return {std::copy_if( MART_COMMON_ALL( src ), dest.begin(), p ), dest.end()};
 }
 
-template<class C1, class DestIt>
-auto move( C1&& src, DestIt dest_it ) -> DestIt
+template<class C1, class Dest>
+auto move( C1& src, Dest&& dest ) -> detail::OutputRange<decltype( dest )>
 {
-	return std::move( MART_COMMON_ALL( src ), dest_it );
+	assert( src.size() <= dest.size() );
+	return {std::move( MART_COMMON_ALL( src ), dest.begin() ), dest.end()};
 }
 
 template<class R, class T>
@@ -72,6 +75,23 @@ void generate_n( R& range, std::size_t n, Generator g )
 {
 	assert( range.size() >= n );
 	std::generate_n( range.begin(), n, std::move( g ) );
+}
+
+// transform
+template<class Src, class Dest, class UnaryOperation>
+auto transform( const Src& src, Dest&& dest, UnaryOperation unary_op ) -> detail::OutputRange<decltype( dest )>
+{
+	assert( src.size() <= dest.size() );
+	return {std::transform( MART_COMMON_ALL( src ), dest.begin(), unary_op ), dest.end()};
+}
+
+template<class Src1, class Src2, class Dest, class UnaryOperation>
+auto transform( const Src1& src1, const Src2& src2, Dest& dest, UnaryOperation unary_op )
+	-> detail::OutputRange<decltype( dest )>
+{
+	assert( src1.size() == src2.size() );
+	assert( src1.size() <= dest.size() );
+	return {std::transform( MART_COMMON_ALL( src1 ), src2.begin(), dest.begin(), unary_op ), dest.end()};
 }
 
 } // namespace mart

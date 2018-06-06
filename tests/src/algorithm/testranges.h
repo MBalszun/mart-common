@@ -43,14 +43,19 @@ const std::vector<comp_func_t*> comps = {[]( int l, int r ) { return l < r; },
 										 []( int l, int r ) { return l > r; },
 										 []( int l, int r ) { return l / 4 < r / 4; }};
 
-const std::vector<std::function<int()>> generators = {[]() { return 5; }, [i = 0]() mutable {return i++;
-} // namespace
-, [i = 1]() mutable
-{
-	i *= 2;
-	return i;
-}
-}
-;
+using siso_trafo_func_t = int( int );
+const std::vector<siso_trafo_func_t*> siso_trafos
+	= {[]( int ) { return 1; }, []( int i ) { return i * 2; }, []( int i ) { return i - 2; }};
+
+using miso_trafo_func_t = int( int, int );
+const std::vector<miso_trafo_func_t*> miso_trafos
+	= {[]( int, int ) { return 1; }, []( int i, int l ) { return i * l; }, []( int l, int r ) { return l - r; }};
+
+const std::vector<std::function<int()>> generators = {[]() { return 5; },
+													  [i = 0]() mutable { return i++; },
+													  [i = 1]() mutable {
+														  i *= 2;
+														  return i;
+													  }};
 
 } // namespace
