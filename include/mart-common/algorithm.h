@@ -28,6 +28,7 @@
 #include "./algorithms/non-mod-sequence-ops.h"
 #include "./algorithms/mod-sequence-ops.h"
 #include "./algorithms/sorting.h"
+#include "./algorithms/numeric.h"
 #include "ranges.h"
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -93,18 +94,6 @@ template<class C, class Pred>
 auto unique( C& c, Pred p ) -> decltype( c.begin() )
 {
 	return std::unique( c.begin(), c.end(), p );
-}
-
-template<class C, class T>
-T accumulate( const C& c, T init )
-{
-	return std::accumulate( c.begin(), c.end(), init );
-}
-
-template<class C, class T, class BinaryOperation>
-T accumulate( const C& c, T init, BinaryOperation op )
-{
-	return std::accumulate( c.begin(), c.end(), init, op );
 }
 
 template<class R1, class R2>
