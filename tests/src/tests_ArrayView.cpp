@@ -80,10 +80,10 @@ TEST_CASE( "asBytes", "[ArrayView]" )
 	int		  i{1};
 	const int ci{2};
 
-	auto crange1 = mart::asBytes( i );
-	auto crange2 = mart::asConstBytes( i );
-	auto crange3 = mart::asBytes( ci );
-	auto range1  = mart::asMutableBytes( i );
+	auto crange1 = mart::view_bytes( i );
+	auto crange2 = mart::view_bytes_const( i );
+	auto crange3 = mart::view_bytes( ci );
+	auto range1  = mart::view_bytes_mutable( i );
 
 	static_assert( std::is_same_v<decltype( crange1 ), mart::ConstMemoryView> );
 	static_assert( std::is_same_v<decltype( crange2 ), mart::ConstMemoryView> );

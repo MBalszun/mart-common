@@ -121,7 +121,7 @@ public:
 		auto t = _socket_handle.isBlocking();
 		_socket_handle.setBlocking(false);
 		uint64_t _tmp{};
-		auto tmp = mart::asMutableBytes(_tmp);
+		auto tmp = mart::view_bytes_mutable(_tmp);
 		try {
 			while (_socket_handle.recv(tmp, 0).first.isValid()) { ; }
 		} catch (...) {

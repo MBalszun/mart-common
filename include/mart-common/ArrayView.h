@@ -322,38 +322,56 @@ auto view_elements_mutable( C& c )
 }
 
 template<class T>
-constexpr ConstMemoryView asBytes( const T& e )
+constexpr ConstMemoryView view_bytes( const T& e )
 {
 	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
 }
 
 // This is actually the same as "asBytes", but might be usefull, when you have to make it clear in code
 template<class T>
-constexpr ConstMemoryView asConstBytes( const T& e )
+constexpr ConstMemoryView view_bytes_const( const T& e )
 {
 	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
 }
 
 template<class T>
-constexpr MemoryView asMutableBytes( T& e )
+constexpr MemoryView view_bytes_mutable( T& e )
 {
 	return MemoryView( reinterpret_cast<ByteType*>( &e ), sizeof( e ) );
 }
 
 template<class T>
-[[deprecated( "Use asMutableBytes instead" )]] constexpr MemoryView viewMemory( T& e )
+[[deprecated( "Use view_bytes instead" )]] constexpr ConstMemoryView asBytes( const T& e )
+{
+	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
+}
+
+template<class T>
+[[deprecated( "Use view_bytes_mutable instead" )]] constexpr MemoryView asMutableBytes( T& e )
+{
+	return MemoryView( reinterpret_cast<ByteType*>( &e ), sizeof( e ) );
+}
+
+template<class T>
+[[deprecated( "Use view_bytes_const instead" )]] constexpr ConstMemoryView asConstBytes( const T& e )
+{
+	return ConstMemoryView( reinterpret_cast<const ByteType*>( &e ), sizeof( e ) );
+}
+
+template<class T>
+[[deprecated( "Use view_bytes_mutable instead" )]] constexpr MemoryView viewMemory( T& e )
 {
 	return asMutableBytes( e );
 }
 
 template<class T>
-[[deprecated( "Please use asBytes instead" )]] constexpr ConstMemoryView viewMemory( const T& e )
+[[deprecated( "Please use view_bytes instead" )]] constexpr ConstMemoryView viewMemory( const T& e )
 {
 	return asBytes( e );
 }
 
 template<class T>
-[[deprecated( "Please use asBytes instead" )]] constexpr ConstMemoryView viewMemoryConst( const T& e )
+[[deprecated( "Please use view_bytes instead" )]] constexpr ConstMemoryView viewMemoryConst( const T& e )
 {
 	return asBytes( e );
 }
