@@ -163,7 +163,7 @@ TEST_CASE( "find_compare_mart_output_to_std_output", "[algorithm][find]" )
 	}
 }
 
-TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algorithm][find]" )
+TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algorithm][find_if]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -172,7 +172,7 @@ TEST_CASE( "find_if_compare_mart_output_to_std_output", "[algorithm][find]" )
 	}
 }
 
-TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algorithm][find]" )
+TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algorithm][find_if_not]" )
 {
 	for( auto&& rng : test_ranges ) {
 		for( auto&& p : unary_preds ) {
@@ -181,7 +181,7 @@ TEST_CASE( "find_if_not_compare_mart_output_to_std_output", "[algorithm][find]" 
 	}
 }
 
-TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algorithm][find]" )
+TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algorithm][find_if_end]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -191,7 +191,7 @@ TEST_CASE( "find_if_end_compare_mart_output_to_std_output", "[algorithm][find]" 
 	}
 }
 
-TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algorithm][find]" )
+TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algorithm][find_first_of]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
@@ -205,7 +205,7 @@ TEST_CASE( "find_first_of_compare_mart_output_to_std_output", "[algorithm][find]
 	}
 }
 
-TEST_CASE( "adjacent_find_compare_mart_output_to_std_output", "[algorithm][find]" )
+TEST_CASE( "adjacent_find_compare_mart_output_to_std_output", "[algorithm][adjacent_find]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		CHECK( mart::adjacent_find( rng1 ) == std::adjacent_find( rng1.begin(), rng1.end() ) );
