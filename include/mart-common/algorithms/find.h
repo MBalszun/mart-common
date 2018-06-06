@@ -88,6 +88,30 @@ auto adjacent_find( R&& rng ) -> decltype( std::begin( rng ) )
 	return std::adjacent_find( MART_COMMON_ALL( rng ) );
 }
 
+template<class R, class T>
+auto lower_bound( R&& rng, const T& value ) -> decltype( std::begin( rng ) )
+{
+	return std::lower_bound( MART_COMMON_ALL( rng ), value );
+}
+
+template<class R, class T, class Compare>
+auto lower_bound( R&& rng, const T& value, Compare cmp ) -> decltype( std::begin( rng ) )
+{
+	return std::lower_bound( MART_COMMON_ALL( rng ), value, cmp );
+}
+
+template<class R, class T>
+auto upper_bound( R&& rng, const T& value ) -> decltype( std::begin( rng ) )
+{
+	return std::upper_bound( MART_COMMON_ALL( rng ), value );
+}
+
+template<class R, class T, class Compare>
+auto upper_bound( R&& rng, const T& value, Compare cmp ) -> decltype( std::begin( rng ) )
+{
+	return std::upper_bound( MART_COMMON_ALL( rng ), value, cmp );
+}
+
 } // namespace mart
 
 #undef MART_COMMON_ALL

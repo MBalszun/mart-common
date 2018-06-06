@@ -29,6 +29,7 @@
 #include "./algorithms/mod-sequence-ops.h"
 #include "./algorithms/sorting.h"
 #include "./algorithms/numeric.h"
+#include "./algorithms/set_ops.h"
 #include "ranges.h"
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -157,17 +158,7 @@ auto find_first_of_ex( C1&& in1, C2&& in2, BinaryPredicate p ) -> mart::EndAware
 	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p ), in1};
 }
 
-template<class C, class T>
-auto lower_bound( C&& c, const T& value ) -> decltype( std::begin( c ) )
-{
-	return std::lower_bound( std::begin( c ), std::end( c ), value );
-}
 
-template<class C, class T, class Compare>
-auto lower_bound( C&& c, const T& value, Compare cmp ) -> decltype( std::begin( c ) )
-{
-	return std::lower_bound( std::begin( c ), std::end( c ), value, cmp );
-}
 
 template<class C>
 bool any_of( const C& c )
@@ -267,19 +258,8 @@ void transform( const Input& in, Output& out, UnaryOperation unary_op )
 	std::transform( in.begin(), in.end(), out.begin(), unary_op );
 }
 
-// set algorithms
 
-template<class InputC1, class InputC2, class OutputIt>
-OutputIt set_difference( const InputC1& first1, const InputC2& first2, OutputIt d_first )
-{
-	return set_difference( first1.begin(), first1.end(), first2.begin(), first2.end(), d_first );
-}
 
-template<class InputC1, class InputC2, class OutputIt>
-OutputIt set_union( const InputC1& first1, const InputC2& first2, OutputIt d_first )
-{
-	return set_union( first1.begin(), first1.end(), first2.begin(), first2.end(), d_first );
-}
 
 /*### algorithm related ###*/
 

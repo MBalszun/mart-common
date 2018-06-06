@@ -211,3 +211,32 @@ TEST_CASE( "adjacent_find_compare_mart_output_to_std_output", "[algorithm][find]
 		CHECK( mart::adjacent_find( rng1 ) == std::adjacent_find( rng1.begin(), rng1.end() ) );
 	}
 }
+
+TEST_CASE( "lower_bound_of_compare_mart_output_to_std_output", "[algorithm][lower_bound]" )
+{
+	for( auto&& rng : test_ranges ) {
+		for( auto&& vrng : test_ranges ) {
+			for( auto v : vrng ) {
+				CHECK( mart::lower_bound( rng, v ) == std::lower_bound( rng.begin(), rng.end(), v ) );
+				for( auto&& c : comps ) {
+					CHECK( mart::lower_bound( rng, v, c )
+						   == std::lower_bound( rng.begin(), rng.end(), v, c ) );
+				}
+			}
+		}
+	}
+}
+
+TEST_CASE( "upper_bound_of_compare_mart_output_to_std_output", "[algorithm][upper_bound]" )
+{
+	for( auto&& rng : test_ranges ) {
+		for( auto&& vrng : test_ranges ) {
+			for( auto v : vrng ) {
+				CHECK( mart::upper_bound( rng, v ) == std::upper_bound( rng.begin(), rng.end(), v ) );
+				for( auto&& c : comps ) {
+					CHECK( mart::upper_bound( rng, v, c ) == std::upper_bound( rng.begin(), rng.end(), v, c ) );
+				}
+			}
+		}
+	}
+}
