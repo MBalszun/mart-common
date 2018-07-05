@@ -17,6 +17,7 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <stdexcept>
+#include <cstdint>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/type_traits.h"
@@ -138,6 +139,8 @@ template<class T, class T1, class ... Ts>
 constexpr bool type_is_one_of() {
 	return detail::type_is_one_of_impl((T*)nullptr, (T1*)nullptr, ((Ts*)nullptr) ...);
 }
+
+using idx_t = std::ptrdiff_t;
 
 }//mart
 
