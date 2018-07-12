@@ -40,11 +40,9 @@ using endpoint = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::TCP>
 class Acceptor;
 class Socket {
 public:
-	Socket() :
-		_socket_handle(socks::Domain::inet, socks::TransportType::stream, 0)
-	{}
-	Socket(endpoint ep) :
-		Socket()
+	Socket() = default;
+
+	Socket(endpoint ep)
 	{
 		bind(ep);
 		//TODO: throw exception, if bind fails
@@ -65,6 +63,7 @@ public:
 	}
 	bool connect(endpoint ep)
 	{
+		open_if_necessary();
 		_ep_remote = ep;
 		auto t = _socket_handle.connect(ep.toSockAddr_in());
 		auto t_ep = getSockAddress(_socket_handle);
@@ -75,6 +74,7 @@ public:
 	}
 	bool bind(endpoint ep)
 	{
+		open_if_necessary();
 		_ep_local = ep;
 		return _socket_handle.bind(ep.toSockAddr_in()) == 0;
 	}
@@ -118,6 +118,11 @@ public:
 	const endpoint& getLocalEndpoint() { return _ep_local; }
 	const endpoint& getRemoteEndpoint() { return _ep_remote; }
 private:
+	void open_if_necessary() {
+		if (!isValid()) {
+			_socket_handle = nw::socks::Socket(socks::Domain::inet, socks::TransportType::stream, 0);
+		}
+	}
 	static endpoint getSockAddress(const nw::socks::Socket& socket)
 	{
 		sockaddr_in t_locaddr{};
@@ -131,7 +136,7 @@ private:
 
 
 	friend Acceptor;
-	nw::socks::Socket _socket_handle;
+	nw::socks::Socket _socket_handle{};
 	endpoint _ep_local{};
 	endpoint _ep_remote{};
 };
@@ -146,10 +151,10 @@ class Acceptor {
 public:
 	Acceptor() = default;
 	//will create acceptor bound to endpoint and listening for incomming connections
-	Acceptor(endpoint ep) :
-		Acceptor()
+	Acceptor(endpoint ep)
+		:_ep_local(ep)
 	{
-		listen_on(ep);
+		listen_on( ep );
 		//TODO: throw exception, if this fails
 	}
 	Acceptor(Acceptor&& other) :
@@ -209,14 +214,18 @@ public:
 		switch(_state ) {
 			case State::listening : {
 				_socket_handle = nw::socks::Socket();
-				this->_ep_local = tcp::endpoint{};
+				this->_ep_local = tcp::endpoint {};
 				this->_state = State::closed;
 			}//deliberate fall through
 			case State::closed: {
-				open();
+				if (!open()) {
+					return false;
+				}
 			}//deliberate fall through
 			case State::open: {
-				bind(ep);
+				if (!bind(ep)) {
+					return false;
+				}
 			}//deliberate fall through
 			case State::bound : {
 				return listen(backlog);
@@ -231,22 +240,40 @@ public:
 	{
 		return _socket_handle.isValid();
 	}
-	Socket accept(std::chrono::microseconds timeout = std::chrono::hours(300))
+
+private:
+	Socket try_accept_impl()
 	{
-		_socket_handle.setBlocking(true);
-		_socket_handle.setRxTimeout(timeout);
-		sockaddr_in sa_remote{};
-		auto handle = _socket_handle.accept(sa_remote);
-		if (!handle.isValid()) {
+		if (!_socket_handle.isValid()) {
 			return Socket{};
 		}
 
+		sockaddr_in sa_remote{};
+		auto handle = _socket_handle.accept(sa_remote);
+		if (!handle.isValid()) {
+			return Socket {};
+		}
 		Socket ret{};
+		ret.open_if_necessary();
 		ret._socket_handle = std::move(handle);
 		ret._ep_local = _ep_local;
 		ret._ep_remote = endpoint(sa_remote);
 		return ret;
 	}
+public:
+	Socket accept(std::chrono::microseconds timeout = std::chrono::hours(300))
+	{
+		_socket_handle.setBlocking(true);
+		_socket_handle.setRxTimeout(timeout);
+		return try_accept_impl();
+	}
+
+	Socket try_accept()
+	{
+		_socket_handle.setBlocking( false );
+		return try_accept_impl();
+	}
+
 	nw::socks::Socket& getSocket()
 	{
 		return _socket_handle;

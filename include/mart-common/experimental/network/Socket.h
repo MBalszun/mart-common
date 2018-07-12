@@ -238,7 +238,7 @@ public:
 	{
 		port_layer::address_len_t len = sizeof(remote_addr);
 		Socket h{ ::accept(_handle, asSockAddrPtr(remote_addr), &len) };
-		if (len == sizeof(remote_addr)) {
+		if (h.isValid() && (len == sizeof(remote_addr))) {
 			return h;
 		} else {
 			return Socket{};
