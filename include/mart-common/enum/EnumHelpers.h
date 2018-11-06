@@ -1,7 +1,7 @@
 #ifndef LIB_MART_COMMON_GUARD_ENUM_ENUM_HELPERS_H
 #define LIB_MART_COMMON_GUARD_ENUM_ENUM_HELPERS_H
 /**
-* EnumIdxArray.h (mart-common/enum)
+* EnumHelpers.h (mart-common/enum)
 *
 * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
 *
@@ -10,7 +10,6 @@
 * directory or http://opensource.org/licenses/MIT for details.
 *
 * @author: Michael Balszun <michael.balszun@mytum.de>
-* @brief: array that can directly be indexed by an enum
 *
 */
 
@@ -21,7 +20,6 @@
 /* Proprietary Library Includes */
 
 /* Project Includes */
-#include "EnumIdxArray.h"
 #include "../StringView.h"
 #include "../experimental/Optional.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -66,7 +64,7 @@ constexpr Enum mart_idxToEnum_impl( size_t v )
  */
 
 // clang-format off
-template <class Enum> constexpr auto enumCnt      ()               -> int                                                               { return mart_enumCnt_impl( static_cast<Enum*>( nullptr ) );}
+template <class Enum> constexpr auto enumCnt      ()               -> std::size_t                                                       { return mart_enumCnt_impl( static_cast<Enum*>( nullptr ) );}
 template <class Enum> constexpr auto to_string_v  ( Enum id )      -> mart::StringView                                                  { return mart_to_string_v_impl( id ); }
 //FIXME if mart_to_string_impl( id ) returns by value we should do the same
 template <class Enum> inline    auto to_string    ( Enum id )      -> const std::string&                                                { return mart_to_string_impl( id ); }

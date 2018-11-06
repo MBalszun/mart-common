@@ -22,6 +22,7 @@
 
 /* Project Includes */
 #include "../cpp_std/type_traits.h"
+#include "EnumHelpers.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 
@@ -32,9 +33,9 @@ namespace mart {
 *
 * NOTE: Currently the enums have to be values that directly translate to 0-based indexes
 */
-template<class T, class EnumT, mart::underlying_type_t<EnumT> N>
-struct EnumIdxArray : std::array<T, (std::size_t)N> {
-	using Storage_t = std::array<T, (std::size_t)N>;
+template<class T, class EnumT, std::size_t N = mart::enumCnt<EnumT>()>
+struct EnumIdxArray : std::array<T, N> {
+	using Storage_t = std::array<T, N>;
 
 	//only explicitly importing types used in the new memberfunctions to reduce typing
 	//(user will have automatically access to all member types of the base
@@ -44,8 +45,8 @@ struct EnumIdxArray : std::array<T, (std::size_t)N> {
 
 	/* ###### CTORS ###### */
 	constexpr EnumIdxArray() noexcept : Storage_t{}{};
-	constexpr EnumIdxArray(const EnumIdxArray<T, EnumT, N>& other) = default;
-	constexpr EnumIdxArray(      EnumIdxArray<T, EnumT, N>&& ) = default;
+	constexpr EnumIdxArray(const EnumIdxArray& other) = default;
+	constexpr EnumIdxArray(      EnumIdxArray&& ) = default;
 	EnumIdxArray& operator=(const EnumIdxArray& ) = default;
 	EnumIdxArray& operator=(	  EnumIdxArray&&) = default;
 
