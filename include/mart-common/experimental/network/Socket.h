@@ -182,7 +182,7 @@ public:
 
 	/* ###### send / rec ############### */
 
-	auto send(mart::ConstMemoryView data, int flags) -> port_layer::txrx_size_t
+	auto send(mart::ConstMemoryView data, int flags = 0) -> port_layer::txrx_size_t
 	{
 		return ::send(_handle, data.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(data.size()), flags);
 	}
@@ -193,7 +193,7 @@ public:
 		return ::sendto(_handle, data.asConstCharPtr(), static_cast<port_layer::txrx_size_t>(data.size()), flags, asSockAddrPtr(addr), sizeof(addr));
 	}
 
-	auto recv(mart::MemoryView buffer, int flags) -> std::pair<mart::MemoryView, int>
+	auto recv(mart::MemoryView buffer, int flags = 0) -> std::pair<mart::MemoryView, int>
 	{
 		auto ret = ::recv(_handle, buffer.asCharPtr(), static_cast<port_layer::txrx_size_t>(buffer.size()), flags);
 		if (ret >= 0) {
