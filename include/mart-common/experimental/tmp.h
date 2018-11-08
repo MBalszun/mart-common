@@ -15,11 +15,12 @@
 */
 
 /* ######## INCLUDES ######### */
-/* Standard Library Includes */
-
 /* Proprietary Library Includes */
 #include "../cpp_std/type_traits.h"
 #include "../cpp_std/utility.h"
+
+/* Standard Library Includes */
+#include <cstdint>
 
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -30,10 +31,10 @@ namespace tmp {
 template<class T, std::size_t N>
 struct c_array {
 	const T t[N];
-	constexpr T operator[](size_t i) const {
+	constexpr T operator[](std::size_t i) const {
 		return t[i];
 	}
-	static constexpr size_t size() { return N; }
+	static constexpr std::size_t size() { return N; }
 };
 
 template<class T, T ... Is, template<class, T...> class sequence>
@@ -42,7 +43,7 @@ constexpr c_array<T, sizeof...(Is)> to_carray(sequence<T, Is...>) {
 }
 
 template<class T, T ...Is >
-constexpr T get_Nth_element(size_t Idx, mart::integer_sequence<T, Is ...> sequ) {
+constexpr T get_Nth_element(std::size_t Idx, mart::integer_sequence<T, Is ...> sequ) {
 	return to_carray(sequ)[Idx];
 }
 
@@ -52,7 +53,6 @@ constexpr decltype(auto) first(T&& t, ARGS ...) {
 	return std::forward<T>(t);
 }
 
-#ifndef _MSC_VER
 // watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the type
 namespace detail_cartesian_value_product {
 template<
@@ -81,7 +81,6 @@ template<
 >
 auto cartesian_value_product(List1 l1, List2 l2 )
 -> decltype(detail_cartesian_value_product::impl<Comb,V1,V2,T>(l1, l2, mart::make_index_sequence<List1::size()*List2::size()>{}));
-#endif // !_MSVC
 
 template<class T, T ... VALS>
 struct value_list {
@@ -89,7 +88,7 @@ struct value_list {
 };
 
 template<class T, T ...Is >
-constexpr T get_Nth_element(size_t Idx, value_list<T, Is ...> sequ) {
+constexpr T get_Nth_element(std::size_t Idx, value_list<T, Is ...> sequ) {
 	return to_carray(sequ)[Idx];
 }
 
