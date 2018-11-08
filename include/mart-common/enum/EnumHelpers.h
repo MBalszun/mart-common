@@ -40,7 +40,7 @@ constexpr auto toUType( T e ) -> mart::underlying_type_t<T>
 	return static_cast<mart::underlying_type_t<T>>( e );
 };
 
-// this is the fallback implementation
+// this is the fallback implementation if the enum author doesn't provide  mart_enumCnt_impl himself
 template <class Enum, int val = toUType( Enum::COUNT )>
 constexpr int mart_enumCnt_impl( Enum* )
 {
