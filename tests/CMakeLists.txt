@@ -43,7 +43,6 @@ endif()
 # idea taken from https://stackoverflow.com/questions/733475/cmake-ctest-make-test-doesnt-build-tests
 # TODO: DOES NOT WORK with MSVC open folder (${CMAKE_COMMAND} seems to be the problem, but a plain "cmake" doesn't pass the correct incldue directories)
 
-message("######### CMake command: ${CMAKE_COMMAND}")
 ADD_TEST(NAME ctest_build_test_code COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target testing_mart-common)
 
 set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS ON)

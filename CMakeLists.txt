@@ -9,7 +9,6 @@ if(TARGET mart-common )
 	message(WARNING "-- Library \"${PROJECT_NAME}\" included multiple times --\n-- Only one directory will be built --\n-- Selected dir: ${PREV_SOURCE_DIR}")
 
 else()
-	message("Dinary Dir: ${CMAKE_BINARY_DIR}")
 	file(GLOB_RECURSE SOURCES *.h *.hpp)
 
 	# Header only library for consumption by other project
