@@ -57,27 +57,39 @@ constexpr decltype( auto ) first( T&& t, ARGS... )
 
 // watch out: on gcc, you can't use parameters itself to generate the returntype, but have to create a new value of the
 // type
-namespace detail_cartesian_value_product {
-// clang-format off
-template<template<class...> class Comb,
-		 class V1, class V2,
-		 template<V1, V2> class T,
-		 class List1, class List2,
+namespace detail {
+template<template<class...> class Comb, // new list type template
+		 class V1,                      // types of elements in list1
+		 class V2,                      // types of elements in list2
+		 template<V1, V2> class T,      // template for elements in combined list
+		 class List1,
+		 class List2,
 		 std::size_t... Is>
-auto impl( List1, List2, mart::index_sequence<Is...> ) ->
-	Comb<
-		T<
-			to_carray( List1{} )[Is / List2::size()],
-			to_carray( List2{} )[Is % List2::size()]
-		>
-		...
-	>;
+auto cartesian_value_product( List1, List2, std::index_sequence<Is...> )
+{
+	// clang-format off
+	return Comb<
+				T<
+					to_carray( List1{} )[Is / List2::size()],
+					to_carray( List2{} )[Is % List2::size()]
+				>
+				...
+			>{};
+	// clang-format on
 }
-// clang-format on
+} // namespace detail
 
-template<template<class...> class Comb, class V1, class V2, template<V1, V2> class T, class List1, class List2>
-auto cartesian_value_product( List1 l1, List2 l2 ) -> decltype( detail_cartesian_value_product::impl<Comb, V1, V2, T>(
-	l1, l2, mart::make_index_sequence<List1::size() * List2::size()>{} ) );
+template<template<class...> class Comb, // new list type template
+		 class V1,                      // types of elements in list1
+		 class V2,                      // types of elements in list2
+		 template<V1, V2> class T,      // template for of elements in combined list
+		 class List1,
+		 class List2>
+auto cartesian_value_product( List1 l1, List2 l2 )
+{
+	return detail::cartesian_value_product<Comb, V1, V2, T>(
+		l1, l2, mart::make_index_sequence<List1::size() * List2::size()>{} );
+};
 
 template<class T, T... VALS>
 struct value_list {
