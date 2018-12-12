@@ -16,8 +16,8 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <ostream>
 #include <chrono>
+#include <ostream>
 
 /* Proprietary Library Includes */
 /* Project Includes */
@@ -27,30 +27,34 @@
 namespace mart {
 namespace _impl_print_chrono {
 
-	//actual functions that take care of formatting
+// actual functions that take care of formatting
+// clang-format off
 	inline void printChronoUnit(std::ostream& out, std::chrono::nanoseconds v)	{ out << v.count() << "ns"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::microseconds v) { out << v.count() << "us"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::milliseconds v) { out << v.count() << "ms"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::seconds v)		{ out << v.count() << "s"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::minutes v)		{ out << v.count() << "min"; };
 	inline void printChronoUnit(std::ostream& out, std::chrono::hours v)		{ out << v.count() << "h"; };
+// clang-format on
 
-	//wrapper for duration for which  operator<< gets overloaded in such a way, that the correct suffix is appended
-	template<typename rep, typename period>
-	struct PrintableDuration {
-		std::chrono::duration<rep, period> value;
+// wrapper for duration for which  operator<< gets overloaded in such a way, that the correct suffix is appended
+template<typename rep, typename period>
+struct PrintableDuration {
+	std::chrono::duration<rep, period> value;
 
-		inline friend std::ostream& operator<<(std::ostream& out, const PrintableDuration& dur){
-			printChronoUnit(out, dur.value);
-			return out;
-		}
-		template<class Dur>
-		PrintableDuration<typename Dur::rep, typename Dur::period> as() {
-			return { std::chrono::duration_cast<Dur>(value) };
-		}
-	};
+	inline friend std::ostream& operator<<( std::ostream& out, const PrintableDuration& dur )
+	{
+		printChronoUnit( out, dur.value );
+		return out;
+	}
+	template<class Dur>
+	PrintableDuration<typename Dur::rep, typename Dur::period> as()
+	{
+		return {std::chrono::duration_cast<Dur>( value )};
+	}
+};
 
-}//_impl_print
+} // namespace _impl_print_chrono
 
 struct os_flag_guard {
 	os_flag_guard( std::ostream& stream )
@@ -65,59 +69,58 @@ struct os_flag_guard {
 };
 
 /**
- * function that wrapps a std::chrono duration into a wrapper with overloaded  operator<< which allows printing of the variable
- * Use:
- *  auto time = std::chrono::seconds(100);
- *	std::cout << mart::sformat(time);
+ * function that wrapps a std::chrono duration into a wrapper with overloaded  operator<< which allows printing of the
+ *variable Use: auto time = std::chrono::seconds(100); std::cout << mart::sformat(time);
  *
  * Output:
  *  100s
  */
 template<typename rep, typename period>
-inline auto sformat(std::chrono::duration<rep,period> dur) -> _impl_print_chrono::PrintableDuration<rep, period>
+inline auto sformat( std::chrono::duration<rep, period> dur ) -> _impl_print_chrono::PrintableDuration<rep, period>
 {
-	return  _impl_print_chrono::PrintableDuration<rep, period>{ dur };
+	return _impl_print_chrono::PrintableDuration<rep, period> {dur};
 }
 
-template<typename rep, typename period, typename repto=rep, typename periodto=period >
-inline auto sformat(std::chrono::duration<rep, period> dur, std::chrono::duration<repto, periodto>) -> _impl_print_chrono::PrintableDuration<repto, periodto>
+template<typename rep, typename period, typename repto = rep, typename periodto = period>
+inline auto sformat( std::chrono::duration<rep, period> dur, std::chrono::duration<repto, periodto> )
+	-> _impl_print_chrono::PrintableDuration<repto, periodto>
 {
-	return  _impl_print_chrono::PrintableDuration<repto, periodto>{ std::chrono::duration_cast<std::chrono::duration<repto, periodto>>(dur) };
+	return _impl_print_chrono::PrintableDuration<repto, periodto> {
+		std::chrono::duration_cast<std::chrono::duration<repto, periodto>>( dur )};
 }
 
-enum class Pad : std::uint8_t {
-	Middle, Left, Right
-};
+enum class Pad : std::uint8_t { Middle, Left, Right };
 
 namespace _impl_print {
 struct PaddedStringView {
 
 	const mart::StringView string;
-	const std::size_t total_length;
-	const Pad side;
+	const std::size_t      total_length;
+	const Pad              side;
 
-	inline friend std::ostream& operator<<(std::ostream& out, const PaddedStringView& e) {
-		switch (e.side) {
-		case Pad::Left: {
-			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
-			out << mart::getSpaces(space_cnt);
-			out << e.string;
-			break;
-		}
-		case Pad::Right: {
-			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
-			out << e.string;
-			out << mart::getSpaces(space_cnt);
-			break;
-		}
-		case Pad::Middle: {
-			const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
-			const size_t left_cnt = space_cnt / 2;
-			const size_t right_cnt = space_cnt - left_cnt;
-			out << mart::getSpaces(left_cnt);
-			out << e.string;
-			out << mart::getSpaces(right_cnt);
-		}
+	inline friend std::ostream& operator<<( std::ostream& out, const PaddedStringView& e )
+	{
+		switch( e.side ) {
+			case Pad::Left: {
+				const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+				out << mart::getSpaces( space_cnt );
+				out << e.string;
+				break;
+			}
+			case Pad::Right: {
+				const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+				out << e.string;
+				out << mart::getSpaces( space_cnt );
+				break;
+			}
+			case Pad::Middle: {
+				const size_t space_cnt = e.total_length <= e.string.size() ? 0 : e.total_length - e.string.size();
+				const size_t left_cnt  = space_cnt / 2;
+				const size_t right_cnt = space_cnt - left_cnt;
+				out << mart::getSpaces( left_cnt );
+				out << e.string;
+				out << mart::getSpaces( right_cnt );
+			}
 		}
 		return out;
 	}
@@ -169,5 +172,3 @@ inline auto sformat( mart::ConstMemoryView range, _impl_print::data_fmt_info fmt
 } // namespace mart
 
 #endif
-
-
