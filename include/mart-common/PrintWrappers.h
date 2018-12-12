@@ -52,6 +52,18 @@ namespace _impl_print_chrono {
 
 }//_impl_print
 
+struct os_flag_guard {
+	os_flag_guard( std::ostream& stream )
+		: _stream( stream )
+		, _flags( stream.flags() )
+	{
+	}
+	~os_flag_guard() { _stream.flags( _flags ); }
+
+	std::ostream&      _stream;
+	std::ios::fmtflags _flags;
+};
+
 /**
  * function that wrapps a std::chrono duration into a wrapper with overloaded  operator<< which allows printing of the variable
  * Use:
@@ -126,6 +138,8 @@ struct formatted_data_range {
 
 std::ostream& operator<<( std::ostream& out, const formatted_data_range& range )
 {
+	os_flag_guard g( out );
+
 	out << range.fmt_info.start_delimiter << ' ';
 
 	for( std::size_t i = 0; i < range.range.size(); ++i ) {
@@ -137,6 +151,7 @@ std::ostream& operator<<( std::ostream& out, const formatted_data_range& range )
 		}
 	}
 	out << range.fmt_info.end_delimiter;
+
 	return out;
 }
 } // namespace _impl_print
