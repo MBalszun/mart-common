@@ -110,15 +110,48 @@ struct PaddedStringView {
 		return out;
 	}
 };
+
+struct data_fmt_info {
+	std::size_t chunck_size     = 8;
+	std::size_t row_size        = 32;
+	char        start_delimiter = '[';
+	char        end_delimiter   = ']';
+};
+static constexpr data_fmt_info default_data_fmt {};
+
+struct formatted_data_range {
+	mart::ConstMemoryView range;
+	data_fmt_info         fmt_info;
+};
+
+std::ostream& operator<<( std::ostream& out, const formatted_data_range& range )
+{
+	out << range.fmt_info.start_delimiter << ' ';
+
+	for( std::size_t i = 0; i < range.range.size(); ++i ) {
+		out << std::hex << std::setw( 2 ) << std::setfill( '0' ) << (int)range.range[i] << ' ';
+		if( ( i + 1 ) % range.fmt_info.row_size == 0 ) {
+			out << "\n  ";
+		} else {
+			if( ( i + 1 ) % range.fmt_info.chunck_size == 0 ) { out << "  "; }
+		}
+	}
+	out << range.fmt_info.end_delimiter;
+	return out;
+}
+} // namespace _impl_print
+
+inline auto padded( mart::StringView str, size_t total_length, Pad pad ) -> _impl_print::PaddedStringView
+{
+	return {str, total_length, pad};
 }
 
-
-inline auto padded(mart::StringView str, size_t total_length, Pad pad)  ->_impl_print::PaddedStringView {
-	return { str, total_length,pad };
+inline auto sformat( mart::ConstMemoryView range, _impl_print::data_fmt_info fmt = _impl_print::default_data_fmt )
+{
+	return _impl_print::formatted_data_range {range, fmt};
 }
 
-
-}//mart
+} // namespace mart
 
 #endif
 
