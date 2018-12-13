@@ -18,10 +18,13 @@
 /* Standard Library Includes */
 #include <chrono>
 #include <ostream>
+#include <ios>
+#include <iomanip>
 
 /* Proprietary Library Includes */
 /* Project Includes */
 #include "./StringView.h"
+#include "./ArrayView.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
