@@ -23,7 +23,7 @@ addons:
 script:
   - export CXX=g++-7
   - mkdir -p build && cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON -DMART_COMMON_UPLOAD_COVERAGE=On
   - cmake --build .
   - ctest .
   - make testing_mart-common_coverage
