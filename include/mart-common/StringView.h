@@ -92,9 +92,9 @@ public:
 	constexpr StringView substr(size_t offset, size_t count = npos) const
 	{
 		;
-		return count <= this->_size - offset
+		return ( count <= this->_size - offset ) && offset <= this->_size
 								? StringView{ this->_start + offset, count }
-								: (count == npos
+								: (count == npos && offset <= this->_size
 										? substr(offset, size() - offset)
 										: throw std::out_of_range(
 												"Tried to create a substring that would exceed the original string. "
@@ -302,7 +302,7 @@ T to_integral(const mart::StringView str) {
 }
 
 //minimal implementation for sanitized strings that only contain digits (no negative numbers)
-template<class T>
+template<class T = unsigned int>
 T to_integral_unsafe(mart::StringView str)
 {
 	return mart::accumulate(str, T{}, [](T sum, char c) { return sum * 10 + c - '0'; });
