@@ -142,7 +142,7 @@ struct formatted_data_range {
 	data_fmt_info         fmt_info;
 };
 
-std::ostream& operator<<( std::ostream& out, const formatted_data_range& range )
+inline std::ostream& operator<<( std::ostream& out, const formatted_data_range& range )
 {
 	os_flag_guard g( out );
 
