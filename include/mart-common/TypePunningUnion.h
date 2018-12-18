@@ -20,8 +20,6 @@
 #include <cstdint>
 
 /* Proprietary Library Includes */
-#include "utils.h"	 // type_is_one_of
-#include "./cpp_std/type_traits.h"
 #include "ArrayView.h"
 
 /* Project Includes */
@@ -44,7 +42,7 @@ public:
 	template<class T>
 	static constexpr bool is_member_type()
 	{
-		return mart::type_is_one_of<T, Types...>();
+		return ( std::is_same_v<T, Types> || ... || false );
 	}
 
 	static_assert(mart::conjunction<is_compatible<Types> ...>::value, "");

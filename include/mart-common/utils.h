@@ -122,22 +122,16 @@ enum class Synchonized {
 	True
 };
 
-namespace detail {
-template<class T>
-constexpr bool type_is_one_of_impl(T*) {
-	return false;
+
+template<class T, class ... Ts>
+constexpr bool type_is_any_of() {
+	return ( std::is_same_v<T, Ts> || ... || false );
 }
 
-template<class T, class T1, class ... Ts>
-constexpr bool type_is_one_of_impl(T* p, T1*, Ts* ... ps) {
-	return std::is_same<T, T1>::value || type_is_one_of_impl(p, ps...);
-}
-
-}
-
-template<class T, class T1, class ... Ts>
-constexpr bool type_is_one_of() {
-	return detail::type_is_one_of_impl((T*)nullptr, (T1*)nullptr, ((Ts*)nullptr) ...);
+template<class T, class T1, class... Ts>
+[[deprecated("Please use type_is_any_of instead")]] constexpr bool type_is_one_of()
+{
+	return type_is_any_of<T, T1, Ts...>();
 }
 
 using idx_t = std::ptrdiff_t;
