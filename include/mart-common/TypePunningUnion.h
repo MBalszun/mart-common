@@ -35,8 +35,8 @@ public:
 	struct is_compatible {
 		static constexpr bool value =
 			std::is_standard_layout<T>::value
-			|| std::is_trivially_destructible<T>::value
-			|| std::is_trivially_copyable<T>::value;
+			&& std::is_trivially_destructible<T>::value
+			&& std::is_trivially_copyable<T>::value;
 	};
 
 	template<class T>
