@@ -83,7 +83,7 @@ public:
 			_cancel = false;
 			throw Canceled{};
 		}
-		receive_target = _fifo.front();
+		receive_target = std::move( _fifo.front() );
 		_fifo.pop();
 	}
 
