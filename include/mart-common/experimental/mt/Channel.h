@@ -26,7 +26,7 @@ namespace mart {
 namespace experimental {
 namespace mt {
 
-template <class T>
+template<class T>
 class Channel {
 public:
 	void send( const T& t )
@@ -76,10 +76,8 @@ public:
 	void receive( T& receive_target )
 	{
 		std::unique_lock<std::mutex> ul( _mx );
-		_cv_non_empty.wait( ul, [this] {
-			return !_fifo.empty() || _cancel;
-		} );
-		if (_cancel) {
+		_cv_non_empty.wait( ul, [this] { return !_fifo.empty() || _cancel; } );
+		if( _cancel ) {
 			_cancel = false;
 			throw Canceled{};
 		}
@@ -90,7 +88,7 @@ public:
 	T receive()
 	{
 		T ret;
-		receive(ret);
+		receive( ret );
 		return ret;
 	}
 
@@ -105,9 +103,9 @@ public:
 
 	void clear()
 	{
+		using f_type = decltype( _fifo );
 		std::lock_guard<std::mutex> _( _mx );
-		using f_type = decltype(_fifo);
-			f_type{}.swap(_fifo);
+		f_type{}.swap( _fifo );
 	}
 
 	void operator<<( const T& v ) { send( v ); }
@@ -130,7 +128,7 @@ public:
 		operator bool()
 		{
 			auto from = _ch;
-			_ch = nullptr;
+			_ch       = nullptr;
 			return from && from->try_receive( _receive_target );
 		}
 		// didn't check -> blocking receive semantics
@@ -141,7 +139,7 @@ public:
 
 	private:
 		Channel* _ch;
-		T&		 _receive_target;
+		T&       _receive_target;
 	};
 
 	/**
@@ -159,13 +157,13 @@ public:
 	receiving operator>>( T& v ) { return receiving( this, v ); }
 
 private:
-	std::queue<T>			_fifo;
-	std::mutex				_mx;
+	std::queue<T>           _fifo;
+	std::mutex              _mx;
 	std::condition_variable _cv_non_empty;
-	bool					_cancel{};
+	bool                    _cancel {};
 };
-}
-}
-}
+} // namespace mt
+} // namespace experimental
+} // namespace mart
 
 #endif
