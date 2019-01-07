@@ -17,6 +17,7 @@
 #include "UnblockException.h"
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -53,6 +54,22 @@ public:
 				received = true;
 			}
 		}
+		return received;
+	}
+
+	bool try_receive( T& _receive_target, std::chrono::milliseconds timeout )
+	{
+		bool received = false;
+
+		std::unique_lock<std::mutex> ul( _mx );
+		_cv_non_empty.wait_for( ul, timeout, [this] { return !_fifo.empty() || _cancel; } );
+
+		if( !_fifo.empty() ) {
+			_receive_target = std::move( _fifo.front() );
+			_fifo.pop();
+			received = true;
+		}
+
 		return received;
 	}
 
