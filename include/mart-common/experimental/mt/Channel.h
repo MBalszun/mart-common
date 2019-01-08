@@ -111,36 +111,36 @@ public:
 	void operator<<( const T& v ) { send( v ); }
 	void operator<<( T&& v ) { send( std::move( v ) ); }
 
-	class receiving {
-	public:
-		receiving( Channel* ch, T& receive_target )
-			: _ch( ch )
-			, _receive_target( receive_target )
-		{
-		}
-		receiving( receiving&& other )
-			: _ch( other._ch )
-			, _receive_target( other._receive_target )
-		{
-			other._ch = nullptr;
-		}
-		// checking for success -> non-blocking try_receive semantics
-		operator bool()
-		{
-			auto from = _ch;
-			_ch       = nullptr;
-			return from && from->try_receive( _receive_target );
-		}
-		// didn't check -> blocking receive semantics
-		~receiving()
-		{
-			if( _ch ) _ch->receive( _receive_target );
-		}
+	//class receiving {
+	//public:
+	//	receiving( Channel* ch, T& receive_target )
+	//		: _ch( ch )
+	//		, _receive_target( receive_target )
+	//	{
+	//	}
+	//	receiving( receiving&& other )
+	//		: _ch( other._ch )
+	//		, _receive_target( other._receive_target )
+	//	{
+	//		other._ch = nullptr;
+	//	}
+	//	// checking for success -> non-blocking try_receive semantics
+	//	operator bool()
+	//	{
+	//		auto from = _ch;
+	//		_ch       = nullptr;
+	//		return from && from->try_receive( _receive_target );
+	//	}
+	//	// didn't check -> blocking receive semantics
+	//	~receiving()
+	//	{
+	//		if( _ch ) _ch->receive( _receive_target );
+	//	}
 
-	private:
-		Channel* _ch;
-		T&       _receive_target;
-	};
+	//private:
+	//	Channel* _ch;
+	//	T&       _receive_target;
+	//};
 
 	/**
 	 * non-blocking try_receive *or* blocking receive function
@@ -154,7 +154,9 @@ public:
 	 * if (ch >> v) //non-blocking
 	 */
 
-	receiving operator>>( T& v ) { return receiving( this, v ); }
+	//receiving operator>>( T& v ) { return receiving( this, v ); }
+
+	void operator>>( T& v ) { return receive( v ); }
 
 private:
 	std::queue<T>           _fifo;

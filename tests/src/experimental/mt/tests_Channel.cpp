@@ -54,7 +54,7 @@ TEST_CASE("mt_channel_send_and_receive_via_stream_operator", "[channel]")
 		}
 		for (auto i : mart::irange(0, k * 200)) {
 			std::string str;
-			if (ch >> str) {
+			if (ch.try_receive(str)) {
 				REQUIRE(std::stoll(str) == i);
 			}
 		}
