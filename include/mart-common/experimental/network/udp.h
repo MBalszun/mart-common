@@ -48,7 +48,7 @@ public:
 		: Socket()
 	{
 		if (!isValid()) {
-			throw std::runtime_error(mart::concat("Could not open create udp socket | Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+			throw std::runtime_error(mart::concat("Could not create udp socket | Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).c_str());
 		}
 		if (!bind(local)) {
 			throw std::runtime_error(mart::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
