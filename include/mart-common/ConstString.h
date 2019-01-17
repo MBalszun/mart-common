@@ -103,6 +103,10 @@ public:
 	//	return substr(offset, _size - offset);
 	//}
 
+	// NOTE: Currently, const string is always zero terminated
+	//	     once substr functionality is added, the actual buffer
+	//       will still be zero terminated, but the string, this
+	//       instance is nominally referring to might not.
 	bool isZeroTerminated() const
 	{
 		return (*this)[size()] == '\0';
@@ -132,9 +136,7 @@ public:
 	}
 
 	const char* c_str() const {
-		if (!isZeroTerminated()) {
-			throw std::runtime_error("Called c_str on ConstString that is not zero terminated -> create zero terminated version wihth createZStr() first");
-		}
+		assert( isZeroTerminated() );
 		return _start;
 	}
 
@@ -185,6 +187,7 @@ private:
 		~atomic_ref_cnt() { _decref(); }
 
 		char* get() noexcept { return reinterpret_cast<char*>( _cnt ) + sizeof( Cnt_t ); }
+		const char* get() const noexcept { return reinterpret_cast<const char*>( _cnt ) + sizeof( Cnt_t ); }
 
 		friend void swap( atomic_ref_cnt& l, atomic_ref_cnt& r ) noexcept  { std::swap( l._cnt, r._cnt ); }
 
@@ -241,16 +244,10 @@ private:
 		return static_cast<const StringView&>(*this);
 	}
 
-	//static inline std::unique_ptr<char[]> _allocate_null_terminated_char_buffer(size_t size)
-	//{
-	//	auto data = mart::make_unique<char[]>(size + 1);
-	//	data[size] = '\0'; //zero terminate
-	//	return data;
-	//}
-
 	static inline atomic_ref_cnt _allocate_null_terminated_char_buffer(size_t size)
 	{
-		atomic_ref_cnt data{ mart::make_unique<char[]>(size + 1 + atomic_ref_cnt::required_space) };
+		// c++20: std::make_unique_default_init<char[]>( size + 1 + atomic_ref_cnt::required_space )
+		atomic_ref_cnt data{ std::unique_ptr<char[]>( new char[size + 1 + atomic_ref_cnt::required_space] ) };
 		data.get()[size] = '\0'; //zero terminate
 		return data;
 	}
