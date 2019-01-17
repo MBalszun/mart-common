@@ -56,6 +56,8 @@ public:
 		_copyFrom(other);
 	}
 
+	constexpr operator std::string_view() const noexcept { return this->_as_strview(); }
+
 	//NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
 	constexpr ConstString(const char(&other)[N]) noexcept :
@@ -239,7 +241,7 @@ private:
 		return static_cast<StringView&>(*this);
 	}
 
-	const StringView& _as_strview() const
+	constexpr const StringView& _as_strview() const
 	{
 		return static_cast<const StringView&>(*this);
 	}

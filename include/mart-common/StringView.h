@@ -45,6 +45,10 @@ public:
 	/* #### CTORS #### */
 	constexpr StringView() noexcept = default;
 
+	constexpr operator std::string_view() const noexcept {
+		return std::string_view(_start, _size);
+	}
+
 	StringView(const std::string& other) noexcept
 		: _start(other.data())
 		, _size(other.size())
