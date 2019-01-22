@@ -15,11 +15,12 @@
  */
 
 #include <stdexcept>
+#include <cstdint>
 
 namespace mart {
 		template <class T>
 		class Optional {
-			enum class OPT_FLAG : uint8_t {
+			enum class OPT_FLAG : std::uint8_t {
 				Invalid = 0,
 				Valid
 			};

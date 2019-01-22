@@ -219,17 +219,17 @@
 	enum class NAME : BASE_TYPE { __VA_ARGS__ };                                                                       \
                                                                                                                        \
 	/* Array containing all enums */                                                                                   \
-	constexpr std::array<NAME, MEMBER_CNT> NAME##_Array{                                                               \
+	[[maybe_unused]] constexpr std::array<NAME, MEMBER_CNT> NAME##_Array{                                              \
 		{MART_UTILS_IMPL_FOR_EACH_P( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER, NAME, __VA_ARGS__ )}};                        \
                                                                                                                        \
 	/* Arrays containing all enum names as mart::StringViews c-string or std::string */                                \
-	constexpr mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT> NAME##_StringViews{                               \
+	[[maybe_unused]] constexpr mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT> NAME##_StringViews {             \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_STRING_VIEW, __VA_ARGS__ )};                      \
                                                                                                                        \
-	constexpr mart::EnumIdxArray<const char*, NAME, MEMBER_CNT> NAME##_CStrings{                                       \
+	[[maybe_unused]] constexpr mart::EnumIdxArray<const char*, NAME, MEMBER_CNT> NAME##_CStrings {                     \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_C_STRING, __VA_ARGS__ )};                         \
                                                                                                                        \
-	const mart::EnumIdxArray<std::string, NAME, MEMBER_CNT> NAME##_CppStrings{                                         \
+	[[maybe_unused]] const mart::EnumIdxArray<std::string, NAME, MEMBER_CNT> NAME##_CppStrings {                       \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_CPP_STRING, __VA_ARGS__ )};                       \
                                                                                                                        \
 	constexpr std::size_t	  mart_enumCnt_impl( const NAME* ) { return MEMBER_CNT; }                                 \

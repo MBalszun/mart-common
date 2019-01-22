@@ -33,9 +33,9 @@ TEST_CASE( "MartTime_dummy", "[MartTime]" )
 	mart::Timer t1;
 	mart::Timer t2( 5_ms );
 	t1.reset();
-	auto t2elapsed = t2.elapsed();
 
-	auto t2remaining = t2.remaining();
+	[[maybe_unused]] auto t2elapsed = t2.elapsed();
+	[[maybe_unused]] auto t2remaining = t2.remaining();
 
 	for( mart::PeriodicScheduler sched( 500_us ); sched.loopCnt() < 3; sched.sleep() ) {
 
