@@ -261,9 +261,21 @@ T core(mart::StringView str)
 		if (d < 0 || 9 < d ) {
 			break;
 		}
-		if (tmp >= std::numeric_limits<T>::max() / 16) { // quick check against simple constant
-			if ( tmp > (std::numeric_limits<T>::max() - d) / 10 ) {
-				throw std::out_of_range("String representing an integral (\"" + str.to_string() + "\") overflows type " + typeid(T).name());
+		if( tmp >= std::numeric_limits<T>::max() / 16 ) { // quick check against simple constant
+			if( tmp > ( std::numeric_limits<T>::max() - d ) / 10 ) {
+#ifdef __cpp_rtti
+				throw std::out_of_range( mart::concat( "String representing an integral (\"",
+													   str.to_string(),
+													   "\") overflows type ",
+													   mart::StringView::fromZString( typeid( T ).name() ) )
+											 .c_str() );
+#else
+				throw std::out_of_range(  mart::concat( "String representing an integral (\"",
+													   str.to_string(),
+													   "\") overflows type in",
+													   mart::StringView::fromZString( __func__ ) )
+											 .c_str() );
+#endif
 			}
 		}
 		tmp = tmp * 10 + d;
