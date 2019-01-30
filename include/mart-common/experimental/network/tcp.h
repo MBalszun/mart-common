@@ -47,14 +47,14 @@ public:
 		bind(ep);
 		//TODO: throw exception, if bind fails
 	}
-	Socket(Socket&& other) :
-		_socket_handle(std::move(other._socket_handle)),
-		_ep_local(std::move(other._ep_local)),
-		_ep_remote(std::move(other._ep_remote))
+	Socket( Socket&& other ) noexcept
+		: _socket_handle( std::move( other._socket_handle ) )
+		, _ep_local( std::move( other._ep_local ) )
+		, _ep_remote( std::move( other._ep_remote ) )
 	{
-		other = Socket{};
+		other = Socket {};
 	}
-	Socket& operator=(Socket&& other)
+	Socket& operator=( Socket&& other ) noexcept 
 	{
 		_socket_handle = std::move(other._socket_handle);
 		_ep_local = mart::exchange(other._ep_local,endpoint{});
@@ -157,18 +157,18 @@ public:
 		listen_on( ep );
 		//TODO: throw exception, if this fails
 	}
-	Acceptor(Acceptor&& other) :
-		_socket_handle(std::move(other._socket_handle)),
-		_ep_local(std::move(other._ep_local)),
-		_state(other._state)
+	Acceptor( Acceptor&& other ) noexcept
+		: _socket_handle( std::move( other._socket_handle ) )
+		, _ep_local( std::move( other._ep_local ) )
+		, _state( other._state )
 	{
-		other = Acceptor{};
+		other = Acceptor {};
 	}
-	Acceptor& operator=(Acceptor&& other)
+	Acceptor& operator=( Acceptor&& other ) noexcept
 	{
-		_socket_handle = std::move(other._socket_handle);
-		_ep_local = std::move(other._ep_local);
-		other._ep_local = endpoint{};
+		_socket_handle  = std::move( other._socket_handle );
+		_ep_local       = std::move( other._ep_local );
+		other._ep_local = endpoint {};
 		return *this;
 	}
 	/* Binds to an address and immediately starts to listen on that address*/

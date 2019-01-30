@@ -141,12 +141,12 @@ public:
 	Socket(const Socket& other) = delete;
 	Socket& operator=(const Socket& other) = delete;
 
-	Socket(Socket&& other) :
+	Socket(Socket&& other) noexcept :
 		_handle{ mart::exchange(other._handle, port_layer::invalid_handle) },
 		_is_blocking{ mart::exchange(other._is_blocking, true) }
 	{}
 
-	Socket& operator=(Socket&& other)
+	Socket& operator=( Socket&& other ) noexcept 
 	{
 		close();
 		_handle = mart::exchange(other._handle, port_layer::invalid_handle);
