@@ -33,9 +33,13 @@ namespace log {
 //TODO: rename to LogLvl
 enum class Level {
 	ERROR = MART_LOG_LOG_LVL_ERROR,
+	Error  = MART_LOG_LOG_LVL_ERROR,
 	STATUS = MART_LOG_LOG_LVL_STATUS,
+	Status = MART_LOG_LOG_LVL_STATUS,
 	DEBUG = MART_LOG_LOG_LVL_DEBUG,
-	TRACE = MART_LOG_LOG_LVL_TRACE
+	Debug = MART_LOG_LOG_LVL_DEBUG,
+	TRACE = MART_LOG_LOG_LVL_TRACE,
+	Trace  = MART_LOG_LOG_LVL_TRACE
 };
 
 constexpr Level defaultLogLevel = Level::STATUS;
