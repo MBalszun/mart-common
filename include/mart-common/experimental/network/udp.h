@@ -133,13 +133,13 @@ public:
 		_socket_handle.setBlocking(t);
 
 	}
-	void setTxTimeout(std::chrono::microseconds timeout)
+	bool setTxTimeout(std::chrono::microseconds timeout)
 	{
-		_socket_handle.setTxTimeout(timeout);
+		return _socket_handle.setTxTimeout(timeout);
 	}
-	void setRxTimeout(std::chrono::microseconds timeout)
+	bool setRxTimeout(std::chrono::microseconds timeout)
 	{
-		_socket_handle.setRxTimeout(timeout);
+		return _socket_handle.setRxTimeout(timeout);
 	}
 	std::chrono::microseconds getTxTimeout()
 	{

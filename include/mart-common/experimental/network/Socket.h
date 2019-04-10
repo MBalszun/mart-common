@@ -106,7 +106,7 @@ struct is_sock_addr_type {
 /* This class is a very thin RAII wrapper around the OS's native socket handle.
  * It also translates the native socket function (like bind, connect send etc.) into member functions
  * which sometimes use a little more convenient parameter types (e.g. ArrayView instead of pointer+length)
- * It doesn't retain any state except the handle
+ * It doesn't retain any state except the handle and may cache a few config flags.
  */
 class Socket {
 	template<class T>
@@ -275,36 +275,38 @@ public:
 		}
 		return _setBlocking_uncached( should_block );
 	}
-	void setTxTimeout(std::chrono::microseconds timeout)
+	bool setTxTimeout(std::chrono::microseconds timeout)
 	{
 	#ifdef MBA_UTILS_USE_WINSOCKS
 		DWORD to_ms = static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
-		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to_ms);
+		auto res = this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to_ms);
 	#else
 		auto to = nw::to_timeval(timeout);
-		this->setsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
+		auto res = this->setsockopt( SOL_SOCKET, SO_SNDTIMEO, to );
 	#endif
+		return res != port_layer::socket_error_value;
 	}
 
-	void setRxTimeout(std::chrono::microseconds timeout)
+	bool setRxTimeout(std::chrono::microseconds timeout)
 	{
 	#ifdef MBA_UTILS_USE_WINSOCKS
 		DWORD to_ms = static_cast<DWORD>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
-		this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, to_ms);
+		auto  res   = this->setsockopt( SOL_SOCKET, SO_RCVTIMEO, to_ms );
 	#else
 		auto to = nw::to_timeval(timeout);
-		this->setsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
+		auto res = this->setsockopt( SOL_SOCKET, SO_RCVTIMEO, to );
 	#endif
+		return res != port_layer::socket_error_value;
 	}
 	std::chrono::microseconds getTxTimeout()
 	{
-		timeval to;
+		timeval to {};
 		this->getsockopt(SOL_SOCKET, SO_SNDTIMEO, to);
 		return nw::from_timeval<std::chrono::microseconds>(to);
 	}
 	std::chrono::microseconds getRxTimeout()
 	{
-		timeval to;
+		timeval to {};
 		this->getsockopt(SOL_SOCKET, SO_RCVTIMEO, to);
 		return nw::from_timeval<std::chrono::microseconds>(to);
 	}
