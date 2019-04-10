@@ -108,6 +108,15 @@ public:
 		f_type{}.swap( _fifo );
 	}
 
+	// same as clear, but also resets the cancel_read flag
+	void reset() {
+		using f_type = decltype( _fifo );
+		std::lock_guard<std::mutex> _( _mx );
+		f_type {}.swap( _fifo );
+		_cancel = false;
+
+	}
+
 	void operator<<( const T& v ) { send( v ); }
 	void operator<<( T&& v ) { send( std::move( v ) ); }
 
