@@ -85,11 +85,13 @@ using handle_t = SOCKET;
 using address_len_t = int;
 using txrx_size_t = int;
 static constexpr handle_t invalid_handle = INVALID_SOCKET;
+static constexpr int      socket_error_value = SOCKET_ERROR;
 #else
 using handle_t = int;
 using address_len_t = socklen_t;
 using txrx_size_t = ssize_t;
 static constexpr handle_t invalid_handle = -1;
+static constexpr int      socket_error_value = -1;
 #endif // MBA_UTILS_USE_WINSOCKS
 
 //Wrapper functions for socket related functions, that are specific to a certain platform
@@ -132,18 +134,18 @@ inline int getLastSocketError()
 inline bool waInit()
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
+    // https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-wsastartup
 
 	/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
-	wVersionRequested = MAKEWORD(2, 2);
+	WORD wVersionRequested = MAKEWORD( 2, 2 );
+	WSADATA wsaData {};
 
-	err = WSAStartup(wVersionRequested, &wsaData);
+	int err = WSAStartup(wVersionRequested, &wsaData);
 	if (err != 0) {
 		/* Tell the user that we could not find a usable */
 		/* Winsock DLL.                                  */
 		std::printf("WSAStartup failed with error: %d\n", err);
+		WSACleanup();
 		return false;
 	}
 	return true;
