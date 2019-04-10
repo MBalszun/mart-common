@@ -127,7 +127,9 @@ public:
 	constexpr Socket() = default;
 	explicit Socket(port_layer::handle_t handle) :
 		_handle(handle)
-	{}
+	{
+		_setBlocking_uncached( true );
+	}
 	Socket(Domain domain, TransportType type, int protocol = 0)
 	{
 		_open(domain, type, protocol);
@@ -268,11 +270,10 @@ public:
 	}
 	bool setBlocking(bool should_block)
 	{
-		if (port_layer::set_blocking(_handle, should_block)) {
-			_is_blocking = should_block;
+		if (_is_blocking == should_block) {
 			return true;
 		}
-		return false;
+		return _setBlocking_uncached( should_block );
 	}
 	void setTxTimeout(std::chrono::microseconds timeout)
 	{
@@ -310,7 +311,7 @@ public:
 	bool isBlocking() const
 	{
 		//XXX: acutally query the native socket
-		return _is_blocking;
+		return _is_blocking && isValid();
 	}
 
 
@@ -321,8 +322,20 @@ private:
 			return false;
 		}
 		_handle = ::socket(mart::toUType(domain), mart::toUType(type), protocol);
+		_setBlocking_uncached( true );
 		return _handle != port_layer::invalid_handle;
 	}
+
+	bool _setBlocking_uncached( bool should_block )
+	{
+		if( port_layer::set_blocking( _handle, should_block ) ) {
+			_is_blocking = should_block;
+			return true;
+		}
+		return false;
+	}
+
+
 	port_layer::handle_t _handle = port_layer::invalid_handle;
 	bool _is_blocking = true;
 };
