@@ -161,6 +161,12 @@ public:
 	{
 		return _socket_handle.isValid();
 	}
+
+	bool close()
+	{
+		return _socket_handle.close();
+	}
+
 	const endpoint& getLocalEndpoint() const { return _ep_local; }
 	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
 private:
