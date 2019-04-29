@@ -2,19 +2,29 @@ cmake_minimum_required(VERSION 3.9)
 
 project(mart-common_testing)
 
+set(CMAKE_CXX_STANDARD 17)
+
 option(MART_COMMON_RUN_BENCHMARKS "run benchmarks as part of unit_test source" OFF)
 option(MART_COMMON_UPLOAD_COVERAGE "" OFF)
 
-find_package(Catch2 CONFIG)
-if(${Catch2_FOUND})
-	message(STATUS "[MART-COMMON][TESTS] Using Catch2 from ${Catch2_CONFIG}" )
-	set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME ON)
-	include(ParseAndAddCatchTests)
-else()
-	message(STATUS "[MART-COMMON][TESTS] Didn't find catch2 -- using local copy")
-	include_directories(libs)
-	set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME ON)
-	include(libs/catch2/ParseAndAddCatchTests.cmake)
+if(NOT TARGET Catch2::Catch2)
+	find_package(Catch2 CONFIG)
+
+	set( PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME ON )
+
+	if(${Catch2_FOUND})
+		message( STATUS "[MART-COMMON][TESTS] Using Catch2 from ${Catch2_CONFIG}" )
+
+		include( ParseAndAddCatchTests )
+	else()
+		message( STATUS "[MART-COMMON][TESTS] Didn't find catch2 -- using local copy" )
+
+		add_library( mart-common-catch2-dummy INTERFACE )
+		add_library( Catch2::Catch2 ALIAS mart-common-catch2-dummy )
+		target_include_directories( mart-common-catch2-dummy INTERFACE libs )
+
+		include( libs/catch2/ParseAndAddCatchTests.cmake )
+	endif()
 endif()
 
 file(GLOB_RECURSE TEST_RCS tests_*.cpp)
