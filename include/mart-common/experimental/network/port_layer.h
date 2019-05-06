@@ -50,6 +50,7 @@ struct IUnknown; //This declaration will be needed when translating windows head
 
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
+#include <afunix.h>
 #pragma comment(lib, "Ws2_32.lib")
 
 #undef ERROR
@@ -163,7 +164,7 @@ namespace port_layer {
 	inline const char *inet_net_to_pres(int af, const void *src, char *dst, size_t size)
 	{
 		#ifdef MBA_UTILS_USE_WINSOCKS //detect windows os - use other guards if necessary
-			return InetNtop(af, const_cast<void*>(src), dst, size);
+			return InetNtop(af, src, dst, size);
 		#else
 			return inet_ntop(af, src, dst, size);
 		#endif
@@ -182,19 +183,5 @@ namespace port_layer {
 } //nw
 } //experimental
 } //mba
-
-//we have to define sockaddr_un type on windows
-//XXX find way to create compiletime error, if used on windows
-#ifdef MBA_UTILS_USE_WINSOCKS
-struct sockaddr_un {
-private:
-	//prevent instantiation on windows instantiate
-	sockaddr_un(){}
-	~sockaddr_un(){}
-};
-
-#endif
-
-
 
 #endif //header guard

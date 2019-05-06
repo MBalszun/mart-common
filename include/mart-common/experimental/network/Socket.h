@@ -18,8 +18,8 @@
 /* Standard Library Includes */
 
 /* Proprietary Library Includes */
-#include "../../cpp_std/utility.h"
 #include "../../ArrayView.h"
+#include "../../utils.h"
 
 /* Project Includes */
 #include "basic_types.h"
@@ -144,15 +144,15 @@ public:
 	Socket& operator=(const Socket& other) = delete;
 
 	Socket(Socket&& other) noexcept :
-		_handle{ mart::exchange(other._handle, port_layer::invalid_handle) },
-		_is_blocking{ mart::exchange(other._is_blocking, true) }
+		_handle{ std::exchange(other._handle, port_layer::invalid_handle) },
+		_is_blocking{ std::exchange(other._is_blocking, true) }
 	{}
 
-	Socket& operator=( Socket&& other ) noexcept 
+	Socket& operator=( Socket&& other ) noexcept
 	{
 		close();
-		_handle = mart::exchange(other._handle, port_layer::invalid_handle);
-		_is_blocking = mart::exchange(other._is_blocking, true);
+		_handle = std::exchange(other._handle, port_layer::invalid_handle);
+		_is_blocking = std::exchange(other._is_blocking, true);
 		return *this;
 	}
 
@@ -179,7 +179,7 @@ public:
 
 	port_layer::handle_t release()
 	{
-		return mart::exchange(_handle, port_layer::invalid_handle);
+		return std::exchange(_handle, port_layer::invalid_handle);
 	}
 
 	/* ###### send / rec ############### */

@@ -17,7 +17,6 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <chrono>
-#include <iostream> //TODO: remove
 #include <cerrno>
 #include <cstring>
 
