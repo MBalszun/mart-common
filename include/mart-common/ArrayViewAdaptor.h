@@ -17,9 +17,12 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <iterator>
-#include <type_traits>
 #include <stdexcept>
-#include <string>
+#include <type_traits>
+
+#ifndef NDEBUG
+#include <string> //exception messages
+#endif
 
 /* Proprietary Library Includes */
 /* Project Includes */
@@ -70,7 +73,7 @@ template<class T, class DerivedType>
 class ArrayViewAdaptor {
 public:
 	// clang format off  <- clang format doesn't support alignment of individual parts of a declaration/definition
-	static_assert(std::is_reference<T>::value == false, "T must not be a reference type");
+	static_assert( std::is_reference<T>::value == false, "T must not be a reference type" );
 	//The usual type defs for c++ container
 	using value_type      = T;
 	using size_type       = std::size_t;
@@ -100,15 +103,15 @@ public:
 	constexpr const_reverse_iterator rbegin()  const { return crbegin(); }
 	constexpr const_reverse_iterator rend()    const { return crend(); }
 
-	constexpr	    reference front()         { return *begin(); }
-	constexpr const_reference front()   const { return *begin(); }
-	constexpr		reference back()          { return *( end() - 1 ); }
-	constexpr const_reference back()    const { return *( end() - 1 ); }
+	constexpr	    reference front()       noexcept { return *begin(); }
+	constexpr const_reference front() const noexcept { return *begin(); }
+	constexpr		reference back()        noexcept { return *( end() - 1 ); }
+	constexpr const_reference back()  const noexcept { return *( end() - 1 ); }
 
 	constexpr size_type length()        const noexcept { return _size(); }
 
-    constexpr       reference operator[](size_t idx)		{ return _data()[idx]; }
-	constexpr const_reference operator[](size_t idx) const  { return _data()[idx]; }
+    constexpr       reference operator[]( size_t idx )       noexcept { return _data()[idx]; }
+	constexpr const_reference operator[]( size_t idx ) const noexcept { return _data()[idx]; }
 
 	constexpr       reference at( size_t idx )       { _throwIfOutOfRange( idx ); return _data()[idx]; }
 	constexpr const_reference at( size_t idx ) const { _throwIfOutOfRange( idx ); return _data()[idx]; }
@@ -128,7 +131,12 @@ protected:
 		if (idx < _size()) {
 			return true;
 		} else {
-			throw std::out_of_range("Tried to access " + std::to_string(idx) + "th element of an Array view of size" + std::to_string(_size()));
+#ifndef NDEBUG
+			throw std::out_of_range( "Tried to access " + std::to_string( idx )
+                                   + "th element of an array of size" + std::to_string( _size() ) );
+#else
+			throw std::out_of_range( "Tried to access out of bounds array element" );
+#endif
 		}
 	}
 
