@@ -45,7 +45,7 @@ public:
 		return ( std::is_same_v<T, Types> || ... || false );
 	}
 
-	static_assert(mart::conjunction<is_compatible<Types> ...>::value, "");
+	static_assert( std::conjunction<is_compatible<Types> ...>::value, "");
 
 	// ###### Special member functions #####
 	TypePunningUnion() = default;
@@ -108,7 +108,7 @@ public:
 	mart::ConstMemoryView valid_bytes() const { return all_bytes().subview(0, _size); }
 
 protected:
-	typename mart::aligned_union<0, Types...>::type data;
+	typename std::aligned_union<0, Types...>::type data;
 	std::size_t _size = 0;
 
 	template<class T>
