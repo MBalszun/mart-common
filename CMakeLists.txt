@@ -10,6 +10,7 @@ endif()
 project( MartCommon VERSION 2.0 )
 
 option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
+option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 
 add_library( mart-common INTERFACE )
 add_library( Mart::common ALIAS mart-common )
@@ -33,5 +34,10 @@ if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 	set_target_properties ( mart-common PROPERTIES EXPORT_NAME common )
 	install_targets( mart-common Mart:: )
+endif()
+
+
+if( MART_COMMON_INCLUDE_EXAMPLES )
+	add_subdirectory(examples/nw)
 endif()
 
