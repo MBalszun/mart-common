@@ -18,7 +18,6 @@
 /* Standard Library Includes */
 #include <algorithm>
 #include <cassert>
-#include <stdexcept>
 #include <atomic>
 
 /* Proprietary Library Includes */
@@ -276,26 +275,15 @@ private:
 	}
 
 	template<class ...ARGS>
-	inline static size_t _total_size(const ARGS& ...args)
-	{
-		//c++17: ~ const size_t newSize = 0 + ... + args.size();
-		size_t newSize = 0;
-		const int ignore1[] = { (newSize += args.size(),0)... };
-		(void)ignore1;
-		return newSize;
-	}
-
-	template<class ...ARGS>
 	inline static void _write_to_buffer(char* buffer, const ARGS& ...args)
 	{
-		const int tignore[] = { (_addTo(buffer,args),0)... };
-		(void)tignore;
+		(_addTo(buffer,args), ...);
 	}
 
 	template<class ...ARGS>
 	inline static ConstString _concat_impl(const ARGS& ...args)
 	{
-		const size_t newSize = _total_size(args ...);
+		const size_t newSize = ( 0 + ... + args.size() );
 
 		auto data = _allocate_null_terminated_char_buffer( newSize );
 
@@ -304,7 +292,6 @@ private:
 		return ConstString(std::move(data), newSize);
 	}
 };
-
 
 /**
 * Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
@@ -319,7 +306,7 @@ ConstString concat(const ARGS& ...args)
 template<class ...ARGS>
 std::string concat_cpp_str(const ARGS& ...args)
 {
-	const size_t newSize = ConstString::_total_size(StringView(args) ...);
+	const size_t newSize = (0 + ... + StringView(args).size());
 
 	std::string ret(newSize, ' ');
 
