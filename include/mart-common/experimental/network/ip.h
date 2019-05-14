@@ -20,13 +20,13 @@
 #include <array>
 #include <cassert>
 #include <type_traits>
+#include <optional>
 
 /* Proprietary Library Includes */
 #include "../../utils.h"
 #include "../../ConstString.h"
 #include "../../ArrayView.h"
 #include "../../algorithm.h"
-#include "../Optional.h"
 
 /* Project Includes */
 #include "basic_types.h"
@@ -61,7 +61,7 @@ inline bool is_malformed(mart::StringView str)
 	return has_wrong_length(str) || has_invalid_char(str) || has_wrong_block_count(str);
 }
 
-inline mart::Optional<std::uint32_t> parse_block(mart::StringView block) {
+inline std::optional<std::uint32_t> parse_block(mart::StringView block) {
 	if (block.size() > 3) {
 		return {};
 	}
@@ -90,7 +90,7 @@ inline std::array<mart::StringView, 4> split_blocks_unchecked(const mart::String
 	return ret;
 }
 
-inline mart::Optional<uint32_host_t> parse_address(const mart::StringView string)
+inline std::optional<uint32_host_t> parse_address(const mart::StringView string)
 {
 	if (is_malformed(string)) {
 		return {};
@@ -159,7 +159,7 @@ private:
 
 	static uint32_host_t _parseIpV4String( const mart::StringView str )
 	{
-		mart::Optional<uint32_host_t> res = impl_addr_v4::parse_address(str);
+		std::optional<uint32_host_t> res = impl_addr_v4::parse_address(str);
 		if (!res) {
 			throw std::invalid_argument(mart::concat_cpp_str("Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. "));
 		}
@@ -176,7 +176,7 @@ private:
 constexpr address_v4 address_any{};
 constexpr address_v4 address_local_host(uint32_host_t{ 0x7F000001 });
 
-inline mart::Optional< address_v4> parse_v4_address(const mart::StringView string)
+inline std::optional< address_v4> parse_v4_address(const mart::StringView string)
 {
 	auto res = impl_addr_v4::parse_address(string);
 	if (res) {
@@ -188,7 +188,7 @@ inline mart::Optional< address_v4> parse_v4_address(const mart::StringView strin
 
 inline bool is_valid_v4_address(const mart::StringView string)
 {
-	return impl_addr_v4::parse_address(string).isValid();
+	return impl_addr_v4::parse_address(string).has_value();
 }
 
 namespace impl_port_v4 {
@@ -221,7 +221,7 @@ private:
 	uint16_net_t _p{};
 };
 
-inline mart::Optional< port_nr> parse_v4_port(const mart::StringView string)
+inline std::optional< port_nr> parse_v4_port(const mart::StringView string)
 {
 	using namespace impl_port_v4;
 	if (has_wrong_length(string) || has_invalid_char(string)) { //maximal 6 digits
@@ -327,7 +327,7 @@ struct basic_endpoint_v4 {
 };
 
 template<TransportProtocol p>
-mart::Optional<basic_endpoint_v4<p>> parse_v4_endpoint(mart::StringView str)
+std::optional<basic_endpoint_v4<p>> parse_v4_endpoint(mart::StringView str)
 {
 	auto ps = str.split(':');
 	auto o_address = parse_v4_address(ps.first);
@@ -344,7 +344,7 @@ mart::Optional<basic_endpoint_v4<p>> parse_v4_endpoint(mart::StringView str)
 template<TransportProtocol p>
 inline bool is_valid_v4_endpoint(mart::StringView str)
 {
-	return parse_v4_endpoint<p>(str).isValid();
+	return parse_v4_endpoint<p>(str).has_value();
 }
 
 }//ns _impl_details_ip

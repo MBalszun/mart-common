@@ -54,7 +54,7 @@ public:
 	{
 		other = Socket {};
 	}
-	Socket& operator=( Socket&& other ) noexcept 
+	Socket& operator=( Socket&& other ) noexcept
 	{
 		_socket_handle = std::move(other._socket_handle);
 		_ep_local = mart::exchange(other._ep_local,endpoint{});
@@ -286,7 +286,7 @@ private:
 	State _state = State::closed;
 };
 
-inline mart::Optional<endpoint> parse_v4_endpoint(mart::StringView str) {
+inline std::optional<endpoint> parse_v4_endpoint(mart::StringView str) {
 	return ip::_impl_details_ip::parse_v4_endpoint<ip::TransportProtocol::TCP>(str);
 }
 
