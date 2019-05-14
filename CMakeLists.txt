@@ -14,6 +14,7 @@ option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 
 add_library( mart-common INTERFACE )
 add_library( Mart::common ALIAS mart-common )
+add_subdirectory(./include/mart-common/experimental/net)
 
 target_include_directories( mart-common
 	INTERFACE

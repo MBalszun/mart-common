@@ -42,7 +42,7 @@ add_executable(testing_mart-common
 
 find_package(Threads REQUIRED)
 
-target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads Catch2::Catch2)
+target_link_libraries(testing_mart-common PRIVATE Mart::common Mart::common_net Threads::Threads Catch2::Catch2)
 
 if(MART_COMMON_RUN_BENCHMARKS)
 	target_compile_definitions(testing_mart-common PRIVATE /DMART_COMMON_RUN_BENCHMARK)
