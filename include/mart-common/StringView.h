@@ -20,8 +20,9 @@
 #include <cstring>
 #include <cassert>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <string>
+#include <string_view>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/type_traits.h"
@@ -55,13 +56,19 @@ public:
 	{
 	}
 
+	constexpr explicit StringView( const std::string_view other ) noexcept
+		: _start( other.data() )
+		, _size( other.size() )
+	{
+	}
+
 	constexpr StringView(const char* other, size_type size) noexcept
 		: _start(other)
 		, _size(size)
 	{
 	}
 
-	static StringView fromZString(const char* other) { return{ other, std::strlen(other) }; }
+	constexpr static StringView fromZString(const char* other) { return{ other, std::string_view(other).size() }; }
 
 	// NOTE: Use only for string literals!!!
 	template <size_t N>
@@ -86,24 +93,21 @@ public:
 
 	/* #### Special member functions #### */
 	constexpr StringView(const StringView& other) noexcept = default;
-	StringView& operator=(const StringView& other) noexcept = default;
+	constexpr StringView& operator=(const StringView& other) noexcept = default;
 	constexpr StringView(StringView&& other) noexcept = default;
-	StringView& operator=(StringView&& other) noexcept = default;
+	constexpr StringView& operator=( StringView&& other ) noexcept = default;
 
 	/*#### string functions ####*/
 	std::string to_string() const { return std::string(this->cbegin(), this->cend()); }
 
-	constexpr StringView substr(size_t offset, size_t count = npos) const
+	constexpr StringView substr( size_t offset, size_t count = npos ) const noexcept
 	{
-		;
-		return ( count <= this->_size - offset ) && offset <= this->_size
-								? StringView{ this->_start + offset, count }
-								: (count == npos && offset <= this->_size
-										? substr(offset, size() - offset)
-										: throw std::out_of_range(
-												"Tried to create a substring that would exceed the original string. "
-												"Original string:\n\n" + this->to_string() + "\n")
-								   );
+		assert( offset <= _size );
+		if( count == npos ) {
+			return StringView {this->_start + offset, this->_size - offset};
+		}
+		assert( offset + count <= _size );
+		return StringView {this->_start + offset,count};
 	}
 
 	/**
@@ -115,26 +119,22 @@ public:
 	*	- if pos > size()
 	*		throws std::out_of_range exception
 	*/
-	constexpr std::pair<StringView, StringView> split(size_t pos) const
+	constexpr std::pair<StringView, StringView> split(size_t pos) const noexcept
 	{
-		return pos < _size
-			? std::make_pair(StringView{ this->_start, pos }, StringView{ this->_start + pos + 1, _size - pos - 1 })
-			: (pos == _size || pos == npos)
-			? std::pair<StringView, StringView>{ *this, StringView{} }
-		: throw std::out_of_range("\nTried to create a substring that would exceed the original string. "
-								  "Original string:\n\n"
-								  + this->to_string()
-								  + "\n");
+		if (pos == npos || pos == _size) { return std::pair<StringView, StringView> {*this, StringView {}};
+		}
+		assert( pos < _size );
+		return std::make_pair( StringView {this->_start, pos}, StringView {this->_start + pos + 1, _size - pos - 1} );
 	}
 
-	std::pair<StringView, StringView> split(char c) const
+	constexpr std::pair<StringView, StringView> split(char at) const noexcept
 	{
-		auto it = mart::find_ex(*this, c);
-		if (!it) {
-			return { *this,{} };
+		std::string_view tmp {*this};
+		auto             pos = tmp.find( at );
+		if( pos == std::string_view::npos ) {
+			return {*this, {}};
 		} else {
-			auto cnt = it - this->begin();
-			return { this->substr(0,cnt),this->substr(cnt + 1,this->size() - cnt - 1) };
+			return {this->substr( 0, pos ), this->substr( pos + 1, this->size() - pos - 1 )};
 		}
 	}
 
@@ -173,11 +173,7 @@ public:
 	}
 
 	friend int compare(StringView l, StringView r);
-	friend std::ostream& operator<<(std::ostream& out, const StringView string)
-	{
-		out.write(string.data(), string.size());
-		return out;
-	}
+	friend std::ostream& operator<<( std::ostream& out, const StringView string );
 
 	bool isValid() const { return _start != nullptr; }
 
@@ -315,11 +311,14 @@ T to_integral(const mart::StringView str) {
 
 //minimal implementation for sanitized strings that only contain digits (no negative numbers)
 template<class T = unsigned int>
-T to_integral_unsafe(mart::StringView str)
+constexpr T to_integral_unsafe( std::string_view str )
 {
-	return mart::accumulate(str, T{}, [](T sum, char c) { return sum * 10 + c - '0'; });
+	T value {};
+	for( auto c : str ) {
+		value = value * 10 + c - '0';
+	}
+	return value;
 }
-
 }
 
 #endif //LIB_MART_COMMON_GUARD_STRING_VIEW_H

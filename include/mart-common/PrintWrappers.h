@@ -28,6 +28,14 @@
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
+std::ostream& operator<<( std::ostream& out, const StringView string )
+{
+	out.write( string.data(), string.size() );
+	return out;
+}
+
+
+
 namespace _impl_print_chrono {
 
 // actual functions that take care of formatting
