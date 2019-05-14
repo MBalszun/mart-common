@@ -10,7 +10,8 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief:  mart::ArrayViewAdaptor, a crtp-style mixin to generate memberfunctions similar to array view from a pointer and a length
+ * @brief:  mart::ArrayViewAdaptor, a crtp-style mixin to generate memberfunctions similar to array view from a pointer
+ * and a length
  *
  */
 
@@ -72,7 +73,8 @@ namespace mart {
 template<class T, class DerivedType>
 class ArrayViewAdaptor {
 public:
-	// clang format off  <- clang format doesn't support alignment of individual parts of a declaration/definition
+	// clang format doesn't support alignment of individual parts of a declaration/definition
+	// clang-format off
 	static_assert( std::is_reference<T>::value == false, "T must not be a reference type" );
 	//The usual type defs for c++ container
 	using value_type      = T;
@@ -108,7 +110,7 @@ public:
 	constexpr		reference back()        noexcept { return *( end() - 1 ); }
 	constexpr const_reference back()  const noexcept { return *( end() - 1 ); }
 
-	constexpr size_type length()        const noexcept { return _size(); }
+    constexpr size_type length() const noexcept { return _size(); }
 
     constexpr       reference operator[]( size_t idx )       noexcept { return _data()[idx]; }
 	constexpr const_reference operator[]( size_t idx ) const noexcept { return _data()[idx]; }
@@ -145,11 +147,9 @@ private:
 	constexpr const_pointer _data() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_data(); }
 	constexpr     size_type _size() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_size(); }
 
-	// clang format on
+	// clang-format on
 };
 
-}
-
-
+} // namespace mart
 
 #endif
