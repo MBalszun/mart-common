@@ -28,7 +28,7 @@
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
-std::ostream& operator<<( std::ostream& out, const StringView string )
+inline std::ostream& operator<<( std::ostream& out, const StringView string )
 {
 	out.write( string.data(), string.size() );
 	return out;
