@@ -1,7 +1,9 @@
 #include "ip.hpp"
 
 #ifdef MBA_UTILS_USE_WINSOCKS
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <WinSock2.h>
 #else
 #include <netinet/ip.h>
