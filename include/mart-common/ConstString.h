@@ -318,7 +318,7 @@ std::string concat_cpp_str( ARGS... args )
 }
 
 template<class... ARGS>
-inline static ConstString ConstString::_concat_impl( ARGS... args )
+inline ConstString ConstString::_concat_impl( ARGS... args )
 {
 	const size_t newSize = ( 0 + ... + args.size() );
 
