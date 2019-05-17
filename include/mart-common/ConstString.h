@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <atomic>
+#include <string_view>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/utility.h"
@@ -54,6 +55,10 @@ public:
 	{
 		_copyFrom(other);
 	}
+
+	explicit ConstString( std::string_view other ):
+		ConstString(StringView(other))
+	{ }
 
 	constexpr operator std::string_view() const noexcept { return this->_as_strview(); }
 
@@ -267,30 +272,8 @@ private:
 		*this = ConstString(std::move(data), other.size());
 	}
 
-	//######## impl helper for concat ###############
-	static void _addTo(char*& buffer, const StringView& str)
-	{
-		std::copy_n(str.cbegin(), str.size(), buffer);
-		buffer += str.size();
-	}
-
 	template<class ...ARGS>
-	inline static void _write_to_buffer(char* buffer, const ARGS& ...args)
-	{
-		(_addTo(buffer,args), ...);
-	}
-
-	template<class ...ARGS>
-	inline static ConstString _concat_impl(const ARGS& ...args)
-	{
-		const size_t newSize = ( 0 + ... + args.size() );
-
-		auto data = _allocate_null_terminated_char_buffer( newSize );
-
-		_write_to_buffer(data.get() , args ...);
-
-		return ConstString(std::move(data), newSize);
-	}
+	static ConstString _concat_impl( ARGS... args );
 };
 
 /**
@@ -300,19 +283,56 @@ private:
 template<class ...ARGS>
 ConstString concat(const ARGS& ...args)
 {
-	return ConstString::_concat_impl(StringView(args)...);
+	return ConstString::_concat_impl(std::string_view(args)...);
+}
+
+//######## impl helper for concat ###############
+namespace detail {
+
+inline void _addTo( char*& buffer, const std::string_view str )
+{
+	std::copy_n( str.cbegin(), str.size(), buffer );
+	buffer += str.size();
+}
+
+template<class... ARGS>
+inline void _write_to_buffer( char* buffer, ARGS... args )
+{
+	( _addTo( buffer, args ), ... );
+}
+
+
+template<class... ARGS>
+std::string concat_cpp_str( ARGS... args )
+{
+	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
+	const size_t newSize = ( 0 + ... + args.size() );
+
+	std::string ret( newSize, ' ' );
+
+	_write_to_buffer( &ret[0], args ... );
+
+	return ret;
+}
+
+}
+
+template<class... ARGS>
+inline static ConstString ConstString::_concat_impl( ARGS... args )
+{
+	const size_t newSize = ( 0 + ... + args.size() );
+
+	auto data = _allocate_null_terminated_char_buffer( newSize );
+
+	detail::_write_to_buffer( data.get(), args... );
+
+	return ConstString( std::move( data ), newSize );
 }
 
 template<class ...ARGS>
 std::string concat_cpp_str(const ARGS& ...args)
 {
-	const size_t newSize = (0 + ... + StringView(args).size());
-
-	std::string ret(newSize, ' ');
-
-	ConstString::_write_to_buffer(&ret[0], StringView(args) ...);
-
-	return ret;
+	return detail::concat_cpp_str( std::string_view( args ) ... );
 }
 
 inline const mart::ConstString& getEmptyConstString()
