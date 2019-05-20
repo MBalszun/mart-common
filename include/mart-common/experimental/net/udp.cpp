@@ -11,17 +11,28 @@
 #endif
 
 #include <cerrno>
-#include <charconv>
+#if __has_include( <charconv> )
+   #include <charconv>
+#endif
 #include <cstring>
 #include <string_view>
+#include <algorithm>
 
 namespace mart::nw::ip::udp {
 
 namespace {
 std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 {
+#if __has_include( <charconv> )
 	auto res = std::to_chars( buffer.begin(), buffer.end(), errno );
 	return {buffer.begin(), static_cast<std::string_view::size_type>( res.ptr - buffer.begin() )};
+#else
+	auto res = std::to_string( errno );
+	auto n   = std::min( res.size(), buffer.size() );
+
+	std::copy_n( res.begin(), n, buffer.begin() );
+	return {buffer.begin(), n};
+#endif
 }
 } // namespace
 
