@@ -154,9 +154,12 @@ public:
 
 	constexpr int add_ref_cnt( int cnt ) const
 	{
-		if( !_cnt ) { return 0; }
-		stats().inc_ref();
-		return _cnt->fetch_add( cnt, std::memory_order_relaxed ) + cnt;
+		if( !_cnt ) {
+			return 0;
+		} else {
+			stats().inc_ref();
+			return _cnt->fetch_add( cnt, std::memory_order_relaxed ) + cnt;
+		}
 	}
 
 private:
