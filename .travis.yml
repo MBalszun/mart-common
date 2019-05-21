@@ -27,7 +27,7 @@ install:
 
 script:
   - mkdir build && cd build
-  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_COVERAGE=ON ..
+  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_INCLUDE_TESTS=ON -DIM_STR_RUN_SANITIZERS=ON ..
   - cmake --build . -- -j2
   - ctest .
   - cd ..

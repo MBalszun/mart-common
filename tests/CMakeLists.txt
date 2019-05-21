@@ -26,7 +26,11 @@ add_executable(im_str_test
 target_link_libraries( im_str_test PUBLIC ImStr::im_str Catch2::Catch2 Threads::Threads )
 
 if( NOT MSVC )
-	if( ${IM_STR_RUN_SANITIZERS} )
+	# On travis this seems to only reliable work with clang at the moment
+	# IF you want to run sanitizers with gcc I'd recommend to adjust the flags in
+	# your cmake toolchain file
+	if( ${IM_STR_RUN_SANITIZERS} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		message(STATUS "[IM_STR][TESTS] Compiling with ASAN and UBSAN")
 		target_compile_options(im_str_test
 			PUBLIC
 				-g
