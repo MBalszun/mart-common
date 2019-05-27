@@ -12,40 +12,29 @@ void requireZero( std::string_view view )
 	REQUIRE( view.data()[view.size()] == '\0' );
 }
 
-TEST_CASE( "Provides standard container type defs", "[im_str]" )
+template<class Container>
+constexpr bool has_standard_container_typedefs()
 {
-	using T = mba::im_str;
-	[[maybe_unused]] T::traits_type            traits {};
-	[[maybe_unused]] T::value_type             v {};
-	[[maybe_unused]] T::pointer                p {};
-	[[maybe_unused]] T::const_pointer          cp {};
-	[[maybe_unused]] T::reference              r  = v;
-	[[maybe_unused]] T::const_reference        cr = v;
-	[[maybe_unused]] T::const_iterator         cit {};
-	[[maybe_unused]] T::iterator               it {};
-	[[maybe_unused]] T::reverse_iterator       rit {};
-	[[maybe_unused]] T::const_reverse_iterator crit {};
-	[[maybe_unused]] T::size_type              s {};
-	[[maybe_unused]] T::difference_type        d {};
-	REQUIRE( true );
+	using T = Container;
+	[[maybe_unused]] typename T::traits_type            traits {};
+	[[maybe_unused]] typename T::value_type             v {};
+	[[maybe_unused]] typename T::pointer                p {};
+	[[maybe_unused]] typename T::const_pointer          cp {};
+	[[maybe_unused]] typename T::reference              r  = v;
+	[[maybe_unused]] typename T::const_reference        cr = v;
+	[[maybe_unused]] typename T::const_iterator         cit {};
+	[[maybe_unused]] typename T::iterator               it {};
+	[[maybe_unused]] typename T::reverse_iterator       rit {};
+	[[maybe_unused]] typename T::const_reverse_iterator crit {};
+	[[maybe_unused]] typename T::size_type              s {};
+	[[maybe_unused]] typename T::difference_type        d {};
+	return true;
 }
 
-TEST_CASE( "Provides standard container type defs 2", "[im_str]" )
+void static_checks()
 {
-	using T = mba::im_zstr;
-	[[maybe_unused]] T::traits_type            traits {};
-	[[maybe_unused]] T::value_type             v {};
-	[[maybe_unused]] T::pointer                p {};
-	[[maybe_unused]] T::const_pointer          cp {};
-	[[maybe_unused]] T::reference              r  = v;
-	[[maybe_unused]] T::const_reference        cr = v;
-	[[maybe_unused]] T::const_iterator         cit {};
-	[[maybe_unused]] T::iterator               it {};
-	[[maybe_unused]] T::reverse_iterator       rit {};
-	[[maybe_unused]] T::const_reverse_iterator crit {};
-	[[maybe_unused]] T::size_type              s {};
-	[[maybe_unused]] T::difference_type        d {};
-	REQUIRE( true );
+	static_assert( has_standard_container_typedefs<mba::im_str>() );
+	static_assert( has_standard_container_typedefs<mba::im_zstr>() );
 }
 
 TEST_CASE( "Construction from literal", "[im_str]" )
@@ -163,7 +152,7 @@ TEST_CASE( "Copy", "[im_str]" )
 		{
 			// no heap allocation
 			mba::im_zstr tcs = "Hello World";
-			str1            = tcs;
+			str1             = tcs;
 		}
 		REQUIRE( str1 == "Hello World" );
 

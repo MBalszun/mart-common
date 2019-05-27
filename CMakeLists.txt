@@ -14,8 +14,8 @@ endif()
 add_library( mart_im_str INTERFACE )
 add_library( ImStr::im_str ALIAS mart_im_str )
 
-target_include_directories( mart_im_str 
-	INTERFACE 
+target_include_directories( mart_im_str
+	INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
 		$<INSTALL_INTERFACE:include>
 )

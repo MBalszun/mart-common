@@ -165,6 +165,7 @@ public:
 
 			start_pos = found_pos + 1;
 		}
+		_data.add_ref_cnt( static_cast<int>( ret.size() ) );
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -178,8 +179,6 @@ public:
 		assert( start_pos == std::string_view::npos + (std::size_t)1 );
 
 #endif
-
-		_data.add_ref_cnt( static_cast<int>( ret.size() ) );
 
 		return ret;
 	}
@@ -307,7 +306,11 @@ public:
 		return true;
 	}
 
+
 private:
+	// This function is inherited from std::string_view and would break im_zstr's invariant of always being
+	// zero terminated
+	constexpr void remove_suffix( size_type n );
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
@@ -415,6 +418,9 @@ inline const im_str& getEmptyConstString()
 	const static im_str str {};
 	return str;
 }
+
+static_assert( sizeof( im_str ) <= 3 * sizeof( void* ) );
+static_assert( sizeof( im_zstr ) <= 3 * sizeof( void* ) );
 
 } // namespace mba
 
