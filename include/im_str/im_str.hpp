@@ -8,7 +8,13 @@
 #include <numeric>
 #include <string_view>
 #include <utility> // tuple/pair
-#include <vector>  // used for split_full TODO: move this into separate file
+
+#define IM_STR_USE_CUSTOM_DYN_ARRAY
+#ifdef IM_STR_USE_CUSTOM_DYN_ARRAY
+#include "detail/dynamic_array.hpp"
+#else
+#include <vector> // used for split_full TODO: move this into separate file
+#endif            // IM_STR_USE_CUSTOM_DYN_ARRAY
 
 namespace mba {
 
@@ -34,6 +40,11 @@ protected:
 	using Handle_t = detail::atomic_ref_cnt_buffer;
 
 public:
+#ifdef IM_STR_USE_CUSTOM_DYN_ARRAY
+	using DynArray_t = detail::dynamic_array<im_str>;
+#else
+	using DynArray_t = std::vector<im_str>;
+#endif
 	/* #################### CTORS ########################## */
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
@@ -129,13 +140,14 @@ public:
 		return split( pos, s );
 	}
 
-	std::vector<im_str> split_full( char delimiter ) const noexcept
+	DynArray_t split_full( char delimiter ) const noexcept
 	{
 		if( size() == 0 ) { return {}; }
 
 		const auto split_cnt = 1 + std::count( begin(), end(), delimiter );
 
-		std::vector<im_str>    ret( split_cnt );
+		DynArray_t ret( split_cnt );
+
 		const std::string_view self_view = this->_as_strview();
 
 		/* !!! DANGER: THIS LOOP MUST NOT THROW DUE TO THE USE OF detail::defer_ref_cnt_tag_t !!! */
@@ -191,7 +203,7 @@ public:
 	im_zstr create_zstr() &&;
 
 protected:
-	Handle_t _data;
+	Handle_t _data {};
 
 	class static_lifetime_tag {
 	};

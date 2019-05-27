@@ -143,5 +143,5 @@ TEST_CASE( "Split full", "[im_str]" )
 	const auto words = s.split_full( ' ' );
 
 	CHECK( words.size() == 6 );
-	CHECK( words == ref );
+	CHECK( std::equal(ref.begin(),ref.end(),words.begin(),words.end()) );
 }

@@ -39,13 +39,13 @@ std::vector<std::string> generate_random_strings(int cnt)
 	return ret;
 }
 
-std::vector<im_str> flatten( std::vector<std::vector<im_str>>& collections )
+im_str::DynArray_t flatten( std::vector<im_str::DynArray_t>& collections )
 {
 	const std::size_t total_size
 		= std::accumulate( collections.begin(), collections.end(), size_t( 0 ), []( size_t size, const auto& e ) {
 			  return size + e.size();
 		  } );
-	std::vector<im_str> ret( total_size );
+	im_str::DynArray_t ret( total_size );
 
 	auto out_it = ret.begin();
 
@@ -57,11 +57,11 @@ std::vector<im_str> flatten( std::vector<std::vector<im_str>>& collections )
 }
 
 template<int Algo>
-im_str run( const std::vector<im_str>& strings, const std::vector<char>& split_chars )
+im_str run( const im_str::DynArray_t& strings, const std::vector<char>& split_chars )
 {
 	auto cstrings = strings;
 	for( char split_char : split_chars ) {
-		std::vector<std::vector<im_str>> tmp( cstrings.size() );
+		std::vector<im_str::DynArray_t> tmp( cstrings.size() );
 
 		size_t i = 0;
 
@@ -82,7 +82,7 @@ im_str run( const std::vector<im_str>& strings, const std::vector<char>& split_c
 
 template<int Algo>
 // __declspec(noinline)
-void test_algo( const std::vector<im_str>& s, const std::vector<char>& split_chars )
+void test_algo( const im_str::DynArray_t& s, const std::vector<char>& split_chars )
 {
 	using namespace std::chrono;
 	for( int z = 0; z < 10; ++z ) {
@@ -108,10 +108,12 @@ int main()
 	const auto my_strings = generate_random_strings(200);
 
 	const std::vector<char>   split_chars{' ', ':', '/', ';', ','};
-	std::vector<im_str> cstrings;
+	im_str::DynArray_t      cstrings( my_strings.size() );
 
+	auto it = cstrings.begin();
 	for( const auto& s : my_strings ) {
-		cstrings.push_back( im_str( s ) );
+		*it = ( im_str( s ) );
+		++it;
 	}
 
 	test_algo<1>( cstrings, split_chars );
