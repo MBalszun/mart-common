@@ -4,8 +4,8 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <new>     // placement new
 #include <utility> // std::move
-#include <new> // placement new
 
 namespace mba::detail {
 
@@ -103,8 +103,6 @@ struct AllocResult;
 class atomic_ref_cnt_buffer {
 	using Cnt_t = std::atomic_int;
 
-	static constexpr auto control_block_size = (int)sizeof( Cnt_t );
-
 public:
 	/*#### Constructors and special member functions ######*/
 	static AllocResult allocate_null_terminated_char_buffer( int size );
@@ -135,7 +133,7 @@ public:
 	}
 	constexpr atomic_ref_cnt_buffer& operator=( atomic_ref_cnt_buffer&& other ) noexcept
 	{
-		assert( ( ( _cnt == nullptr ) || ( this != &other ) ) && "Move assignment to self is not allowed" );
+		assert( ( ( _cnt == nullptr ) || ( this != &other ) ) && "Move assignment to self is not allowed, if cnt!=0" );
 		_decref();
 		_cnt = c_expr_exchange( other._cnt, nullptr );
 		return *this;
@@ -199,9 +197,10 @@ struct AllocResult {
 
 inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( int size )
 {
+	assert( size >= 0 );
 	stats().alloc();
-	const int total_size = size + 1 + control_block_size;
-	auto*     raw        = new char[total_size];
+	const auto total_size = size + 1 + (int)sizeof( Cnt_t );
+	auto*      raw        = new char[total_size];
 
 	raw[total_size - 1] = '\0'; // zero terminate
 	auto* cnt_ptr       = new( raw ) Cnt_t {1};
@@ -209,7 +208,7 @@ inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( 
 	// TODO: Is this guaranteed by the standard?
 	assert( reinterpret_cast<char*>( cnt_ptr ) == raw );
 
-	return {raw + control_block_size, atomic_ref_cnt_buffer {cnt_ptr}};
+	return {raw + sizeof( Cnt_t ), atomic_ref_cnt_buffer {cnt_ptr}};
 }
 
 #ifdef IM_STR_DEBUG_HOOKS
