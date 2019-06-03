@@ -1,12 +1,12 @@
 #include <im_str/im_str.hpp>
 
-#include <catch2/catch.hpp>
+#include "include_catch.hpp"
 
 #include <iostream>
 
 using namespace ::mba;
 
-TEST_CASE( "Split Position","[im_str]" )
+TEST_CASE( "Split Position", "[im_str]" )
 {
 	im_str s( "Hello World" );
 	{
@@ -135,13 +135,13 @@ TEST_CASE( "Split Separator multi", "[im_str]" )
 
 TEST_CASE( "Split full", "[im_str]" )
 {
-	std::vector<im_str> ref{"Hello", "my", "dear!", "How", "are", "you?"};
+	std::vector<im_str> ref {"Hello", "my", "dear!", "How", "are", "you?"};
 
-	std::string  base = "Hello my dear! How are you?";
-	im_str s( base );
+	std::string base = "Hello my dear! How are you?";
+	im_str      s( base );
 
 	const auto words = s.split_full( ' ' );
 
 	CHECK( words.size() == 6 );
-	CHECK( std::equal(ref.begin(),ref.end(),words.begin(),words.end()) );
+	CHECK( std::equal( ref.begin(), ref.end(), words.begin(), words.end() ) );
 }

@@ -1,6 +1,6 @@
 #include <im_str/im_str.hpp>
 
-#include <catch2/catch.hpp>
+#include "include_catch.hpp"
 
 using namespace ::mba;
 
@@ -19,7 +19,7 @@ TEST_CASE( "Substring", "[im_str]" )
 		std::string_view sv( cs );
 		auto             ssv = cs.substr( 5 );
 		auto             s   = cs.substr( ssv );
-		auto             s2   = cs.substr( sv );
+		auto             s2  = cs.substr( sv );
 
 		REQUIRE( s == ssv );
 		REQUIRE( s2 == cs );

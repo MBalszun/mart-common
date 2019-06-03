@@ -1,9 +1,10 @@
 #include <im_str/im_str.hpp>
+
+#include "include_catch.hpp"
+
 #include <iostream>
 #include <string>
 #include <thread>
-
-#include <catch2/catch.hpp>
 
 using namespace std::literals;
 
