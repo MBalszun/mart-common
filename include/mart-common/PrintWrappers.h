@@ -25,16 +25,10 @@
 /* Project Includes */
 #include "./StringView.h"
 #include "./ArrayView.h"
+#include "./StringViewOstream.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
-inline std::ostream& operator<<( std::ostream& out, const StringView string )
-{
-	out.write( string.data(), string.size() );
-	return out;
-}
-
-
 
 namespace _impl_print_chrono {
 
