@@ -15,9 +15,13 @@
  */
 
 #include <cstdint>
-#include <stdexcept>
+#include <exception>
 
 namespace mart {
+struct InvalidOptionalAcces : std::exception {
+	const char* what() const noexcept override { return "Access to invalid data of Optional class"; }
+};
+
 template<class T>
 class Optional {
 	enum class OPT_FLAG : std::uint8_t { Invalid = 0, Valid };
@@ -26,7 +30,7 @@ class Optional {
 
 	constexpr void throwIfInvalid() const
 	{
-		if( flag != OPT_FLAG::Valid ) { throw std::invalid_argument( "Access to invalid data of Optional class" ); }
+		if( flag != OPT_FLAG::Valid ) { throw InvalidOptionalAcces {}; }
 	}
 
 public:
@@ -68,9 +72,9 @@ public:
 	}
 
 	constexpr const T& operator*() const { return data; }
-	constexpr       T& operator*() { return data; }
+	constexpr T&       operator*() { return data; }
 	constexpr const T* operator->() const { return &data; }
-	constexpr       T* operator->() { return &data; }
+	constexpr T*       operator->() { return &data; }
 
 	constexpr explicit operator bool() const { return isValid(); }
 	constexpr OPT_FLAG getState() const { return flag; }
