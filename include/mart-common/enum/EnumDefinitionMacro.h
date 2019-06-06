@@ -1,9 +1,9 @@
 #pragma once
-#include "../StringView.h"
+
 #include "EnumHelpers.h"
 #include "EnumIdxArray.h"
 #include <array>
-#include <string>
+#include <string_view>
 
 // Necessary to work around MSVC's decision to not expand __VA_ARGS__ when drectly passing it to a macro
 #define MART_UTILS_IMPL_EXPAND( X ) X
@@ -210,8 +210,7 @@
 #define MART_UTILS_IMPL_FOR_EACH_P( ... ) MART_UTILS_IMPL_EXPAND( MART_UTILS_IMPL_FOR_EACH_P_IMPL( __VA_ARGS__ ) )
 
 #define MART_UTILS_IMPL_DEFINE_ENUM_MEMBER( P, X ) P::X,
-#define MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_STRING_VIEW( X ) mart::StringView( #X ),
-#define MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_CPP_STRING( X ) std::string( #X ),
+#define MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_STRING_VIEW( X ) std::string_view( #X ),
 #define MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_C_STRING( X ) #X,
 
 // Actual macro we will use in code to define enums
@@ -222,21 +221,17 @@
 	[[maybe_unused]] constexpr std::array<NAME, MEMBER_CNT> NAME##_Array {                                             \
 		{MART_UTILS_IMPL_FOR_EACH_P( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER, NAME, __VA_ARGS__ )}};                        \
                                                                                                                        \
-	/* Arrays containing all enum names as mart::StringViews c-string or std::string */                                \
-	[[maybe_unused]] constexpr mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT> NAME##_StringViews {             \
+	/* Arrays containing all enum names as std::string c-string */                                                     \
+	[[maybe_unused]] constexpr mart::EnumIdxArray<std::string_view, NAME, MEMBER_CNT> NAME##_StringViews {             \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_STRING_VIEW, __VA_ARGS__ )};                      \
                                                                                                                        \
 	[[maybe_unused]] constexpr mart::EnumIdxArray<const char*, NAME, MEMBER_CNT> NAME##_CStrings {                     \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_C_STRING, __VA_ARGS__ )};                         \
                                                                                                                        \
-	[[maybe_unused]] const mart::EnumIdxArray<std::string, NAME, MEMBER_CNT> NAME##_CppStrings {                       \
-		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_CPP_STRING, __VA_ARGS__ )};                       \
-                                                                                                                       \
 	[[maybe_unused]] constexpr std::size_t      mart_enumCnt_impl( const NAME* ) { return MEMBER_CNT; }                \
-	[[maybe_unused]] constexpr mart::StringView mart_to_string_v_impl( NAME id ) { return NAME##_StringViews[id]; };   \
-	[[maybe_unused]] inline const std::string&  mart_to_string_impl( NAME id ) { return NAME##_CppStrings[id]; };      \
+	[[maybe_unused]] constexpr std::string_view mart_to_string_v_impl( NAME id ) { return NAME##_StringViews[id]; };   \
                                                                                                                        \
-	[[maybe_unused]] constexpr const mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT>& mart_getEnumNames_impl(   \
+	[[maybe_unused]] constexpr const mart::EnumIdxArray<std::string_view, NAME, MEMBER_CNT>& mart_getEnumNames_impl(   \
 		NAME* )                                                                                                        \
 	{                                                                                                                  \
 		return NAME##_StringViews;                                                                                     \

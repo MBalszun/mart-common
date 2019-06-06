@@ -18,15 +18,14 @@
 #include <array>
 #include <optional>
 #include <string_view>
+#include <algorithm>
+#include <type_traits>
 
 /* Proprietary Library Includes */
 
 /* Project Includes */
-#include "../StringView.h"
 #include "../experimental/Optional.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
-
-#include <string>
 
 namespace mart {
 
@@ -36,9 +35,9 @@ namespace mart {
  * @return corresponding underlying vale
  */
 template<class T>
-constexpr auto toUType( T e ) -> mart::underlying_type_t<T>
+constexpr auto toUType( T e ) -> std::underlying_type_t<T>
 {
-	return static_cast<mart::underlying_type_t<T>>( e );
+	return static_cast<std::underlying_type_t<T>>( e );
 };
 
 // this is the fallback implementation if the enum author doesn't provide  mart_enumCnt_impl himself
@@ -48,7 +47,7 @@ constexpr int mart_enumCnt_impl( Enum* )
 	return val;
 }
 
-template<class Enum, class uType = mart::underlying_type_t<Enum>>
+template<class Enum, class uType = std::underlying_type_t<Enum>>
 constexpr Enum mart_idxToEnum_impl( size_t v )
 {
 	return static_cast<Enum>( v );
@@ -67,11 +66,8 @@ constexpr Enum mart_idxToEnum_impl( size_t v )
 
 // clang-format off
 template <class Enum> constexpr auto enumCnt      ()               -> std::size_t                                                       { return mart_enumCnt_impl( static_cast<Enum*>( nullptr ) );}
-template <class Enum> constexpr auto to_string_v  ( Enum id )      -> mart::StringView                                                  { return mart_to_string_v_impl( id ); }
 template <class Enum> constexpr auto to_string_view( Enum id )     -> std::string_view                                                  { return mart_to_string_v_impl( id ); }
 
-//FIXME if mart_to_string_impl( id ) returns by value we should do the same
-template <class Enum> inline    auto to_string    ( Enum id )      -> const std::string&                                                { return mart_to_string_impl( id ); }
 template <class Enum> constexpr auto idxToEnum    ( size_t value ) -> Enum                                                              { return mart_idxToEnum_impl<Enum>( value ); }
 template <class Enum> constexpr auto getEnums     ()               -> decltype( mart_getEnums_impl    ( static_cast<Enum*>(nullptr) ) ) { return mart_getEnums_impl    (static_cast<Enum*>(nullptr)); }
 template <class Enum> constexpr auto getEnumNames ()               -> decltype( mart_getEnumNames_impl( static_cast<Enum*>(nullptr) ) ) { return mart_getEnumNames_impl(static_cast<Enum*>(nullptr)); }
@@ -79,7 +75,7 @@ template <class Enum> constexpr auto getEnumNames ()               -> decltype( 
 // clang-format on
 
 template<class Enum>
-Optional<Enum> toEnum( mart::StringView str )
+Optional<Enum> toEnum( std::string_view str )
 {
 	constexpr auto enums = getEnumNames<Enum>();
 	const auto     idx   = std::find( enums.begin(), enums.end(), str ) - enums.begin();
