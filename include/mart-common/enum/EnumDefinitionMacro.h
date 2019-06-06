@@ -219,7 +219,7 @@
 	enum class NAME : BASE_TYPE { __VA_ARGS__ };                                                                       \
                                                                                                                        \
 	/* Array containing all enums */                                                                                   \
-	[[maybe_unused]] constexpr std::array<NAME, MEMBER_CNT> NAME##_Array{                                              \
+	[[maybe_unused]] constexpr std::array<NAME, MEMBER_CNT> NAME##_Array {                                             \
 		{MART_UTILS_IMPL_FOR_EACH_P( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER, NAME, __VA_ARGS__ )}};                        \
                                                                                                                        \
 	/* Arrays containing all enum names as mart::StringViews c-string or std::string */                                \
@@ -232,12 +232,13 @@
 	[[maybe_unused]] const mart::EnumIdxArray<std::string, NAME, MEMBER_CNT> NAME##_CppStrings {                       \
 		MART_UTILS_IMPL_FOR_EACH( MART_UTILS_IMPL_DEFINE_ENUM_MEMBER_CPP_STRING, __VA_ARGS__ )};                       \
                                                                                                                        \
-	constexpr std::size_t	  mart_enumCnt_impl( const NAME* ) { return MEMBER_CNT; }                                 \
-	constexpr mart::StringView mart_to_string_v_impl( NAME id ) { return NAME##_StringViews[id]; };                    \
-	inline const std::string&  mart_to_string_impl( NAME id ) { return NAME##_CppStrings[id]; };                       \
+	[[maybe_unused]] constexpr std::size_t      mart_enumCnt_impl( const NAME* ) { return MEMBER_CNT; }                \
+	[[maybe_unused]] constexpr mart::StringView mart_to_string_v_impl( NAME id ) { return NAME##_StringViews[id]; };   \
+	[[maybe_unused]] inline const std::string&  mart_to_string_impl( NAME id ) { return NAME##_CppStrings[id]; };      \
                                                                                                                        \
-	constexpr const mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT>& mart_getEnumNames_impl( NAME* )            \
+	[[maybe_unused]] constexpr const mart::EnumIdxArray<mart::StringView, NAME, MEMBER_CNT>& mart_getEnumNames_impl(   \
+		NAME* )                                                                                                        \
 	{                                                                                                                  \
 		return NAME##_StringViews;                                                                                     \
 	}                                                                                                                  \
-	constexpr const std::array<NAME, MEMBER_CNT>& mart_getEnums_impl( NAME* ) { return NAME##_Array; }
+	[[maybe_unused]] constexpr const std::array<NAME, MEMBER_CNT>& mart_getEnums_impl( NAME* ) { return NAME##_Array; }
