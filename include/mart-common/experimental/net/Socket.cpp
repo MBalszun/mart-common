@@ -49,7 +49,7 @@ timeval to_timeval( Dur duration )
 	if( duration.count() > 0 ) {
 		auto s      = duration_cast<seconds>( duration );
 		ret.tv_sec  = mart::narrow<decltype( ret.tv_sec )>( s.count() );
-		ret.tv_usec = mart::narrow<decltype( ret.tv_usec )>( ( duration_cast<microseconds>( duration ) - s ).count() );
+		ret.tv_usec = mart::narrow<decltype( ret.tv_usec )>( ( duration_cast<microseconds>( duration - s ) ).count() );
 	}
 	return ret;
 }
