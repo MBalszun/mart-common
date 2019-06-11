@@ -10,7 +10,7 @@
       "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
       "cmakeCommandArgs": "-DMART_COMMON_INCLUDE_TESTS=ON",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "--output-on-failure"
     }
   ]
 }
