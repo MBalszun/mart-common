@@ -19,17 +19,18 @@ TEST_CASE( "udp_socket_members_do_compile", "[net]" )
 
 	[[maybe_unused]] mart::nw::socks::Socket& raw_socket = s2.getRawSocket();
 
-	s2.bind( e2 );
+	udp::endpoint e4 = {mart::nw::ip::address_any, mart::nw::ip::port_nr {2553}};
+	s2.bind( e4 );
 	//socket can't be rebinded to a different one
-	CHECK( !s2.try_bind( e2 ) );
-	s2.connect( e1 );
- 	CHECK( s2.try_connect( e1 ) );
+	CHECK( !s2.try_bind( e4 ) );
+	s2.connect( e3 );
+ 	CHECK( s2.try_connect( e3 ) );
 
-	CHECK( s2.getLocalEndpoint() == e2 );
-	CHECK( s2.getRemoteEndpoint() == e1 );
+	CHECK( s2.getLocalEndpoint() == e4 );
+	CHECK( s2.getRemoteEndpoint() == e3 );
 
 	s2.send( mart::view_bytes( 5 ) );
-	s2.sendto( mart::view_bytes( 5 ), e1 );
+	s2.sendto( mart::view_bytes( 5 ), e2 );
 
 	using namespace std::chrono_literals;
 	s2.setRxTimeout( 1ms );
@@ -38,9 +39,9 @@ TEST_CASE( "udp_socket_members_do_compile", "[net]" )
 	CHECK( s2.getTxTimeout() == 2ms );
 
 	int buffer = 0;
-	udp::endpoint e4;
+	udp::endpoint e5;
 	CHECK( !s2.rec( mart::view_bytes_mutable( buffer ) ).isValid() );
-	CHECK( !s2.recvfrom( mart::view_bytes_mutable( buffer ), e4 ).isValid() );
+	CHECK( !s2.recvfrom( mart::view_bytes_mutable( buffer ), e5 ).isValid() );
 
 	s2.clearRxBuff();
 
