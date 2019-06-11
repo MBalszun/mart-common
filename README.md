@@ -75,6 +75,6 @@ This is a short (and probably out of data) overview over the content provided by
   For bugfixes, feature or improvement requests, please contact michael.balszun@tum.de or raise an issue at the gitlab repository at https://github.com/tum-ei-rcs/mart-common
 
 # Tests
-**TBD**
-The repository currently only provides a unit test skeleton. What unit tests exist (we are far from full coverage) are part of a different application using this library.
-We are still considering how to best ship them while minimizing impact on projects that just want to include the library as a git submodule.
+
+If you want to boild the tests, run cmake with the `-DMART_COMMON_INCLUDE_TESTS=ON` option and call `ctest .`
+Testcoverage is nowhere as complete as we would like and we rely far too much on the tests of programs that use the components in this library. 
