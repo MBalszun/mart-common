@@ -49,7 +49,7 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	im_str( std::string_view other ) { _copy_from( other ); }
+	explicit im_str( std::string_view other ) { _copy_from( other ); }
 
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
@@ -282,7 +282,7 @@ public:
 		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag {} )
 	{
 	}
-	im_zstr( std::string_view other )
+	explicit im_zstr( std::string_view other )
 		: im_str( other.data() == nullptr ? detail::getEmptyZeroTerminatedStringView() : other )
 	{
 	}
