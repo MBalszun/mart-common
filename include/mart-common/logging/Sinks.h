@@ -22,7 +22,6 @@
 
 /* Proprietary Library Includes */
 #include "../ConstString.h"
-#include "../StringView.h"
 
 /* Project Includes */
 #include "ILogSink.h"
@@ -36,7 +35,7 @@ namespace log {
 class FileLog : public ILogSink {
 	std::ofstream		_file;
 	mart::ConstString	_fileName;
-	void _writeToLogImpl( mart::StringView msg ) override { _file << msg; }
+	void _writeToLogImpl( std::string_view msg ) override { _file << msg; }
 	void _flush() override { _file.flush(); }
 
 public:
@@ -66,7 +65,7 @@ class StdOutLog : public ILogSink {
 		// Most probably, stdout will be used in multiple different threads, so default to threadsafe mode
 		this->enableThreadSafeMode( true );
 	};
-	void _writeToLogImpl( mart::StringView msg ) override { std::cout << msg; }
+	void _writeToLogImpl( std::string_view msg ) override { std::cout << msg; }
 	void _flush() override { std::cout.flush(); }
 
 public:

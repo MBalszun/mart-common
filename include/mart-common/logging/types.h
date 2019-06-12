@@ -17,10 +17,9 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <array>
+#include <string_view>
 
 /* Proprietary Library Includes */
-#include "../ConstString.h"
-#include "../StringView.h"
 #include "../utils.h"
 
 /* Project Includes */
@@ -30,45 +29,40 @@
 namespace mart {
 namespace log {
 
-//TODO: rename to LogLvl
+// TODO: rename to LogLvl
 enum class Level {
-	ERROR = MART_LOG_LOG_LVL_ERROR,
+	ERROR  = MART_LOG_LOG_LVL_ERROR,
 	Error  = MART_LOG_LOG_LVL_ERROR,
 	STATUS = MART_LOG_LOG_LVL_STATUS,
 	Status = MART_LOG_LOG_LVL_STATUS,
-	DEBUG = MART_LOG_LOG_LVL_DEBUG,
-	Debug = MART_LOG_LOG_LVL_DEBUG,
-	TRACE = MART_LOG_LOG_LVL_TRACE,
+	DEBUG  = MART_LOG_LOG_LVL_DEBUG,
+	Debug  = MART_LOG_LOG_LVL_DEBUG,
+	TRACE  = MART_LOG_LOG_LVL_TRACE,
 	Trace  = MART_LOG_LOG_LVL_TRACE
 };
 
 constexpr Level defaultLogLevel = Level::STATUS;
 
-//clang-format off
-inline mart::StringView toStringView(Level lvl)
+// clang-format off
+constexpr inline std::string_view to_string_view( Level lvl )
 {
-	static constexpr std::array<mart::StringView, 4> names{ {
-			mart::StringView{ "ERROR" },
-			mart::StringView{ "STATUS" },
-			mart::StringView{ "DEBUG" },
-			mart::StringView{ "TRACE" }
+	constexpr std::array<std::string_view, 4> names{ {
+			std::string_view {"ERROR"},
+			std::string_view {"STATUS"},
+			std::string_view {"DEBUG"},
+			std::string_view {"TRACE"}
 		} };
 	return names[mart::toUType(lvl)];
 }
 
-inline const std::string& toString(Level lvl)
+constexpr inline std::string_view toStringView( Level lvl )
 {
-	static const std::array<std::string, 4> names{ {
-			std::string{ "ERROR" },
-			std::string{ "STATUS" },
-			std::string{ "DEBUG" },
-			std::string{ "TRACE" }
-		} };
-	return names[mart::toUType(lvl)];
+	return to_string_view(lvl);
 }
-//clang-format on
 
-}
-}
+// clang-format on
+
+} // namespace log
+} // namespace mart
 
 #endif

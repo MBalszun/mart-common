@@ -32,6 +32,7 @@
 #include "../ConstString.h"
 #include "../MartTime.h"
 #include "../StringView.h"
+#include "../StringViewOstream.h"
 #include "../experimental/CopyableAtomic.h"
 #include "../utils.h"
 
@@ -68,7 +69,7 @@ public:
 	 * @param moduleName Name of the module by which the logger is used (this will be printed at the beginning of each
 	 * line in the log)
 	 */
-	Logger( const mart::StringView moduleName, Level logLvl = defaultLogLevel )
+	Logger( const std::string_view moduleName, Level logLvl = defaultLogLevel )
 		: _startTime {mart::now()}
 		, _currentLogLevel {logLvl}
 		, _enabled {true}
@@ -83,7 +84,7 @@ public:
 	 * line in the log)
 	 * @param sink pointer to sink, where the output is written to MUST NOT BE NULL!
 	 */
-	Logger( mart::StringView moduleName, std::shared_ptr<ILogSink> sink, Level logLvl = defaultLogLevel )
+	Logger( const std::string_view moduleName, std::shared_ptr<ILogSink> sink, Level logLvl = defaultLogLevel )
 		: Logger( moduleName, logLvl )
 	{
 		addSink( sink );
@@ -101,7 +102,7 @@ public:
 	 * @param moduleName
 	 * @param other
 	 */
-	Logger( const mart::StringView subModuleName, const Logger& other )
+	Logger( const std::string_view subModuleName, const Logger& other )
 		: Logger( other )
 	{
 		_loggingName = _createLoggingName( subModuleName, other._loggingName );
@@ -122,7 +123,7 @@ public:
 
 	Logger& operator=( const Logger& other ) = default;
 
-	Logger make_child( const mart::StringView subModuleName ) const { return Logger( subModuleName, *this ); }
+	Logger make_child( const std::string_view subModuleName ) const { return Logger( subModuleName, *this ); }
 
 	/* ### Statics ### */
 	// NOTE: This is NOT a singleton
@@ -203,7 +204,7 @@ public:
 	void disable() { enable( false ); }
 	bool isEnabled() const { return _enabled; }
 
-	void setName( mart::StringView name ) { _loggingName = _createLoggingName( name ); }
+	void setName( const std::string_view name ) { _loggingName = _createLoggingName( name ); }
 
 	/* ### Change sinks ###*/
 	void addSink( std::shared_ptr<ILogSink> sink )
@@ -282,8 +283,8 @@ private:
 			   && ( lvl <= _currentLogLevel.load( std::memory_order_relaxed ) );
 	}
 
-	static mart::ConstString _createLoggingName( const StringView moduleName,
-												 const StringView parentName = EmptyStringView )
+	static mart::ConstString _createLoggingName( const std::string_view moduleName,
+												 const std::string_view parentName = EmptyStringView )
 	{
 		return mart::concat( parentName, "[", moduleName, "]" );
 	}

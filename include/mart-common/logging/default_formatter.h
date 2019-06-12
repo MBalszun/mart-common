@@ -166,7 +166,7 @@ inline void formatForLog( std::ostream& out, const T& value )
 // overloads for types in the mart::log namespace
 inline void formatForLog( std::ostream& out, const Level& value )
 {
-	out << std::right << std::setw( 6 ) << toString( value );
+	out << std::right << std::setw( 6 ) << to_string_view( value );
 }
 inline void formatForLog( std::ostream& out, std::thread::id id )
 {

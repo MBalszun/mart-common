@@ -15,14 +15,14 @@
  */
 
 
+#include "types.h"
+
 #include <atomic>
 #include <mutex>
-
-#include "types.h"
+#include <string_view>
 
 namespace mart {
 
-class StringView;
 class ConstString;
 
 namespace log {
@@ -41,7 +41,7 @@ public:
 
 	bool isInThreadSafeMode() const { return _threadSafe; }
 
-	void writeToLog( mart::StringView msg, Level lvl )
+	void writeToLog( std::string_view msg, Level lvl )
 	{
 		// only log messages with lower or equal log level (higher importance) than maxlvl
 		if( lvl > maxlvl ) {
@@ -82,7 +82,7 @@ private:
 	std::atomic<bool> _threadSafe{true};
 
 	/// actual logging function that has to be implemented by sinks
-	virtual void _writeToLogImpl( mart::StringView msg ) = 0;
+	virtual void _writeToLogImpl( std::string_view msg ) = 0;
 	virtual void _flush()								 = 0;
 };
 }
