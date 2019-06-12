@@ -206,6 +206,11 @@ protected:
 
 	class static_lifetime_tag {
 	};
+
+	//used for constructor in im_zstr
+	class is_zero_terminated_tag {
+	};
+
 	constexpr im_str( std::string_view sv, static_lifetime_tag )
 		: std::string_view( sv )
 	{
@@ -282,15 +287,16 @@ public:
 	{
 	}
 
-	explicit im_zstr( const im_str& other )
-		: im_str( other.create_zstr() )
+	explicit im_zstr( const im_str& other, is_zero_terminated_tag )
+		: im_str( other )
 	{
 	}
 
-	im_zstr( im_str&& other )
-		: im_str( std::move( other ).create_zstr() )
+	explicit im_zstr( im_str&& other, is_zero_terminated_tag )
+		: im_str( std::move(other) )
 	{
 	}
+
 
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<std::size_t N>
@@ -334,7 +340,7 @@ inline im_zstr im_str::unshare() const
 inline im_zstr im_str::create_zstr() const&
 {
 	if( is_zero_terminated() ) {
-		return *this; // just copy
+		return im_zstr {{*this}, is_zero_terminated_tag {}}; // just copy
 	} else {
 		return unshare();
 	}
@@ -343,7 +349,7 @@ inline im_zstr im_str::create_zstr() const&
 inline im_zstr im_str::create_zstr() &&
 {
 	if( is_zero_terminated() ) {
-		return std::move( *this ); // already zero terminated - just move
+		return im_zstr {std::move( *this ), is_zero_terminated_tag {}}; // already zero terminated - just move
 	} else {
 		return unshare();
 	}

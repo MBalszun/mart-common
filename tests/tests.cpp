@@ -128,6 +128,39 @@ TEST_CASE( "Construction from temporary std::string", "[im_str]" )
 	}
 }
 
+TEST_CASE( "Construction from im_str", "[im_zstr]" )
+{
+	std::string cppstring = "Hello World, how are you?";
+	{
+		const mba::im_str ims_z {cppstring};
+
+		auto imzs1 = ims_z.create_zstr();
+		static_assert( std::is_same_v<decltype( imzs1 ), mba::im_zstr> );
+		CHECK( ims_z == imzs1 );
+
+		// construction from temporary
+		auto imzs2 = mba::im_str( ims_z ).create_zstr();
+		static_assert( std::is_same_v<decltype( imzs2 ), mba::im_zstr> );
+		CHECK( ims_z == imzs2 );
+	}
+
+	// construction from an ims_nz that isn't alredy zero terminated
+	{
+		mba::im_str ims_nz = mba::im_str( cppstring ).substr( 0, 3 );
+
+		auto imzs3 = ims_nz.create_zstr();
+		static_assert( std::is_same_v<decltype( imzs3 ), mba::im_zstr> );
+		CHECK( ims_nz == imzs3 );
+		CHECK( mba::im_str( imzs3 ).is_zero_terminated() );
+
+		// construction from temporary
+		auto imzs4 = mba::im_str( ims_nz ).create_zstr();
+		static_assert( std::is_same_v<decltype( imzs4 ), mba::im_zstr> );
+		CHECK( ims_nz == imzs4 );
+		CHECK( mba::im_str( imzs4 ).is_zero_terminated() );
+	}
+}
+
 TEST_CASE( "Copy", "[im_str]" )
 {
 	{
