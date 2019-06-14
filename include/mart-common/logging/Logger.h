@@ -35,6 +35,7 @@
 #include "../StringViewOstream.h"
 #include "../experimental/CopyableAtomic.h"
 #include "../utils.h"
+#include "../port_layer.h"
 
 /* Project Includes */
 #include "ILogSink.h"
@@ -58,6 +59,25 @@ struct LoggerConf_t {
  * CAN'T be used from multiple threads
  * Can write to multiple logs
  */
+
+namespace detail {
+
+template<class ARG, class = std::enable_if_t<std::is_convertible_v<ARG&&, std::string_view>>>
+inline std::string_view forward_as_string_view_if_possible( ARG&& arg )
+{
+	return std::string_view( arg );
+}
+
+template<class ARG, class = std::enable_if_t<!std::is_convertible_v<ARG&&, std::string_view>>>
+inline decltype( auto ) forward_as_string_view_if_possible( ARG&& args )
+{
+	return std::forward<ARG>( args );
+}
+
+static_assert( std::is_same_v<std::string_view, decltype( forward_as_string_view_if_possible("Hello World") )> );
+
+}
+
 
 class Logger {
 	enum class AddNewline { No, Yes };
@@ -136,7 +156,8 @@ public:
 		return instance;
 	}
 
-	static Logger& initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
+	static Logger&
+	initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
 	{
 		std::cout << "Initializing default logger\n";
 		Logger& lref = initDefaultLogger( conf );
@@ -155,35 +176,41 @@ public:
 
 	/* ####### log interface #######*/
 	template<class... ARGS>
-	void log( Level lvl, ARGS&&... args )
+	inline void log( Level lvl, ARGS&&... args )
 	{
 		// Bail out of formatting and stuff early, if message should not be logged in the first place
 		if( !_shouldBeLogged( lvl ) ) return;
 
+		log_impl( lvl, detail::forward_as_string_view_if_possible( args )... );
+	}
+
+	template<class... ARGS>
+	LIB_MART_COMMON_NO_INLINE void log_impl( Level lvl, ARGS&&... args )
+	{
 		_fillBuffer( lvl, AddNewline::Yes, std::forward<ARGS>( args )... );
 		_writeBufferToSinks( lvl );
 	}
 
 	template<class... ARGS>
-	void error_msg( ARGS&&... args )
+	inline void error_msg( ARGS&&... args )
 	{
 		log( Level::Error, std::forward<ARGS>( args )... );
 	}
 
 	template<class... ARGS>
-	void status_msg( ARGS&&... args )
+	inline void status_msg( ARGS&&... args )
 	{
 		log( Level::Status, std::forward<ARGS>( args )... );
 	}
 
 	template<class... ARGS>
-	void debug_msg( ARGS&&... args )
+	inline void debug_msg( ARGS&&... args )
 	{
 		log( Level::Debug, std::forward<ARGS>( args )... );
 	}
 
 	template<class... ARGS>
-	void trace_msg( ARGS&&... args )
+	inline void trace_msg( ARGS&&... args )
 	{
 		log( Level::Debug, std::forward<ARGS>( args )... );
 	}
@@ -266,7 +293,7 @@ private:
 
 	/*### Cached parts of logged message ### */
 	mart::ConstString _loggingName; // This is what can be grepped for in the logfile
-	std::string _spacer;
+	std::string       _spacer;
 
 	static std::ostringstream& _sbuffer()
 	{
