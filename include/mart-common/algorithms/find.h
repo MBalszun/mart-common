@@ -43,9 +43,14 @@ auto find( R&& rng, const V& value ) -> decltype( std::begin( rng ) )
 
 // find_if
 template<class R, class UnaryPredicate>
-auto find_if( R&& rng, UnaryPredicate p ) -> decltype( std::begin( rng ) )
+constexpr auto find_if( R&& rng, UnaryPredicate p ) -> decltype( std::begin( rng ) )
 {
-	return std::find_if( MART_COMMON_ALL( rng ), p );
+	const auto& end = rng.end();
+	for (auto it = rng.begin(); it != end; ++it) {
+		if (p(*it)) { return it;
+		}
+	}
+	return end;
 }
 
 // find_if_not

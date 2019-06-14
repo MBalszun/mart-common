@@ -47,9 +47,15 @@ bool none_of( const R& c, Pred p )
 }
 
 template<class R, class T>
-auto count(const R& r, const T& value)
+constexpr auto count(const R& r, const T& value)
 {
-	return count( MART_COMMON_ALL( r ), value );
+	std::size_t cnt = 0;
+	const auto& end = r.end();
+	for (auto it = r.begin(); it != end; ++it) {
+		cnt += *it == value;
+	}
+	return cnt;
+	//return count( MART_COMMON_ALL( r ), value );
 }
 
 template<class R, class UnaryPredicate>
