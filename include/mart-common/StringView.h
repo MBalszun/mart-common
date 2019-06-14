@@ -140,13 +140,18 @@ public:
 
 	/*#### algorithms ####*/
 
-	size_type find(char c, size_type start_pos = 0) const
+	constexpr size_type find(char c, size_type start_pos = 0) const
 	{
 		if (start_pos >= size()) {
 			return npos;
 		}
+		std::size_t pos = start_pos;
+		for (; pos < size(); ++pos) {
+			if ((*this)[pos] == c) { break;
+			}
+		}
 
-		const size_t pos = std::find(this->cbegin() + start_pos, this->cend(), c) - this->cbegin();
+		//const size_t pos = std::find(this->cbegin() + start_pos, this->cend(), c) - this->cbegin();
 		return pos < this->size() ? pos : npos;
 	}
 
@@ -249,7 +254,7 @@ namespace details_to_integral {
 //Core logic.
 //Assuming number starts at first character and string is supposed to be parsed until first non-digit
 template<class T>
-T core(mart::StringView str)
+constexpr T core(mart::StringView str)
 {
 	T tmp = 0;
 	for (auto c : str) {
@@ -278,7 +283,7 @@ T core(mart::StringView str)
 
 //for unsigned types
 template<class T>
-auto base(const mart::StringView str) -> mart::enable_if_t<std::is_unsigned<T>::value, T>
+constexpr auto base(const mart::StringView str) -> mart::enable_if_t<std::is_unsigned<T>::value, T>
 {
 	assert(str.size() > 0);
 	if (str[0] == '+') {
@@ -290,7 +295,7 @@ auto base(const mart::StringView str) -> mart::enable_if_t<std::is_unsigned<T>::
 
 //for signed types
 template<class T>
-auto base(const mart::StringView str) -> mart::enable_if_t<std::is_signed<T>::value, T>
+constexpr auto base( const mart::StringView str ) -> mart::enable_if_t<std::is_signed<T>::value, T>
 {
 	assert(str.size() > 0);
 	switch(str[0]) {
@@ -302,7 +307,8 @@ auto base(const mart::StringView str) -> mart::enable_if_t<std::is_signed<T>::va
 }
 
 template<class T = int>
-T to_integral(const mart::StringView str) {
+constexpr T to_integral( const mart::StringView str )
+{
 	if (str.size() == 0) {
 		return T{};
 	}
