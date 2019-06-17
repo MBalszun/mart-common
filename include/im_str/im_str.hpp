@@ -114,30 +114,55 @@ public:
 
 	enum class Split { Drop, Before, After };
 
+	// split string into two substrings [0,i) and [i, this->size() )
+	[[deprecated( "Use split_at instead" )]]
 	std::pair<im_str, im_str> split( std::size_t i ) const
+	{
+		return split_at(i);
+	}
+
+	// split string into two substrings [0,i) and [i, this->size() )
+	std::pair<im_str, im_str> split_at( std::size_t i ) const
 	{
 		assert( i < size() || i == npos );
 		if( i == npos ) { return {*this, {}}; }
 		return {substr( 0, i ), substr( i, npos )};
 	}
 
-	std::pair<im_str, im_str> split( std::size_t i, Split s ) const
+	// split string into two substrings [0,i) and [i, this->size() )
+	std::pair<im_str, im_str> split_at( std::size_t i, Split s ) const
 	{
 		assert( i < size() || i == npos );
 		if( i == npos ) { return {*this, {}}; }
 		return {substr( 0, i + ( s == Split::After ) ), substr( i + ( s == Split::After || s == Split::Drop ), npos )};
 	}
 
+	// split string on first occurence of c.
+	[[deprecated( "Use split_on_first instead" )]]
 	std::pair<im_str, im_str> split_first( char c = ' ', Split s = Split::Drop ) const
 	{
-		auto pos = this->find( c );
-		return split( pos, s );
+		return split_on_first( c, s );
 	}
 
+	// split string on last occurence of c.
+	[[deprecated( "Use split_on_last instead" )]]
 	std::pair<im_str, im_str> split_last( char c = ' ', Split s = Split::Drop ) const
 	{
+		return split_on_last( c, s );
+	}
+
+	// split string on first occurence of c.
+	std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
+	{
+		auto pos = this->find( c );
+		return split_at( pos, s );
+	}
+
+	// split string on last occurence of c
+	std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
+	{
 		auto pos = this->rfind( c );
-		return split( pos, s );
+		return split_at( pos, s );
 	}
 
 	DynArray_t split_full( char delimiter ) const noexcept
@@ -163,7 +188,7 @@ public:
                 detail::defer_ref_cnt_tag // ref count will be incremented at the end of the function
             );
 
-			start_pos = found_pos + 1;
+			start_pos = found_pos + 1u;
 		}
 		_data.add_ref_cnt( static_cast<int>( ret.size() ) );
 
@@ -207,7 +232,7 @@ protected:
 	class static_lifetime_tag {
 	};
 
-	//used for constructor in im_zstr
+	// used for constructor in im_zstr
 	class is_zero_terminated_tag {
 	};
 
@@ -293,10 +318,9 @@ public:
 	}
 
 	explicit im_zstr( im_str&& other, is_zero_terminated_tag )
-		: im_str( std::move(other) )
+		: im_str( std::move( other ) )
 	{
 	}
-
 
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<std::size_t N>
