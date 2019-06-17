@@ -336,11 +336,11 @@ public:
 		return true;
 	}
 
+	// Deleted, because this function is inherited from std::string_view and
+	// would break im_zstr's invariant of always being zero terminated
+	constexpr void remove_suffix( size_type n ) = delete;
 
 private:
-	// This function is inherited from std::string_view and would break im_zstr's invariant of always being
-	// zero terminated
-	constexpr void remove_suffix( size_type n );
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
@@ -441,12 +441,6 @@ template<class T>
 auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
 {
 	return detail_concat::range_helper( args );
-}
-
-inline const im_str& getEmptyConstString()
-{
-	const static im_str str {};
-	return str;
 }
 
 static_assert( sizeof( im_str ) <= 3 * sizeof( void* ) );
