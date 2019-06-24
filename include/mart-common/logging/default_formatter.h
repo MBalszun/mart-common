@@ -86,7 +86,7 @@ inline void defaultFormatForLog(std::ostream& out, std::chrono::time_point<Clock
 
 //make sure that string literals are not taken by the ConstMemoryView overload
 template <size_t N>
-inline void defaultFormatForLog(std::ostream& out, const char(&stringLit)[N])		{ out << mart::StringView(stringLit); }
+inline void defaultFormatForLog(std::ostream& out, const char(&stringLit)[N])		{ out << std::string_view( stringLit ); }
 
 // clang-format on
 
@@ -114,7 +114,7 @@ inline void defaultFormatForLog( std::ostream& out, mart::ArrayView<T> arr )
 namespace _impl_log {
 inline void printOneLine( std::ostream& out, mart::ConstMemoryView mem, size_t fillto = 0 )
 {
-	constexpr StringView space("                                                                                                                                                     ");
+	constexpr std::string_view space("                                                                                                                                                     ");
 	const auto spaces = [&](size_t cnt) { return space.substr(0, std::min(cnt,space.size())); };
 
 	out << '[';

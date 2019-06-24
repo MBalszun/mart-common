@@ -99,7 +99,7 @@ enum class Pad : std::uint8_t { Middle, Left, Right };
 namespace _impl_print {
 struct PaddedStringView {
 
-	const mart::StringView string;
+	const std::string_view string;
 	const std::size_t      total_length;
 	const Pad              side;
 
@@ -164,7 +164,7 @@ inline std::ostream& operator<<( std::ostream& out, const formatted_data_range& 
 }
 } // namespace _impl_print
 
-inline auto padded( mart::StringView str, size_t total_length, Pad pad ) -> _impl_print::PaddedStringView
+inline auto padded( std::string_view str, size_t total_length, Pad pad ) -> _impl_print::PaddedStringView
 {
 	return {str, total_length, pad};
 }

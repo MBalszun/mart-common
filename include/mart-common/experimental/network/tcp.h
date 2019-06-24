@@ -286,7 +286,7 @@ private:
 	State _state = State::closed;
 };
 
-inline std::optional<endpoint> parse_v4_endpoint(mart::StringView str) {
+inline std::optional<endpoint> parse_v4_endpoint( std::string_view str ) {
 	return ip::_impl_details_ip::parse_v4_endpoint<ip::TransportProtocol::TCP>(str);
 }
 

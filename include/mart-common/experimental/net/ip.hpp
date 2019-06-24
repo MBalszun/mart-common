@@ -79,7 +79,7 @@ constexpr bool is_malformed( std::string_view str ) noexcept
 constexpr std::optional<std::uint32_t> parse_block( std::string_view block )
 {
 	if( block.size() > 3 ) { return {}; }
-	const auto num = mart::to_integral_unsafe<std::uint32_t>( mart::StringView( block ) );
+	const auto num = mart::to_integral_unsafe<std::uint32_t>( block );
 	if( num > 255 ) { return {}; }
 	return num;
 }
@@ -222,7 +222,7 @@ constexpr std::optional<port_nr> parse_v4_port( const std::string_view string )
 	if( has_wrong_length( string ) || has_invalid_char( string ) ) { // maximal 6 digits
 		return {};
 	}
-	auto parsed = mart::to_integral_unsafe<std::uint32_t>( mart::StringView( string ) );
+	auto parsed = mart::to_integral_unsafe<std::uint32_t>( string );
 	if( parsed > std::numeric_limits<std::uint16_t>::max() ) { return {}; }
 	return port_nr( static_cast<std::uint16_t>( parsed ) );
 }

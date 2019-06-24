@@ -313,11 +313,13 @@ struct basic_endpoint_v4 {
 	}
 	mart::ConstString toStringEx() const
 	{
+		std::string_view suffix;
 		switch (p) {
-		case TransportProtocol::UDP: return mart::concat(toString() , " (UDP)");
-		case TransportProtocol::TCP: return mart::concat(toString() , " (TCP)");
-		default:					 return mart::concat(toString() , " (Unknown)");
+			case TransportProtocol::UDP: suffix = " (UDP)";
+			case TransportProtocol::TCP: suffix = " (TCP)";
+			default:					 suffix = " (Unknown)";
 		}
+		return mart::concat( address.asString(), ":", std::to_string( port.inHostOrder() ), suffix );
 	}
 	/* ####### State ############ */
 	address_v4 address{};

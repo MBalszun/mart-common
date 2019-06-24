@@ -19,7 +19,7 @@ mart::ConstString address_v4::asString() const
 	addr.s_addr = mart::toUType( _addr );
 	nw::ip::port_layer::inet_net_to_pres( AF_INET, &addr, ret.data(), ret.size() ); // mart::ArrayView<char>(ret)));
 
-	return mart::ConstString( mart::StringView::fromZString( ret.data() ) );
+	return mart::ConstString( std::string_view( ret.data() ) );
 }
 
 [[noreturn]] void address_v4::_throwParseIpV4StringError( const std::string_view str )

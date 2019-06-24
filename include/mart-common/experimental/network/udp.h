@@ -47,13 +47,13 @@ public:
 		: Socket()
 	{
 		if (!isValid()) {
-			throw std::runtime_error(mart::concat("Could not create udp socket | Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).c_str());
+			throw std::runtime_error(mart::concat("Could not create udp socket | Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 		if (!bind(local)) {
-			throw std::runtime_error(mart::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+			throw std::runtime_error(mart::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 		if (!connect(remote)) {
-			throw std::runtime_error(mart::concat("Could not connect socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", mart::StringView::fromZString(std::strerror(errno))).to_string());
+			throw std::runtime_error(mart::concat("Could not connect socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 	}
 
@@ -179,7 +179,7 @@ private:
 	nw::socks::Socket _socket_handle;
 };
 
-inline std::optional<endpoint> parse_v4_endpoint(mart::StringView str) {
+inline std::optional<endpoint> parse_v4_endpoint(std::string_view str) {
 	return ip::_impl_details_ip::parse_v4_endpoint<ip::TransportProtocol::UDP>(str);
 }
 
