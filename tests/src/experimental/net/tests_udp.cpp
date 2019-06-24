@@ -3,7 +3,7 @@
 #include <catch2/catch.hpp>
 
 #include <iostream>
-TEST_CASE( "udp_socket_members_do_compile", "[net]" )
+TEST_CASE( "udp_socket_simple_member_check", "[net]" )
 {
 	using namespace mart::nw::ip;
 	udp::endpoint e1 = {mart::nw::ip::address_any, mart::nw::ip::port_nr {5555}};
@@ -19,30 +19,28 @@ TEST_CASE( "udp_socket_members_do_compile", "[net]" )
 
 	[[maybe_unused]] mart::nw::socks::Socket& raw_socket = s2.getRawSocket();
 
-	udp::endpoint e4 = {mart::nw::ip::address_any, mart::nw::ip::port_nr {2553}};
-	s2.bind( e4 );
+	s2.bind( e2 );
 	//socket can't be rebinded to a different one
-	CHECK( !s2.try_bind( e4 ) );
-	s2.connect( e3 );
- 	CHECK( s2.try_connect( e3 ) );
+	CHECK( !s2.try_bind( e2 ) );
+	s2.connect( e1 );
+ 	CHECK( s2.try_connect( e1 ) );
 
-	CHECK( s2.getLocalEndpoint() == e4 );
-	CHECK( s2.getRemoteEndpoint() == e3 );
+	CHECK( s2.getLocalEndpoint() == e2 );
+	CHECK( s2.getRemoteEndpoint() == e1 );
 
 	s2.send( mart::view_bytes( 5 ) );
-	s2.sendto( mart::view_bytes( 5 ), e2 );
+	s2.sendto( mart::view_bytes( 5 ), e1 );
 
 	using namespace std::chrono_literals;
 	s2.setRxTimeout( 1ms );
 	s2.setTxTimeout( 2ms );
-	// TODO Check, why those fail on travis
-	//CHECK( s2.getRxTimeout() == 1ms );
-	//CHECK( s2.getTxTimeout() == 2ms );
+	CHECK( s2.getRxTimeout() == 1ms );
+	CHECK( s2.getTxTimeout() == 2ms );
 
 	int buffer = 0;
-	udp::endpoint e5;
+	udp::endpoint e4;
 	CHECK( !s2.rec( mart::view_bytes_mutable( buffer ) ).isValid() );
-	CHECK( !s2.recvfrom( mart::view_bytes_mutable( buffer ), e5 ).isValid() );
+	CHECK( !s2.recvfrom( mart::view_bytes_mutable( buffer ), e4 ).isValid() );
 
 	s2.clearRxBuff();
 
