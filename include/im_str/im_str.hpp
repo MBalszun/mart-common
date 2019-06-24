@@ -336,6 +336,8 @@ public:
 		return true;
 	}
 
+	constexpr bool wrapps_a_string_litteral() const noexcept { return _data == nullptr; }
+
 	// Deleted, because this function is inherited from std::string_view and
 	// would break im_zstr's invariant of always being zero terminated
 	constexpr void remove_suffix( size_type n ) = delete;

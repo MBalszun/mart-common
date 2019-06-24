@@ -162,6 +162,11 @@ public:
 		}
 	}
 
+	friend constexpr bool operator==( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt == nullptr; }
+	friend constexpr bool operator==( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt == nullptr; }
+	friend constexpr bool operator!=( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt != nullptr; }
+	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt != nullptr; }
+
 private:
 	// This is used in allocate_null_terminated_char_buffer
 	constexpr explicit atomic_ref_cnt_buffer( Cnt_t* buffer ) noexcept

@@ -218,6 +218,15 @@ TEST_CASE( "comparison", "[im_str]" )
 	CHECK( str2 < std::string( "Hello2o" ) );
 }
 
+TEST_CASE("is_created_from_litteral", "[im_str]")
+{
+	mba::im_zstr from_litteral( "Hello" );
+	CHECK( from_litteral.wrapps_a_string_litteral() );
+	mba::im_zstr not_from_litteral( std::string_view("Hello") );
+	CHECK( !from_litteral.wrapps_a_string_litteral() );
+
+}
+
 TEST_CASE( "thread" )
 {
 	constexpr int iterations = 100'000;
@@ -302,7 +311,7 @@ TEST_CASE( "Examples", "[im_str]" )
 	{
 		std::string name = "Mike";
 
-		mba::im_str  is           = mba::im_str( name );                   // This allocates
+		mba::im_str is            = mba::im_str( name );                   // This allocates
 		mba::im_str full_greeting = mba::concat( "Hello, ", name, "!\n" ); // This will also allocate (once)
 
 		std::cout << full_greeting; // Prints "Hello, Mike!", followed by a newline
