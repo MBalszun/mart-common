@@ -60,14 +60,25 @@ public:
 		ConstString(StringView(other))
 	{ }
 
+
+	struct trust_me_this_is_from_a_string_litteral_t {
+	};
+	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral {};
+
+	constexpr explicit ConstString( std::string_view other, trust_me_this_is_from_a_string_litteral_t ) noexcept
+		: StringView( other )
+	{
+	}
+
 	constexpr operator std::string_view() const noexcept { return this->_as_strview(); }
 
 	//NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<size_t N>
-	constexpr ConstString(const char(&other)[N]) noexcept :
-	StringView(other)
+	constexpr ConstString(const char(&other)[N]) noexcept
+		: StringView(other)
 		//we don't have to initialize the shared_ptr to anything as string litterals already have static lifetime
 	{
+		// if the array is of size 0, it can't be a zero terminated string
 		static_assert(N >= 1, "");
 	}
 
