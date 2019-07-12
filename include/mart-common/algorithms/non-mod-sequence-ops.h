@@ -49,7 +49,7 @@ bool none_of( const R& c, Pred p )
 template<class R, class T>
 constexpr auto count(const R& r, const T& value)
 {
-	std::size_t cnt = 0;
+	std::ptrdiff_t cnt = 0;
 	const auto& end = r.end();
 	for (auto it = r.begin(); it != end; ++it) {
 		cnt += *it == value;
