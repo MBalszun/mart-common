@@ -1,14 +1,14 @@
-#include "udp.hpp"
+#include <mart-netlib/udp.hpp>
 
-#include "network_exceptions.hpp"
+#include <mart-netlib/network_exceptions.hpp>
 
 #include <mart-common/ConstString.h>
 
-#ifdef MBA_UTILS_USE_WINSOCKS
-#include <WinSock2.h>
-#else
-#include <netinet/in.h>
-#endif
+//#ifdef MBA_UTILS_USE_WINSOCKS
+//#include <WinSock2.h>
+//#else
+//#include <netinet/in.h>
+//#endif
 
 #include <cerrno>
 #if __has_include( <charconv> )
@@ -37,7 +37,7 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 } // namespace
 
 Socket::Socket()
-	: _socket_handle( socks::Domain::inet, socks::TransportType::datagram )
+	: _socket_handle( socks::Domain::Inet, socks::TransportType::datagram )
 {
 	if( !isValid() ) {
 		char errno_buffer[24] {};
@@ -57,9 +57,10 @@ Socket::Socket( endpoint local, endpoint remote )
 
 mart::MemoryView Socket::recvfrom( mart::MemoryView buffer, endpoint& src_addr ) noexcept
 {
-	::sockaddr_in src {};
+	mart::nw::socks::port_layer::sockaddr_in src {};
+
 	auto          tmp = _socket_handle.recvfrom( buffer, 0, src );
-	if( tmp.first.isValid() && src.sin_family == to_native( nw::socks::Domain::inet ) ) {
+	if( tmp.first.isValid() && src.is_valid() ) {
 		src_addr = endpoint( src );
 		return tmp.first;
 	} else {

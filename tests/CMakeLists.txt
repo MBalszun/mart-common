@@ -6,10 +6,26 @@ endif()
 
 project(mart-common_testing)
 
-set(CMAKE_CXX_STANDARD 17)
-
 option(MART_COMMON_RUN_BENCHMARKS "run benchmarks as part of unit_test source" OFF)
 option(MART_COMMON_UPLOAD_COVERAGE "" OFF)
+
+set(CMAKE_CXX_STANDARD 17)
+
+if(MSVC)
+	string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	add_compile_definitions(
+		_CRT_SECURE_NO_WARNINGS
+		_SCL_SECURE_NO_WARNINGS
+		_SILENCE_PARALLEL_ALGORITHMS_EXPERIMENTAL_WARNING
+	)
+	add_compile_options(
+			/permissive-
+	)
+else()
+	add_compile_options(-Wall -Wextra)
+endif()
+
+
 
 if(NOT TARGET Catch2::Catch2)
 	find_package(Catch2 CONFIG)
@@ -32,9 +48,7 @@ if(NOT TARGET Catch2::Catch2)
 endif()
 
 file(GLOB_RECURSE TEST_RCS tests_*.cpp)
-
-# message(STATUS "Found test files: ${TEST_RCS}")
-
+list(FILTER TEST_RCS EXCLUDE REGEX netlib)
 add_executable(testing_mart-common
 	main.cpp
 	${TEST_RCS}
@@ -42,27 +56,13 @@ add_executable(testing_mart-common
 
 find_package(Threads REQUIRED)
 
-target_link_libraries(testing_mart-common PRIVATE Mart::common Mart::common_net Threads::Threads Catch2::Catch2)
+target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads Catch2::Catch2)
 
 if(MART_COMMON_RUN_BENCHMARKS)
 	target_compile_definitions(testing_mart-common PRIVATE /DMART_COMMON_RUN_BENCHMARK)
 endif()
 
-if(MSVC)
-	string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	target_compile_definitions(testing_mart-common
-		PRIVATE
-		_CRT_SECURE_NO_WARNINGS
-		_SCL_SECURE_NO_WARNINGS
-		_SILENCE_PARALLEL_ALGORITHMS_EXPERIMENTAL_WARNING
-	)
-	target_compile_options(testing_mart-common
-		PRIVATE
-			/permissive-
-	)
-else()
-	target_compile_options(testing_mart-common PRIVATE -Wall -Wextra)
-endif()
+
 
 ## Make ctest run build.
 # idea taken from https://stackoverflow.com/questions/733475/cmake-ctest-make-test-doesnt-build-tests
@@ -80,4 +80,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 	setup_target_for_coverage(NAME testing_mart-common_coverage EXECUTABLE testing_mart-common DEPENDENCIES testing_mart-common)
 endif()
 endif()
+
+add_subdirectory(src/netlib)
 

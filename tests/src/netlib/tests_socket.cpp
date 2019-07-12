@@ -6,7 +6,7 @@ TEST_CASE( "net_socket_is_blocking_after_construction", "[net]" )
 {
 	using namespace mart::nw;
 	//socks::port_layer::waInit();
-	socks::Socket socket( socks::Domain::inet6, socks::TransportType::datagram );
+	socks::Socket socket( socks::Domain::Inet6, socks::TransportType::datagram );
 	CHECK( socket.isValid() );
 	CHECK( socket.isBlocking() );
 	CHECK( socket.setBlocking( true ) );
@@ -18,7 +18,7 @@ TEST_CASE( "net_socket_is_blocking_after_construction", "[net]" )
 	CHECK( socket.setBlocking( false ) );
 	CHECK( !socket.isBlocking() );
 
-	socket = socks::Socket( socks::Domain::inet, socks::TransportType::datagram );
+	socket = socks::Socket( socks::Domain::Inet, socks::TransportType::datagram );
 	CHECK( socket.isBlocking() );
 	CHECK( socket.setBlocking( true ) );
 	CHECK( socket.isBlocking() );

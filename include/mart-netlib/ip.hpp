@@ -15,30 +15,26 @@
  */
 
 /* ######## INCLUDES ######### */
+#include "basic_types.hpp"
+#include "port_layer.hpp"
 /* Standard Library Includes */
 
+
+/* Proprietary Library Includes */
+#include <mart-common/ConstString.h>
+#include <mart-common/algorithm.h>
+#include <mart-common/utils.h>
+
+/* Project Includes */
 #include <array>
 #include <cassert>
 #include <optional>
 #include <string_view>
 #include <type_traits>
 
-/* Proprietary Library Includes */
-#include <mart-common/ArrayView.h>
-#include <mart-common/ConstString.h>
-#include <mart-common/algorithm.h>
-#include <mart-common/utils.h>
-
-/* Project Includes */
-#include "basic_types.hpp"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
-
-//#ifdef MBA_UTILS_USE_WINSOCKS
-//#define NOMINMAX
-//#include <WinSock2.h>
-//#else
-//#include <netinet/ip.h>
-//#endif
+struct sockaddr_in;
+struct sockaddr_in6;
 
 namespace mart::nw {
 // classes related to the ip protocol in general
@@ -89,6 +85,18 @@ constexpr bool is_invalid_number( std::string_view block )
 	return !parse_block( block );
 }
 
+// unchecked version of str.substr (which would throw exceptions)
+constexpr std::string_view substr( std::string_view str, std::size_t start, std::size_t length )
+{
+	return std::string_view {str.data() + start, length};
+}
+
+// unchecked version of str.substr
+constexpr std::string_view substr( std::string_view str, std::size_t start )
+{
+	return std::string_view {str.data() + start, str.size() - start};
+}
+
 constexpr std::array<std::string_view, 4> split_blocks_unchecked( const std::string_view str )
 {
 	std::array<std::string_view, 4> ret {};
@@ -96,11 +104,11 @@ constexpr std::array<std::string_view, 4> split_blocks_unchecked( const std::str
 	std::string_view::size_type     start = 0;
 	for( auto pos = start; pos < str.size(); ++pos ) {
 		if( str[pos] == '.' ) {
-			ret[cnt++] = str.substr( start, pos - start );
+			ret[cnt++] = substr( str, start, pos - start );
 			start      = pos + 1;
 		}
 	}
-	ret[3] = str.substr( start /*, str.size()-start*/ );
+	ret[3] = substr( str, start /*, str.size()-start*/ );
 	return ret;
 }
 
@@ -160,7 +168,7 @@ private:
 };
 
 constexpr address_v4 address_any {};
-constexpr address_v4 address_local_host( uint32_host_t {0x7F000001} );
+constexpr address_v4 address_local_host( uint32_host_t {0x7F'00'00'01} );
 
 constexpr std::optional<address_v4> parse_v4_address( const std::string_view string )
 {
@@ -244,7 +252,7 @@ struct basic_endpoint_v4_base {
 	/* ####### constructors ############ */
 	constexpr basic_endpoint_v4_base() noexcept = default;
 
-	explicit basic_endpoint_v4_base( const sockaddr_in& native );
+	explicit basic_endpoint_v4_base( const mart::nw::socks::port_layer::sockaddr_in& native );
 
 	constexpr basic_endpoint_v4_base( address_v4 address, port_nr port ) noexcept
 		: address( address )
@@ -263,7 +271,7 @@ struct basic_endpoint_v4_base {
 	// expects format XXX.XXX.XXX.XXX:pppp
 	constexpr explicit basic_endpoint_v4_base( std::string_view str )
 	{
-		const auto addr_port_pair = [lstr =  mart::StringView( str )] {
+		const auto addr_port_pair = [lstr = mart::StringView( str )] {
 			auto ps = lstr.split( ':' );
 			if( ps.second.size() < 1u ) { _throw_ipv4_parse_fail_invalid_format( lstr ); }
 			return ps;
@@ -282,9 +290,13 @@ struct basic_endpoint_v4_base {
 		valid = true;
 	}
 
+	mart::nw::socks::port_layer::sockaddr_in toSockAddr_in() const noexcept
+	{
+		return mart::nw::socks::port_layer::sockaddr_in( address.inNetOrder(), port.inNetOrder() );
+	}
+
 	mart::ConstString toString() const;
 	mart::ConstString toStringEx( TransportProtocol p ) const;
-	sockaddr_in toSockAddr_in() const noexcept;
 };
 
 constexpr std::optional<basic_endpoint_v4_base> parse_basic_v4_endpoint( std::string_view str )

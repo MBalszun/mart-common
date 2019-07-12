@@ -13,4 +13,7 @@ struct generic_nw_error : std::exception {
 
 	mart::ConstString _message;
 };
+struct invalid_string : generic_nw_error {
+	using  generic_nw_error:: generic_nw_error;
+};
 } // namespace mart::nw

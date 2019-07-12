@@ -110,9 +110,9 @@ public:
 	const endpoint& getLocalEndpoint() const { return _ep_local; }
 	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
 private:
-	bool _txWasSuccess(mart::ConstMemoryView data, nw::socks::port_layer::txrx_size_t ret)
+	bool _txWasSuccess(mart::ConstMemoryView data, nw::socks::txrx_size_t ret)
 	{
-		return mart::narrow<nw::socks::port_layer::txrx_size_t>(data.size()) == ret;
+		return mart::narrow<nw::socks::txrx_size_t>(data.size()) == ret;
 	}
 	endpoint _ep_local{};
 	endpoint _ep_remote{};

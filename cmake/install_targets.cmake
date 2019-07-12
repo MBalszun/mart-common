@@ -16,6 +16,7 @@ install( EXPORT ${CONFIG_STEM_NAME}
 		${INSTALL_DIR_CMAKE}
 )
 install( DIRECTORY include/ DESTINATION include )
+install( TARGETS ${targets} )
 
 include(CMakePackageConfigHelpers)
 
