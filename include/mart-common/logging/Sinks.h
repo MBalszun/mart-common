@@ -25,6 +25,7 @@
 
 /* Project Includes */
 #include "ILogSink.h"
+#include "SinkConfigs.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
@@ -45,11 +46,6 @@ public:
 		, _fileName( name ){};
 
 	mart::ConstString getName() const override { return _fileName; }
-};
-
-struct FileLogConfig_t {
-	mart::ConstString fileName;
-	Level			  maxLogLvl;
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const FileLogConfig_t& cfg )
@@ -76,10 +72,6 @@ public:
 		return instance;
 	}
 	mart::ConstString getName() const override { return mart::ConstString{"COUT"}; }
-};
-
-struct StdOutLogConfig_t {
-	Level maxLogLvl;
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const StdOutLogConfig_t& cfg )

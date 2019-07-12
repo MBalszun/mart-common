@@ -74,12 +74,12 @@ inline void defaultFormatForLog(std::ostream& out, std::chrono::minutes value)		
 inline void defaultFormatForLog(std::ostream& out, std::chrono::hours value)		{ out << value.count() << "h"; }
 
 // TODO: c++11
-//inline void defaultFormatForLog(std::ostream& out, std::chrono::system_clock::time_point value) {
-//	const auto t = std::chrono::system_clock::to_time_t(value);
-//	out << std::put_time(std::gmtime(&t), "(%Z) %F_%T-");
-//	ostream_flag_saver _(out);
-//	out << std::setfill('0') << std::setw(6) << std::chrono::duration_cast<std::chrono::microseconds>(value.time_since_epoch()).count() % 1000000;
-//}
+inline void defaultFormatForLog(std::ostream& out, std::chrono::system_clock::time_point value) {
+	const auto t = std::chrono::system_clock::to_time_t(value);
+	out << std::put_time(std::gmtime(&t), "(%Z) %F_%T-");
+	ostream_flag_saver _(out);
+	out << std::setfill('0') << std::setw(6) << std::chrono::duration_cast<std::chrono::microseconds>(value.time_since_epoch()).count() % 1000000;
+}
 
 template<class Clock, class Dur>
 inline void defaultFormatForLog(std::ostream& out, std::chrono::time_point<Clock, Dur> value) { defaultFormatForLog(out, value.time_since_epoch()); }
@@ -181,9 +181,9 @@ inline void formatForLog( std::ostream& out, const ARGS&... args )
 	 * Creates an integer array of zeros
 	 * and as a "by-product" adds each argument to the stream (which is actually what we want)
 	 */
-	int dummy[]{( formatForLog( out, args ), 0 )...};
-	(void)dummy; //silence warning about unused array
+	( formatForLog( out, args ),...);
 }
+
 }
 }
 

@@ -19,16 +19,18 @@
 namespace mart {
 namespace log {
 
-inline void defaultInit(Level logLvl = Level::Debug, std::string_view name_tag = std::string_view("main"))
+inline void defaultInit( Level logLvl = Level::Debug, mart::ConstString name_tag =  "main"  )
 {
-	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ mart::ConstString(name_tag) , logLvl });
+	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ name_tag , logLvl });
 	logger.addSink(log::makeSink(log::StdOutLogConfig_t{ Level::Debug }) );
 }
 
-inline void defaultInit(std::string_view file_tag, Level logLvl = Level::Debug, std::string_view name_tag = std::string_view("main"))
+inline void defaultInit( mart::ConstString file_tag,
+						 Level             logLvl   = Level::Debug,
+						 mart::ConstString name_tag = "main" )
 {
-	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ mart::ConstString(name_tag) , logLvl });
-	logger.addSink(log::makeSink(log::FileLogConfig_t{ mart::ConstString{file_tag},Level::Trace }));
+	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ name_tag , logLvl });
+	logger.addSink(log::makeSink(log::FileLogConfig_t{ file_tag,Level::Trace }));
 }
 
 using LOG_LVL = Level;

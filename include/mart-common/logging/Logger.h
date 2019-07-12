@@ -23,7 +23,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <string>
 
 #include <mutex>
 #include <thread>
@@ -33,11 +32,12 @@
 #include "../MartTime.h"
 #include "../StringViewOstream.h"
 #include "../experimental/CopyableAtomic.h"
-#include "../utils.h"
 #include "../port_layer.h"
+#include "../utils.h"
 
 /* Project Includes */
 #include "ILogSink.h"
+#include "LoggerConfig.h"
 #include "MartLogFWD.h"
 #include "default_formatter.h"
 #include "types.h"
@@ -45,12 +45,6 @@
 
 namespace mart {
 namespace log {
-
-// TODO: move to separate file
-struct LoggerConf_t {
-	mart::ConstString moduleName;
-	Level             logLvl = defaultLogLevel;
-};
 
 /**
  * @brief Logger class
@@ -73,10 +67,9 @@ inline decltype( auto ) forward_as_string_view_if_possible( ARG&& args )
 	return std::forward<ARG>( args );
 }
 
-static_assert( std::is_same_v<std::string_view, decltype( forward_as_string_view_if_possible("Hello World") )> );
+static_assert( std::is_same_v<std::string_view, decltype( forward_as_string_view_if_possible( "Hello World" ) )> );
 
-}
-
+} // namespace detail
 
 class Logger {
 	enum class AddNewline { No, Yes };
@@ -127,20 +120,10 @@ public:
 		_loggingName = _createLoggingName( subModuleName, other._loggingName );
 	}
 
-	Logger( Logger&& other ) noexcept = default;
 	Logger( const Logger& other )     = default;
-	Logger& operator                  =( Logger&& other ) noexcept
-	{ //= default; doesn't work for some reason
-		_startTime       = other._startTime;
-		_currentLogLevel = other._currentLogLevel;
-		_enabled         = other._enabled;
-		_sinks           = std::move( other._sinks );
-		_loggingName     = std::move( other._loggingName );
-		_spacer          = std::move( other._spacer );
-		return *this;
-	}
-
+	Logger( Logger&& other ) noexcept = default;
 	Logger& operator=( const Logger& other ) = default;
+	Logger& operator=( Logger&& other ) noexcept = default;
 
 	Logger make_child( const std::string_view subModuleName ) const { return Logger( subModuleName, *this ); }
 
@@ -155,8 +138,7 @@ public:
 		return instance;
 	}
 
-	static Logger&
-	initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
+	static Logger& initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
 	{
 		std::cout << "Initializing default logger\n";
 		Logger& lref = initDefaultLogger( conf );
@@ -180,6 +162,8 @@ public:
 		// Bail out of formatting and stuff early, if message should not be logged in the first place
 		if( !_shouldBeLogged( lvl ) ) return;
 
+		// reduce the number of instantiations for log_impl by converting all string
+		// types to string_views
 		log_impl( lvl, detail::forward_as_string_view_if_possible( args )... );
 	}
 
@@ -235,7 +219,7 @@ public:
 	/* ### Change sinks ###*/
 	void addSink( std::shared_ptr<ILogSink> sink )
 	{
-		if( sink != nullptr ) { _sinks.emplace_back( sink ); }
+		if( sink != nullptr ) { _sinks.emplace_back( std::move( sink ) ); }
 	}
 	void                                   clearSinks() { _sinks.clear(); }
 	std::vector<std::shared_ptr<ILogSink>> getSinks() const { return _sinks; }
@@ -244,15 +228,19 @@ public:
 	/**
 	 * Increases indentation level for all following log messages created from this logger by two
 	 */
-	void bumpIndentLevel() { _spacer.append( "  " ); }
+	void bumpIndentLevel()
+	{
+		if( _spacer.size() < space_string_litteral.size() - 2 ) {
+			_spacer = std::string_view( space_string_litteral.data(), _spacer.size() + 2 );
+		}
+	}
 
 	/**
 	 * Decreases indentation level for all following log messages created from this logger by two
 	 */
 	void removeIndentLevel()
 	{
-		_spacer.pop_back();
-		_spacer.pop_back();
+		if( _spacer.size() >= 2 ) { _spacer.remove_suffix( 2 ); }
 	}
 
 	struct IndentLevelGuard {
@@ -280,7 +268,7 @@ public:
 	 * This can be used to couple the log indentation level to a scope in an RAII manner
 	 * @return Guard Object to whose lifetime the indentation level is coupled
 	 */
-	IndentLevelGuard bumpIdentLevelGuarded() { return IndentLevelGuard( *this ); }
+	[[nodiscard]] IndentLevelGuard bumpIdentLevelGuarded() { return IndentLevelGuard( *this ); }
 
 private:
 	/*### Variables controlling logging behavior ###*/
@@ -292,7 +280,10 @@ private:
 
 	/*### Cached parts of logged message ### */
 	mart::ConstString _loggingName; // This is what can be grepped for in the logfile
-	std::string       _spacer;
+	std::string_view  _spacer;
+
+	static constexpr std::string_view space_string_litteral
+		= "                                                                                                         ";
 
 	static std::ostringstream& _sbuffer()
 	{
@@ -310,7 +301,7 @@ private:
 	}
 
 	static mart::ConstString _createLoggingName( const std::string_view moduleName,
-												 const std::string_view parentName = EmptyStringView )
+												 const std::string_view parentName = {} )
 	{
 		return mart::concat( parentName, "[", moduleName, "]" );
 	}
@@ -319,27 +310,22 @@ private:
 	template<class... ARGS>
 	void _fillBuffer( Level lvl, AddNewline newLine, ARGS&&... args )
 	{
+		std::ostream& buffer = _sbuffer();
 		// line prefix
-		formatForLog( _sbuffer(),
-					  lvl,
-					  " - At ",
-					  std::setw( 7 ),
-					  passedTime<milliseconds>( _startTime ),
-					  " - ",
-					  _loggingName,
-					  ": " );
+		formatForLog(
+			buffer, lvl, " - At ", std::setw( 7 ), passedTime<milliseconds>( _startTime ), " - ", _loggingName, ": " );
 
 		// Add thread Id and spacer in trace mode
 		if( _currentLogLevel == Level::TRACE ) {
-			ostream_flag_saver _( _sbuffer() );
-			formatForLog( _sbuffer(), "[ThreadID: ", std::this_thread::get_id(), "]: ", _spacer );
+			ostream_flag_saver _( buffer );
+			formatForLog( buffer, "[ThreadID: ", std::this_thread::get_id(), "]: ", _spacer );
 		}
 
 		// write actual message
-		formatForLog( _sbuffer(), args... );
+		formatForLog( buffer, args... );
 
 		// Append new line if requested
-		if( newLine == AddNewline::Yes ) { _sbuffer() << '\n'; }
+		if( newLine == AddNewline::Yes ) { buffer << '\n'; }
 	}
 
 	// write contents to all registered log sinks and reset buffer

@@ -20,7 +20,7 @@
 #include <string_view>
 
 /* Proprietary Library Includes */
-#include "../utils.h"
+#include "../enum/EnumHelpers.h"
 
 /* Project Includes */
 #include "MartLogFWD.h"
@@ -41,7 +41,7 @@ enum class Level {
 	Trace  = MART_LOG_LOG_LVL_TRACE
 };
 
-constexpr Level defaultLogLevel = Level::STATUS;
+constexpr Level defaultLogLevel = Level::Status;
 
 // clang-format off
 constexpr inline std::string_view to_string_view( Level lvl )
