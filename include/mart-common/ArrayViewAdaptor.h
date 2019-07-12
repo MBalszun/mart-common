@@ -18,10 +18,11 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <iterator>
-#include <stdexcept>
+#include <exception>
 #include <type_traits>
 
 #ifndef NDEBUG
+#include <stdexcept>
 #include <string> //exception messages
 #endif
 
@@ -137,7 +138,7 @@ protected:
 			throw std::out_of_range( "Tried to access " + std::to_string( idx )
                                    + "th element of an array of size" + std::to_string( _size() ) );
 #else
-			throw std::out_of_range( "Tried to access out of bounds array element" );
+			throw std::exception{};
 #endif
 		}
 	}
