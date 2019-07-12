@@ -14,18 +14,15 @@
  *
  */
 
-/* ######## INCLUDES ######### */
-/* Standard Library Includes */
-
-/* Proprietary Library Includes */
-
-/* Project Includes */
-/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
-
 namespace mart {
 
+/** returns value multiplied with itself
+ *
+ * Allows the return type of the multiplication to be different
+ * than the type of value
+ */
 template<class T>
-auto square( const T& value )
+inline auto square( const T& value )
 {
 	return value * value;
 }

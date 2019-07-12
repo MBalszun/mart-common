@@ -10,7 +10,7 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief: Portabgility utilities
+ * @brief: Portability utilities
  *
  */
 
