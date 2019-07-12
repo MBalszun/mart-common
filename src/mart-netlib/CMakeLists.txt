@@ -5,10 +5,8 @@ endif()
 ## netlib-portlayer library - minimal abstraction over os-specific bsd-socket-api
 # NOTE: the port-layer is supposed to be a c++11 library
 set(CMAKE_CXX_STANDARD 11)
-add_library(mart-netlib-portlayer STATIC ${CMAKE_CURRENT_SOURCE_DIR}/port_layer.cpp)
-
-add_library(Mart::netlib-portlayer ALIAS mart-netlib-portlayer)
-
+add_library( mart-netlib-portlayer STATIC ${CMAKE_CURRENT_SOURCE_DIR}/port_layer.cpp )
+add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
 set_target_properties ( mart-netlib-portlayer PROPERTIES EXPORT_NAME netlib-portlayer )
 target_include_directories( mart-netlib-portlayer
 	PUBLIC

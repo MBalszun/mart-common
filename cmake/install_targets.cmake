@@ -3,8 +3,8 @@
 
 function(install_targets targets namespace )
 
-set( INSTALL_DIR_CMAKE share/cmake/${PROJECT_NAME} )
-set( CONFIG_STEM_NAME ${PROJECT_NAME}Config)
+set( INSTALL_DIR_CMAKE share/MartCommon )
+set( CONFIG_STEM_NAME MartCommonConfig )
 
 install( TARGETS ${targets} EXPORT ${CONFIG_STEM_NAME} )
 install( EXPORT ${CONFIG_STEM_NAME}
@@ -16,7 +16,6 @@ install( EXPORT ${CONFIG_STEM_NAME}
 		${INSTALL_DIR_CMAKE}
 )
 install( DIRECTORY include/ DESTINATION include )
-install( TARGETS ${targets} )
 
 include(CMakePackageConfigHelpers)
 
