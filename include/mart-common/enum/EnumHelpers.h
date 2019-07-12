@@ -18,7 +18,6 @@
 #include <array>
 #include <optional>
 #include <string_view>
-#include <algorithm>
 #include <type_traits>
 
 /* Proprietary Library Includes */
@@ -57,10 +56,10 @@ constexpr Enum mart_idxToEnum_impl( size_t v )
 /**
  * Implementation note
  *Those interface functions forward to mart_<name>_impl functions that are supposed to be defined in the same namespace
- * as the respective enum an are found via argument dependent lookup. On way to generate those definition functions is
+ * as the respective enum and are found via argument dependent lookup. One way to generate those definition functions is
  * to use the macro MART_UTILS_DEFINE_ENUM which is defined in EnumDefinitionMacro.h header but you can also just write
- *them on your own. In some cases, a fallback solution is provided here. e.g. mart_enumCnt_impl is defined in terms of
- *Enum::COUNT by default
+ * them on your own. In some cases, a fallback solution is provided here. e.g. mart_enumCnt_impl is defined in terms of
+ * Enum::COUNT by default
  *
  */
 
@@ -75,27 +74,31 @@ template <class Enum> constexpr auto getEnumNames ()               -> decltype( 
 // clang-format on
 
 template<class Enum>
-Optional<Enum> toEnum( std::string_view str )
+[[deprecated("Please use to_enum instead")]] constexpr Optional<Enum> toEnum( std::string_view str ) noexcept
 {
-	constexpr auto enums = getEnumNames<Enum>();
-	const auto     idx   = std::find( enums.begin(), enums.end(), str ) - enums.begin();
-	if( (size_t)idx < enumCnt<Enum>() ) {
-		return getEnums<Enum>()[idx];
-	} else {
-		return {};
+	std::size_t idx = 0;
+	for( const auto& name : getEnumNames<Enum>() ) {
+		if( str == name ) {
+			return getEnums<Enum>()[idx];
+		} else {
+			++idx;
+		}
 	}
+	return {};
 }
 
 template<class Enum>
-std::optional<Enum> to_enum( std::string_view str )
+constexpr std::optional<Enum> to_enum( std::string_view str ) noexcept
 {
-	constexpr auto enums = getEnumNames<Enum>();
-	const auto     idx   = std::find( enums.begin(), enums.end(), str ) - enums.begin();
-	if( (size_t)idx < enumCnt<Enum>() ) {
-		return getEnums<Enum>()[idx];
-	} else {
-		return {};
+	std::size_t idx = 0;
+	for( const auto& name : getEnumNames<Enum>() ) {
+		if( str == name ) {
+			return getEnums<Enum>()[idx];
+		} else {
+			idx++;
+		}
 	}
+	return {};
 }
 
 } // namespace mart
