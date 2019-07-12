@@ -17,14 +17,15 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <chrono>
-#include <ostream>
-#include <ios>
 #include <iomanip>
+#include <ios>
+#include <ostream>
+#include <string_view>
 
 /* Proprietary Library Includes */
 /* Project Includes */
-#include "./StringView.h"
 #include "./ArrayView.h"
+#include "./StringView.h"        //getSpaces
 #include "./StringViewOstream.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
