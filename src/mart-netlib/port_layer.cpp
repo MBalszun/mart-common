@@ -24,9 +24,8 @@
 #ifdef __cpp_lib_launder
 #define MBA_LAUNDER( x ) std::launder( x )
 #else
-#define MBA_LAUNDER( x ) (x)
+#define MBA_LAUNDER( x ) ( x )
 #endif
-
 
 // Include OS-specific headers
 #ifdef MBA_UTILS_USE_WINSOCKS
@@ -58,7 +57,6 @@
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
-
 namespace mart {
 namespace nw {
 namespace socks {
@@ -77,11 +75,22 @@ using buffer_len_t  = int;
 
 #endif // MBA_UTILS_USE_WINSOCKS
 
+ErrorCode get_last_socket_error() noexcept
+{
+	return ErrorCode {static_cast<ErrorCode::Value_t>(
+#ifdef MBA_UTILS_USE_WINSOCKS
+		WSAGetLastError()
+#else
+		errno
+#endif
+	)};
+}
+
 namespace {
 template<class E>
 using utype_t = typename std::underlying_type<E>::type; // fill in for c++14 std::unterlying_type_t
 template<class T>
-using rm_const_t = typename std::remove_const<T>::type; // fill in for c++14 std::unterlying_type_t
+using rm_const_t = typename std::remove_const<T>::type; // fill in for c++14 remove_const_t
 
 template<class E>
 constexpr utype_t<E> to_utype( E e )
@@ -105,34 +114,58 @@ constexpr address_len_t to_native_buf_len( std::size_t size )
 	return narrow_cast<buffer_len_t>( size );
 }
 
+static_assert( (int)ErrorCode::Value_t::NoError == NOERROR, "" );
+static_assert( (int)ErrorCode::Value_t::TryAgain == EAGAIN, "" );
+static_assert( (int)ErrorCode::Value_t::WouldBlock == EWOULDBLOCK, "" );
+
+ErrorCode get_appropriate_error_code( int function_result )
+{
+	if( function_result == 0 ) {
+		return {ErrorCode::Value_t::NoError};
+	} else {
+		return get_last_socket_error();
+	}
+}
+
+template<class T>
+struct non_deduced {
+	using type = T;
+};
+
+template<class T>
+using non_deduced_t = typename non_deduced<T>::type;
+
+template<class T>
+ReturnValue<T> make_return_value( const T error_value, non_deduced_t<T> function_result )
+{
+	if( function_result != error_value ) {
+		return ReturnValue<T> {function_result};
+	} else {
+		return ReturnValue<T>( get_last_socket_error() );
+	}
+}
+
 } // namespace
 
 // Define aliases for platform specific types and values
 #ifdef MBA_UTILS_USE_WINSOCKS
 
 static_assert( std::is_same<utype_t<handle_t>, SOCKET>::value, "" );
-static_assert( std::is_same<utype_t<std::remove_const_t<decltype( handle_t::Invalid )>>, decltype( INVALID_SOCKET )>::value,
-			   "" );
-static_assert( std::is_same<rm_const_t<decltype( socket_error_value )>, decltype( SOCKET_ERROR )>::value,
-			   "" );
+static_assert(
+	std::is_same<utype_t<std::remove_const_t<decltype( handle_t::Invalid )>>, decltype( INVALID_SOCKET )>::value, "" );
 
 static_assert( to_utype( handle_t::Invalid ) == INVALID_SOCKET, "" );
-static_assert( socket_error_value == SOCKET_ERROR, "" );
 #else
 
 static_assert( std::is_same<utype_t<handle_t>, int>::value, "" );
 
-static_assert( std::is_same<utype_t<rm_const_t<decltype( handle_t::Invalid )>>, decltype( -1 )>::value,
-	"" );
+static_assert( std::is_same<utype_t<rm_const_t<decltype( handle_t::Invalid )>>, decltype( -1 )>::value, "" );
 static_assert( to_utype( handle_t::Invalid ) == -1, "" );
-
-static_assert( std::is_same<rm_const_t<decltype( socket_error_value )>, decltype( -1 )>::value, "" );
-static_assert( socket_error_value == -1, "" );
 
 #endif // MBA_UTILS_USE_WINSOCKS
 
 // Wrapper functions for socket related functions, that are specific to a certain platform
-bool set_blocking( handle_t socket, bool should_block ) noexcept
+ErrorCode set_blocking( handle_t socket, bool should_block ) noexcept
 {
 	bool ret           = true;
 	auto native_handle = to_utype( socket );
@@ -149,40 +182,34 @@ bool set_blocking( handle_t socket, bool should_block ) noexcept
 	if( ( flags & O_NONBLOCK ) == !should_block ) { return ret; }
 	ret = 0 == fcntl( native_handle, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK );
 #endif
-	return ret;
+	return get_appropriate_error_code( ret );
 }
 
 namespace {
 // TODO: throw exception on failure?
 void startup()
 {
-#pragma warning( disable : 5051  ) // unknown attribute
+#pragma warning( disable : 5051 ) // unknown attribute
 	[[maybe_unused]] const static bool isInit = port_layer::waInit();
 #pragma warning( default : 5051 )
 }
 } // namespace
 
-handle_t socket( Domain domain, TransportType transport_type, Protocol protocol )
+ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol )
 {
 	startup();
-	return static_cast<handle_t>(::socket( to_native( domain ), to_native( transport_type ), to_native( protocol ) ));
+	return make_return_value(
+		handle_t::Invalid,
+		static_cast<handle_t>( ::socket( to_native( domain ), to_native( transport_type ), to_native( protocol ) ) ) );
 }
 
-int close_socket( handle_t handle ) noexcept
+ErrorCode close_socket( handle_t handle ) noexcept
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
-	return ::closesocket( to_utype( handle ) );
+	return get_appropriate_error_code( ::closesocket( to_utype( handle ) ) );
 #else
-	return ::close( to_utype( handle ) ); // in linux, a socket is just another file descriptor
-#endif
-}
-
-int getLastSocketError() noexcept
-{
-#ifdef MBA_UTILS_USE_WINSOCKS
-	return WSAGetLastError();
-#else
-	return errno;
+	return get_appropriate_error_code(
+		::close( to_utype( handle ) ) ); // in linux, a socket is just another file descriptor
 #endif
 }
 
@@ -207,7 +234,7 @@ bool waInit() noexcept
 	return true; // on linux we don't have to initialize anything
 }
 
-int to_native( Domain domain )
+int to_native( Domain domain ) noexcept
 {
 	switch( domain ) {
 		case mart::nw::socks::Domain::Invalid: return -1; break;
@@ -219,18 +246,18 @@ int to_native( Domain domain )
 	return -1;
 }
 
-int to_native( TransportType transport_type )
+int to_native( TransportType transport_type ) noexcept
 {
 	switch( transport_type ) {
-		case mart::nw::socks::TransportType::stream: return SOCK_STREAM; break;
-		case mart::nw::socks::TransportType::datagram: return SOCK_DGRAM; break;
-		case mart::nw::socks::TransportType::seqpacket: return SOCK_SEQPACKET; break;
+		case mart::nw::socks::TransportType::Stream: return SOCK_STREAM; break;
+		case mart::nw::socks::TransportType::Datagram: return SOCK_DGRAM; break;
+		case mart::nw::socks::TransportType::Seqpacket: return SOCK_SEQPACKET; break;
 	}
 	assert( false );
 	return -1;
 }
 
-int to_native( Protocol protocol )
+int to_native( Protocol protocol ) noexcept
 {
 	switch( protocol ) {
 		case mart::nw::socks::Protocol::Default: return 0;
@@ -246,7 +273,7 @@ namespace {
 int to_native( SocketOptionLevel level )
 {
 	switch( level ) {
-		case mart::nw::socks::SocketOptionLevel::sol_socket: return SOL_SOCKET; break;
+		case mart::nw::socks::SocketOptionLevel::Socket: return SOL_SOCKET; break;
 	}
 	assert( false );
 	return static_cast<int>( level );
@@ -264,23 +291,23 @@ int to_native( SocketOption option )
 
 } // namespace
 
-int setsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, const byte_range data ) noexcept
+ErrorCode setsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, const byte_range data ) noexcept
 {
-	return ::setsockopt( to_native( handle ),
-						 to_native( level ),
-						 to_native( optname ),
-						 data.char_ptr(),
-						 narrow_cast<int>( data.size() ) );
+	return get_appropriate_error_code( ::setsockopt( to_native( handle ),
+													 to_native( level ),
+													 to_native( optname ),
+													 data.char_ptr(),
+													 narrow_cast<int>( data.size() ) ) );
 }
 
-int getsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range_mut& data ) noexcept
+ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range_mut& data ) noexcept
 {
 	auto len = to_native_addr_len( data.size() );
 
 	const auto ret
 		= ::getsockopt( to_native( handle ), to_native( level ), to_native( optname ), data.char_ptr(), &len );
 	data._size = len;
-	return ret;
+	return get_appropriate_error_code( ret );
 }
 
 const ::sockaddr* to_native( const Sockaddr* addr )
@@ -293,61 +320,66 @@ const ::sockaddr* to_native( const Sockaddr* addr )
 	return static_cast<::sockaddr*>( static_cast<void*>( addr ) );
 }
 
-int bind( handle_t handle, const Sockaddr& addr ) noexcept
+ErrorCode bind( handle_t handle, const Sockaddr& addr ) noexcept
 {
-	return ::bind( to_native( handle ), addr.to_native_ptr(), to_native_addr_len( addr.size() ) );
+	return get_appropriate_error_code(
+		::bind( to_native( handle ), addr.to_native_ptr(), to_native_addr_len( addr.size() ) ) );
 }
 
-int connect( handle_t handle, const Sockaddr& addr ) noexcept
+ErrorCode connect( handle_t handle, const Sockaddr& addr ) noexcept
 {
-	return ::connect( to_native( handle ), addr.to_native_ptr(), to_native_addr_len( addr.size() ) );
+	return get_appropriate_error_code(
+		::connect( to_native( handle ), addr.to_native_ptr(), to_native_addr_len( addr.size() ) ) );
 }
 
-int listen( handle_t handle, int backlog ) noexcept
+ErrorCode listen( handle_t handle, int backlog ) noexcept
 {
-	return ::listen( to_native( handle ), backlog );
+	return get_appropriate_error_code( ::listen( to_native( handle ), backlog ) );
 }
 
-handle_t accept( handle_t handle, Sockaddr& addr ) noexcept
+ReturnValue<handle_t> accept( handle_t handle, Sockaddr& addr ) noexcept
 {
-	auto addr_len = to_native_addr_len( addr.size() );
-	auto ret      = static_cast<handle_t>(::accept( to_native( handle ), addr.to_native_ptr(), &addr_len ));
+	auto       addr_len = to_native_addr_len( addr.size() );
+	const auto ret      = static_cast<handle_t>( ::accept( to_native( handle ), addr.to_native_ptr(), &addr_len ) );
 	addr.set_valid_data_range( addr_len );
-	return ret;
+	return make_return_value( handle_t::Invalid, ret );
 }
 
-handle_t accept( handle_t handle ) noexcept
+ReturnValue<handle_t> accept( handle_t handle ) noexcept
 {
-	return static_cast<handle_t>(::accept( to_native( handle ), nullptr, 0 ));
+	return make_return_value( handle_t::Invalid, static_cast<handle_t>( ::accept( to_native( handle ), nullptr, 0 ) ) );
 }
 
-txrx_size_t send( handle_t handle, byte_range buf, int flags ) noexcept
+ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noexcept
 {
-	return ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags );
+	return make_return_value( txrx_size_t {-1},
+							  ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
-txrx_size_t sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept
+ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept
 {
-	return ::sendto( to_native( handle ),
-					 buf.char_ptr(),
-					 to_native_buf_len( buf.size() ),
-					 flags,
-					 to.to_native_ptr(),
-					 to_native_addr_len( to.size() ) );
+	return make_return_value( txrx_size_t {-1},
+							  ::sendto( to_native( handle ),
+										buf.char_ptr(),
+										to_native_buf_len( buf.size() ),
+										flags,
+										to.to_native_ptr(),
+										to_native_addr_len( to.size() ) ) );
 }
 
-txrx_size_t recv( handle_t handle, byte_range_mut buf, int flags ) noexcept
+ReturnValue<txrx_size_t> recv( handle_t handle, byte_range_mut buf, int flags ) noexcept
 {
-	return ::recv( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags );
+	return make_return_value( txrx_size_t {-1},
+							  ::recv( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
-txrx_size_t recvfrom( handle_t handle, byte_range_mut buf, int flags, Sockaddr& from ) noexcept
+ReturnValue<txrx_size_t> recvfrom( handle_t handle, byte_range_mut buf, int flags, Sockaddr& from ) noexcept
 {
 	auto from_len = to_native_addr_len( from.size() );
 	auto ret      = ::recvfrom(
         to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags, from.to_native_ptr(), &from_len );
 	from.set_valid_data_range( from_len );
-	return ret;
+	return make_return_value( txrx_size_t {-1}, ret );
 }
 
 // implementation details for timeout related functions
@@ -377,23 +409,24 @@ Dur from_timeval( timeval duration )
 using dword = std::uint32_t;
 } // namespace
 
-bool set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept
+ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	dword to_ms = static_cast<dword>( std::chrono::duration_cast<std::chrono::milliseconds>( timeout ).count() );
-	auto  timeout_native = to_ms;
+	auto  native_timeout = to_ms;
 #else
 	auto    to             = to_timeval( timeout );
-	auto    timeout_native = to;
+	auto    native_timeout = to;
 #endif
 	auto option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
-	auto res = setsockopt( handle, SocketOptionLevel::sol_socket, option_name, byte_range_from_pod( timeout_native ) );
-	return res != port_layer::socket_error_value;
+	return port_layer::setsockopt(
+		handle, SocketOptionLevel::Socket, option_name, byte_range_from_pod( native_timeout ) );
 }
 
-std::chrono::microseconds get_timeout( handle_t handle, Direction direction ) noexcept
+ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept
 {
 	using namespace std::chrono;
+	static constexpr auto invalid_return_duration = duration_cast<microseconds>( seconds( -1 ) );
 
 	microseconds ret;
 	const auto   option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
@@ -405,10 +438,10 @@ std::chrono::microseconds get_timeout( handle_t handle, Direction direction ) no
 #endif
 
 	auto bytes = byte_range_from_pod( native_timeout );
-	auto res   = getsockopt( handle, SocketOptionLevel::sol_socket, option_name, bytes );
+	auto res   = getsockopt( handle, SocketOptionLevel::Socket, option_name, bytes );
 
-	if( res == port_layer::socket_error_value && bytes.size() == sizeof( native_timeout ) ) {
-		ret = duration_cast<microseconds>( std::chrono::seconds( -1 ) );
+	if( !res || bytes.size() != sizeof( native_timeout ) ) {
+		return ReturnValue<std::chrono::microseconds> {res};
 	} else {
 #ifdef MBA_UTILS_USE_WINSOCKS
 		ret = microseconds( milliseconds( native_timeout ) );
@@ -416,14 +449,14 @@ std::chrono::microseconds get_timeout( handle_t handle, Direction direction ) no
 		ret = from_timeval<microseconds>( native_timeout );
 #endif
 	}
-	return ret;
+	return ReturnValue<std::chrono::microseconds>( ret );
 }
 
-sockaddr_in::sockaddr_in( const ::sockaddr_in& native ) noexcept
-	: sockaddr_in::sockaddr_in()
+SockaddrIn::SockaddrIn( const ::sockaddr_in& native ) noexcept
+	: SockaddrIn::SockaddrIn()
 {
-	static_assert( sizeof( _storage ) >= sizeof( native ),"" );
-	static_assert( alignof( sockaddr_in::Storage ) >= alignof( ::sockaddr_in ),"" );
+	static_assert( sizeof( _storage ) >= sizeof( native ), "" );
+	static_assert( alignof( SockaddrIn::Storage ) >= alignof( ::sockaddr_in ), "" );
 
 	new( _storage.raw_bytes )::sockaddr_in( native );
 }
@@ -441,35 +474,35 @@ namespace {
 
 } // namespace
 
-sockaddr_in::sockaddr_in( mart::nw::uint32_net_t address, mart::nw::uint16_net_t port ) noexcept
-	: sockaddr_in::sockaddr_in( make_sockaddr_in( address, port ) )
+SockaddrIn::SockaddrIn( mart::nw::uint32_net_t address, mart::nw::uint16_net_t port ) noexcept
+	: SockaddrIn::SockaddrIn( make_sockaddr_in( address, port ) )
 {
 }
 
-const ::sockaddr_in& sockaddr_in::native() const noexcept
+const ::sockaddr_in& SockaddrIn::native() const noexcept
 {
 	return *MBA_LAUNDER( reinterpret_cast<const ::sockaddr_in*>( _storage.raw_bytes ) );
 }
 
-::sockaddr_in& sockaddr_in::native() noexcept
+::sockaddr_in& SockaddrIn::native() noexcept
 {
 	return *MBA_LAUNDER( reinterpret_cast<::sockaddr_in*>( _storage.raw_bytes ) );
 }
 
-mart::nw::uint32_net_t sockaddr_in::address() const noexcept
+mart::nw::uint32_net_t SockaddrIn::address() const noexcept
 {
-	return static_cast<mart::nw::uint32_net_t>(native().sin_addr.s_addr);
+	return static_cast<mart::nw::uint32_net_t>( native().sin_addr.s_addr );
 }
-mart::nw::uint16_net_t sockaddr_in::port() const noexcept
+mart::nw::uint16_net_t SockaddrIn::port() const noexcept
 {
 	return static_cast<mart::nw::uint16_net_t>( native().sin_port );
 }
 
-sockaddr_in6::sockaddr_in6( const ::sockaddr_in6& native )
-	: sockaddr_in6::sockaddr_in6()
+SockaddrIn6::SockaddrIn6( const ::sockaddr_in6& native )
+	: SockaddrIn6::SockaddrIn6()
 {
-	static_assert( sizeof( _storage ) >= sizeof( native ),"" );
-	static_assert( alignof( sockaddr_in6::Storage ) >= alignof( ::sockaddr_in6 ),"" );
+	static_assert( sizeof( _storage ) >= sizeof( native ), "" );
+	static_assert( alignof( SockaddrIn6::Storage ) >= alignof( ::sockaddr_in6 ), "" );
 
 	std::memcpy( _storage.raw_bytes, &native, sizeof( native ) );
 }

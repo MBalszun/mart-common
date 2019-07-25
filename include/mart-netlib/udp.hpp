@@ -16,8 +16,8 @@
 
 /* ######## INCLUDES ######### */
 /* Project Includes */
-#include "ip.hpp"
 #include "Socket.hpp"
+#include "ip.hpp"
 
 /* Proprietary Library Includes */
 #include <mart-common/ArrayView.h>
@@ -40,95 +40,66 @@ class Socket {
 public:
 	Socket();
 	Socket( endpoint local, endpoint remote );
-	Socket(Socket&&) noexcept = default;
+	Socket( Socket&& ) noexcept = default;
 	Socket& operator=( Socket&& ) noexcept = default;
 
-	const nw::socks::Socket& getRawSocket() const
-	{
-		return _socket_handle;
-	}
+	const nw::socks::Socket& getRawSocket() const { return _socket_handle; }
 
-	nw::socks::Socket& getRawSocket()
-	{
-		return _socket_handle;
-	}
+	nw::socks::Socket& getRawSocket() { return _socket_handle; }
 
 	void bind( endpoint ep );
-	bool try_bind( endpoint ep ) noexcept;
+	socks::ErrorCode try_bind( endpoint ep ) noexcept;
 	void connect( endpoint ep );
-	bool try_connect( endpoint ep ) noexcept;
+	socks::ErrorCode try_connect( endpoint ep ) noexcept;
 
-	bool send( mart::ConstMemoryView data )
+	auto try_send( mart::ConstMemoryView data )
 	{
-		return _txWasSuccess( data, _socket_handle.send( data, 0 ) );
+		return _socket_handle.send( data, 0 );
 	}
 
-	mart::MemoryView rec(mart::MemoryView buffer)
-	{
-		return _socket_handle.recv(buffer, 0).first;
-	}
 
-	bool sendto( mart::ConstMemoryView data, endpoint ep ) noexcept;
-	mart::MemoryView recvfrom( mart::MemoryView buffer, endpoint& src_addr ) noexcept;
+	mart::MemoryView rec( mart::MemoryView buffer );
+
+	void             sendto( mart::ConstMemoryView data, endpoint ep );
+	void send( mart::ConstMemoryView data );
+	mart::MemoryView recvfrom( mart::MemoryView buffer, endpoint& src_addr );
 
 	void clearRxBuff();
 
-	bool setTxTimeout(std::chrono::microseconds timeout)
-	{
-		return _socket_handle.setTxTimeout(timeout);
-	}
-	bool setRxTimeout(std::chrono::microseconds timeout)
-	{
-		return _socket_handle.setRxTimeout(timeout);
-	}
-	std::chrono::microseconds getTxTimeout()
-	{
-		return _socket_handle.getTxTimeout();
-	}
-	std::chrono::microseconds getRxTimeout()
-	{
-		return _socket_handle.getRxTimeout();
-	}
-	bool setBlocking(bool should_block)
-	{
-		return _socket_handle.setBlocking(should_block);
-	}
-	bool isBlocking()
-	{
-		return _socket_handle.isBlocking();
-	}
-	bool isValid() const
-	{
-		return _socket_handle.isValid();
-	}
+	bool setTxTimeout( std::chrono::microseconds timeout ) { return _socket_handle.set_tx_timeout( timeout ); }
+	bool setRxTimeout( std::chrono::microseconds timeout ) { return _socket_handle.set_rx_timeout( timeout ); }
+	std::chrono::microseconds getTxTimeout() { return _socket_handle.get_tx_timeout(); }
+	std::chrono::microseconds getRxTimeout() { return _socket_handle.get_rx_timeout(); }
+	bool                      setBlocking( bool should_block ) { return _socket_handle.set_blocking( should_block ).success(); }
+	bool                      isBlocking() { return _socket_handle.is_blocking(); }
+	bool                      isValid() const { return _socket_handle.is_valid(); }
 
-	bool close()
-	{
-		return _socket_handle.close();
-	}
+	bool close() { return _socket_handle.close().success(); }
 
 	const endpoint& getLocalEndpoint() const { return _ep_local; }
 	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
+
 private:
-	bool _txWasSuccess(mart::ConstMemoryView data, nw::socks::txrx_size_t ret)
+	static bool _txWasSuccess( mart::ConstMemoryView data, nw::socks::ReturnValue<mart::nw::socks::txrx_size_t> ret )
 	{
-		return mart::narrow<nw::socks::txrx_size_t>(data.size()) == ret;
+		return ret.success() && mart::narrow<nw::socks::txrx_size_t>( data.size() ) == ret.value();
 	}
-	endpoint _ep_local{};
-	endpoint _ep_remote{};
-	//sockaddr_in _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to sockaddr_in  every time.
+	endpoint _ep_local {};
+	endpoint _ep_remote {};
+	// SockaddrIn _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to SockaddrIn every
+	// time.
 	nw::socks::Socket _socket_handle;
 };
 
-constexpr std::optional<endpoint> parse_v4_endpoint(std::string_view str) {
-	return ip::parse_v4_endpoint<ip::TransportProtocol::UDP>(str);
+constexpr std::optional<endpoint> parse_v4_endpoint( std::string_view str )
+{
+	return ip::parse_v4_endpoint<ip::TransportProtocol::UDP>( str );
 }
 
-}//ns udp
+} // namespace udp
 
-}//ns ip
-}//ns nw
-}//ns mart
-
+} // namespace ip
+} // namespace nw
+} // namespace mart
 
 #endif

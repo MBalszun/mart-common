@@ -16,7 +16,9 @@
 
 #include "basic_types.hpp"
 
+#include <cerrno>
 #include <chrono>
+#include <errno.h>
 
 namespace mart {
 namespace nw {
@@ -24,77 +26,80 @@ namespace socks {
 
 namespace port_layer {
 
-using socket_timeout_t = std::uint32_t;
-// Define aliases for platform specific types and values
+/* ########################################################################################### */
+/* ############# Translation from portable enums and values to native api values ############# */
+
 #ifdef MBA_UTILS_USE_WINSOCKS
 using native_handle_t = std::uintptr_t;
 enum class handle_t : native_handle_t { Invalid = ~0 };
-constexpr int socket_error_value = -1;
+
 #else
 using native_handle_t = int;
 enum class handle_t : native_handle_t { Invalid = -1 };
-constexpr int socket_error_value = -1;
 
 #endif // MBA_UTILS_USE_WINSOCKS
-
 
 inline native_handle_t to_native( handle_t h ) noexcept
 {
 	return static_cast<native_handle_t>( h );
 }
 
-int to_native( Domain domain );
-int to_native( TransportType transport_Type );
-int to_native( Protocol protocol );
+int to_native( Domain domain ) noexcept;
+int to_native( TransportType transport_Type ) noexcept;
+int to_native( Protocol protocol ) noexcept;
 
 // Wrapper functions for socket related functions, that are specific to a certain platform
-bool set_blocking( handle_t socket, bool should_block ) noexcept;
 
-int  close_socket( handle_t handle ) noexcept;
-int  getLastSocketError() noexcept;
-bool waInit() noexcept;
+/* ################################################################################ */
+/* ############# Wrapper around native socket API ################################# */
 
-// handle_t socket( int af, int type, int protocol );
-handle_t socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default );
+ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default );
+ErrorCode close_socket( handle_t handle ) noexcept;
 
-handle_t accept( handle_t sockfd, Sockaddr& addr ) noexcept;
-handle_t accept( handle_t sockfd ) noexcept;
+ReturnValue<handle_t> accept( handle_t handle, Sockaddr& addr ) noexcept;
+ReturnValue<handle_t> accept( handle_t handle ) noexcept;
 
-int connect( handle_t handle, const Sockaddr& addr ) noexcept;
-int bind( handle_t s, const Sockaddr& addr ) noexcept;
-int listen( handle_t sockfd, int backlog ) noexcept;
+ErrorCode connect( handle_t handle, const Sockaddr& addr ) noexcept;
+ErrorCode bind( handle_t handle, const Sockaddr& addr ) noexcept;
+ErrorCode listen( handle_t handle, int backlog ) noexcept;
 
-int setsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range data ) noexcept;
-int getsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range_mut& buffer ) noexcept;
+ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noexcept;
+ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept;
+ReturnValue<txrx_size_t> recv( handle_t handle, byte_range_mut buf, int flags ) noexcept;
+ReturnValue<txrx_size_t> recvfrom( handle_t handle, byte_range_mut buf, int flags, Sockaddr& from ) noexcept;
 
-txrx_size_t send( handle_t handle, byte_range buf, int flags ) noexcept;
-txrx_size_t sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept;
+ErrorCode setsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range data ) noexcept;
+ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range_mut& buffer ) noexcept;
 
-txrx_size_t recv( handle_t handle, byte_range_mut buf, int flags ) noexcept;
-txrx_size_t recvfrom( handle_t handle, byte_range_mut buf, int flags, Sockaddr& from ) noexcept;
+ErrorCode get_last_socket_error() noexcept;
+bool      waInit() noexcept;
 
-bool set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept;
-std::chrono::microseconds get_timeout( handle_t handle, Direction direction ) noexcept;
+ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept;
+ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept;
+ErrorCode                              set_blocking( handle_t handle, bool should_block ) noexcept;
 
 
-struct sockaddr_in : mart::nw::socks::Sockaddr {
-	sockaddr_in()
-		: sockaddr_in( Storage {} )
+/* ################################################################################ */
+/* ############# Wrapper for various address types ################################ */
+
+struct SockaddrIn : mart::nw::socks::Sockaddr {
+	SockaddrIn()
+		: SockaddrIn( Storage {} )
 	{
 	}
-	sockaddr_in( const sockaddr_in& other )
-		: sockaddr_in( other._storage )
+	SockaddrIn( const SockaddrIn& other )
+		: SockaddrIn( other._storage )
 	{
 	}
 
-	sockaddr_in& operator=( const sockaddr_in& other ) noexcept
+	SockaddrIn& operator=( const SockaddrIn& other ) noexcept
 	{
 		_storage = other._storage;
 		return *this;
 	}
 
-	explicit sockaddr_in( const ::sockaddr_in& native ) noexcept;
-	sockaddr_in( mart::nw::uint32_net_t address, mart::nw::uint16_net_t port ) noexcept;
+	explicit SockaddrIn( const ::sockaddr_in& native ) noexcept;
+	SockaddrIn( mart::nw::uint32_net_t address, mart::nw::uint16_net_t port ) noexcept;
 
 	const ::sockaddr_in& native() const noexcept;
 	::sockaddr_in&       native() noexcept;
@@ -103,46 +108,46 @@ struct sockaddr_in : mart::nw::socks::Sockaddr {
 	mart::nw::uint16_net_t port() const noexcept;
 
 private:
-	// this should have at least the same size and alignment as the platform's sockaddr_in
+	// this should have at least the same size and alignment as the platform's SockaddrIn
 	struct alignas( 4 ) Storage {
 		char raw_bytes[16];
 	};
 	Storage _storage {};
 
 	// All constructors forward to this
-	explicit sockaddr_in( const sockaddr_in::Storage& src )
+	explicit SockaddrIn( const SockaddrIn::Storage& src )
 		: Sockaddr( mart::nw::socks::Domain::Inet, byte_range_from_pod( _storage ) )
 		, _storage( src )
 	{
 	}
 };
 
-struct sockaddr_in6 : mart::nw::socks::Sockaddr {
-	sockaddr_in6()
-		: sockaddr_in6( Storage {} )
+struct SockaddrIn6 : mart::nw::socks::Sockaddr {
+	SockaddrIn6()
+		: SockaddrIn6( Storage {} )
 	{
 	}
-	sockaddr_in6( const sockaddr_in6& other )
-		: sockaddr_in6( other._storage )
+	SockaddrIn6( const SockaddrIn6& other )
+		: SockaddrIn6( other._storage )
 	{
 	}
 
-	sockaddr_in6& operator=( const sockaddr_in6& other )
+	SockaddrIn6& operator=( const SockaddrIn6& other )
 	{
 		_storage = other._storage;
 		return *this;
 	}
 
-	explicit sockaddr_in6( const ::sockaddr_in6& native );
+	explicit SockaddrIn6( const ::sockaddr_in6& native );
 
 private:
-	// this should have the same size and alignment as the platform's sockaddr_in
+	// this should have the same size and alignment as the platform's SockaddrIn
 	struct alignas( 8 ) Storage {
 		char raw_bytes[32];
 	};
 	Storage _storage {};
 
-	explicit sockaddr_in6( const sockaddr_in6::Storage& src )
+	explicit SockaddrIn6( const SockaddrIn6::Storage& src )
 		: Sockaddr( mart::nw::socks::Domain::Inet6, byte_range_from_pod( _storage ) )
 		, _storage( src )
 	{
@@ -152,7 +157,6 @@ const char* inet_net_to_pres( mart::nw::socks::Domain af, const void* src, char*
 int         inet_pres_to_net( mart::nw::socks::Domain af, const char* src, void* dst );
 } // namespace port_layer
 } // namespace socks
-
 
 } // namespace nw
 } // namespace mart

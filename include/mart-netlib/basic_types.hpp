@@ -10,9 +10,9 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief:  This file provides some basic types used in networking
- *
- * Currently (2017-04) this is mainly about network vs host order integer types
+ * @brief:  This file provides various basic types used in networking
+ *          Many of them are platform independent replacements for
+ *          native types related to the platform socket api
  *
  */
 
@@ -21,13 +21,19 @@
 /* Proprietary Library Includes */
 
 /* Standard Library Includes */
+#include <cassert>
+#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
+#ifndef MBA_UTILS_USE_WINSOCKS
 #ifdef _MSC_VER
-#define MBA_UTILS_USE_WINSOCKS
+#define MBA_UTILS_USE_WINSOCKS 1
+#endif
+#endif
 
+#ifdef _MSC_VER
 // assume little endian for windows
 #define MBA_ORDER_LITTLE_ENDIAN 1
 #define MBA_BYTE_ORDER MBA_ORDER_LITTLE_ENDIAN
@@ -122,7 +128,7 @@ constexpr uint64_host_t to_host_order(uint64_net_t net_rep) { return uint64_host
 using raw_ip_address = uint32_net_t;
 using raw_port       = uint16_net_t;
 
-// very lightweight span-like type
+// very lightweight span-like type that abstracts a range of bytes
 struct byte_range {
 	const unsigned char* _data;
 	std::uintptr_t       _size;
@@ -161,6 +167,12 @@ byte_range_mut byte_range_from_pod( T& pod )
 	return byte_range_mut {reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
 }
 
+template<class T>
+byte_range_mut byte_range_mut_rom_pod( T& pod )
+{
+	return byte_range_mut {reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
+}
+
 namespace socks {
 
 enum class Domain {
@@ -171,18 +183,20 @@ enum class Domain {
 };
 
 enum class TransportType {
-	stream,
-	datagram,
-	seqpacket,
+	Stream,
+	Datagram,
+	Seqpacket,
 };
 
 enum class Protocol { Default, Udp, Tcp };
 
-enum class SocketOptionLevel { sol_socket };
+enum class SocketOptionLevel { Socket };
 
 enum class SocketOption { so_rcvtimeo, so_sndtimeo };
 
 enum class Direction { Tx, Rx };
+
+using txrx_size_t = int;
 
 struct Sockaddr {
 	Domain domain() const { return _domain; }
@@ -216,7 +230,55 @@ protected:
 	~Sockaddr()                            = default;
 };
 
-using txrx_size_t = std::ptrdiff_t;
+enum class ErrorCodeValues : int {
+	NoError    = 0,
+	TryAgain   = EAGAIN,
+	WouldBlock = EWOULDBLOCK,
+	Timeout    = 10060 // Windows
+};
+struct ErrorCode {
+	// TODO list more error codes
+	using Value_t = ErrorCodeValues;
+	Value_t                    _value;
+	static constexpr ErrorCode Ok() noexcept { return {ErrorCodeValues::NoError}; }
+
+	constexpr int      raw_value() const noexcept { return static_cast<int>( _value ); }
+	constexpr Value_t  value() const noexcept { return _value; }
+	constexpr explicit operator bool() const noexcept { return _value == Value_t::NoError; }
+	constexpr bool     success() const noexcept { return _value == Value_t::NoError; }
+};
+
+template<class T = int>
+struct ReturnValue {
+	ReturnValue() = default;
+	constexpr explicit ReturnValue( const T& value ) noexcept
+		: _success {true}
+		, _value {value}
+	{
+	}
+
+	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
+		: _success {false}
+		, _errc {errc}
+	{
+	}
+	constexpr T         value_or( const T& default_value ) { return _success ? value() : default_value; }
+	constexpr bool      success() const noexcept { return _success; }
+	constexpr explicit  operator bool() const noexcept { return success(); }
+	constexpr T         value() const noexcept { return _value; }
+	constexpr ErrorCode error_code() const noexcept
+	{
+		return _success ? ErrorCode {ErrorCode::Value_t::NoError} : _errc;
+	}
+	constexpr int raw() const noexcept { return static_cast<int>( _errc.raw_value() ); }
+
+private:
+	union {
+		ErrorCode _errc;
+		T         _value;
+	};
+	bool _success = false;
+};
 
 } // namespace socks
 

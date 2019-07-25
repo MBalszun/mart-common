@@ -16,7 +16,6 @@ target_include_directories( mart-netlib-portlayer
 )
 
 ## netlib library - network library build ontop of mart-commmon and netlib-portlayer
-# NOTE: the port-layer is supposed to be a c++11 library
 target_sources(mart-netlib PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/ip.cpp ${CMAKE_CURRENT_SOURCE_DIR}/udp.cpp)
 set_target_properties ( mart-netlib PROPERTIES EXPORT_NAME netlib )
 target_link_libraries( mart-netlib PRIVATE Mart::common Mart::netlib-portlayer)

@@ -1,9 +1,9 @@
 #ifndef LIB_MART_COMMON_GUARD_NW_IP_H
 #define LIB_MART_COMMON_GUARD_NW_IP_H
 /**
- * ip.h (mart-common/experimental/nw)
+ * ip.h (mart-netlib)
  *
- * Copyright (C) 2015-2017: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2015-2019: Michael Balszun <michael.balszun@mytum.de>
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See either the LICENSE file in the library's root
@@ -17,7 +17,7 @@
 /* ######## INCLUDES ######### */
 #include "basic_types.hpp"
 #include "port_layer.hpp"
-/* Standard Library Includes */
+/* Project Includes */
 
 
 /* Proprietary Library Includes */
@@ -25,7 +25,7 @@
 #include <mart-common/algorithm.h>
 #include <mart-common/utils.h>
 
-/* Project Includes */
+/* Standard Library Includes */
 #include <array>
 #include <cassert>
 #include <optional>
@@ -252,7 +252,7 @@ struct basic_endpoint_v4_base {
 	/* ####### constructors ############ */
 	constexpr basic_endpoint_v4_base() noexcept = default;
 
-	explicit basic_endpoint_v4_base( const mart::nw::socks::port_layer::sockaddr_in& native );
+	explicit basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& native );
 
 	constexpr basic_endpoint_v4_base( address_v4 address, port_nr port ) noexcept
 		: address( address )
@@ -290,9 +290,9 @@ struct basic_endpoint_v4_base {
 		valid = true;
 	}
 
-	mart::nw::socks::port_layer::sockaddr_in toSockAddr_in() const noexcept
+	mart::nw::socks::port_layer::SockaddrIn toSockAddr_in() const noexcept
 	{
-		return mart::nw::socks::port_layer::sockaddr_in( address.inNetOrder(), port.inNetOrder() );
+		return mart::nw::socks::port_layer::SockaddrIn( address.inNetOrder(), port.inNetOrder() );
 	}
 
 	mart::ConstString toString() const;

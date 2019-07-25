@@ -1050,7 +1050,7 @@ inline id performOptionalSelector( id obj, SEL sel ) {
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4180) // We attempt to stream a function (address) by const&, which MSVC complains about but is harmless
+#pragma warning(disable:4180) // We attempt to Stream a function (address) by const&, which MSVC complains about but is harmless
 #endif
 
 namespace Catch {
@@ -6376,7 +6376,7 @@ namespace detail {
         }
     };
 
-    // Wraps a token coming from a token stream. These may not directly correspond to strings as a single string
+    // Wraps a token coming from a token Stream. These may not directly correspond to strings as a single string
     // may encode an option + its argument if the : or = form is used
     enum class TokenType {
         Option, Argument
@@ -6394,7 +6394,7 @@ namespace detail {
         ;
     }
 
-    // Abstracts iterators into args as a stream of tokens, with option arguments uniformly handled
+    // Abstracts iterators into args as a Stream of tokens, with option arguments uniformly handled
     class TokenStream {
         using Iterator = std::vector<std::string>::const_iterator;
         Iterator it;
@@ -12250,7 +12250,7 @@ namespace {
                     break;
                 }
 
-                // Plain ASCII: Write it to stream
+                // Plain ASCII: Write it to Stream
                 if (c < 0x7F) {
                     os << c;
                     break;

@@ -18,7 +18,7 @@ mart::ConstString address_v4::asString() const
 
 [[noreturn]] void address_v4::_throwParseIpV4StringError( const std::string_view str )
 {
-	throw mart::nw::invalid_string(
+	throw mart::nw::invalid_address_string(
 		mart::concat( "Could not parse string \"", str, "\" - IP-Addess must have format a.b.c.d. " ) );
 }
 
@@ -26,7 +26,8 @@ namespace _impl_details_ip {
 
 [[noreturn]] void _throw_ipv4_parse_fail_invalid_format( std::string_view str )
 {
-	throw mart::nw::invalid_string( mart::concat( "Creating ipv4 endpoint from string \"",
+	throw mart::nw::invalid_address_string(
+		mart::concat( "Creating ipv4 endpoint from string \"",
 											   str,
 											   "\" Failed. "
 											   "Addess must have format a.b.c.d:p - colon or p is missing" )
@@ -34,7 +35,7 @@ namespace _impl_details_ip {
 }
 [[noreturn]] void _throw_ipv4_parse_fail_port( std::string_view str, std::string_view port )
 {
-	throw mart::nw::invalid_string( mart::concat( "Parsing port <",
+	throw mart::nw::invalid_address_string( mart::concat( "Parsing port <",
 											   port,
 											   "> from ipv4 endpoint string"
 											   "\"",
@@ -45,12 +46,11 @@ namespace _impl_details_ip {
 									 );
 }
 
-basic_endpoint_v4_base::basic_endpoint_v4_base( const mart::nw::socks::port_layer::sockaddr_in& addr )
+basic_endpoint_v4_base::basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& addr )
 	: address( addr.address() )
 	, port( addr.port() )
 	, valid { addr.is_valid()
-				 ? true
-				 : throw mart::nw::invalid_string( "Invalid sockaddr_in passed " )}
+				 ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
 {
 }
 
@@ -67,10 +67,6 @@ mart::ConstString basic_endpoint_v4_base::toStringEx( TransportProtocol p ) cons
 		default: return mart::concat( toString(), " (Unknown)" );
 	}
 }
-
-
-
-
 
 } // namespace _impl_details_ip
 
