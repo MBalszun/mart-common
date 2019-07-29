@@ -20,7 +20,7 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 	udp::Socket s4( std::move( s1 ) );
 	s2 = std::move( s4 );
 
-	[[maybe_unused]] mart::nw::socks::Socket& raw_socket = s2.getRawSocket();
+	[[maybe_unused]] mart::nw::socks::RaiiSocket& raw_socket = s2.getRawSocket();
 
 	s2.bind( e1 );
 	// socket can't be rebinded to a different one

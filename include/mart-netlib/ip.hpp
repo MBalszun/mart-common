@@ -17,13 +17,13 @@
 /* ######## INCLUDES ######### */
 #include "basic_types.hpp"
 #include "port_layer.hpp"
-/* Project Includes */
 
+#include "detail/ip_detail.hpp"
+/* Project Includes */
 
 /* Proprietary Library Includes */
 #include <mart-common/ConstString.h>
-#include <mart-common/algorithm.h>
-#include <mart-common/utils.h>
+#include <mart-common/utils.h> //narrow
 
 /* Standard Library Includes */
 #include <array>
@@ -33,110 +33,22 @@
 #include <type_traits>
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
-struct sockaddr_in;
-struct sockaddr_in6;
+
 
 namespace mart::nw {
 // classes related to the ip protocol in general
 namespace ip {
 
-namespace impl_addr_v4 {
-
-constexpr bool has_wrong_length( std::string_view str ) noexcept
-{
-	return ( str.size() > 4 * 3 + 3 )
-		   || ( str.size() < 4 + 3 ); // max length: aaa.bbb.ccc.dddd  (4blocks of 3 digits + 3 '.')
-}
-
-constexpr bool has_invalid_char( std::string_view str ) noexcept
-{
-	for( auto c : str ) {
-		bool is_valid = ( ( '0' <= c && c <= '9' ) || ( c == '.' ) );
-		if( !is_valid ) { return true; }
-	}
-	return false;
-}
-
-constexpr bool has_wrong_block_count( std::string_view str ) noexcept
-{
-	int cnt = 0;
-	for( auto c : str ) {
-		cnt += c == '.';
-	}
-	return cnt != 3;
-	// not constexpr yet: return std::count( str.begin(), str.end(), '.' ) != 3;
-}
-
-constexpr bool is_malformed( std::string_view str ) noexcept
-{
-	return has_wrong_length( str ) || has_invalid_char( str ) || has_wrong_block_count( str );
-}
-
-constexpr std::optional<std::uint32_t> parse_block( std::string_view block )
-{
-	if( block.size() > 3 ) { return {}; }
-	const auto num = mart::to_integral_unsafe<std::uint32_t>( block );
-	if( num > 255 ) { return {}; }
-	return num;
-}
-
-constexpr bool is_invalid_number( std::string_view block )
-{
-	return !parse_block( block );
-}
-
-// unchecked version of str.substr (which would throw exceptions)
-constexpr std::string_view substr( std::string_view str, std::size_t start, std::size_t length )
-{
-	return std::string_view {str.data() + start, length};
-}
-
-// unchecked version of str.substr
-constexpr std::string_view substr( std::string_view str, std::size_t start )
-{
-	return std::string_view {str.data() + start, str.size() - start};
-}
-
-constexpr std::array<std::string_view, 4> split_blocks_unchecked( const std::string_view str )
-{
-	std::array<std::string_view, 4> ret {};
-	int                             cnt   = 0;
-	std::string_view::size_type     start = 0;
-	for( auto pos = start; pos < str.size(); ++pos ) {
-		if( str[pos] == '.' ) {
-			ret[cnt++] = substr( str, start, pos - start );
-			start      = pos + 1;
-		}
-	}
-	ret[3] = substr( str, start /*, str.size()-start*/ );
-	return ret;
-}
-
-constexpr std::optional<uint32_host_t> parse_address( const std::string_view string )
-{
-	if( is_malformed( string ) ) { return {}; }
-	std::uint32_t accum = 0;
-	for( const auto block : split_blocks_unchecked( string ) ) {
-		auto b = parse_block( block );
-		if( !b ) { return {}; }
-		auto v = *b;
-		assert( v <= 255u );
-		accum <<= 8;
-		accum |= v;
-	}
-	return accum;
-}
-
-} // namespace impl_addr_v4
+// ##### IP_v4 Address
 
 class address_v4 {
 public:
 	constexpr address_v4() = default;
-	constexpr explicit address_v4( uint32_host_t addr_h )
+	constexpr explicit address_v4( uint32_host_t addr_h ) noexcept
 		: _addr( to_net_order( addr_h ) )
 	{
 	}
-	constexpr explicit address_v4( uint32_net_t addr_h )
+	constexpr explicit address_v4( uint32_net_t addr_h ) noexcept
 		: _addr( addr_h )
 	{
 	}
@@ -147,12 +59,15 @@ public:
 
 	mart::ConstString asString() const;
 
-	constexpr uint32_net_t  inNetOrder() const { return _addr; }
-	constexpr uint32_host_t inHostOrder() const { return to_host_order( _addr ); }
+	constexpr uint32_net_t  inNetOrder() const noexcept { return _addr; }
+	constexpr uint32_host_t inHostOrder() const noexcept { return to_host_order( _addr ); }
 
-	friend constexpr bool operator==( address_v4 l, address_v4 r ) { return l._addr == r._addr; }
-	friend constexpr bool operator!=( address_v4 l, address_v4 r ) { return l._addr != r._addr; }
-	friend constexpr bool operator<( address_v4 l, address_v4 r ) { return l._addr < r._addr; }
+	friend constexpr bool operator==( address_v4 l, address_v4 r ) noexcept { return l._addr == r._addr; }
+	friend constexpr bool operator!=( address_v4 l, address_v4 r ) noexcept { return l._addr != r._addr; }
+	friend constexpr bool operator<( address_v4 l, address_v4 r )
+	{
+		return to_host_order( l._addr ) < to_host_order( r._addr );
+	}
 
 private:
 	uint32_net_t _addr {};
@@ -161,7 +76,7 @@ private:
 
 	static constexpr uint32_host_t _parseIpV4String( const std::string_view str )
 	{
-		std::optional<uint32_host_t> res = impl_addr_v4::parse_address( str );
+		std::optional<uint32_host_t> res = _impl_addr_v4::parse_address( str );
 		if( !res ) { _throwParseIpV4StringError( str ); }
 		return *res;
 	}
@@ -170,9 +85,9 @@ private:
 constexpr address_v4 address_any {};
 constexpr address_v4 address_local_host( uint32_host_t {0x7F'00'00'01} );
 
-constexpr std::optional<address_v4> parse_v4_address( const std::string_view string )
+constexpr std::optional<address_v4> try_parse_v4_address( const std::string_view string ) noexcept
 {
-	auto res = impl_addr_v4::parse_address( string );
+	auto res = _impl_addr_v4::parse_address( string );
 	if( res ) {
 		return {address_v4 {*res}};
 	} else {
@@ -182,41 +97,31 @@ constexpr std::optional<address_v4> parse_v4_address( const std::string_view str
 
 constexpr bool is_valid_v4_address( const std::string_view string )
 {
-	return impl_addr_v4::parse_address( string ).has_value();
+	return _impl_addr_v4::parse_address( string ).has_value();
 }
 
-namespace impl_port_v4 {
-constexpr bool has_wrong_length( std::string_view str )
-{
-	return str.size() > 6 || str.empty(); // 16 bit number 65XXX
-}
-
-constexpr bool has_invalid_char( std::string_view str )
-{
-	for( auto c : str ) {
-		bool is_valid = ( ( '0' <= c && c <= '9' ) );
-		if( !is_valid ) { return true; }
-	}
-	return false;
-}
-} // namespace impl_port_v4
+// ##### Port
 
 class port_nr {
 public:
-	constexpr port_nr() = default;
-	constexpr explicit port_nr( uint16_host_t value )
+	constexpr port_nr() noexcept = default;
+	constexpr explicit port_nr( uint16_host_t value ) noexcept
 		: _p( to_net_order( value ) )
 	{
 	}
-	constexpr explicit port_nr( uint16_net_t value )
+	constexpr explicit port_nr( uint16_net_t value ) noexcept
 		: _p( value )
 	{
 	}
 
-	constexpr uint16_net_t  inNetOrder() const { return _p; }
-	constexpr uint16_host_t inHostOrder() const { return to_host_order( _p ); }
-	friend constexpr bool   operator==( port_nr l, port_nr r ) { return l._p == r._p; }
-	friend constexpr bool   operator<( port_nr l, port_nr r ) { return l._p < r._p; }
+	constexpr uint16_net_t  inNetOrder() const noexcept { return _p; }
+	constexpr uint16_host_t inHostOrder() const noexcept { return to_host_order( _p ); }
+
+	friend constexpr bool operator==( port_nr l, port_nr r ) noexcept { return l._p == r._p; }
+	friend constexpr bool operator<( port_nr l, port_nr r ) noexcept
+	{
+		return to_host_order( l._p ) < to_host_order( r._p );
+	}
 
 	static constexpr int max_port_nr = std::numeric_limits<uint16_t>::max();
 
@@ -224,9 +129,9 @@ private:
 	uint16_net_t _p {};
 };
 
-constexpr std::optional<port_nr> parse_v4_port( const std::string_view string )
+constexpr std::optional<port_nr> try_parse_v4_port( const std::string_view string ) noexcept
 {
-	using namespace impl_port_v4;
+	using namespace _impl_port_v4;
 	if( has_wrong_length( string ) || has_invalid_char( string ) ) { // maximal 6 digits
 		return {};
 	}
@@ -235,7 +140,9 @@ constexpr std::optional<port_nr> parse_v4_port( const std::string_view string )
 	return port_nr( static_cast<std::uint16_t>( parsed ) );
 }
 
-enum class TransportProtocol { UDP, TCP };
+// ##### Protocol
+
+enum class TransportProtocol { Udp, Tcp };
 
 namespace _impl_details_ip {
 
@@ -268,6 +175,13 @@ struct basic_endpoint_v4_base {
 	{
 	}
 
+	constexpr basic_endpoint_v4_base( std::string_view address, uint16_host_t port ) noexcept
+		: address( address_v4( address ) )
+		, port( port )
+		, valid {true}
+	{
+	}
+
 	// expects format XXX.XXX.XXX.XXX:pppp
 	constexpr explicit basic_endpoint_v4_base( std::string_view str )
 	{
@@ -280,7 +194,7 @@ struct basic_endpoint_v4_base {
 		address = address_v4( addr_port_pair.first );
 
 		port = [addr_port_pair, str] {
-			auto port = parse_v4_port( addr_port_pair.second );
+			auto port = try_parse_v4_port( addr_port_pair.second );
 			if( port ) {
 				return port.value();
 			} else {
@@ -296,60 +210,67 @@ struct basic_endpoint_v4_base {
 	}
 
 	mart::ConstString toString() const;
+
+protected:
 	mart::ConstString toStringEx( TransportProtocol p ) const;
 };
 
-constexpr std::optional<basic_endpoint_v4_base> parse_basic_v4_endpoint( std::string_view str )
+constexpr std::optional<basic_endpoint_v4_base> try_parse_basic_v4_endpoint( std::string_view str ) noexcept
 {
-	auto ps        = mart::StringView( str ).split( ':' );
-	auto o_address = parse_v4_address( ps.first );
-	auto o_port    = parse_v4_port( ps.second );
+	const auto ps = mart::StringView( str ).split( ':' );
+
+	const auto o_address = try_parse_v4_address( ps.first );
 	if( !o_address ) { return {}; }
+
+	const auto o_port = try_parse_v4_port( ps.second );
 	if( !o_port ) { return {}; }
+
 	return basic_endpoint_v4_base {*o_address, *o_port};
 }
 
+} // namespace _impl_details_ip
+
 template<TransportProtocol p>
-struct basic_endpoint_v4 : basic_endpoint_v4_base {
+struct basic_endpoint_v4 : _impl_details_ip::basic_endpoint_v4_base {
 
-	using basic_endpoint_v4_base::basic_endpoint_v4_base;
+	using _impl_details_ip::basic_endpoint_v4_base::basic_endpoint_v4_base;
 
-	mart::ConstString     toStringEx() const { return basic_endpoint_v4_base::toStringEx( p ); }
-	friend constexpr bool operator==( basic_endpoint_v4 l, basic_endpoint_v4 r )
+	mart::ConstString     toStringEx() const { return _impl_details_ip::basic_endpoint_v4_base::toStringEx( p ); }
+	friend constexpr bool operator==( basic_endpoint_v4 l, basic_endpoint_v4 r ) noexcept
 	{
 		return l.address == r.address && l.port == r.port;
 	}
 
-	friend constexpr bool operator!=( basic_endpoint_v4 l, basic_endpoint_v4 r ) { return !( l == r ); }
+	friend constexpr bool operator!=( basic_endpoint_v4 l, basic_endpoint_v4 r ) noexcept { return !( l == r ); }
 
-	static constexpr std::optional<basic_endpoint_v4<p>> parse_v4_endpoint( std::string_view str )
+	static constexpr std::optional<basic_endpoint_v4<p>> try_parse( std::string_view str )
 	{
-		auto rs = parse_basic_v4_endpoint( str );
+		auto rs = _impl_details_ip::try_parse_basic_v4_endpoint( str );
 		if( rs.has_value() ) {
-			return basic_endpoint_v4( rs.value() );
+			return basic_endpoint_v4<p>( rs.value() );
 		} else {
 			return {};
 		}
 	}
 
 private:
-	constexpr basic_endpoint_v4( const basic_endpoint_v4_base& other )
+	constexpr basic_endpoint_v4( const _impl_details_ip::basic_endpoint_v4_base& other )
 		: basic_endpoint_v4_base( other )
 	{
 	}
 };
 
-} // namespace _impl_details_ip
+
 
 constexpr bool is_valid_v4_endpoint( std::string_view str )
 {
-	return _impl_details_ip::parse_basic_v4_endpoint( str ).has_value();
+	return _impl_details_ip::try_parse_basic_v4_endpoint( str ).has_value();
 }
 
 template<TransportProtocol p>
-constexpr std::optional<_impl_details_ip::basic_endpoint_v4<p>> parse_v4_endpoint( std::string_view str )
+constexpr std::optional<basic_endpoint_v4<p>> try_parse_v4_endpoint( std::string_view str )
 {
-	return _impl_details_ip::basic_endpoint_v4<p>::parse_v4_endpoint( str );
+	return basic_endpoint_v4<p>::try_parse( str );
 }
 
 } // namespace ip

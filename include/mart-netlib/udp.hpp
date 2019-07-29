@@ -34,7 +34,7 @@ namespace nw {
 namespace ip {
 namespace udp {
 
-using endpoint = ip::_impl_details_ip::basic_endpoint_v4<mart::nw::ip::TransportProtocol::UDP>;
+using endpoint = ip::basic_endpoint_v4<mart::nw::ip::TransportProtocol::Udp>;
 
 class Socket {
 public:
@@ -43,9 +43,9 @@ public:
 	Socket( Socket&& ) noexcept = default;
 	Socket& operator=( Socket&& ) noexcept = default;
 
-	const nw::socks::Socket& getRawSocket() const { return _socket_handle; }
+	const nw::socks::RaiiSocket& getRawSocket() const { return _socket_handle; }
 
-	nw::socks::Socket& getRawSocket() { return _socket_handle; }
+	nw::socks::RaiiSocket& getRawSocket() { return _socket_handle; }
 
 	void bind( endpoint ep );
 	socks::ErrorCode try_bind( endpoint ep ) noexcept;
@@ -88,12 +88,12 @@ private:
 	endpoint _ep_remote {};
 	// SockaddrIn _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to SockaddrIn every
 	// time.
-	nw::socks::Socket _socket_handle;
+	nw::socks::RaiiSocket _socket_handle;
 };
 
-constexpr std::optional<endpoint> parse_v4_endpoint( std::string_view str )
+constexpr std::optional<endpoint> try_parse_v4_endpoint( std::string_view str ) noexcept
 {
-	return ip::parse_v4_endpoint<ip::TransportProtocol::UDP>( str );
+	return ip::try_parse_v4_endpoint<ip::TransportProtocol::Udp>( str );
 }
 
 } // namespace udp

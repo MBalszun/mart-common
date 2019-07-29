@@ -1,5 +1,17 @@
+if(POLICY CMP0092)
+  cmake_policy(SET CMP0092 NEW)
+else()
+if(MSVC)
+	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
+
+endif()
+
 if(MSVC)
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+	add_compile_options( /W4 )
+else()
+	add_compile_options( -Wall -Wextra )
 endif()
 
 ## netlib-portlayer library - minimal abstraction over os-specific bsd-socket-api

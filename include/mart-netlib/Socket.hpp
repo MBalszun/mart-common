@@ -1,7 +1,7 @@
 #ifndef LIB_MART_COMMON_GUARD_NW_SOCKET_H
 #define LIB_MART_COMMON_GUARD_NW_SOCKET_H
 /**
- * Socket.hpp (mart-common/nw)
+ * RaiiSocket.hpp (mart-common/nw)
  *
  * Copyright (C) 2015-2019: Michael Balszun <michael.balszun@mytum.de>
  *
@@ -10,7 +10,7 @@
  * directory or http://opensource.org/licenses/MIT for details.
  *
  * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief:	Provides mart::Socket - an thin RAII-wrapper around the port_layer functions
+ * @brief:	Provides mart::RaiiSocket - an thin RAII-wrapper around the port_layer functions
  *
  */
 
@@ -66,30 +66,30 @@ inline std::string_view to_text_rep( ErrorCode code )
  * which sometimes use a little more convenient parameter types (e.g. ArrayView instead of pointer+length)
  * It doesn't retain any state except the handle and may cache a few config flags.
  */
-class Socket {
+class RaiiSocket {
 
 public:
 	/*##### CTORS / DTORS #####*/
-	constexpr Socket() = default;
-	explicit Socket( port_layer::handle_t handle )
+	constexpr RaiiSocket() = default;
+	explicit RaiiSocket( port_layer::handle_t handle ) noexcept
 		: _handle( handle )
 	{
 		_setBlocking_uncached( true );
 	}
-	Socket( Domain domain, TransportType type ) { _open( domain, type ); }
-	~Socket() { close(); }
+	RaiiSocket( Domain domain, TransportType type ) noexcept { _open( domain, type ); }
+	~RaiiSocket() noexcept { close(); }
 
 	/*##### Special member functions #####*/
-	Socket( const Socket& other ) = delete;
-	Socket& operator=( const Socket& other ) = delete;
+	RaiiSocket( const RaiiSocket& other ) = delete;
+	RaiiSocket& operator=( const RaiiSocket& other ) = delete;
 
-	Socket( Socket&& other ) noexcept
+	RaiiSocket( RaiiSocket&& other ) noexcept
 		: _handle {std::exchange( other._handle, port_layer::handle_t::Invalid )}
 		, _is_blocking {std::exchange( other._is_blocking, false )}
 	{
 	}
 
-	Socket& operator=( Socket&& other ) noexcept
+	RaiiSocket& operator=( RaiiSocket&& other ) noexcept
 	{
 		close();
 		_handle      = std::exchange( other._handle, port_layer::handle_t::Invalid );
@@ -97,7 +97,7 @@ public:
 		return *this;
 	}
 
-	/*##### Socket operations #####*/
+	/*##### RaiiSocket operations #####*/
 	bool is_valid() const noexcept { return _handle != port_layer::handle_t::Invalid; }
 
 	ErrorCode close() noexcept
@@ -144,7 +144,6 @@ public:
 		}
 	}
 
-
 	RecvResult recvfrom( mart::MemoryView buffer, int flags, Sockaddr& src_addr )
 	{
 		auto ret = port_layer::recvfrom( _handle, _detail_socket_::to_mutable_byte_range( buffer ), flags, src_addr );
@@ -163,23 +162,23 @@ public:
 
 	auto listen( int backlog ) { return port_layer::listen( _handle, backlog ); }
 
-	Socket accept()
+	RaiiSocket accept()
 	{
 		auto res = port_layer::accept( _handle );
 		if( res ) {
-			return Socket( res.value() );
+			return RaiiSocket( res.value() );
 		} else {
-			return Socket {};
+			return RaiiSocket {};
 		}
 	}
 
-	Socket accept( Sockaddr& remote_addr )
+	RaiiSocket accept( Sockaddr& remote_addr ) noexcept
 	{
 		auto res = port_layer::accept( _handle, remote_addr );
 		if( res ) {
-			return Socket( res.value() );
+			return RaiiSocket( res.value() );
 		} else {
-			return Socket {};
+			return RaiiSocket {};
 		}
 	}
 
@@ -192,7 +191,7 @@ public:
 	}
 
 	template<class T>
-	ErrorCode getsockopt( SocketOptionLevel level, SocketOption optname, T& option_data ) noexcept
+	ErrorCode getsockopt( SocketOptionLevel level, SocketOption optname, T& option_data ) const noexcept
 	{
 		return port_layer::getsockopt( _handle, level, optname, byte_range_from_pod( option_data ) );
 	}
@@ -203,7 +202,7 @@ public:
 		return _setBlocking_uncached( should_block );
 	}
 
-	bool is_blocking() const
+	bool is_blocking() const noexcept
 	{
 		// XXX: acutally query the native socket
 		return _is_blocking && is_valid();
@@ -229,7 +228,7 @@ public:
 	}
 
 private:
-	ErrorCode _open( Domain domain, TransportType type )
+	ErrorCode _open( Domain domain, TransportType type ) noexcept
 	{
 		auto res = port_layer::socket( domain, type );
 		if( res ) {
@@ -239,12 +238,10 @@ private:
 		return res.error_code();
 	}
 
-	ErrorCode _setBlocking_uncached( bool should_block )
+	ErrorCode _setBlocking_uncached( bool should_block ) noexcept
 	{
 		const auto res = port_layer::set_blocking( _handle, should_block );
-		if( res ) {
-			_is_blocking = should_block;
-		}
+		if( res ) { _is_blocking = should_block; }
 		return res;
 	}
 

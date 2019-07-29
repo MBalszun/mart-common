@@ -157,7 +157,7 @@ mart::MemoryView Socket::rec( mart::MemoryView buffer )
 
 namespace {
 struct BlockingRestorer {
-	BlockingRestorer( nw::socks::Socket& socket )
+	BlockingRestorer( nw::socks::RaiiSocket& socket )
 		: _socket( socket )
 		, _was_blocking( socket.is_blocking() )
 	{
@@ -165,7 +165,7 @@ struct BlockingRestorer {
 
 	~BlockingRestorer() { _socket.set_blocking( _was_blocking ); }
 
-	nw::socks::Socket& _socket;
+	nw::socks::RaiiSocket& _socket;
 	const bool         _was_blocking;
 };
 } // namespace

@@ -1,5 +1,5 @@
 
-file(GLOB TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tests_*.cpp)
+file(GLOB_RECURSE TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tests_*.cpp)
 add_executable(testing_mart-netlib
 	main.cpp
 	${TEST_SRC}

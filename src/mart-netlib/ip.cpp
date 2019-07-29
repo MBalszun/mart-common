@@ -62,8 +62,8 @@ mart::ConstString basic_endpoint_v4_base::toString() const
 mart::ConstString basic_endpoint_v4_base::toStringEx( TransportProtocol p ) const
 {
 	switch( p ) {
-		case TransportProtocol::UDP: return mart::concat( toString(), " (UDP)" );
-		case TransportProtocol::TCP: return mart::concat( toString(), " (TCP)" );
+		case TransportProtocol::Udp: return mart::concat( toString(), " (UDP)" );
+		case TransportProtocol::Tcp: return mart::concat( toString(), " (TCP)" );
 		default: return mart::concat( toString(), " (Unknown)" );
 	}
 }
