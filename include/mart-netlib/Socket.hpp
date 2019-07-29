@@ -113,44 +113,44 @@ public:
 
 	/* ###### send / rec ############### */
 	struct SendResult {
-		mart::ConstMemoryView remaining_data;
-		ErrorCode             result;
+		mart::ConstMemoryView    remaining_data;
+		ReturnValue<txrx_size_t> result;
 	};
 
 	SendResult send( mart::ConstMemoryView data, int flags = 0 )
 	{
 		auto res = port_layer::send( _handle, _detail_socket_::to_byte_range( data ), flags );
-		return {data.subview( res.value_or( 0 ) ), res.error_code()};
+		return {data.subview( res.value_or( 0 ) ), res};
 	}
 
 	SendResult sendto( mart::ConstMemoryView data, int flags, const Sockaddr& addr )
 	{
 		auto res = port_layer::sendto( _handle, _detail_socket_::to_byte_range( data ), flags, addr );
-		return {data.subview( res.value_or( 0 ) ), res.error_code()};
+		return {data.subview( res.value_or( 0 ) ), res};
 	}
 
 	struct RecvResult {
-		mart::MemoryView received_data;
-		ErrorCode        result;
+		mart::MemoryView         received_data;
+		ReturnValue<txrx_size_t> result;
 	};
 
 	RecvResult recv( mart::MemoryView buffer, int flags )
 	{
-		auto ret = port_layer::recv( _handle, _detail_socket_::to_mutable_byte_range( buffer ), flags );
-		if( ret.success() ) {
-			return {buffer.subview( 0, ret.value() ), ret.error_code()};
+		auto res = port_layer::recv( _handle, _detail_socket_::to_mutable_byte_range( buffer ), flags );
+		if( res.success() ) {
+			return {buffer.subview( 0, res.value() ), res};
 		} else {
-			return {mart::MemoryView {}, ret.error_code()};
+			return {mart::MemoryView {}, res};
 		}
 	}
 
 	RecvResult recvfrom( mart::MemoryView buffer, int flags, Sockaddr& src_addr )
 	{
-		auto ret = port_layer::recvfrom( _handle, _detail_socket_::to_mutable_byte_range( buffer ), flags, src_addr );
-		if( ret.success() ) {
-			return {buffer.subview( 0, ret.value() ), ret.error_code()};
+		auto res = port_layer::recvfrom( _handle, _detail_socket_::to_mutable_byte_range( buffer ), flags, src_addr );
+		if( res.success() ) {
+			return {buffer.subview( 0, res.value() ), res};
 		} else {
-			return {mart::MemoryView {}, ret.error_code()};
+			return {mart::MemoryView {}, res};
 		}
 	}
 
@@ -162,7 +162,7 @@ public:
 
 	auto listen( int backlog ) { return port_layer::listen( _handle, backlog ); }
 
-	RaiiSocket accept()
+	RaiiSocket accept() noexcept
 	{
 		auto res = port_layer::accept( _handle );
 		if( res ) {

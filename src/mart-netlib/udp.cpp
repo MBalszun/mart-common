@@ -148,7 +148,7 @@ mart::MemoryView Socket::rec( mart::MemoryView buffer )
 	const auto res = _socket_handle.recv( buffer, 0 );
 	if( !res.result
 		&& is_none_of<ErrorCodeValues, ErrorCodeValues::WouldBlock, ErrorCodeValues::TryAgain, ErrorCodeValues::Timeout>(
-			   res.result.value() )
+			   res.result.error_code().value() )
 			    ) {
 		throw nw::generic_nw_error( mart::concat("Failed to receive data from socket. Details:  "));
 	}
