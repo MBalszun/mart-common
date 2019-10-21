@@ -1,9 +1,10 @@
 #include <im_str/im_str.hpp>
+
+#include "include_catch.hpp"
+
 #include <iostream>
 #include <string>
 #include <thread>
-
-#include <catch2/catch.hpp>
 
 using namespace std::literals;
 
@@ -223,8 +224,7 @@ TEST_CASE("is_created_from_litteral", "[im_str]")
 	mba::im_zstr from_litteral( "Hello" );
 	CHECK( from_litteral.wrapps_a_string_litteral() );
 	mba::im_zstr not_from_litteral( std::string_view("Hello") );
-	CHECK( !from_litteral.wrapps_a_string_litteral() );
-
+	CHECK( !not_from_litteral.wrapps_a_string_litteral() );
 }
 
 TEST_CASE( "thread" )

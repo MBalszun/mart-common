@@ -1,6 +1,6 @@
 #include <im_str/im_str.hpp>
 
-#include <catch2/catch.hpp>
+#include "include_catch.hpp"
 
 #include <iostream>
 

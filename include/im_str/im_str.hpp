@@ -52,7 +52,7 @@ public:
 	explicit im_str( std::string_view other ) { _copy_from( other ); }
 
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
-	template<size_t N>
+	template<std::size_t N>
 	constexpr im_str( const char ( &other )[N] ) noexcept
 		: std::string_view( other )
 	// we don't have to copy the data to the freestore as string litterals already have static lifetime
@@ -70,23 +70,23 @@ public:
 
 	im_str( im_str&& other ) noexcept
 		: std::string_view( std::exchange( other._as_strview(), std::string_view {} ) )
-		, _data( std::move( other._data ) )
+		, _handle( std::move( other._handle ) )
 	{
 	}
 
 	im_str& operator=( im_str&& other ) noexcept
 	{
 		this->_as_strview() = std::exchange( other._as_strview(), std::string_view {} );
-		_data               = std::move( other._data );
+		_handle             = std::move( other._handle );
 		return *this;
 	}
 
 	/* ################## String functions  ################################# */
-	im_str substr( size_t offset = 0, size_t count = npos ) const
+	im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
 	{
 		im_str retval;
 		retval._as_strview() = this->_as_strview().substr( offset, count );
-		retval._data         = this->_data;
+		retval._handle       = this->_handle;
 		return retval;
 	}
 
@@ -95,7 +95,7 @@ public:
 		assert( data() <= range.data() && range.data() + range.size() <= data() + size() );
 		im_str retval;
 		retval._as_strview() = range;
-		retval._data         = this->_data;
+		retval._handle       = this->_handle;
 		return retval;
 	}
 
@@ -106,7 +106,7 @@ public:
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
-	im_str substr_sentinel( size_t offset, char sentinel ) const
+	im_str substr_sentinel( std::size_t offset, char sentinel ) const
 	{
 		const auto size = this->find( sentinel, offset );
 		return substr( offset, size == npos ? this->size() - offset : size - offset );
@@ -184,13 +184,13 @@ public:
                 // std::string_view::substr(offset,count) allows count to be bigger than size,
                 // so we don't have to check for npos here
                 self_view.substr( start_pos, found_pos - start_pos ),
-                _data,
+                _handle,
                 detail::defer_ref_cnt_tag // ref count will be incremented at the end of the function
             );
 
 			start_pos = found_pos + 1u;
 		}
-		_data.add_ref_cnt( static_cast<int>( ret.size() ) );
+		_handle.add_ref_cnt( static_cast<int>( ret.size() ) );
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -227,8 +227,6 @@ public:
 	im_zstr create_zstr() &&;
 
 protected:
-	Handle_t _data {};
-
 	class static_lifetime_tag {
 	};
 
@@ -245,24 +243,26 @@ protected:
 					  const detail::atomic_ref_cnt_buffer& data,
 					  detail::defer_ref_cnt_tag_t ) noexcept
 		: std::string_view( sv )
-		, _data {data, detail::defer_ref_cnt_tag_t {}}
+		, _handle {data, detail::defer_ref_cnt_tag_t {}}
 	{
 	}
-
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
 	im_str( detail::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
 		: std::string_view( data, size )
-		, _data( std::move( handle ) )
+		, _handle( std::move( handle ) )
 	{
 	}
+
+protected:
+	Handle_t _handle {};
 
 	friend void swap( im_str& l, im_str& r )
 	{
 		using std::swap;
 		swap( l._as_strview(), r._as_strview() );
-		swap( l._data, r._data );
+		swap( l._handle, r._handle );
 	}
 
 	std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
@@ -285,8 +285,9 @@ protected:
 };
 
 namespace detail_concat {
-template<class ARG1, class... ARGS>
-im_zstr variadic_helper( const ARG1 arg1, const ARGS&... args );
+// ARGS must be std::string_view
+template<class... ARGS>
+im_zstr variadic_helper( const ARGS... args );
 
 template<class T>
 im_zstr range_helper( const T& args );
@@ -336,7 +337,7 @@ public:
 		return true;
 	}
 
-	constexpr bool wrapps_a_string_litteral() const noexcept { return _data == nullptr; }
+	constexpr bool wrapps_a_string_litteral() const noexcept { return _handle == nullptr; }
 
 	// Deleted, because this function is inherited from std::string_view and
 	// would break im_zstr's invariant of always being zero terminated
@@ -351,8 +352,8 @@ private:
 	{
 	}
 
-	template<class ARG1, class... ARGS>
-	friend im_zstr detail_concat::variadic_helper( const ARG1 arg1, const ARGS&... args );
+	template<class... ARGS>
+	friend im_zstr detail_concat::variadic_helper( const ARGS... args );
 
 	template<class T>
 	friend im_zstr detail_concat::range_helper( const T& args );
@@ -388,60 +389,57 @@ inline void addTo( char*& buffer, const std::string_view str )
 	buffer = std::copy_n( str.data(), str.size(), buffer );
 }
 
-template<class... ARGS>
-inline void write_to_buffer( char* buffer, const ARGS&... args )
-{
-	( addTo( buffer, args ), ... );
-}
-
 /**
  * Function that can concatenate an arbitrary number of std::string_views
  */
-template<class ARG1, class... ARGS>
-im_zstr variadic_helper( const ARG1 arg1, const ARGS&... args )
+template<class... ARGS>
+im_zstr variadic_helper( const ARGS... args )
 {
 	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
-	static_assert( std::is_same_v<ARG1, std::string_view> );
-	const size_t newSize = ( arg1.size() + ... + args.size() );
+	const std::size_t newSize = ( 0 + ... + args.size() );
 
-	auto [data, handle]
+	auto buffer
 		= ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
 
-	write_to_buffer( data, arg1, args... );
+	auto* tmp_data_ptr = buffer.data;
+	( addTo( tmp_data_ptr, args ), ... );
 
-	return im_zstr( std::move( handle ), data, newSize );
+	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
 }
 
 template<class T>
 im_zstr range_helper( const T& args )
 {
-	const size_t newSize
+	const std::size_t newSize
 		= std::accumulate( args.begin(), args.end(), std::size_t( 0 ), []( std::size_t s, const auto& str ) {
 			  return s + std::string_view( str ).size();
 		  } );
 
-	auto [data, handle]
+	auto buffer
 		= ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
 
-	auto ptr = data;
+	auto* tmp_data_ptr = buffer.data;
 	for( auto&& e : args ) {
-		addTo( ptr, std::string_view( e ) );
+		addTo( tmp_data_ptr, std::string_view( e ) );
 	}
 
-	return im_zstr( std::move( handle ), data, newSize );
+	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
 }
 
 } // namespace detail_concat
 
 template<class ARG1, class... ARGS>
-auto concat( const ARG1 arg1, const ARGS&... args )
+inline auto concat( const ARG1 arg1, const ARGS&... args )
 	-> std::enable_if_t<std::is_convertible_v<ARG1, std::string_view>, im_zstr>
 {
+	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
+				   "variadic concat can only be used with arguments that can be converted to string_view" );
 	return detail_concat::variadic_helper( std::string_view( arg1 ), std::string_view( args )... );
 }
 template<class T>
-auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
+inline auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
 {
+	// static_assert( <args_is_a_range> )
 	return detail_concat::range_helper( args );
 }
 

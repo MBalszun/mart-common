@@ -18,6 +18,8 @@ class dynamic_array {
 	std::unique_ptr<T[]> _data;
 
 public:
+	using value_type = T;
+
 	constexpr std::size_t size() const noexcept { return _size; }
 
 	T*       begin() noexcept { return _data.get(); }
