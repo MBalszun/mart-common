@@ -29,46 +29,54 @@ Usage is pretty much the same as you would expect from an immutable, ref-counted
     #include <string>
 
     int main() {
-        im_str name = "John";
-        assert(name == "John");
-        assert(name.size() == 4);
-        std::cout << name; // Will print "John";
+		using namespace mba;
+        
+		im_str name = "John";
+		assert( name == "John" );
+		assert( name.size() == 4 );
+		std::cout << name; // Will print "John";
 
-        im_str cpy = "John";
-        name = im_str("Jane Doe");
-        assert(cpy == "John");
+		im_str cpy = name;
+		name       = im_str( "Jane Doe" );
+		assert( cpy == "John" );
 
-        auto[first,second] = name.split(' ');
+		auto [first, second] = name.split_on_first( ' ' );
 
-        name = im_str{};
-        cpy = im_str{};
+		name = im_str {};
+		cpy  = im_str {};
 
-        assert(first == "Jane");
-        assert(second == "Doe");
+		assert( first == "Jane" );
+		assert( second == "Doe" );
     }
 
 
 Even though `im_str` doesn't implement SSO (yet), there isn't a single allocation happening in the above code. Allocations are neccesary, when an `im_str` is created from something other than a string litteral or another `im_str`:
 
     std::string name = "Mike";
-    im_str is = std::string_view(stdstr);                  // This allocates
-    im_str full_greeting = concat("Hello, ", name, "!\n"); // This will also allocate (once)
-    std:cout << full_greeting;                             // Prints "Hello, Mike!", followed by a newline
+
+    mba::im_str  is           = mba::im_str( name );                   // This allocates
+    mba::im_str full_greeting = mba::concat( "Hello, ", name, "!\n" ); // This will also allocate (once)
+
+    std::cout << full_greeting; // Prints "Hello, Mike!", followed by a newline
 
 `im_str` also offers a way to query if it is a zero terminated string / create a zero terminated string
 
-    im_str full = "Hello, World!";
-    assert( full.is_zero_terminated() );
+	using namespace mba;
+    
+	im_str full = "Hello, World!";
+	assert( full.is_zero_terminated() );
 
-    im_str sub = full.substr(0,3);
-    assert( sub.is_zero_terminated() == false );
+	im_str sub = full.substr( 0, 3 );
+	assert( sub.is_zero_terminated() == false );
 
-    im_zstr subz = sub.create_zstr();           // This will allocate
-    static_assert( subz.is_zero_terminated() );
+	im_zstr subz = sub.create_zstr();    // This will allocate
+	assert( subz.is_zero_terminated() ); // This will always be true
 
-    im_zstr fullz = std::move(full).create_zstr();    // This  will not allocate
-    assert( full.empty() );
-    c_func( fullz.c_str() );
+	im_zstr fullz = std::move( full ).create_zstr(); // This  will not allocate
+	assert( full.empty() );
+	c_func( fullz.c_str() );
+    
+The type `im_zstr` is derived from `im_str` and - as a type invariant - is always zero terminated. `concat` actually returns a `im_zstr`
 
 ## [TODO] Full API description
 ### `im_str`
@@ -97,8 +105,8 @@ Of course a simple `const char*` or `std::string_view` that point to a string li
 E.g.:
 
     struct Config {
-        im_str local_name;
-        im_str remote_name;
+        im_zstr local_name;
+        im_zstr remote_name;
     };
     const Config config {"foo", "bar"};
 

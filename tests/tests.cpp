@@ -129,6 +129,39 @@ TEST_CASE( "Construction from temporary std::string", "[im_str]" )
 	}
 }
 
+TEST_CASE( "Construction from im_str", "[im_zstr]" )
+{
+	std::string cppstring = "Hello World, how are you?";
+	{
+		const mba::im_str ims_z {cppstring};
+
+		auto imzs1 = ims_z.create_zstr();
+		static_assert( std::is_same_v<decltype( imzs1 ), mba::im_zstr> );
+		CHECK( ims_z == imzs1 );
+
+		// construction from temporary
+		auto imzs2 = mba::im_str( ims_z ).create_zstr();
+		static_assert( std::is_same_v<decltype( imzs2 ), mba::im_zstr> );
+		CHECK( ims_z == imzs2 );
+	}
+
+	// construction from an ims_nz that isn't alredy zero terminated
+	{
+		mba::im_str ims_nz = mba::im_str( cppstring ).substr( 0, 3 );
+
+		auto imzs3 = ims_nz.create_zstr();
+		static_assert( std::is_same_v<decltype( imzs3 ), mba::im_zstr> );
+		CHECK( ims_nz == imzs3 );
+		CHECK( mba::im_str( imzs3 ).is_zero_terminated() );
+
+		// construction from temporary
+		auto imzs4 = mba::im_str( ims_nz ).create_zstr();
+		static_assert( std::is_same_v<decltype( imzs4 ), mba::im_zstr> );
+		CHECK( ims_nz == imzs4 );
+		CHECK( mba::im_str( imzs4 ).is_zero_terminated() );
+	}
+}
+
 TEST_CASE( "Copy", "[im_str]" )
 {
 	{
@@ -184,6 +217,15 @@ TEST_CASE( "comparison", "[im_str]" )
 	CHECK( str1 < str2 );
 	CHECK( str1 > "Hello" );
 	CHECK( str2 < std::string( "Hello2o" ) );
+}
+
+TEST_CASE("is_created_from_litteral", "[im_str]")
+{
+	mba::im_zstr from_litteral( "Hello" );
+	CHECK( from_litteral.wrapps_a_string_litteral() );
+	mba::im_zstr not_from_litteral( std::string_view("Hello") );
+	CHECK( !from_litteral.wrapps_a_string_litteral() );
+
 }
 
 TEST_CASE( "thread" )
@@ -242,4 +284,52 @@ TEST_CASE( "thread" )
 	REQUIRE( total_cpps2_fail_cnt == 0 );
 	REQUIRE( total_s1_fail_cnt == 0 );
 	REQUIRE( total_s2_fail_cnt == 0 );
+}
+
+void c_func( const char* ) {}
+
+TEST_CASE( "Examples", "[im_str]" )
+{
+	{
+		using namespace mba;
+		im_str name = "John";
+		assert( name == "John" );
+		assert( name.size() == 4 );
+		std::cout << name; // Will print "John";
+
+		im_str cpy = name;
+		name       = im_str( "Jane Doe" );
+		assert( cpy == "John" );
+
+		auto [first, second] = name.split_on_first( ' ' );
+
+		name = im_str {};
+		cpy  = im_str {};
+
+		assert( first == "Jane" );
+		assert( second == "Doe" );
+	}
+	{
+		std::string name = "Mike";
+
+		mba::im_str is            = mba::im_str( name );                   // This allocates
+		mba::im_str full_greeting = mba::concat( "Hello, ", name, "!\n" ); // This will also allocate (once)
+
+		std::cout << full_greeting; // Prints "Hello, Mike!", followed by a newline
+	}
+	{
+		using namespace mba;
+		im_str full = "Hello, World!";
+		assert( full.is_zero_terminated() );
+
+		im_str sub = full.substr( 0, 3 );
+		assert( sub.is_zero_terminated() == false );
+
+		im_zstr subz = sub.create_zstr();    // This will allocate
+		assert( subz.is_zero_terminated() ); // This will always be true
+
+		im_zstr fullz = std::move( full ).create_zstr(); // This  will not allocate
+		assert( full.empty() );
+		c_func( fullz.c_str() );
+	}
 }
