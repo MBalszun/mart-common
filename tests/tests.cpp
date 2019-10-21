@@ -224,8 +224,7 @@ TEST_CASE("is_created_from_litteral", "[im_str]")
 	mba::im_zstr from_litteral( "Hello" );
 	CHECK( from_litteral.wrapps_a_string_litteral() );
 	mba::im_zstr not_from_litteral( std::string_view("Hello") );
-	CHECK( !from_litteral.wrapps_a_string_litteral() );
-
+	CHECK( !not_from_litteral.wrapps_a_string_litteral() );
 }
 
 TEST_CASE( "thread" )
