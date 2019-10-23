@@ -49,7 +49,10 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	explicit im_str( std::string_view other ) { _copy_from( other ); }
+	explicit im_str( std::string_view other, std::pmr::memory_resource* alloc = nullptr )
+	{
+		_copy_from( other, alloc );
+	}
 
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<std::size_t N>
@@ -115,10 +118,9 @@ public:
 	enum class Split { Drop, Before, After };
 
 	// split string into two substrings [0,i) and [i, this->size() )
-	[[deprecated( "Use split_at instead" )]]
-	std::pair<im_str, im_str> split( std::size_t i ) const
+	[[deprecated( "Use split_at instead" )]] std::pair<im_str, im_str> split( std::size_t i ) const
 	{
-		return split_at(i);
+		return split_at( i );
 	}
 
 	// split string into two substrings [0,i) and [i, this->size() )
@@ -138,15 +140,15 @@ public:
 	}
 
 	// split string on first occurence of c.
-	[[deprecated( "Use split_on_first instead" )]]
-	std::pair<im_str, im_str> split_first( char c = ' ', Split s = Split::Drop ) const
+	[[deprecated( "Use split_on_first instead" )]] std::pair<im_str, im_str> split_first( char  c = ' ',
+																						  Split s = Split::Drop ) const
 	{
 		return split_on_first( c, s );
 	}
 
 	// split string on last occurence of c.
-	[[deprecated( "Use split_on_last instead" )]]
-	std::pair<im_str, im_str> split_last( char c = ' ', Split s = Split::Drop ) const
+	[[deprecated( "Use split_on_last instead" )]] std::pair<im_str, im_str> split_last( char  c = ' ',
+																						Split s = Split::Drop ) const
 	{
 		return split_on_last( c, s );
 	}
@@ -269,14 +271,14 @@ protected:
 
 	const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
 
-	void _copy_from( const std::string_view other )
+	void _copy_from( const std::string_view other, std::pmr::memory_resource* alloc )
 	{
 		if( other.data() == nullptr ) {
 			this->_as_strview() = std::string_view {""};
 			return;
 		}
 		// create buffer and copy data over
-		auto [data, handle] = Handle_t::allocate_null_terminated_char_buffer( static_cast<int>( other.size() ) );
+		auto [data, handle] = Handle_t::allocate_null_terminated_char_buffer( static_cast<int>( other.size() ), alloc );
 		std::copy_n( other.data(), other.size(), data );
 
 		// initialize data fields;
@@ -291,6 +293,14 @@ im_zstr variadic_helper( const ARGS... args );
 
 template<class T>
 im_zstr range_helper( const T& args );
+
+template<class... ARGS>
+im_zstr variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args );
+
+template<class T>
+im_zstr range_helper( std::pmr::memory_resource* alloc, const T& args );
+
+
 } // namespace detail_concat
 
 namespace detail {
@@ -357,6 +367,12 @@ private:
 
 	template<class T>
 	friend im_zstr detail_concat::range_helper( const T& args );
+
+	template<class... ARGS>
+	friend im_zstr detail_concat::variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args );
+
+	template<class T>
+	friend im_zstr detail_concat::range_helper( std::pmr::memory_resource* alloc, const T& args );
 };
 
 inline im_zstr im_str::unshare() const
@@ -426,6 +442,40 @@ im_zstr range_helper( const T& args )
 	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
 }
 
+template<class... ARGS>
+im_zstr variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args )
+{
+	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
+	const std::size_t newSize = ( 0 + ... + args.size() );
+
+	auto buffer = ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+		static_cast<int>( newSize ), alloc );
+
+	auto* tmp_data_ptr = buffer.data;
+	( addTo( tmp_data_ptr, args ), ... );
+
+	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
+}
+
+template<class T>
+im_zstr range_helper( std::pmr::memory_resource* alloc, const T& args )
+{
+	const std::size_t newSize
+		= std::accumulate( args.begin(), args.end(), std::size_t( 0 ), []( std::size_t s, const auto& str ) {
+			  return s + std::string_view( str ).size();
+		  } );
+
+	auto buffer = ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+		static_cast<int>( newSize ), alloc );
+
+	auto* tmp_data_ptr = buffer.data;
+	for( auto&& e : args ) {
+		addTo( tmp_data_ptr, std::string_view( e ) );
+	}
+
+	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
+}
+
 } // namespace detail_concat
 
 template<class ARG1, class... ARGS>
@@ -441,6 +491,22 @@ inline auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T
 {
 	// static_assert( <args_is_a_range> )
 	return detail_concat::range_helper( args );
+}
+
+template<class ARG1, class... ARGS>
+inline auto concat( std::pmr::memory_resource* alloc, const ARG1 arg1, const ARGS&... args )
+	-> std::enable_if_t<std::is_convertible_v<ARG1, std::string_view>, im_zstr>
+{
+	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
+				   "variadic concat can only be used with arguments that can be converted to string_view" );
+	return detail_concat::variadic_helper( alloc, std::string_view( arg1 ), std::string_view( args )... );
+}
+template<class T>
+inline auto concat( std::pmr::memory_resource* alloc, const T& args )
+	-> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
+{
+	// static_assert( <args_is_a_range> )
+	return detail_concat::range_helper(alloc, args );
 }
 
 static_assert( sizeof( im_str ) <= 3 * sizeof( void* ) );

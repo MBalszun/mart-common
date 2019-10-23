@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <memory_resource>
 #include <new>     // placement new
 #include <utility> // std::move
 
@@ -93,6 +94,19 @@ constexpr T c_expr_exchange( T& obj, U&& new_value )
 	return old_value;
 }
 
+inline constexpr std::size_t c_expr_max( std::size_t l, std::size_t r )
+{
+	return l > r ? l : r;
+}
+inline constexpr std::size_t c_expr_aligned_offset( std::size_t alignment, std::size_t min )
+{
+	if( alignment >= min ) {
+		return alignment;
+	} else {
+		return min + ( alignment - min % alignment );
+	}
+}
+
 struct AllocResult;
 
 /**
@@ -105,7 +119,7 @@ class atomic_ref_cnt_buffer {
 
 public:
 	/*#### Constructors and special member functions ######*/
-	static AllocResult allocate_null_terminated_char_buffer( int size );
+	static AllocResult allocate_null_terminated_char_buffer( int size, std::pmr::memory_resource* = nullptr );
 
 	constexpr atomic_ref_cnt_buffer() noexcept = default;
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t ) noexcept
@@ -172,15 +186,13 @@ private:
 	{
 	}
 
+	static void dealloc_buffer( Cnt_t* ptr );
+
 	constexpr void _decref() const noexcept
 	{
 		if( _cnt ) {
 			stats().dec_ref();
-			if( _cnt->fetch_sub( 1 ) == 1 ) {
-				stats().dealloc();
-				_cnt->~Cnt_t();
-				delete[]( reinterpret_cast<char*>( _cnt ) );
-			}
+			if( _cnt->fetch_sub( 1 ) == 1 ) { dealloc_buffer( _cnt ); }
 		}
 	}
 
@@ -193,6 +205,16 @@ private:
 	}
 
 	Cnt_t* _cnt = nullptr;
+
+	using alloc_ptr_t = std::pmr::memory_resource*;
+	using size_type   = int;
+
+	static constexpr auto alignment   = c_expr_max( alignof( Cnt_t ), alignof( alloc_ptr_t ) );
+	static constexpr auto offset_cnt  = 0;
+	static constexpr auto offset_size = c_expr_aligned_offset( alignof( size_type ), offset_cnt + sizeof( Cnt_t ) );
+	static constexpr auto offset_alloc
+		= c_expr_aligned_offset( alignof( alloc_ptr_t ), offset_size + sizeof( size_type ) );
+	static constexpr auto offset_data = c_expr_aligned_offset( 1, offset_alloc + sizeof( alloc_ptr_t ) );
 };
 
 struct AllocResult {
@@ -200,20 +222,44 @@ struct AllocResult {
 	atomic_ref_cnt_buffer handle;
 };
 
-inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( int size )
+inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( size_type                  size,
+																				std::pmr::memory_resource* resource )
 {
 	assert( size >= 0 );
 	stats().alloc();
-	const auto total_size = size + 1 + (int)sizeof( Cnt_t );
-	auto*      raw        = new char[total_size];
 
-	raw[total_size - 1] = '\0'; // zero terminate
-	auto* cnt_ptr       = new( raw ) Cnt_t {1};
+	const auto total_size       = offset_data + size + 1;
+	const bool bool_use_default = resource == nullptr;
+
+	static_assert( alignment <= alignof( std::max_align_t ) );
+	char* const start = (char*)( bool_use_default                //
+									 ? std::malloc( total_size ) //
+									 : resource->allocate( total_size, alignment ) );
+
+	[[maybe_unused]] auto* cnt_ptr   = new( start + offset_cnt ) Cnt_t {1}; // construct ref count
+	[[maybe_unused]] auto* size_ptr  = new( start + offset_size ) size_type {size};
+	[[maybe_unused]] auto* alloc_ptr = new( start + offset_alloc )
+		std::pmr::memory_resource* {resource}; // construct pointer to allocator TODO: save memory when ptr is null
+	[[maybe_unused]] auto* data_ptr = start + offset_data; // Start of string
+	data_ptr[size]                  = '\0';                // zero terminate
 
 	// TODO: Is this guaranteed by the standard?
-	assert( reinterpret_cast<char*>( cnt_ptr ) == raw );
+	assert( reinterpret_cast<char*>( cnt_ptr ) == start );
 
-	return {raw + sizeof( Cnt_t ), atomic_ref_cnt_buffer {cnt_ptr}};
+	return {data_ptr, atomic_ref_cnt_buffer {cnt_ptr}};
+}
+
+inline void atomic_ref_cnt_buffer::dealloc_buffer( Cnt_t* ptr )
+{
+	stats().dealloc();
+	auto*       start = reinterpret_cast<char*>( ptr ) - offset_cnt;
+	alloc_ptr_t alloc = *reinterpret_cast<alloc_ptr_t*>( start + offset_alloc );
+	if( alloc == nullptr ) {
+		std::free( start );
+	} else {
+		size_type   size  = *reinterpret_cast<size_type*>( start + offset_size );
+		alloc->deallocate( start, size, alignment );
+	}
 }
 
 #ifdef IM_STR_DEBUG_HOOKS

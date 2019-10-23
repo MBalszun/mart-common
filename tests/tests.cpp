@@ -209,6 +209,15 @@ TEST_CASE( "concat", "[im_str]" )
 	requireZero( combined );
 }
 
+TEST_CASE( "concat alloc", "[im_str]" )
+{
+	mba::im_str cs       = "How are you?";
+	auto        combined = concat(std::pmr::get_default_resource(), "Hello", " World! "s, cs );
+	REQUIRE( combined == "Hello World! How are you?" );
+	REQUIRE( combined.is_zero_terminated() );
+	requireZero( combined );
+}
+
 TEST_CASE( "comparison", "[im_str]" )
 {
 	mba::im_str str1 = "Hello1";
