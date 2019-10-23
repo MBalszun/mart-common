@@ -115,11 +115,13 @@ struct AllocResult;
  * handle is default constructed (i.e. _cnt == nullptr)
  */
 class atomic_ref_cnt_buffer {
-	using Cnt_t = std::atomic_int;
+	using Cnt_t       = std::atomic_int;
+	using alloc_ptr_t = std::pmr::memory_resource*;
+	using size_type   = int;
 
 public:
 	/*#### Constructors and special member functions ######*/
-	static AllocResult allocate_null_terminated_char_buffer( int size, std::pmr::memory_resource* = nullptr );
+	static AllocResult allocate_null_terminated_char_buffer( int size, alloc_ptr_t = nullptr );
 
 	constexpr atomic_ref_cnt_buffer() noexcept = default;
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t ) noexcept
@@ -180,19 +182,28 @@ public:
 	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt != nullptr; }
 
 private:
+	struct Header {
+		Cnt_t       ref_cnt;
+		size_type   size;
+		alloc_ptr_t alloc;
+	};
+
 	// This is used in allocate_null_terminated_char_buffer
-	constexpr explicit atomic_ref_cnt_buffer( Cnt_t* buffer ) noexcept
-		: _cnt( buffer )
+	constexpr explicit atomic_ref_cnt_buffer( Header& buffer ) noexcept
+		: _cnt( &( buffer.ref_cnt ) )
 	{
 	}
 
-	static void dealloc_buffer( Cnt_t* ptr );
+	static void dealloc_buffer( Header* ptr );
 
 	constexpr void _decref() const noexcept
 	{
 		if( _cnt ) {
 			stats().dec_ref();
-			if( _cnt->fetch_sub( 1 ) == 1 ) { dealloc_buffer( _cnt ); }
+			if( _cnt->fetch_sub( 1 ) == 1 ) {
+				Header* header = static_cast<Header*>( static_cast<void*>( _cnt ) );
+				dealloc_buffer( header );
+			}
 		}
 	}
 
@@ -206,15 +217,7 @@ private:
 
 	Cnt_t* _cnt = nullptr;
 
-	using alloc_ptr_t = std::pmr::memory_resource*;
-	using size_type   = int;
-
-	static constexpr auto alignment   = c_expr_max( alignof( Cnt_t ), alignof( alloc_ptr_t ) );
-	static constexpr auto offset_cnt  = 0;
-	static constexpr auto offset_size = c_expr_aligned_offset( alignof( size_type ), offset_cnt + sizeof( Cnt_t ) );
-	static constexpr auto offset_alloc
-		= c_expr_aligned_offset( alignof( alloc_ptr_t ), offset_size + sizeof( size_type ) );
-	static constexpr auto offset_data = c_expr_aligned_offset( 1, offset_alloc + sizeof( alloc_ptr_t ) );
+	static constexpr auto alignment = alignof( Header );
 };
 
 struct AllocResult {
@@ -228,37 +231,31 @@ inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( 
 	assert( size >= 0 );
 	stats().alloc();
 
-	const auto total_size       = offset_data + size + 1;
+	const auto total_size       = sizeof( Header ) + size + 1;
 	const bool bool_use_default = resource == nullptr;
 
-	static_assert( alignment <= alignof( std::max_align_t ) );
 	char* const start = (char*)( bool_use_default                //
 									 ? std::malloc( total_size ) //
 									 : resource->allocate( total_size, alignment ) );
 
-	[[maybe_unused]] auto* cnt_ptr   = new( start + offset_cnt ) Cnt_t {1}; // construct ref count
-	[[maybe_unused]] auto* size_ptr  = new( start + offset_size ) size_type {size};
-	[[maybe_unused]] auto* alloc_ptr = new( start + offset_alloc )
-		std::pmr::memory_resource* {resource}; // construct pointer to allocator TODO: save memory when ptr is null
-	[[maybe_unused]] auto* data_ptr = start + offset_data; // Start of string
-	data_ptr[size]                  = '\0';                // zero terminate
+	auto* const header_ptr = new( start ) Header {Cnt_t {1}, size_type {size}, resource};
 
-	// TODO: Is this guaranteed by the standard?
-	assert( reinterpret_cast<char*>( cnt_ptr ) == start );
+	auto* const data_ptr = start + sizeof( Header ); // Start of string
+	data_ptr[size]       = '\0';                     // zero terminate
 
-	return {data_ptr, atomic_ref_cnt_buffer {cnt_ptr}};
+	return {data_ptr, atomic_ref_cnt_buffer { *header_ptr}};
 }
 
-inline void atomic_ref_cnt_buffer::dealloc_buffer( Cnt_t* ptr )
+inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 {
 	stats().dealloc();
-	auto*       start = reinterpret_cast<char*>( ptr ) - offset_cnt;
-	alloc_ptr_t alloc = *reinterpret_cast<alloc_ptr_t*>( start + offset_alloc );
+
+	alloc_ptr_t alloc = header->alloc;
 	if( alloc == nullptr ) {
-		std::free( start );
+		std::free( header );
 	} else {
-		size_type   size  = *reinterpret_cast<size_type*>( start + offset_size );
-		alloc->deallocate( start, size, alignment );
+		size_type size = header->size;
+		alloc->deallocate( header, size, alignment );
 	}
 }
 
