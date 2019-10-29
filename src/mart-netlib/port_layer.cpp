@@ -192,9 +192,7 @@ namespace {
 // TODO: throw exception on failure?
 void startup()
 {
-#pragma warning( disable : 5051 ) // unknown attribute
 	[[maybe_unused]] const static bool isInit = port_layer::waInit();
-#pragma warning( default : 5051 )
 }
 } // namespace
 

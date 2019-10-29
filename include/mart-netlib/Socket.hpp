@@ -241,7 +241,7 @@ private:
 	ErrorCode _setBlocking_uncached( bool should_block ) noexcept
 	{
 		const auto res = port_layer::set_blocking( _handle, should_block );
-		if( res ) { _is_blocking = should_block; }
+		if( res.success() ) { _is_blocking = should_block; }
 		return res;
 	}
 

@@ -262,7 +262,7 @@ struct ReturnValue {
 		, _success {false}
 	{
 	}
-	constexpr T         value_or( const T& default_value ) { return _success ? value() : default_value; }
+	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
 	constexpr bool      success() const noexcept { return _success; }
 	constexpr explicit  operator bool() const noexcept { return success(); }
 	constexpr T         value() const noexcept { return _value; }

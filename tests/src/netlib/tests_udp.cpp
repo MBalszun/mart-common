@@ -56,7 +56,6 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 	CHECK( s.is_blocking() );
 
 	CHECK_NOTHROW( s.bind( udp::endpoint {"127.0.0.1:3446"} ) );
-
 	using namespace std::chrono_literals;
 	CHECK( s.set_rx_timeout( 1ms ) );
 	CHECK( s.set_tx_timeout( 2ms ) );
