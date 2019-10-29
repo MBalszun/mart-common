@@ -25,6 +25,9 @@ else()
 	add_compile_options(-Wall -Wextra)
 endif()
 
+# let catch print chrono duration values
+add_compile_definitions(CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER)
+
 
 
 if(NOT TARGET Catch2::Catch2)
