@@ -4,7 +4,6 @@
 
 #include <catch2/catch.hpp>
 
-#include <iostream>
 TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 {
 	using namespace mart::nw::ip;
@@ -39,16 +38,6 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 
 	CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e1 ) ); // invalid target address
 }
-
-namespace {
-template<class Rep, class Period>
-std::ostream& operator<<( std::ostream& out, std::chrono::duration<Rep, Period> dur )
-{
-	out << mart::sformat( dur );
-	return out;
-}
-
-} // namespace
 
 TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 {
