@@ -6,7 +6,17 @@ function(install_targets targets namespace )
 set( INSTALL_DIR_CMAKE share/MartCommon )
 set( CONFIG_STEM_NAME MartCommonConfig )
 
-install( TARGETS ${targets} EXPORT ${CONFIG_STEM_NAME} )
+include(GNUInstallDirs)
+
+# install results from compiling the targets and export the
+# relevant information into file
+install( TARGETS ${targets} EXPORT ${CONFIG_STEM_NAME}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+# install the CmakeConfig file holding the infromation about the isntalled targets
 install( EXPORT ${CONFIG_STEM_NAME}
 	FILE
 		${CONFIG_STEM_NAME}.cmake
