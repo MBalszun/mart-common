@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring> // memcpy
-#include <new>     // launder
+#include <new> // launder
 #include <type_traits>
 
 #ifdef __cpp_lib_launder
@@ -81,9 +81,9 @@ ErrorCode get_last_socket_error() noexcept
 #ifdef MBA_UTILS_USE_WINSOCKS
 		WSAGetLastError()
 #else
-		errno
+        errno
 #endif
-	)};
+			)};
 }
 
 namespace {
@@ -131,6 +131,15 @@ ErrorCode get_appropriate_error_code( int function_result )
 	}
 }
 
+[[maybe_unused]] ErrorCode get_appropriate_error_code( bool success )
+{
+	if( success ) {
+		return {ErrorCode::Value_t::NoError};
+	} else {
+		return get_last_socket_error();
+	}
+}
+
 template<class T>
 struct non_deduced {
 	using type = T;
@@ -171,7 +180,6 @@ static_assert( to_utype( handle_t::Invalid ) == -1, "" );
 // Wrapper functions for socket related functions, that are specific to a certain platform
 ErrorCode set_blocking( handle_t socket, bool should_block ) noexcept
 {
-	bool ret           = true;
 	auto native_handle = to_utype( socket );
 #ifdef MBA_UTILS_USE_WINSOCKS
 	// from
@@ -179,11 +187,11 @@ ErrorCode set_blocking( handle_t socket, bool should_block ) noexcept
 	/// @note windows sockets are created in blocking mode by default
 	// currently on windows, there is no easy way to obtain the socket's current blocking mode since WSAIsBlocking was
 	// deprecated
-	u_long non_blocking = should_block ? 0 : 1;
-	ret                 = NO_ERROR == ioctlsocket( native_handle, FIONBIO, &non_blocking );
+	u_long     non_blocking = should_block ? 0 : 1;
+	const auto ret          = ioctlsocket( native_handle, FIONBIO, &non_blocking );
 #else
-	const int flags = fcntl( native_handle, F_GETFL, 0 );
-	ret = 0 == fcntl( native_handle, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK );
+	const int  flags = fcntl( native_handle, F_GETFL, 0 );
+	const auto ret   = fcntl( native_handle, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK );
 #endif
 	return get_appropriate_error_code( ret );
 }
@@ -428,7 +436,7 @@ ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction d
 {
 	using namespace std::chrono;
 
-	const auto   option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
+	const auto option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
 
 #ifdef MBA_UTILS_USE_WINSOCKS
 	dword native_timeout {};

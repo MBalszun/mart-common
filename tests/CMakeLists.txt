@@ -26,7 +26,7 @@ else()
 endif()
 
 # let catch print chrono duration values
-add_compile_definitions(CATCH_CONFIG_ENABLE_CHRONO_STRINGMAKER)
+add_compile_definitions(CATCH_CONFIG_ENABLE_ALL_STRINGMAKERS)
 
 
 
