@@ -20,7 +20,7 @@ struct generic_nw_error_base : nw_error {
 
 
 struct generic_nw_error final : generic_nw_error_base {
-	generic_nw_error_base::generic_nw_error_base;
+	using generic_nw_error_base::generic_nw_error_base;
 };
 
 
