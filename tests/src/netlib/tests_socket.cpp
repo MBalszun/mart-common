@@ -2,6 +2,14 @@
 
 #include <catch2/catch.hpp>
 
+namespace {
+	std::ostream& operator<<(std::ostream& out, mart::nw::socks::ErrorCode ec) {
+		out << ec.raw_value();
+		return out;
+	}
+}
+
+
 TEST_CASE( "net_socket_is_blocking_after_construction", "[net]" )
 {
 	using namespace mart::nw;
