@@ -114,7 +114,11 @@ constexpr address_len_t to_native_buf_len( std::size_t size )
 	return narrow_cast<buffer_len_t>( size );
 }
 
+#if _MSC_VER
 static_assert( (int)ErrorCode::Value_t::NoError == NOERROR, "" );
+#else
+static_assert( (int)ErrorCode::Value_t::NoError == 0, "" );
+#endif
 static_assert( (int)ErrorCode::Value_t::TryAgain == EAGAIN, "" );
 static_assert( (int)ErrorCode::Value_t::WouldBlock == EWOULDBLOCK, "" );
 
@@ -179,7 +183,6 @@ ErrorCode set_blocking( handle_t socket, bool should_block ) noexcept
 	ret                 = NO_ERROR == ioctlsocket( native_handle, FIONBIO, &non_blocking );
 #else
 	const int flags = fcntl( native_handle, F_GETFL, 0 );
-	if( ( flags & O_NONBLOCK ) == !should_block ) { return ret; }
 	ret = 0 == fcntl( native_handle, F_SETFL, should_block ? flags & ~O_NONBLOCK : flags | O_NONBLOCK );
 #endif
 	return get_appropriate_error_code( ret );
