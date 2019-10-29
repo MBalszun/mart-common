@@ -252,14 +252,14 @@ template<class T = int>
 struct ReturnValue {
 	ReturnValue() = default;
 	constexpr explicit ReturnValue( const T& value ) noexcept
-		: _success {true}
-		, _value {value}
+		: _value {value}
+		, _success {true}
 	{
 	}
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
-		: _success {false}
-		, _errc {errc}
+		: _errc {errc}
+		, _success {false}
 	{
 	}
 	constexpr T         value_or( const T& default_value ) { return _success ? value() : default_value; }
