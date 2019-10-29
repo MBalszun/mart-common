@@ -78,8 +78,9 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
 	CHECK( !s.try_recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
-	CHECK_THROWS( s.recv( mart::view_bytes_mutable( buffer ) ).isValid() );
-	CHECK_THROWS( s.recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
+
+	CHECK( !s.recv( mart::view_bytes_mutable( buffer ) ).isValid() );
+	CHECK( !s.recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
 
 
 	s.clearRxBuff();
