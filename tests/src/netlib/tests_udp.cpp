@@ -47,7 +47,9 @@ std::ostream& operator<<( std::ostream& out, std::chrono::duration<Rep, Period> 
 	out << mart::sformat( dur );
 	return out;
 }
+
 } // namespace
+
 TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 {
 	using namespace mart::nw::ip;

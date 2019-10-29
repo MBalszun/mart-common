@@ -427,9 +427,7 @@ ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::micros
 ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept
 {
 	using namespace std::chrono;
-	static constexpr auto invalid_return_duration = duration_cast<microseconds>( seconds( -1 ) );
 
-	microseconds ret;
 	const auto   option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
 
 #ifdef MBA_UTILS_USE_WINSOCKS
@@ -445,12 +443,12 @@ ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction d
 		return ReturnValue<std::chrono::microseconds> {res};
 	} else {
 #ifdef MBA_UTILS_USE_WINSOCKS
-		ret = microseconds( milliseconds( native_timeout ) );
+		microseconds ret = microseconds( milliseconds( native_timeout ) );
 #else
-		ret = from_timeval<microseconds>( native_timeout );
+		microseconds ret = from_timeval<microseconds>( native_timeout );
 #endif
+		return ReturnValue<std::chrono::microseconds>( ret );
 	}
-	return ReturnValue<std::chrono::microseconds>( ret );
 }
 
 SockaddrIn::SockaddrIn( const ::sockaddr_in& native ) noexcept
