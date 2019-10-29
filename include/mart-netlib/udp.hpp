@@ -36,6 +36,7 @@ namespace udp {
 
 using endpoint = ip::basic_endpoint_v4<mart::nw::ip::TransportProtocol::Udp>;
 
+/* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is still very much in flux */
 class Socket {
 public:
 	Socket();
@@ -47,32 +48,53 @@ public:
 
 	nw::socks::RaiiSocket& getRawSocket() { return _socket_handle; }
 
-	void bind( endpoint ep );
 	socks::ErrorCode try_bind( endpoint ep ) noexcept;
-	void connect( endpoint ep );
+	void             bind( endpoint ep );
+
 	socks::ErrorCode try_connect( endpoint ep ) noexcept;
+	void             connect( endpoint ep );
 
-	auto try_send( mart::ConstMemoryView data )
+	/* All send functions return the remaining (non-sent) data */
+	auto try_send( mart::ConstMemoryView data ) noexcept -> mart::ConstMemoryView
 	{
-		return _socket_handle.send( data, 0 );
+		return _socket_handle.send( data, 0 ).remaining_data;
 	}
+	auto send( mart::ConstMemoryView data ) -> mart::ConstMemoryView;
 
+	auto try_sendto( mart::ConstMemoryView data, endpoint ep ) noexcept -> mart::ConstMemoryView
+	{
+		return _socket_handle.sendto( data, 0, ep.toSockAddr_in() ).remaining_data;
+	}
+	auto sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView;
 
-	mart::MemoryView rec( mart::MemoryView buffer );
+	mart::MemoryView try_recv( mart::MemoryView buffer ) noexcept
+	{
+		return _socket_handle.recv( buffer, 0 ).received_data;
+	}
+	mart::MemoryView recv( mart::MemoryView buffer );
 
-	void             sendto( mart::ConstMemoryView data, endpoint ep );
-	void send( mart::ConstMemoryView data );
-	mart::MemoryView recvfrom( mart::MemoryView buffer, endpoint& src_addr );
+	struct RecvfromResult {
+		mart::MemoryView data;
+		endpoint         remote_address;
+	};
+	RecvfromResult try_recvfrom( mart::MemoryView buffer ) noexcept
+	{
+		mart::nw::socks::port_layer::SockaddrIn addr{};
+		auto res = _socket_handle.recvfrom( buffer, 0, addr);
+		return {res.received_data, endpoint( addr )};
+	}
+	RecvfromResult recvfrom( mart::MemoryView buffer );
 
 	void clearRxBuff();
 
-	bool setTxTimeout( std::chrono::microseconds timeout ) { return _socket_handle.set_tx_timeout( timeout ); }
-	bool setRxTimeout( std::chrono::microseconds timeout ) { return _socket_handle.set_rx_timeout( timeout ); }
-	std::chrono::microseconds getTxTimeout() { return _socket_handle.get_tx_timeout(); }
-	std::chrono::microseconds getRxTimeout() { return _socket_handle.get_rx_timeout(); }
-	bool                      setBlocking( bool should_block ) { return _socket_handle.set_blocking( should_block ).success(); }
-	bool                      isBlocking() { return _socket_handle.is_blocking(); }
-	bool                      isValid() const { return _socket_handle.is_valid(); }
+	bool set_tx_timeout( std::chrono::microseconds timeout ) { return _socket_handle.set_tx_timeout( timeout ); }
+	bool set_rx_timeout( std::chrono::microseconds timeout ) { return _socket_handle.set_rx_timeout( timeout ); }
+	std::chrono::microseconds get_tx_timeout() { return _socket_handle.get_tx_timeout(); }
+	std::chrono::microseconds get_rx_timeout() { return _socket_handle.get_rx_timeout(); }
+
+	bool set_blocking( bool should_block ) { return _socket_handle.set_blocking( should_block ).success(); }
+	bool is_blocking() { return _socket_handle.is_blocking(); }
+	bool is_valid() const { return _socket_handle.is_valid(); }
 
 	bool close() { return _socket_handle.close().success(); }
 

@@ -29,7 +29,6 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 	CHECK( s2.getLocalEndpoint() == e1 );
 	CHECK( s2.getRemoteEndpoint() == e2 );
 
-
 	CHECK( s2.try_connect( e3 ) );
 
 	CHECK( s2.getLocalEndpoint() == e1 );
@@ -54,29 +53,41 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 	using namespace mart::nw::ip;
 	udp::Socket s {};
 
-	CHECK( s.isBlocking() );
+	CHECK( s.is_blocking() );
 
 	CHECK_NOTHROW( s.bind( udp::endpoint {"127.0.0.1:3446"} ) );
 
 	using namespace std::chrono_literals;
-	CHECK( s.setRxTimeout( 1ms ) );
-	CHECK( s.setTxTimeout( 2ms ) );
-	CHECK( s.getTxTimeout() == 2ms );
-	CHECK( s.getRxTimeout() == 1ms );
+	CHECK( s.set_rx_timeout( 1ms ) );
+	CHECK( s.set_tx_timeout( 2ms ) );
+	CHECK( s.get_tx_timeout() == 2ms );
+	CHECK( s.get_rx_timeout() == 1ms );
 
 	int buffer = 0;
-	CHECK( !s.rec( mart::view_bytes_mutable( buffer ) ).isValid() );
+	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
 
-	udp::endpoint e4;
-	CHECK( !s.recvfrom( mart::view_bytes_mutable( buffer ), e4 ).isValid() );
+
+	CHECK( s.try_send( mart::view_bytes( buffer ) ).size() != 0 );
+	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ).isValid() );
+	{
+		udp::endpoint e4 {};
+		CHECK( s.try_sendto( mart::view_bytes( buffer ), e4 ).size() != 0 );
+		CHECK_THROWS( s.sendto( mart::view_bytes( buffer ), e4 ).isValid() );
+	}
+
+	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
+	CHECK( !s.try_recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
+	CHECK_THROWS( s.recv( mart::view_bytes_mutable( buffer ) ).isValid() );
+	CHECK_THROWS( s.recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
+
 
 	s.clearRxBuff();
 
-	CHECK( s.setBlocking( false ) );
-	CHECK( !s.isBlocking() );
+	CHECK( s.set_blocking( false ) );
+	CHECK( !s.is_blocking() );
 
 	s.close();
-	CHECK( !s.isValid() );
+	CHECK( !s.is_valid() );
 }
 
 TEST_CASE( "invalid_endpoint_strings_fail" )

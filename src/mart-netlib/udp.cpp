@@ -5,8 +5,8 @@
 #include <mart-common/ConstString.h>
 #include <mart-common/StringViewOstream.h>
 
-#include <cerrno>
 #include <algorithm>
+#include <cerrno>
 #include <cstring>
 #include <string_view>
 
@@ -41,7 +41,7 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 Socket::Socket()
 	: _socket_handle( socks::Domain::Inet, socks::TransportType::Datagram )
 {
-	if( !isValid() ) {
+	if( !is_valid() ) {
 		char errno_buffer[24] {};
 		throw generic_nw_error(
 			mart::concat( "Could not create udp socket | Errnor:",
@@ -56,19 +56,6 @@ Socket::Socket( endpoint local, endpoint remote )
 {
 	bind( local );
 	connect( remote );
-}
-
-mart::MemoryView Socket::recvfrom( mart::MemoryView buffer, endpoint& src_addr )
-{
-	mart::nw::socks::port_layer::SockaddrIn src {};
-
-	auto tmp = _socket_handle.recvfrom( buffer, 0, src );
-	if( tmp.result.success() && src.is_valid() ) {
-		src_addr = endpoint( src );
-		return tmp.received_data;
-	} else {
-		return mart::MemoryView {};
-	}
 }
 
 void Socket::connect( endpoint ep )
@@ -119,38 +106,55 @@ socks::ErrorCode Socket::try_connect( endpoint ep ) noexcept
 	return result;
 }
 
-void Socket::sendto( mart::ConstMemoryView data, endpoint ep )
+auto Socket::sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.sendto( data, 0, ep.toSockAddr_in() );
-	if (!res.result) {
-		throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) );
-	}
+	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	return res.remaining_data;
 }
 
-void Socket::send( mart::ConstMemoryView data )
+auto Socket::send( mart::ConstMemoryView data ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.send( data, 0 );
 	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	return res.remaining_data;
 }
 
 namespace {
-template<class T, T ... Vals>
+template<class T, T... Vals>
 bool is_none_of( T v )
 {
-		return ( true && ... && ( v != Vals ) );
-
+	return ( true && ... && ( v != Vals ) );
 }
+} // namespace
+
+Socket::RecvfromResult Socket::recvfrom( mart::MemoryView buffer )
+{
+	using mart::nw::socks::ErrorCodeValues;
+	mart::nw::socks::port_layer::SockaddrIn addr {};
+
+	auto res = _socket_handle.recvfrom( buffer, 0, addr );
+	if( !res.result
+		&& is_none_of<ErrorCodeValues,
+					  ErrorCodeValues::WouldBlock,
+					  ErrorCodeValues::TryAgain,
+					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
+		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
+	}
+
+	return {res.received_data, udp::endpoint( addr )};
 }
 
-mart::MemoryView Socket::rec( mart::MemoryView buffer )
+mart::MemoryView Socket::recv( mart::MemoryView buffer )
 {
 	using mart::nw::socks::ErrorCodeValues;
 	const auto res = _socket_handle.recv( buffer, 0 );
 	if( !res.result
-		&& is_none_of<ErrorCodeValues, ErrorCodeValues::WouldBlock, ErrorCodeValues::TryAgain, ErrorCodeValues::Timeout>(
-			   res.result.error_code().value() )
-			    ) {
-		throw nw::generic_nw_error( mart::concat("Failed to receive data from socket. Details:  "));
+		&& is_none_of<ErrorCodeValues,
+					  ErrorCodeValues::WouldBlock,
+					  ErrorCodeValues::TryAgain,
+					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
+		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
 	}
 	return res.received_data;
 }
@@ -166,16 +170,15 @@ struct BlockingRestorer {
 	~BlockingRestorer() { _socket.set_blocking( _was_blocking ); }
 
 	nw::socks::RaiiSocket& _socket;
-	const bool         _was_blocking;
+	const bool             _was_blocking;
 };
 } // namespace
 
 void Socket::clearRxBuff()
 {
 	BlockingRestorer r( _socket_handle );
-	auto res = _socket_handle.set_blocking( false );
-	if( !res ) { throw mart::nw::generic_nw_error( "Failed to set socket in non-blocking mode for ex cleanup" );
-	}
+	auto             res = _socket_handle.set_blocking( false );
+	if( !res ) { throw mart::nw::generic_nw_error( "Failed to set socket in non-blocking mode for ex cleanup" ); }
 
 	uint64_t buffer[8] {};
 	auto     buffer_view = mart::view_bytes_mutable( buffer );
