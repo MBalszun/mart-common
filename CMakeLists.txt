@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW) # allow to override options in submake files by setting the corresponding vairable locally
+endif()
+
 # guard against multiple inclusions in a single super project as we have sometimes in the mart project
 if(TARGET mart-common )
 	get_target_property(PREV_SOURCE_DIR mart-common SOURCE_DIR)
@@ -57,7 +61,8 @@ endif()
 
 # support installation
 get_directory_property( hasParent PARENT_DIRECTORY )
-if( NOT hasParent )
+if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
+#if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
 	install_targets( mart-netlib-portlayer Mart:: )
