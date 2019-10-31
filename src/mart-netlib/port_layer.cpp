@@ -388,7 +388,6 @@ bool is_invalid_destination_address( const Sockaddr& to )
 
 ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept
 {
-	const auto* dest_ptr = to.to_native_ptr();
 	// sending messages to address 0.0.0.0 is apparently handled differently on different platforms,
 	// so we have to catch it manually here
 	if( is_invalid_destination_address( to ) ) {
