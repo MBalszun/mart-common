@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring> // memcpy
-#include <new> // launder
+#include <new>     // launder
 #include <type_traits>
 
 #ifdef __cpp_lib_launder
@@ -365,8 +365,36 @@ ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noex
 							  ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
+namespace {
+bool is_invalid_destination_address( const Sockaddr& to )
+{
+	const auto* dest_ptr = to.to_native_ptr();
+	// check for "0.0.0.0"
+	if( dest_ptr->sa_family == AF_INET && ( (const ::sockaddr_in*)dest_ptr )->sin_addr.s_addr == 0 ) { return true; }
+
+	// TODO: there are many more cases not covered here
+	// The library doesn't really support IPv6 beyond the portlayer yet, so lets avoid the code for this alltogether
+	// if( dest_ptr->sa_family == AF_INET6 ) {
+	//	const auto(& addr)[16] = ( (const ::sockaddr_in6*)dest_ptr )->sin6_addr.s6_addr;
+	//	for( int i = 0; i < sizeof( addr ); ++i ) {
+	//		if( addr[i] != 0 ) { return false; }
+	//	}
+	//	return true;
+	//}
+	return false;
+}
+
+} // namespace
+
 ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, const Sockaddr& to ) noexcept
 {
+	const auto* dest_ptr = to.to_native_ptr();
+	// sending messages to address 0.0.0.0 is apparently handled differently on different platforms,
+	// so we have to catch it manually here
+	if( is_invalid_destination_address( to ) ) {
+		return ReturnValue<txrx_size_t> {ErrorCode {ErrorCodeValues::InvalidArgument}};
+	}
+
 	return make_return_value( txrx_size_t {-1},
 							  ::sendto( to_native( handle ),
 										buf.char_ptr(),

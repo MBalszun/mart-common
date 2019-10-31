@@ -231,10 +231,12 @@ protected:
 };
 
 enum class ErrorCodeValues : int {
-	NoError    = 0,
-	TryAgain   = EAGAIN,
-	WouldBlock = EWOULDBLOCK,
-	Timeout    = 10060 // Windows
+	NoError         = 0,
+	TryAgain        = EAGAIN,
+	InvalidArgument = EINVAL,
+	WouldBlock      = EWOULDBLOCK,
+	Timeout         = 10060 // Windows
+
 };
 struct ErrorCode {
 	// TODO list more error codes
