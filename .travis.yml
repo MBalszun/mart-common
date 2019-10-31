@@ -39,7 +39,7 @@ install:
 script:
   - export CXX=g++-8
   - mkdir -p build && cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON -DMART_COMMON_UPLOAD_COVERAGE=On
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON -DMART_COMMON_INCLUDE_EXAMPLES=ON -DMART_COMMON_UPLOAD_COVERAGE=On
   - cmake --build .
   - ctest --output-on-failure .
   - make testing_mart-common_coverage && bash <(curl -s https://codecov.io/bash) || true
