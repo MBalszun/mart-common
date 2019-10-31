@@ -1,13 +1,12 @@
-{
-  // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
+﻿{
   "configurations": [
     {
       "name": "x64-Debug-mart-tests",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "buildRoot": "${projectDir}\\__out__\\msvc\\build\\${name}",
+      "installRoot": "${projectDir}\\__out__\\msvc\\install\\${name}",
       "cmakeCommandArgs": "-DMART_COMMON_INCLUDE_TESTS=ON",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "--output-on-failure"
