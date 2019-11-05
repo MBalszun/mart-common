@@ -153,6 +153,44 @@ private:
 	{
 	}
 };
+
+struct SockaddrUn : mart::nw::socks::Sockaddr {
+	SockaddrUn()
+		: SockaddrUn( Storage {} )
+	{
+	}
+	SockaddrUn( const SockaddrUn& other )
+		: SockaddrUn( other._storage )
+	{
+	}
+
+	SockaddrUn& operator=( const SockaddrUn& other )
+	{
+		_storage = other._storage;
+		return *this;
+	}
+
+	SockaddrUn( const char* u8path, std::size_t length );
+	explicit SockaddrUn( const ::sockaddr_un& native );
+
+	const char* path() const noexcept;
+	std::size_t length() const noexcept;
+
+private:
+	// this should have the same size and alignment as the platform's SockaddrIn
+	struct alignas (2) Storage {
+		char raw_bytes[110];
+	};
+	Storage _storage {};
+
+	explicit SockaddrUn( const SockaddrUn::Storage& src )
+		: Sockaddr( mart::nw::socks::Domain::Local, byte_range_from_pod( _storage ) )
+		, _storage( src )
+	{
+	}
+};
+
+
 const char* inet_net_to_pres( mart::nw::socks::Domain af, const void* src, char* dst, size_t size );
 int         inet_pres_to_net( mart::nw::socks::Domain af, const char* src, void* dst );
 } // namespace port_layer

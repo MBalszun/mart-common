@@ -1,4 +1,4 @@
-
+option(MART_NETLIB_TEST_UNIX_DOMAIN_SOCKS off)
 file(GLOB_RECURSE TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tests_*.cpp)
 add_executable(testing_mart-netlib
 	main.cpp
