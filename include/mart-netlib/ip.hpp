@@ -150,6 +150,7 @@ namespace _impl_details_ip {
 [[noreturn]] void _throw_ipv4_parse_fail_port( std::string_view str, std::string_view port );
 
 struct basic_endpoint_v4_base {
+	using abi_endpoint_type = mart::nw::socks::port_layer::SockaddrIn;
 
 	/* ####### State ############ */
 	address_v4 address {};
@@ -159,7 +160,7 @@ struct basic_endpoint_v4_base {
 	/* ####### constructors ############ */
 	constexpr basic_endpoint_v4_base() noexcept = default;
 
-	explicit basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& native );
+	explicit basic_endpoint_v4_base( const abi_endpoint_type& native );
 
 	constexpr basic_endpoint_v4_base( address_v4 address, port_nr port ) noexcept
 		: address( address )
@@ -208,6 +209,13 @@ struct basic_endpoint_v4_base {
 	{
 		return mart::nw::socks::port_layer::SockaddrIn( address.inNetOrder(), port.inNetOrder() );
 	}
+
+	// for use in generic contexts
+	mart::nw::socks::port_layer::SockaddrIn toSockAddr() const noexcept
+	{
+		return toSockAddr_in();
+	}
+
 
 	mart::ConstString toString() const;
 
