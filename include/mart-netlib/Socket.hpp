@@ -103,7 +103,7 @@ public:
 	ErrorCode close() noexcept
 	{
 		ErrorCode ret = port_layer::close_socket( _handle );
-		if( ret ) { _handle = port_layer::handle_t::Invalid; }
+		_handle = port_layer::handle_t::Invalid;
 		return ret;
 	}
 
