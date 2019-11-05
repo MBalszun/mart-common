@@ -83,7 +83,7 @@ ErrorCode                              set_blocking( handle_t handle, bool shoul
 /* ############# Wrapper for various address types ################################ */
 
 struct SockaddrIn : mart::nw::socks::Sockaddr {
-	SockaddrIn()
+	SockaddrIn() noexcept
 		: SockaddrIn( Storage {} )
 	{
 	}

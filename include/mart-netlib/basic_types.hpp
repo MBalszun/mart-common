@@ -199,8 +199,8 @@ enum class Direction { Tx, Rx };
 using txrx_size_t = int;
 
 struct Sockaddr {
-	Domain domain() const { return _domain; }
-	bool   is_valid() const { return _raw_storage_range.data() != nullptr; }
+	Domain domain() const noexcept { return _domain; }
+	bool   is_valid() const noexcept { return _raw_storage_range.data() != nullptr; }
 	// byte_range        raw_storage() const noexcept { return _raw_storage_range; }
 	// byte_range_mut    raw_storage() noexcept { return _raw_storage_range; };
 	::sockaddr*       to_native_ptr() noexcept { return reinterpret_cast<::sockaddr*>( _raw_storage_range.data() ); }
@@ -210,7 +210,7 @@ struct Sockaddr {
 	}
 
 	std::size_t size() const noexcept { return _raw_storage_range.size(); }
-	void        set_valid_data_range( std::size_t s ) { _raw_storage_range._size = s; }
+	void        set_valid_data_range( std::size_t s ) noexcept { _raw_storage_range._size = s; }
 
 protected:
 	const Domain   _domain;
