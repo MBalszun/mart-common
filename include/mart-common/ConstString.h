@@ -47,7 +47,7 @@ class ConstString : public StringView {
 public:
 	/* #################### CTORS ########################## */
 	//Default ConstString points at empty string
-	ConstString() :
+	ConstString() noexcept:
 		StringView(mart::EmptyStringView)
 	{};
 
