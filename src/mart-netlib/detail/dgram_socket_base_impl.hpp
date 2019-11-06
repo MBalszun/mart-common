@@ -89,7 +89,7 @@ bool is_none_of( T v )
  * still very much in flux */
 
 inline DgramSocketBase::DgramSocketBase( mart::nw::socks::Domain domain )
-	: _socket_handle( domain, socks::TransportType::Stream )
+	: _socket_handle( domain, socks::TransportType::Datagram )
 {
 	if( !is_valid() ) {
 		char errno_buffer[24] {};
