@@ -34,7 +34,8 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 	CHECK( s2.getRemoteEndpoint() == e3 );
 
 	CHECK_NOTHROW( s2.send( mart::view_bytes( 5 ) ) );
-	CHECK_NOTHROW( s2.sendto( mart::view_bytes( 5 ), e2 ) );
+	// TODO calling sendto on a connected socket has different behavior on linux and windows
+	//CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e2 ) );
 
 	CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e1 ) ); // invalid target address
 }
