@@ -7,13 +7,12 @@
 #include <filesystem>
 #include <iostream>
 
-TEST_CASE( "unix_domain_socket_simple_member_check1", "[net]" )
+TEST_CASE( "unix_domain_socket_simple_member_check1", "[.][net][unix_domain_socket]" )
 {
 
 	mart::nw::un::Socket sock1;
-	std::cout << "Empty socket created" << std::endl;
 	mart::nw::un::Socket sock2(                    //
-		mart::ConstString( "__tmp__/sock2.local" ), //
-		mart::ConstString( "__tmp__/sock2.remote" ) //
+		mart::ConstString( "./__tmp__/sock2.local" ), //
+		mart::ConstString( "./__tmp__/sock2.remote" ) //
 	);
 }
