@@ -36,6 +36,18 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 	return errno_nr_as_string( mart::nw::socks::port_layer::get_last_socket_error(), buffer );
 }
 
+template<class... Elements>
+mart::ConstString make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
+															   Elements&&... elements )
+{
+	std::array<char, 24> errno_buffer {};
+	return mart::concat( std::string_view(elements)...,
+											  "| Error Code:",
+											  errno_nr_as_string( error, errno_buffer ),
+											  " Error Msg: ",
+											  socks::to_text_rep( error ) );
+}
+
 } // namespace
 
 Socket::Socket()
@@ -44,10 +56,8 @@ Socket::Socket()
 	if( !is_valid() ) {
 		char errno_buffer[24] {};
 		throw generic_nw_error(
-			mart::concat( "Could not create udp socket | Errnor:",
-						  errno_nr_as_string( errno_buffer ),
-						  " msg: ",
-						  socks::to_text_rep( mart::nw::socks::port_layer::get_last_socket_error() ) ) );
+			make_error_message_with_appended_last_errno(mart::nw::socks::port_layer::get_last_socket_error(),
+			 "Could not create udp socket."  ));
 	}
 }
 
@@ -62,13 +72,9 @@ void Socket::connect( endpoint ep )
 {
 	auto result = _socket_handle.connect( ep.toSockAddr_in() );
 	if( !result.success() ) {
-		std::array<char, 24> errno_buffer {};
-		throw generic_nw_error( mart::concat( "Could not connect socket to address ",
-											  ep.toStringEx(),
-											  "| Errnor:",
-											  errno_nr_as_string( result, errno_buffer ),
-											  " msg: ",
-											  socks::to_text_rep( result ) ) );
+
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			result, "Could not connect socket to address ", ep.toStringEx() ) );
 	}
 
 	_ep_remote = ep;
@@ -79,12 +85,8 @@ void Socket::bind( endpoint ep )
 	auto result = _socket_handle.bind( ep.toSockAddr_in() );
 	if( !result.success() ) {
 		char errno_buffer[24] {};
-		throw generic_nw_error( mart::concat( "Could not bind udp socket to address ",
-											  ep.toStringEx(),
-											  "| Errno:",
-											  errno_nr_as_string( errno_buffer ),
-											  " msg: ",
-											  socks::to_text_rep( result ) ) );
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			result, "Could not bind udp socket to address ", ep.toStringEx() ) );
 	}
 
 	_ep_local = ep;
@@ -109,14 +111,20 @@ socks::ErrorCode Socket::try_connect( endpoint ep ) noexcept
 auto Socket::sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.sendto( data, 0, ep.toSockAddr_in() );
-	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	if( !res.result ) {
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to send data to ", ep.toString(), ". Details:  " ) );
+	}
 	return res.remaining_data;
 }
 
 auto Socket::send( mart::ConstMemoryView data ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.send( data, 0 );
-	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	if( !res.result ) {
+		throw nw::generic_nw_error(
+			make_error_message_with_appended_last_errno( res.result.error_code(), "Failed to send data. Details:  " ) );
+	}
 	return res.remaining_data;
 }
 
@@ -139,7 +147,8 @@ Socket::RecvfromResult Socket::recvfrom( mart::MemoryView buffer )
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
 					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
-		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
 
 	return {res.received_data, udp::endpoint( addr )};
@@ -154,7 +163,8 @@ mart::MemoryView Socket::recv( mart::MemoryView buffer )
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
 					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
-		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
 	return res.received_data;
 }
