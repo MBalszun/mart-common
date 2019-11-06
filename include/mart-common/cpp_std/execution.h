@@ -15,15 +15,20 @@
  *
  */
 
+#if __has_include( <version>)
+#include <version>
+#else
+#include <ciso646>
+#endif
+
 #ifndef MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
+
+#if defined( __cpp_lib_execution ) && defined( __cpp_lib_parallel_algorithm )
+#define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 1
+#else
 #define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 0
 #endif
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1913
-#undef MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
-#define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 1
-#endif
 #endif
 
 #if MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
@@ -39,8 +44,8 @@ using std::execution::parallel_policy;
 using std::execution::parallel_unsequenced_policy;
 using std::execution::sequenced_policy;
 
-constexpr const sequenced_policy&			 seq		= std::execution::seq;
-constexpr const parallel_policy&			 par		= std::execution::par;
+constexpr const sequenced_policy&            seq        = std::execution::seq;
+constexpr const parallel_policy&             par        = std::execution::par;
 constexpr const parallel_unsequenced_policy& par_unsequ = std::execution::par_unseq;
 
 } // namespace execution
@@ -55,9 +60,9 @@ class parallel_policy {};
 class parallel_unsequenced_policy {};
 // clang-format on
 
-inline constexpr sequenced_policy			 seq{};
-inline constexpr parallel_policy			 par{};
-inline constexpr parallel_unsequenced_policy par_unseq{};
+inline constexpr sequenced_policy            seq {};
+inline constexpr parallel_policy             par {};
+inline constexpr parallel_unsequenced_policy par_unseq {};
 
 } // namespace execution
 
