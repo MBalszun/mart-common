@@ -49,10 +49,10 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	CHECK_NOTHROW( s.bind( udp::endpoint {"127.0.0.1:3446"} ) );
 	using namespace std::chrono_literals;
-	CHECK( s.set_rx_timeout( 1ms ) );
-	CHECK( s.set_tx_timeout( 2ms ) );
-	CHECK( s.get_tx_timeout() == 2ms );
-	CHECK( s.get_rx_timeout() == 1ms );
+	CHECK( s.set_rx_timeout( 32ms ) ); //TODO: on some platforms (travis), must be multiple of 4ms
+	CHECK( s.set_tx_timeout( 20ms ) );
+	CHECK( s.get_tx_timeout() == 20ms );
+	CHECK( s.get_rx_timeout() == 32ms );
 
 	int buffer = 0;
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
