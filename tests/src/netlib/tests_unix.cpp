@@ -12,7 +12,7 @@ TEST_CASE( "unix_domain_socket_simple_member_check1", "[.][net][unix_domain_sock
 
 	mart::nw::un::Socket sock1;
 	mart::nw::un::Socket sock2(                    //
-		mart::ConstString( "./__tmp__/sock2.local" ), //
-		mart::ConstString( "./__tmp__/sock2.remote" ) //
+		mart::ConstString( "sock.local" ), //
+		mart::ConstString( "sock.remote" ) //
 	);
 }
