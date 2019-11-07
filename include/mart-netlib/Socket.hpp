@@ -103,7 +103,7 @@ public:
 	ErrorCode close() noexcept
 	{
 		ErrorCode ret = port_layer::close_socket( _handle );
-		_handle = port_layer::handle_t::Invalid;
+		_handle       = port_layer::handle_t::Invalid;
 		return ret;
 	}
 
@@ -226,6 +226,8 @@ public:
 	{
 		return port_layer::get_timeout( _handle, Direction::Rx ).value_or( {} );
 	}
+
+	port_layer::handle_t get() const { return _handle; }
 
 private:
 	ErrorCode _open( Domain domain, TransportType type ) noexcept
