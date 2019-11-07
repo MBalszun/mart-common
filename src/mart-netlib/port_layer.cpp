@@ -57,6 +57,12 @@
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
+#if __has_cpp_attribute( maybe_unused )
+#define MART_NETLIB_PORT_LAYER_MAYBE_UNUSED [[maybe_unused]]
+#else
+#define MART_NETLIB_PORT_LAYER_MAYBE_UNUSED
+#endif
+
 namespace mart {
 namespace nw {
 namespace socks {
@@ -131,7 +137,7 @@ ErrorCode get_appropriate_error_code( int function_result )
 	}
 }
 
-[[maybe_unused]] ErrorCode get_appropriate_error_code( bool success )
+MART_NETLIB_PORT_LAYER_MAYBE_UNUSED ErrorCode get_appropriate_error_code( bool success )
 {
 	if( success ) {
 		return {ErrorCode::Value_t::NoError};
@@ -200,7 +206,7 @@ namespace {
 // TODO: throw exception on failure?
 void startup()
 {
-	[[maybe_unused]] const static bool isInit = port_layer::waInit();
+	MART_NETLIB_PORT_LAYER_MAYBE_UNUSED const static bool isInit = port_layer::waInit();
 }
 } // namespace
 
@@ -536,9 +542,48 @@ SockaddrIn6::SockaddrIn6( const ::sockaddr_in6& native )
 	: SockaddrIn6::SockaddrIn6()
 {
 	static_assert( sizeof( _storage ) >= sizeof( native ), "" );
-	static_assert( alignof( SockaddrIn6::Storage ) >= alignof( ::sockaddr_in6 ), "" );
+	static_assert( alignof( Storage ) >= alignof( ::sockaddr_in6 ), "" );
 
 	std::memcpy( _storage.raw_bytes, &native, sizeof( native ) );
+}
+
+namespace {
+
+::sockaddr_un make_sockaddr_un( const char* u8path, std::size_t length )
+{
+	::sockaddr_un native {};
+	constexpr std::size_t max_unix_path_length = sizeof( native.sun_path );
+	native.sun_family                          = AF_UNIX;
+	std::size_t           actual_length        = length < max_unix_path_length - 1 ? length : max_unix_path_length - 1;
+	std::memcpy( native.sun_path, u8path, actual_length );
+	native.sun_path[actual_length] = '\0';
+	return native;
+}
+
+} // namespace
+
+SockaddrUn::SockaddrUn( const char* u8path, std::size_t length )
+	: SockaddrUn( make_sockaddr_un( u8path, length ) )
+{
+}
+
+SockaddrUn::SockaddrUn( const ::sockaddr_un& native )
+	: SockaddrUn::SockaddrUn()
+{
+	static_assert( sizeof( _storage ) >= sizeof( native ), "" );
+	static_assert( alignof( Storage ) >= alignof( ::sockaddr_un ), "" );
+
+	std::memcpy( _storage.raw_bytes, &native, sizeof( native ) );
+}
+
+const char* SockaddrUn::path() const noexcept
+{
+	return reinterpret_cast<const ::sockaddr_un*>( &_storage )->sun_path;
+}
+
+std::size_t SockaddrUn::length() const noexcept
+{
+	return std::strlen(reinterpret_cast<const ::sockaddr_un*>( &_storage )->sun_path);
 }
 
 const char* inet_net_to_pres( Domain af, const void* src, char* dst, size_t size )
