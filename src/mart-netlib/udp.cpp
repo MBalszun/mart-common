@@ -54,7 +54,6 @@ Socket::Socket()
 	: _socket_handle( socks::Domain::Inet, socks::TransportType::Datagram )
 {
 	if( !is_valid() ) {
-		char errno_buffer[24] {};
 		throw generic_nw_error(
 			make_error_message_with_appended_last_errno(mart::nw::socks::port_layer::get_last_socket_error(),
 			 "Could not create udp socket."  ));
@@ -84,7 +83,6 @@ void Socket::bind( endpoint ep )
 {
 	auto result = _socket_handle.bind( ep.toSockAddr_in() );
 	if( !result.success() ) {
-		char errno_buffer[24] {};
 		throw generic_nw_error( make_error_message_with_appended_last_errno(
 			result, "Could not bind udp socket to address ", ep.toStringEx() ) );
 	}

@@ -18,8 +18,9 @@
 /* ######## INCLUDES ######### */
 /* Project Includes */
 #include <mart-netlib/Socket.hpp>
-#include <mart-netlib/detail/dgram_socket_base.hpp>
 #include <mart-netlib/network_exceptions.hpp>
+
+#include <mart-netlib/detail/dgram_socket_base.hpp>
 
 /* Proprietary Library Includes */
 #include <mart-common/ArrayView.h>
@@ -29,7 +30,6 @@
 
 /* Standard Library Includes */
 #include <chrono>
-#include <optional>
 #include <string_view>
 
 #include <algorithm>
@@ -85,6 +85,18 @@ bool is_none_of( T v )
 	return ( true && ... && ( v != Vals ) );
 }
 
+template<class... Elements>
+mart::ConstString make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
+															   Elements&&... elements )
+{
+	std::array<char, 24> errno_buffer {};
+	return mart::concat( std::string_view( elements )...,
+						 "| Error Code:",
+						 errno_nr_as_string( error, errno_buffer ),
+						 " Error Msg: ",
+						 socks::to_text_rep( error ) );
+}
+
 /* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is
  * still very much in flux */
 
@@ -92,19 +104,18 @@ inline DgramSocketBase::DgramSocketBase( mart::nw::socks::Domain domain )
 	: _socket_handle( domain, socks::TransportType::Datagram )
 {
 	if( !is_valid() ) {
-		char errno_buffer[24] {};
-		throw generic_nw_error(
-			mart::concat( "Could not create socket | Errnor:",
-						  errno_nr_as_string( errno_buffer ),
-						  " msg: ",
-						  socks::to_text_rep( mart::nw::socks::port_layer::get_last_socket_error() ) ) );
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			mart::nw::socks::port_layer::get_last_socket_error(), "Could not create socket." ) );
 	}
 }
 
 inline auto DgramSocketBase::send( mart::ConstMemoryView data ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.send( data, 0 );
-	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	if( !res.result ) {
+		throw nw::generic_nw_error(
+			make_error_message_with_appended_last_errno( res.result.error_code(), "Failed to send data. Details:  " ) );
+	}
 	return res.remaining_data;
 }
 
@@ -117,7 +128,8 @@ inline mart::MemoryView DgramSocketBase::recv( mart::MemoryView buffer )
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
 					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
-		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
 	return res.received_data;
 }
@@ -141,7 +153,6 @@ inline bool _txWasSuccess( mart::ConstMemoryView data, nw::socks::ReturnValue<ma
 	return ret.success() && mart::narrow<nw::socks::txrx_size_t>( data.size() ) == ret.value();
 }
 
-
 template<class EndpointT>
 typename DgramSocket<EndpointT>::RecvfromResult DgramSocket<EndpointT>::recvfrom( mart::MemoryView buffer )
 {
@@ -154,7 +165,8 @@ typename DgramSocket<EndpointT>::RecvfromResult DgramSocket<EndpointT>::recvfrom
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
 					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
-		throw nw::generic_nw_error( mart::concat( "Failed to receive data from socket. Details:  " ) );
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
 
 	return {res.received_data, EndpointT( addr )};
@@ -173,13 +185,8 @@ void DgramSocket<EndpointT>::connect( endpoint ep )
 {
 	auto result = _socket_handle.connect( ep.toSockAddr() );
 	if( !result.success() ) {
-		std::array<char, 24> errno_buffer {};
-		throw generic_nw_error( mart::concat( "Could not connect socket to address ",
-											  ep.toStringEx(),
-											  "| Errnor:",
-											  errno_nr_as_string( result, errno_buffer ),
-											  " msg: ",
-											  socks::to_text_rep( result ) ) );
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			result, "Could not connect socket to address ", ep.toStringEx() ) );
 	}
 
 	_ep_remote = ep;
@@ -190,13 +197,8 @@ void DgramSocket<EndpointT>::bind( endpoint ep )
 {
 	auto result = _socket_handle.bind( ep.toSockAddr() );
 	if( !result.success() ) {
-		char errno_buffer[24] {};
-		throw generic_nw_error( mart::concat( "Could not bind socket to address ",
-											  ep.toStringEx(),
-											  "| Errno:",
-											  errno_nr_as_string( errno_buffer ),
-											  " msg: ",
-											  socks::to_text_rep( result ) ) );
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			result, "Could not bind socket to address ", ep.toStringEx() ) );
 	}
 
 	_ep_local = ep;
@@ -224,7 +226,10 @@ template<class EndpointT>
 auto DgramSocket<EndpointT>::sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.sendto( data, 0, ep.toSockAddr() );
-	if( !res.result ) { throw nw::generic_nw_error( mart::concat( "Failed to send data. Details:  " ) ); }
+	if( !res.result ) {
+		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
+			res.result.error_code(), "Failed to send data to", ep.toStringEx(), " . Details:  " ) );
+	}
 	return res.remaining_data;
 }
 

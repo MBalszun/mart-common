@@ -34,8 +34,18 @@ namespace nw {
 namespace socks {
 namespace detail {
 
-/* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is
- * still very much in flux */
+/*
+* DgramSocketBase and the template DgramSocket provide the implementation for datagram based sockets
+* such as udp (the udp socket class is just a specialization of DgramSocket for udp endpoints).
+*
+* Most of the implementation can be found in src/mart-netlib/detaildgram_socket_base_impl.hpp
+* The goal is to reduce compile times for files that use default socket types like
+* udp or unix domain sockets, but if you want to specialize DgramSocket for a differen
+* endpoint type, you need to also include that file.
+*
+* Note, that instantiating for DgramSocket arbitrary user types is not supported by this library
+* and will likely fail.
+*/
 class DgramSocketBase {
 public:
 	DgramSocketBase(mart::nw::socks::Domain domain);
