@@ -87,7 +87,7 @@ protected:
 };
 
 template<class EndpointT>
-class DgramSocket : DgramSocketBase {
+class DgramSocket : public DgramSocketBase {
 public:
 	using endpoint = EndpointT;
 
@@ -132,12 +132,7 @@ public:
 private:
 	endpoint _ep_local {};
 	endpoint _ep_remote {};
-	// SockaddrIn _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to SockaddrIn every
-	// time.
-	nw::socks::RaiiSocket _socket_handle;
 };
-
-
 
 } // namespace detail
 } // namespace socks
