@@ -11,8 +11,9 @@ TEST_CASE( "unix_domain_socket_simple_member_check1", "[.][net][unix_domain_sock
 {
 
 	mart::nw::un::Socket sock1;
+	sock1.bind( mart::ConstString("sock1") );
 	mart::nw::un::Socket sock2(                    //
-		mart::ConstString( "sock.local" ), //
-		mart::ConstString( "sock.remote" ) //
+		mart::ConstString( "sock2" ), //
+		mart::ConstString( "sock1" ) //
 	);
 }

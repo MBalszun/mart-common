@@ -35,26 +35,26 @@ namespace socks {
 namespace detail {
 
 /*
-* DgramSocketBase and the template DgramSocket provide the implementation for datagram based sockets
-* such as udp (the udp socket class is just a specialization of DgramSocket for udp endpoints).
-*
-* Most of the implementation can be found in src/mart-netlib/detaildgram_socket_base_impl.hpp
-* The goal is to reduce compile times for files that use default socket types like
-* udp or unix domain sockets, but if you want to specialize DgramSocket for a differen
-* endpoint type, you need to also include that file.
-*
-* Note, that instantiating for DgramSocket arbitrary user types is not supported by this library
-* and will likely fail.
-*/
+ * DgramSocketBase and the template DgramSocket provide the implementation for datagram based sockets
+ * such as udp (the udp socket class is just a specialization of DgramSocket for udp endpoints).
+ *
+ * Most of the implementation can be found in src/mart-netlib/detaildgram_socket_base_impl.hpp
+ * The goal is to reduce compile times for files that use default socket types like
+ * udp or unix domain sockets, but if you want to specialize DgramSocket for a differen
+ * endpoint type, you need to also include that file.
+ *
+ * Note, that instantiating for DgramSocket arbitrary user types is not supported by this library
+ * and will likely fail.
+ */
 class DgramSocketBase {
 public:
-	DgramSocketBase(mart::nw::socks::Domain domain);
+	DgramSocketBase( mart::nw::socks::Domain domain );
 
 	DgramSocketBase( DgramSocketBase&& ) noexcept = default;
 	DgramSocketBase& operator=( DgramSocketBase&& ) noexcept = default;
 
 	const nw::socks::RaiiSocket& getRawSocket() const { return _socket_handle; }
-	nw::socks::RaiiSocket& getRawSocket() { return _socket_handle; }
+	nw::socks::RaiiSocket&       getRawSocket() { return _socket_handle; }
 
 	/* All send functions return the remaining (non-sent) data */
 	auto try_send( mart::ConstMemoryView data ) noexcept -> mart::ConstMemoryView
@@ -82,6 +82,10 @@ public:
 
 	bool close() { return _socket_handle.close().success(); }
 
+	const nw::socks::RaiiSocket& socket_handle() const { return _socket_handle; }
+
+	nw::socks::RaiiSocket& socket_handle() { return _socket_handle; }
+
 protected:
 	nw::socks::RaiiSocket _socket_handle;
 };
@@ -92,10 +96,9 @@ public:
 	using endpoint = EndpointT;
 
 	DgramSocket()
-		: DgramSocketBase( mart::nw::socks::Domain::Local )
-	{
-		//assert( _socket_handle.is_valid() );
-	};
+		: DgramSocketBase( mart::nw::socks::Domain::Local ) {
+			// assert( _socket_handle.is_valid() );
+		};
 	DgramSocket( const endpoint& local, const endpoint& remote );
 	DgramSocket( DgramSocket&& ) noexcept = default;
 	DgramSocket& operator=( DgramSocket&& ) noexcept = default;
