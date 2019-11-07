@@ -210,7 +210,7 @@ void startup()
 }
 } // namespace
 
-ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol )
+ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol ) noexcept
 {
 	startup();
 	return make_return_value(

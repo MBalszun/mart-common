@@ -53,7 +53,7 @@ int to_native( Protocol protocol ) noexcept;
 /* ################################################################################ */
 /* ############# Wrapper around native socket API ################################# */
 
-ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default );
+ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default ) noexcept;
 ErrorCode close_socket( handle_t handle ) noexcept;
 
 ReturnValue<handle_t> accept( handle_t handle, Sockaddr& addr ) noexcept;
