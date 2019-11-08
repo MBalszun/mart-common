@@ -12,6 +12,7 @@
 #endif
 
 constexpr char message[] = {"Hello World!"};
+
 int main()
 {
 #ifdef USE_NATIVE_SOCKET_API
