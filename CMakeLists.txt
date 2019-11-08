@@ -61,8 +61,8 @@ endif()
 
 # support installation
 get_directory_property( hasParent PARENT_DIRECTORY )
-if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
-#if( NOT hasParent )
+#if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
+if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
 	install_targets( mart-netlib-portlayer Mart:: )
