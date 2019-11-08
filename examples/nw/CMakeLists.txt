@@ -19,8 +19,10 @@ else()
 
 endif()
 
+find_package(Threads)
+
 add_executable( mart-common_ex_udp_sender simple_udp_sender.cpp )
 target_link_libraries( mart-common_ex_udp_sender PUBLIC Mart::netlib)
 
 add_executable( mart-common_ex_udp_server udp_server.cpp )
-target_link_libraries( mart-common_ex_udp_server PUBLIC Mart::netlib)
+target_link_libraries( mart-common_ex_udp_server PUBLIC Mart::netlib Threads::Threads)
