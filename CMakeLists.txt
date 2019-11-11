@@ -65,9 +65,7 @@ get_directory_property( hasParent PARENT_DIRECTORY )
 if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
-	install_targets( mart-netlib-portlayer Mart:: )
-	install_targets( mart-netlib Mart:: )
-	install_targets( mart-common Mart:: )
+	install_targets( "mart-common;mart-netlib;mart-netlib-portlayer" "mart-common;mart-netlib" Mart:: )
 endif()
 
 

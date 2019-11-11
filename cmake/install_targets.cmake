@@ -1,7 +1,7 @@
 
 # https://cmake.org/cmake/help/latest/command/find_package.html
 
-function(install_targets targets namespace )
+function(install_targets targets tl_include_dirs namespace)
 
 set( INSTALL_DIR_CMAKE share/MartCommon )
 set( CONFIG_STEM_NAME MartCommonConfig )
@@ -25,7 +25,13 @@ install( EXPORT ${CONFIG_STEM_NAME}
 	DESTINATION
 		${INSTALL_DIR_CMAKE}
 )
-install( DIRECTORY include/ DESTINATION include )
+
+
+foreach(dir IN LISTS tl_include_dirs)
+	install( DIRECTORY include/${dir} DESTINATION include/ )
+endforeach()
+
+
 
 include(CMakePackageConfigHelpers)
 
