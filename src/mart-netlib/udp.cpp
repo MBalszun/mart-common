@@ -54,6 +54,9 @@ Socket::Socket()
 	: _socket_handle( socks::Domain::Inet, socks::TransportType::Datagram )
 {
 	if( !is_valid() ) {
+		// TODO: The creation of this exception message seems to be pretty costly in terms of binary size - have to investigate
+		// NOTE: Preliminary tests suggest, that the dynamic memory allocation for the message text could be the main problem,
+		// but that is just a possibility
 		throw generic_nw_error(
 			make_error_message_with_appended_last_errno(mart::nw::socks::port_layer::get_last_socket_error(),
 			 "Could not create udp socket."  ));
