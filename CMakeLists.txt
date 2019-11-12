@@ -17,11 +17,14 @@ option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 option( MART_COMMON_INCLUDE_NET_LIB "Also build netlib components (Those are not header only)" ON)
 
+add_subdirectory(im_str)
+
 ####### create mart-common library
 #
 add_library( mart-common INTERFACE )
 add_library( Mart::common ALIAS mart-common )
 set_target_properties ( mart-common PROPERTIES EXPORT_NAME common )
+target_link_libraries( mart-common INTERFACE ImStr::im_str )
 
 target_include_directories( mart-common
 	INTERFACE
@@ -61,8 +64,8 @@ endif()
 
 # support installation
 get_directory_property( hasParent PARENT_DIRECTORY )
-#if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
-if( NOT hasParent )
+if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
+#if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
 	install_targets( "mart-common;mart-netlib;mart-netlib-portlayer" "mart-common;mart-netlib" Mart:: )
