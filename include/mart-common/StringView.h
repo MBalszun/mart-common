@@ -24,6 +24,7 @@
 #include <string_view>
 #include <stdexcept>
 #include <tuple>
+#include <cassert>
 #else
 
 /* Standard Library Includes */
