@@ -62,6 +62,15 @@ public:
 	{
 	}
 
+	struct trust_me_this_is_from_a_string_litteral_t {
+	};
+	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral {};
+
+	constexpr im_str( std::string_view other, trust_me_this_is_from_a_string_litteral_t ) noexcept
+		: std::string_view( other )
+	{
+	}
+
 	// don't accept c-strings in the form of pointer
 	// if you need to create a im_str from a c string use the explicit conversion to string_view
 	template<class T>
@@ -339,6 +348,12 @@ public:
 		: im_str( other )
 	{
 	}
+
+	constexpr im_zstr( std::string_view other, trust_me_this_is_from_a_string_litteral_t t) noexcept
+		: im_str( other, t )
+	{
+	}
+
 	constexpr const char* c_str() const { return this->data(); }
 
 	constexpr bool is_zero_terminated() const noexcept
