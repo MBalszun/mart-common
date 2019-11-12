@@ -53,13 +53,14 @@ Usage is pretty much the same as you would expect from an immutable, ref-counted
 Even though `im_str` doesn't implement SSO (yet), there isn't a single allocation happening in the above code. Allocations are neccesary, when an `im_str` is created from something other than a string litteral or another `im_str`:
 
     std::string name = "Mike";
-
     mba::im_str  is           = mba::im_str( name );                   // This allocates
+
     mba::im_str full_greeting = mba::concat( "Hello, ", name, "!\n" ); // This will also allocate (once)
 
     std::cout << full_greeting; // Prints "Hello, Mike!", followed by a newline
 
-`im_str` also offers a way to query if it is a zero terminated string / create a zero terminated string
+Just like string_view, im_str is not guaranteed to be zero terminated (this can be queried via the member `im_str::is_zero_terminated()` though.
+However, the library also provides the type `im_zstr`, which is from `im_str` and is guaranteed to be always zero terminated. `concat` actually returns a `im_zstr`
 
 	using namespace mba;
     
@@ -76,7 +77,6 @@ Even though `im_str` doesn't implement SSO (yet), there isn't a single allocatio
 	assert( full.empty() );
 	c_func( fullz.c_str() );
     
-The type `im_zstr` is derived from `im_str` and - as a type invariant - is always zero terminated. `concat` actually returns a `im_zstr`
 
 ## [TODO] Full API description
 ### `im_str`
@@ -94,7 +94,7 @@ Free function that takes an arbitrary number of arguments that can be converted 
 
 **Disclaimer**: Essentially, this is a simplified, c++17 version of a type that has mainly been used in (semi-) embedded system projects and was developed at a time where the toolchains for those systems either didn't provide a `std::string` at all, or at least not a SSO version. While it can also be usefull in desktop and server applications, the drawback of using a non-standard string type with less micro-optimization compared to modern implementations will likely outweight the benefits.
 
-Two important optimizations compared to `std::string` are that 1) the internal data is ref-counted, so copying is (comparibly) cheap and 2) when constructed from a string litteral (more precisely, when constructed from a char array) it doesn't allocate at all, but just points to the string litteral. Both of those optimizations are possible because other than `std::string`, `im_str` **doesn't allow mutation of the underlying data**.
+Two important optimizations compared to `std::string` are that 1) the internal data is ref-counted, so copying is (comparibly) cheap and 2) when constructed from a string litteral (more precisely, when constructed from a const char array) it doesn't allocate at all, but just points to the string litteral. Both of those optimizations are possible because other than `std::string`, `im_str` **doesn't allow mutation of the underlying data**.
 
 In particular the creation from string litterals is a) very efficient and can be performed at compile time and is b) largely transparent to the optimizer. This generally leads to much better/smaller code generation.
 
@@ -144,7 +144,7 @@ Many will argue that public implementation inheritance from a standard library c
 However, the simple fact is that reusing `std::string_view` eliminates a whole lot of boiler plate code and as we all know, the most efficent and most bugfree code is the code you don't have to write. More importantly, most of the drawbacks don't really apply in this case:
 
 - Deletion via pointer to base class:
-  `std::string_view` doesn't have a virtual destructor, so if you have - lets say - a `std::unique_ptr<std::string_view>` that actually points to a `im_str` the wrong destructor will get called and you'll have UB. This is true but I just can't think of any valid reason to have a `std::unique_ptr<std::string_view>` outside of generic code in the first place. And even within generic code, it is very hard vor me to imagine a situation, where such a pointer would actually end up pointing at a `im_str`.
+  `std::string_view` doesn't have a virtual destructor, so if you have - lets say - a `std::unique_ptr<std::string_view>` that actually points to a `im_str` the wrong destructor will get called and you'll have UB. This is true but I just can't think of any valid reason to have a `std::unique_ptr<std::string_view>` outside of generic code in the first place. And even within generic code, it is very hard for me to imagine a situation, where such a pointer would actually end up pointing at a `im_str`.
 
 - Object slicing:
   You can break `im_str`, if you have a function that takes a `std::string_view` by reference and then assign a different, **unrelated** `std::string_view` into it (NOTE that calling `remove_prefix` or performing a similar operation is fine). Considering that  `std::string_view` is very cheap to copy, it is again hard to imagine a sensible API that would `std::string_view` as an out parameter instead of just returning it by value.
