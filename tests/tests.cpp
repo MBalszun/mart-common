@@ -212,7 +212,11 @@ TEST_CASE( "concat", "[im_str]" )
 TEST_CASE( "concat alloc", "[im_str]" )
 {
 	mba::im_str cs       = "How are you?";
+#if IM_STR_USE_ALLOC
 	auto        combined = concat(std::pmr::get_default_resource(), "Hello", " World! "s, cs );
+#else
+	auto combined = concat( nullptr, "Hello", " World! "s, cs );
+#endif
 	REQUIRE( combined == "Hello World! How are you?" );
 	REQUIRE( combined.is_zero_terminated() );
 	requireZero( combined );
