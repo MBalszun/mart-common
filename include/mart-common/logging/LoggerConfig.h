@@ -16,15 +16,15 @@
 
 #include "types.h"
 
-#include "../ConstString.h"
+#include <im_str/im_str.hpp>
 
 namespace mart {
 namespace log {
 
 // TODO: move to separate file
 struct LoggerConf_t {
-	mart::ConstString moduleName;
-	Level             logLvl = defaultLogLevel;
+	mba::im_zstr moduleName;
+	Level        logLvl = defaultLogLevel;
 };
 
 } // namespace log

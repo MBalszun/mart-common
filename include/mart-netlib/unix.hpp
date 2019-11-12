@@ -17,7 +17,8 @@
 
 #include "port_layer.hpp"
 
-#include <mart-common/ConstString.h>
+#include <im_str/im_str.hpp>
+
 #include <mart-common/utils.h>
 
 #include <filesystem>
@@ -34,7 +35,7 @@ public:
 	using abi_endpoint_type = mart::nw::socks::port_layer::SockaddrUn;
 
 	constexpr endpoint() noexcept = default;
-	endpoint( mart::ConstString path ) noexcept
+	endpoint( mba::im_zstr path ) noexcept
 		: _addr( std::move( path ) )
 	{
 	}
@@ -53,8 +54,8 @@ public:
 	{
 	}
 
-	mart::ConstString asString() const noexcept { return _addr; }
-	mart::ConstString toStringEx() const noexcept { return _addr; }
+	mba::im_zstr asString() const noexcept { return _addr; }
+	mba::im_zstr toStringEx() const noexcept { return _addr; }
 
 	abi_endpoint_type toSockAddrUn() const noexcept { return abi_endpoint_type( _addr.data(), _addr.size() ); }
 
@@ -66,7 +67,7 @@ public:
 	friend bool operator<( const endpoint& l, const endpoint& r ) noexcept { return l._addr < r._addr; }
 
 private:
-	mart::ConstString _addr {};
+	mba::im_zstr _addr {};
 };
 } // namespace un
 } // namespace mart::nw

@@ -8,11 +8,11 @@
 namespace mart::experimental::nw {
 
 class RuntimeError : public std::exception {
-	mart::ConstString _msg;
+	mba::im_zstr _msg;
 
 public:
-	RuntimeError( mart::ConstString message )
-		: _msg( std::move( message ).createZStr() )
+	RuntimeError( mba::im_zstr message )
+		: _msg( std::move( message ) )
 	{
 	}
 	const char* what() const noexcept override { return _msg.c_str(); }

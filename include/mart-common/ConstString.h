@@ -55,7 +55,8 @@ namespace mart {
 #if MART_COMMON_USE_IM_STR
 
 // NOTE: Deprecated in favor of mba::im_str
-class ConstString : public mba::im_str {
+class [[deprecated( "Use mba::im_str or mba::im_zstr directly" )]] ConstString : public mba::im_str
+{
 public:
 	using im_str::im_str;
 	ConstString( const mba::im_zstr& other )

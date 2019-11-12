@@ -20,12 +20,12 @@
 #include <atomic>
 #include <mutex>
 #include <string_view>
-#include <im_str/im_str.hpp>
+
+namespace mba {
+	class im_zstr;
+}
 
 namespace mart {
-
-class ConstString;
-
 namespace log {
 /**
  * Interface which log sinks must implement in order to be compatible with the logger

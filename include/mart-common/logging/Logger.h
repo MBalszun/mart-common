@@ -28,7 +28,8 @@
 #include <thread>
 
 /* Proprietary Library Includes */
-#include "../ConstString.h"
+#include <im_str/im_str.hpp>
+
 #include "../MartTime.h"
 #include "../StringViewOstream.h"
 #include "../experimental/CopyableAtomic.h"
@@ -279,7 +280,7 @@ private:
 	std::vector<std::shared_ptr<ILogSink>> _sinks;
 
 	/*### Cached parts of logged message ### */
-	mart::ConstString _loggingName; // This is what can be grepped for in the logfile
+	mba::im_zstr     _loggingName; // This is what can be grepped for in the logfile
 	std::string_view  _spacer;
 
 	static constexpr std::string_view space_string_litteral
@@ -300,10 +301,10 @@ private:
 			   && ( lvl <= _currentLogLevel.load( std::memory_order_relaxed ) );
 	}
 
-	static mart::ConstString _createLoggingName( const std::string_view moduleName,
+	static mba::im_zstr _createLoggingName( const std::string_view moduleName,
 												 const std::string_view parentName = {} )
 	{
-		return mart::concat( parentName, "[", moduleName, "]" );
+		return mba::concat( parentName, "[", moduleName, "]" );
 	}
 
 	// Function where the actual message gets composed

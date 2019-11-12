@@ -16,7 +16,7 @@
 
 #include "types.h"
 
-#include "../ConstString.h"
+#include <im_str/im_str.hpp>
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
