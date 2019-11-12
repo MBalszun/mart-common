@@ -322,7 +322,7 @@ class im_zstr : public im_str {
 	using im_str::im_str;
 
 public:
-	constexpr im_zstr()
+	constexpr im_zstr() noexcept
 		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag {} )
 	{
 	}
@@ -331,12 +331,12 @@ public:
 	{
 	}
 
-	explicit im_zstr( const im_str& other, is_zero_terminated_tag )
+	explicit im_zstr( const im_str& other, is_zero_terminated_tag ) noexcept
 		: im_str( other )
 	{
 	}
 
-	explicit im_zstr( im_str&& other, is_zero_terminated_tag )
+	explicit im_zstr( im_str&& other, is_zero_terminated_tag ) noexcept
 		: im_str( std::move( other ) )
 	{
 	}
