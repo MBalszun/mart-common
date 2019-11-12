@@ -28,6 +28,7 @@
 /* Project Includes */
 #include "ip.h"
 #include "Socket.h"
+#include <im_str/im_str.hpp>
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
@@ -47,13 +48,13 @@ public:
 		: Socket()
 	{
 		if (!isValid()) {
-			throw std::runtime_error(mart::concat("Could not create udp socket | Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
+			throw std::runtime_error(mba::concat("Could not create udp socket | Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 		if (!bind(local)) {
-			throw std::runtime_error(mart::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
+			throw std::runtime_error(mba::concat("Could not bind udp socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 		if (!connect(remote)) {
-			throw std::runtime_error(mart::concat("Could not connect socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
+			throw std::runtime_error(mba::concat("Could not connect socket to address ", local.toStringEx(), "| Errnor:", std::to_string(errno), " msg: ", std::string_view(std::strerror(errno))).c_str());
 		}
 	}
 

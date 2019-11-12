@@ -20,6 +20,7 @@
 #include <atomic>
 #include <mutex>
 #include <string_view>
+#include <im_str/im_str.hpp>
 
 namespace mart {
 
@@ -72,7 +73,7 @@ public:
 		}
 	};
 
-	virtual mart::ConstString getName() const = 0;
+	virtual mba::im_zstr getName() const = 0;
 
 	// Maximum level up to which messages are actually written to this sink
 	std::atomic<Level> maxlvl;

@@ -25,9 +25,10 @@
 
 /* Proprietary Library Includes */
 #include "../../utils.h"
-#include "../../ConstString.h"
 #include "../../ArrayView.h"
 #include "../../algorithm.h"
+
+#include <im_str/im_str.hpp>
 
 /* Project Includes */
 #include "basic_types.h"
@@ -136,7 +137,7 @@ public:
 		address_v4(_parseIpV4String(str))
 	{}
 
-	mart::ConstString asString() const
+	mba::im_zstr asString() const
 	{
 		std::array<char, 24> ret{}; //17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
 		in_addr addr{};
@@ -144,7 +145,7 @@ public:
 		nw::ip::port_layer::inet_net_to_pres(AF_INET, &addr, ret.data(), ret.size());// mart::ArrayView<char>(ret)));
 
 
-		return mart::ConstString(std::string_view(ret.data()));
+		return mba::im_zstr( std::string_view( ret.data() ) );
 	}
 
 
@@ -307,11 +308,11 @@ struct basic_endpoint_v4 {
 		return sockaddr;
 	}
 
-	mart::ConstString toString() const
+	mba::im_zstr toString() const
 	{
-		return mart::concat(address.asString() , ":" , std::to_string(port.inHostOrder()));
+		return mba::concat(address.asString() , ":" , std::to_string(port.inHostOrder()));
 	}
-	mart::ConstString toStringEx() const
+	mba::im_zstr toStringEx() const
 	{
 		std::string_view suffix;
 		switch (p) {
@@ -319,7 +320,7 @@ struct basic_endpoint_v4 {
 			case TransportProtocol::TCP: suffix = " (TCP)";
 			default:					 suffix = " (Unknown)";
 		}
-		return mart::concat( address.asString(), ":", std::to_string( port.inHostOrder() ), suffix );
+		return mba::concat( address.asString(), ":", std::to_string( port.inHostOrder() ), suffix );
 	}
 	/* ####### State ############ */
 	address_v4 address{};

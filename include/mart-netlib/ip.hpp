@@ -22,7 +22,7 @@
 /* Project Includes */
 
 /* Proprietary Library Includes */
-#include <mart-common/ConstString.h>
+#include <im_str/im_str.hpp>
 #include <mart-common/utils.h> //narrow
 
 /* Standard Library Includes */
@@ -57,7 +57,7 @@ public:
 	{
 	}
 
-	mart::ConstString asString() const;
+	mba::im_zstr asString() const;
 
 	constexpr uint32_net_t  inNetOrder() const noexcept { return _addr; }
 	constexpr uint32_host_t inHostOrder() const noexcept { return to_host_order( _addr ); }
@@ -217,10 +217,10 @@ struct basic_endpoint_v4_base {
 	}
 
 
-	mart::ConstString toString() const;
+	mba::im_zstr toString() const;
 
 protected:
-	mart::ConstString toStringEx( TransportProtocol p ) const;
+	mba::im_zstr toStringEx( TransportProtocol p ) const;
 };
 
 constexpr std::optional<basic_endpoint_v4_base> try_parse_basic_v4_endpoint( std::string_view str ) noexcept
@@ -243,7 +243,7 @@ struct basic_endpoint_v4 : _impl_details_ip::basic_endpoint_v4_base {
 
 	using _impl_details_ip::basic_endpoint_v4_base::basic_endpoint_v4_base;
 
-	mart::ConstString     toStringEx() const { return _impl_details_ip::basic_endpoint_v4_base::toStringEx( p ); }
+	mba::im_zstr          toStringEx() const { return _impl_details_ip::basic_endpoint_v4_base::toStringEx( p ); }
 	friend constexpr bool operator==( basic_endpoint_v4 l, basic_endpoint_v4 r ) noexcept
 	{
 		return l.address == r.address && l.port == r.port;

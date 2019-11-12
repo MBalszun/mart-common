@@ -21,7 +21,7 @@
 #include <memory>
 
 /* Proprietary Library Includes */
-#include "../ConstString.h"
+#include <im_str/im_str.hpp>
 
 /* Project Includes */
 #include "ILogSink.h"
@@ -35,17 +35,17 @@ namespace log {
 
 class FileLog : public ILogSink {
 	std::ofstream		_file;
-	mart::ConstString	_fileName;
+	mba::im_zstr	_fileName;
 	void _writeToLogImpl( std::string_view msg ) override { _file << msg; }
 	void _flush() override { _file.flush(); }
 
 public:
-	FileLog( mart::ConstString name, Level lvl = Level::TRACE )
+	FileLog( mba::im_zstr name, Level lvl = Level::TRACE )
 		: ILogSink( lvl )
 		, _file( std::string(std::string_view(name)) )
 		, _fileName( name ){};
 
-	mart::ConstString getName() const override { return _fileName; }
+	mba::im_zstr getName() const override { return _fileName; }
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const FileLogConfig_t& cfg )
@@ -71,7 +71,7 @@ public:
 		const static auto instance = std::shared_ptr<StdOutLog>( new StdOutLog() );
 		return instance;
 	}
-	mart::ConstString getName() const override { return mart::ConstString{"COUT"}; }
+	mba::im_zstr getName() const override { return mba::im_zstr {"COUT"}; }
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const StdOutLogConfig_t& cfg )

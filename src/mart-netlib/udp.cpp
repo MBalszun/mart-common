@@ -2,8 +2,9 @@
 
 #include <mart-netlib/network_exceptions.hpp>
 
-#include <mart-common/ConstString.h>
-#include <mart-common/StringViewOstream.h>
+//#include <mart-common/StringViewOstream.h>
+
+#include <im_str/im_str.hpp>
 
 #include <algorithm>
 #include <cerrno>
@@ -37,11 +38,11 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 }
 
 template<class... Elements>
-mart::ConstString make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
+mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
 															   Elements&&... elements )
 {
 	std::array<char, 24> errno_buffer {};
-	return mart::concat( std::string_view(elements)...,
+	return mba::concat( std::string_view(elements)...,
 											  "| Error Code:",
 											  errno_nr_as_string( error, errno_buffer ),
 											  " Error Msg: ",

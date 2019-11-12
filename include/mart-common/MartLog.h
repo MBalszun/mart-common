@@ -16,21 +16,23 @@
 #include "./logging/Logger.h"
 #include "./logging/Sinks.h"
 
+#include <im_str/im_str.hpp>
+
 namespace mart {
 namespace log {
 
-inline void defaultInit( Level logLvl = Level::Debug, mart::ConstString name_tag =  "main"  )
+inline void defaultInit( Level logLvl = Level::Debug, mba::im_zstr name_tag = "main" )
 {
 	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ name_tag , logLvl });
 	logger.addSink(log::makeSink(log::StdOutLogConfig_t{ Level::Debug }) );
 }
 
-inline void defaultInit( mart::ConstString file_tag,
+inline void defaultInit( mba::im_zstr file_tag,
 						 Level             logLvl   = Level::Debug,
-						 mart::ConstString name_tag = "main" )
+						 mba::im_zstr name_tag = "main" )
 {
 	Logger& logger = Logger::initDefaultLogger(LoggerConf_t{ name_tag , logLvl });
-	logger.addSink(log::makeSink(log::FileLogConfig_t{ file_tag,Level::Trace }));
+	logger.addSink(log::makeSink(log::FileLogConfig_t{ file_tag, Level::Trace }));
 }
 
 using LOG_LVL = Level;

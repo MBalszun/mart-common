@@ -24,9 +24,10 @@
 
 /* Proprietary Library Includes */
 #include <mart-common/ArrayView.h>
-#include <mart-common/ConstString.h>
 #include <mart-common/StringViewOstream.h>
 #include <mart-common/utils.h>
+
+#include <im_str/im_str.hpp>
 
 /* Standard Library Includes */
 #include <chrono>
@@ -86,11 +87,11 @@ bool is_none_of( T v )
 }
 
 template<class... Elements>
-mart::ConstString make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
+mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
 															   Elements&&... elements )
 {
 	std::array<char, 24> errno_buffer {};
-	return mart::concat( std::string_view( elements )...,
+	return mba::concat( std::string_view( elements )...,
 						 "| Error Code:",
 						 errno_nr_as_string( error, errno_buffer ),
 						 " Error Msg: ",

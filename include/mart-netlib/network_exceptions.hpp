@@ -15,7 +15,7 @@
  */
 
 #include <exception>
-#include <mart-common/ConstString.h>
+#include <im_str/im_str.hpp>
 
 namespace mart::nw {
 
@@ -27,11 +27,11 @@ protected:
 struct generic_nw_error_base : nw_error {
 
 	const char* what() const noexcept override { return _message.c_str(); }
-	generic_nw_error_base( mart::ConstString message )
-		: _message( std::move( message ).createZStr() )
+	generic_nw_error_base( mba::im_zstr message )
+		: _message( std::move( message ) )
 	{
 	}
-	mart::ConstString _message;
+	mba::im_zstr _message;
 };
 
 

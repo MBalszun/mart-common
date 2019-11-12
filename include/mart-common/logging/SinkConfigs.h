@@ -23,14 +23,13 @@ namespace mart {
 namespace log {
 
 struct FileLogConfig_t {
-	mart::ConstString fileName;
-	Level             maxLogLvl;
+	mba::im_zstr fileName;
+	Level        maxLogLvl;
 };
 
 struct StdOutLogConfig_t {
 	Level maxLogLvl;
 };
-
 
 } // namespace log
 } // namespace mart
