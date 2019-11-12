@@ -59,12 +59,12 @@ class ConstString : public mba::im_str {
 public:
 	using im_str::im_str;
 	ConstString( const mba::im_zstr& other )
-		: im_str( other )
+		: im_str( static_cast<const mba::im_str&>( other ) )
 	{
 	}
 
 	ConstString( mba::im_zstr&& other )
-		: im_str( std::move( other ) )
+		: im_str( std::move( static_cast<mba::im_str&&>(other ) ) )
 	{
 	}
 
