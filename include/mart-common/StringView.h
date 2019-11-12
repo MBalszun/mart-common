@@ -22,6 +22,8 @@
 #if MART_COMMON_STRING_VIEW_USE_STD
 #include <string>
 #include <string_view>
+#include <stdexcept>
+#include <tuple>
 #else
 
 /* Standard Library Includes */
@@ -305,7 +307,7 @@ namespace details_to_integral {
 // Core logic.
 // Assuming number starts at first character and string is supposed to be parsed until first non-digit
 template<class T>
-constexpr T core( mart::StringView str )
+constexpr T core( std::string_view str )
 {
 	T tmp = 0;
 	for( auto c : str ) {
@@ -314,11 +316,11 @@ constexpr T core( mart::StringView str )
 		if( tmp >= std::numeric_limits<T>::max() / 16 ) { // quick check against simple constant
 			if( tmp > ( std::numeric_limits<T>::max() - d ) / 10 ) {
 #ifdef __cpp_rtti
-				throw std::out_of_range( "String representing an integral (\"" + str.to_string() + "\") overflows type "
+				throw std::out_of_range( "String representing an integral (\"" + std::string( str ) + "\") overflows type "
 										 + typeid( T ).name() );
 
 #else
-				throw std::out_of_range( "String representing an integral (\"" + str.to_string()
+				throw std::out_of_range( "String representing an integral (\"" + std::string( str )
 										 + "\") overflows type in function" + __func__ );
 
 #endif
@@ -331,7 +333,7 @@ constexpr T core( mart::StringView str )
 
 // for unsigned types
 template<class T>
-constexpr auto base( const mart::StringView str ) -> std::enable_if_t<std::is_unsigned<T>::value, T>
+constexpr auto base( const std::string_view str ) -> std::enable_if_t<std::is_unsigned<T>::value, T>
 {
 	assert( str.size() > 0 );
 	if( str[0] == '+' ) {
@@ -343,7 +345,7 @@ constexpr auto base( const mart::StringView str ) -> std::enable_if_t<std::is_un
 
 // for signed types
 template<class T>
-constexpr auto base( const mart::StringView str ) -> std::enable_if_t<std::is_signed<T>::value, T>
+constexpr auto base( const std::string_view str ) -> std::enable_if_t<std::is_signed<T>::value, T>
 {
 	assert( str.size() > 0 );
 	switch( str[0] ) {
@@ -355,19 +357,13 @@ constexpr auto base( const mart::StringView str ) -> std::enable_if_t<std::is_si
 } // namespace details_to_integral
 
 template<class T = int>
-constexpr T to_integral( const mart::StringView str )
+constexpr T to_integral( const std::string_view str )
 {
 	if( str.size() == 0 ) { return T {}; }
 	return details_to_integral::base<T>( str );
 }
 
-template<class T = int>
-constexpr T to_integral( const std::string_view str )
-{
-	return to_integral( mart::StringView( str ) );
-}
-
-// minimal implementation for sanitized strings that only contain digits (no negative numbers)
+// minimal implementation for sanitized strings that only contain digits (no negative numbers) and isn't too big for the return type
 template<class T = unsigned int>
 constexpr T to_integral_unsafe( std::string_view str )
 {

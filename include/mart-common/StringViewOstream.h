@@ -18,11 +18,16 @@
 #include <ostream>
 
 namespace mart {
+#if !MART_COMMON_STRING_VIEW_USE_STD
+inline namespace sv_custom {
 inline std::ostream& operator<<( std::ostream& out, const StringView string )
 {
 	out.write( string.data(), string.size() );
 	return out;
 }
+} // namespace sv_custom
+
+#endif
 } // namespace mart
 
 #endif
