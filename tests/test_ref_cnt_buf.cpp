@@ -36,10 +36,14 @@ TEST_CASE( "ref_cnt_buf_default_construction_does_nothing", "[im_str]" )
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
-	b1 = b1; // yes, we want to check self assignment here //TODO: also check with non-default constructed buffers
+#endif
+
+	// yes, we want to check self assignment here
+	//TODO: also check with non-default constructed buffers
+	b1 = b1;
+
+#ifdef __clang__
 #pragma GCC diagnostic pop
-#else
-	b1 = b1; // yes, we want to check self assignment here //TODO: also check with non-default constructed buffers
 #endif
 
 	b1 = b3;

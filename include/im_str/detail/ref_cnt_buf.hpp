@@ -203,6 +203,7 @@ private:
 		size_type   size;
 		alloc_ptr_t alloc;
 	};
+	static_assert( sizeof( Header ) <= 4+4+sizeof(void*) ); // make sure there is no padding and we use 32bit integers
 
 	// This is used in allocate_null_terminated_char_buffer
 	constexpr explicit atomic_ref_cnt_buffer( Header& buffer ) noexcept
