@@ -32,7 +32,7 @@ void serv_task( std::atomic<bool>& stop_requested, udp::endpoint local_ep )
 }
 
 int main() {
-	constexpr udp::endpoint local_ep = udp::try_parse_v4_endpoint( "127.0.0.1:3435" ).value();
+	const udp::endpoint local_ep = udp::try_parse_v4_endpoint( "127.0.0.1:3435" ).value();
 
 	std::atomic<bool> stop_flag = false;
 	std::thread       th( [&stop_flag, local_ep] { serv_task( stop_flag,local_ep ); } );
