@@ -45,7 +45,7 @@ if(MART_COMMON_INCLUDE_NET_LIB)
 	set_target_properties ( mart-netlib PROPERTIES EXPORT_NAME netlib )
 
 	# here, only interface properties are set, the build properties are set in src/mart-netlib
-	target_link_libraries( mart-netlib INTERFACE Mart::common Mart::netlib-portlayer)
+	target_link_libraries( mart-netlib PUBLIC Mart::common Mart::netlib-portlayer)
 
 	target_compile_features( mart-netlib INTERFACE cxx_std_17 )
 	target_include_directories( mart-netlib

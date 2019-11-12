@@ -40,8 +40,8 @@ script:
   - cmake --build ${BUILD_DIR_MAIN}
   - cd ${BUILD_DIR_MAIN} && ctest --output-on-failure . && cd -
   - cmake --build ${BUILD_DIR_MAIN} --target install
-#  - cmake -S ${TRAVIS_BUILD_DIR}/examples/nw -B ${BUILD_DIR_EXAMPLE} -DCMAKE_PREFIX_PATH=${TRAVIS_BUILD_DIR}/install -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES=ON
-#  - cmake --build ${BUILD_DIR_EXAMPLE}
-#  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_sender
-#  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_server
+  - cmake -S ${TRAVIS_BUILD_DIR}/examples/nw -B ${BUILD_DIR_EXAMPLE} -DCMAKE_PREFIX_PATH=${TRAVIS_BUILD_DIR}/install -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES=ON
+  - cmake --build ${BUILD_DIR_EXAMPLE}
+  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_sender
+  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_server
 #  - make testing_mart-common_coverage && bash <(curl -s https://codecov.io/bash) || true
