@@ -11,7 +11,7 @@ if(TARGET mart-common )
 	return()
 endif()
 
-project( MartCommon VERSION 2.0 )
+project( MartCommon VERSION 3.0 )
 
 option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
