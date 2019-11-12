@@ -8,6 +8,7 @@ option(MART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES "Don't compile mart-common
 if(${MART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES})
 
 	find_package(MartCommon REQUIRED)
+	message("[MART-COMMON][EXAMPLES] Found MartCommon at " ${MartCommon_CONFIG})
 
 else()
 
