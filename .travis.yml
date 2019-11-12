@@ -2,6 +2,8 @@ language: cpp
 
 sudo: false
 
+dist: bionic
+
 git:
   depth: 5
 
