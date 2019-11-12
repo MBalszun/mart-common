@@ -49,7 +49,7 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	explicit im_str( std::string_view other, std::pmr::memory_resource* alloc = nullptr )
+	explicit im_str( std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
 	}
@@ -280,7 +280,7 @@ protected:
 
 	const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
 
-	void _copy_from( const std::string_view other, std::pmr::memory_resource* alloc )
+	void _copy_from( const std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
 		if( other.data() == nullptr ) {
 			this->_as_strview() = std::string_view {""};
@@ -304,11 +304,10 @@ template<class T>
 im_zstr range_helper( const T& args );
 
 template<class... ARGS>
-im_zstr variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args );
+im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args );
 
 template<class T>
-im_zstr range_helper( std::pmr::memory_resource* alloc, const T& args );
-
+im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
 
 } // namespace detail_concat
 
@@ -384,10 +383,11 @@ private:
 	friend im_zstr detail_concat::range_helper( const T& args );
 
 	template<class... ARGS>
-	friend im_zstr detail_concat::variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args );
+	friend im_zstr detail_concat::variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc,
+												   const ARGS... args );
 
 	template<class T>
-	friend im_zstr detail_concat::range_helper( std::pmr::memory_resource* alloc, const T& args );
+	friend im_zstr detail_concat::range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
 };
 
 inline im_zstr im_str::unshare() const
@@ -458,7 +458,7 @@ im_zstr range_helper( const T& args )
 }
 
 template<class... ARGS>
-im_zstr variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args )
+im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args )
 {
 	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
 	const std::size_t newSize = ( 0 + ... + args.size() );
@@ -473,7 +473,7 @@ im_zstr variadic_helper( std::pmr::memory_resource* alloc, const ARGS... args )
 }
 
 template<class T>
-im_zstr range_helper( std::pmr::memory_resource* alloc, const T& args )
+im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
 {
 	const std::size_t newSize
 		= std::accumulate( args.begin(), args.end(), std::size_t( 0 ), []( std::size_t s, const auto& str ) {
@@ -509,7 +509,7 @@ inline auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T
 }
 
 template<class ARG1, class... ARGS>
-inline auto concat( std::pmr::memory_resource* alloc, const ARG1 arg1, const ARGS&... args )
+inline auto concat( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARG1 arg1, const ARGS&... args )
 	-> std::enable_if_t<std::is_convertible_v<ARG1, std::string_view>, im_zstr>
 {
 	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
@@ -517,11 +517,11 @@ inline auto concat( std::pmr::memory_resource* alloc, const ARG1 arg1, const ARG
 	return detail_concat::variadic_helper( alloc, std::string_view( arg1 ), std::string_view( args )... );
 }
 template<class T>
-inline auto concat( std::pmr::memory_resource* alloc, const T& args )
+inline auto concat( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
 	-> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
 {
 	// static_assert( <args_is_a_range> )
-	return detail_concat::range_helper(alloc, args );
+	return detail_concat::range_helper( alloc, args );
 }
 
 static_assert( sizeof( im_str ) <= 3 * sizeof( void* ) );

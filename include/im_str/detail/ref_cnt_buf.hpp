@@ -4,9 +4,19 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
-#include <memory_resource>
 #include <new>     // placement new
 #include <utility> // std::move
+
+#ifndef IM_STR_USE_ALLOC
+	#if __has_include( <memory_resource>)
+		#include <memory_resource>
+		#define IM_STR_USE_ALLOC 1
+	#endif
+#else
+	#define IM_STR_USE_ALLOC 0
+#endif
+
+
 
 namespace mba::detail {
 
@@ -115,11 +125,16 @@ struct AllocResult;
  * handle is default constructed (i.e. _cnt == nullptr)
  */
 class atomic_ref_cnt_buffer {
-	using Cnt_t       = std::atomic_int;
-	using alloc_ptr_t = std::pmr::memory_resource*;
-	using size_type   = int;
+	using Cnt_t     = std::atomic_int;
+	using size_type = int;
 
 public:
+#if IM_STR_USE_ALLOC
+	using alloc_t     = std::pmr::memory_resource;
+	using alloc_ptr_t = alloc_t*;
+#else
+	using alloc_ptr_t = std::nullptr_t;
+#endif
 	/*#### Constructors and special member functions ######*/
 	static AllocResult allocate_null_terminated_char_buffer( int size, alloc_ptr_t = nullptr );
 
@@ -225,31 +240,35 @@ struct AllocResult {
 	atomic_ref_cnt_buffer handle;
 };
 
-inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( size_type                  size,
-																				std::pmr::memory_resource* resource )
+inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( size_type size, alloc_ptr_t resource )
 {
 	assert( size >= 0 );
 	stats().alloc();
 
 	const auto total_size       = sizeof( Header ) + size + 1;
-	const bool bool_use_default = resource == nullptr;
 
+#if IM_STR_USE_ALLOC
+	const bool bool_use_default = resource == nullptr;
 	char* const start = (char*)( bool_use_default                //
 									 ? std::malloc( total_size ) //
 									 : resource->allocate( total_size, alignment ) );
+#else
+	char* const start = (char*)std::malloc( total_size );
+#endif
 
 	auto* const header_ptr = new( start ) Header {Cnt_t {1}, size_type {size}, resource};
 
 	auto* const data_ptr = start + sizeof( Header ); // Start of string
 	data_ptr[size]       = '\0';                     // zero terminate
 
-	return {data_ptr, atomic_ref_cnt_buffer { *header_ptr}};
+	return {data_ptr, atomic_ref_cnt_buffer {*header_ptr}};
 }
 
 inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 {
 	stats().dealloc();
 
+#if IM_STR_USE_ALLOC
 	alloc_ptr_t alloc = header->alloc;
 	if( alloc == nullptr ) {
 		std::free( header );
@@ -257,6 +276,9 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 		size_type size = header->size;
 		alloc->deallocate( header, size, alignment );
 	}
+#else
+	std::free( header );
+#endif
 }
 
 #ifdef IM_STR_DEBUG_HOOKS
