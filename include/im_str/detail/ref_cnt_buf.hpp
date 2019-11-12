@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <new>     // placement new
 #include <utility> // std::move
+#include <cstdlib>
 
 #ifndef IM_STR_USE_ALLOC
 	#if __has_include( <memory_resource>)
