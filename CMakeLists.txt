@@ -17,11 +17,16 @@ option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 option( MART_COMMON_INCLUDE_NET_LIB "Also build netlib components (Those are not header only)" ON)
 
+add_subdirectory(im_str)
+
+add_library(Mart::im_str ALIAS mart_im_str)
+
 ####### create mart-common library
 #
 add_library( mart-common INTERFACE )
 add_library( Mart::common ALIAS mart-common )
 set_target_properties ( mart-common PROPERTIES EXPORT_NAME common )
+target_link_libraries( mart-common INTERFACE Mart::im_str )
 
 target_include_directories( mart-common
 	INTERFACE
@@ -65,7 +70,9 @@ get_directory_property( hasParent PARENT_DIRECTORY )
 if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
-	install_targets( "mart-common;mart-netlib;mart-netlib-portlayer" "mart-common;mart-netlib" Mart:: )
+	set_target_properties ( mart_im_str PROPERTIES EXPORT_NAME im_str )
+	install_targets( "mart_im_str"  Mart:: "${CMAKE_CURRENT_LIST_DIR}/im_str/include" "im_str") #todo: ugly hack - this should probably not work
+	install_targets( "mart-common;mart-netlib;mart-netlib-portlayer" Mart:: "${CMAKE_CURRENT_LIST_DIR}/include"  "mart-common;mart-netlib")
 endif()
 
 

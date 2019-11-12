@@ -6,6 +6,7 @@
 
 #include <array>
 #include <sstream>
+#include <numeric>
 
 TEST_CASE( "Padded", "[PrintWrappers]" )
 {

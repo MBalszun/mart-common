@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string_view>
 
+#include <im_str/im_str.hpp>
+
 namespace udp = mart::nw::ip::udp;
 using namespace std::chrono_literals;
 
@@ -35,7 +37,7 @@ int main() {
 	std::atomic<bool> stop_flag = false;
 	std::thread       th( [&stop_flag, local_ep] { serv_task( stop_flag,local_ep ); } );
 
-	std::cout << "Start sending data to the server\n" << std::flush;
+	std::cout << "Start sending data to the server at " << local_ep.toString() << " \n" << std::flush;
 	for (mart::PeriodicScheduler sched(1000ms); sched.invocationCnt() < 10; sched.sleep()) {
 		auto msg = "PkgNr. " + std::to_string(sched.invocationCnt());
 		udp::Socket{}.sendto( mart::view_elements( msg ).asBytes(), local_ep );

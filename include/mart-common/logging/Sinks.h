@@ -42,7 +42,7 @@ class FileLog : public ILogSink {
 public:
 	FileLog( mart::ConstString name, Level lvl = Level::TRACE )
 		: ILogSink( lvl )
-		, _file( name.to_string() )
+		, _file( std::string(std::string_view(name)) )
 		, _fileName( name ){};
 
 	mart::ConstString getName() const override { return _fileName; }

@@ -16,6 +16,13 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
+#ifndef MART_COMMON_USE_IM_STR
+#define MART_COMMON_USE_IM_STR 1
+#endif
+
+#if MART_COMMON_USE_IM_STR
+#include <im_str/im_str.hpp>
+#else
 #include <algorithm>
 #include <cassert>
 #include <atomic>
@@ -26,6 +33,8 @@
 #include "./cpp_std/memory.h"
 
 /* Project Includes */
+#endif
+
 #include "StringView.h"
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -43,6 +52,53 @@ namespace mart {
  * needs only a single dynamic memory allocation
  *
  */
+#if MART_COMMON_USE_IM_STR
+
+// NOTE: Deprecated in favor of mba::im_str
+class ConstString : public mba::im_str {
+public:
+	using im_str::im_str;
+	ConstString( const mba::im_zstr& other )
+		: im_str( static_cast<const mba::im_str&>( other ) )
+	{
+	}
+
+	ConstString( mba::im_zstr&& other )
+		: im_str( std::move( static_cast<mba::im_str&&>(other ) ) )
+	{
+	}
+
+	ConstString( const mba::im_str& other )
+		: im_str( other )
+	{
+	}
+
+	ConstString( mba::im_str&& other )
+		: im_str( std::move(other) )
+	{
+	}
+
+	constexpr const char* c_str() const noexcept
+	{
+		assert( this->is_zero_terminated() );
+		return this->data();
+	}
+
+	constexpr bool isZeroTerminated() const noexcept {
+		return this->is_zero_terminated();
+	}
+
+#if !MART_COMMON_STRING_VIEW_USE_STD1
+	operator mart::StringView() const noexcept { return mart::StringView( std::string_view( *this ) ); }
+#endif
+
+	mba::im_zstr createZStr() const& noexcept { return this->create_zstr(); }
+
+	mba::im_zstr createZStr() && noexcept { return this->create_zstr(); }
+};
+
+#else
+
 class ConstString : public StringView {
 public:
 	/* #################### CTORS ########################## */
@@ -286,16 +342,7 @@ private:
 	template<class ...ARGS>
 	static ConstString _concat_impl( ARGS... args );
 };
-
-/**
-* Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
-* returned constStr will always be zero terminated
-*/
-template<class ...ARGS>
-ConstString concat(const ARGS& ...args)
-{
-	return ConstString::_concat_impl(std::string_view(args)...);
-}
+#endif
 
 //######## impl helper for concat ###############
 namespace detail {
@@ -312,20 +359,22 @@ inline void _write_to_buffer( char* buffer, ARGS... args )
 	( _addTo( buffer, args ), ... );
 }
 
+} // namespace detail
 
+#if MART_COMMON_USE_IM_STR
+
+using mba::concat;
+
+#else
+
+/**
+ * Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
+ * returned constStr will always be zero terminated
+ */
 template<class... ARGS>
-std::string concat_cpp_str( ARGS... args )
+ConstString concat( const ARGS&... args )
 {
-	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
-	const size_t newSize = ( 0 + ... + args.size() );
-
-	std::string ret( newSize, ' ' );
-
-	_write_to_buffer( &ret[0], args ... );
-
-	return ret;
-}
-
+	return ConstString::_concat_impl( std::string_view( args )... );
 }
 
 template<class... ARGS>
@@ -340,16 +389,34 @@ inline ConstString ConstString::_concat_impl( ARGS... args )
 	return ConstString( std::move( data ), newSize );
 }
 
-template<class ...ARGS>
-std::string concat_cpp_str(const ARGS& ...args)
-{
-	return detail::concat_cpp_str( std::string_view( args ) ... );
-}
-
 inline const mart::ConstString& getEmptyConstString()
 {
-	const static mart::ConstString str(mart::EmptyStringView);
+	const static mart::ConstString str( mart::EmptyStringView );
 	return str;
+}
+
+#endif
+
+namespace detail {
+template<class... ARGS>
+std::string concat_cpp_str( ARGS... args )
+{
+	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
+	const size_t newSize = ( 0 + ... + args.size() );
+
+	std::string ret( newSize, ' ' );
+
+	_write_to_buffer( &ret[0], args... );
+
+	return ret;
+}
+
+} // namespace detail
+
+template<class... ARGS>
+std::string concat_cpp_str( const ARGS&... args )
+{
+	return detail::concat_cpp_str( std::string_view( args )... );
 }
 
 }
