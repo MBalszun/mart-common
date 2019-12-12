@@ -17,8 +17,10 @@
 // clang-format off
 #ifdef _MSC_VER
 	#define LIB_MART_COMMON_NO_INLINE __declspec( noinline )
+	#define LIB_MART_COMMON_ALWAYS_INLINE __forceinline
 #else
 	#define LIB_MART_COMMON_NO_INLINE __attribute__((noinline))
+	#define LIB_MART_COMMON_ALWAYS_INLINE __attribute__((always_inline))
 #endif
 // clang-format on
 
