@@ -13,3 +13,11 @@ TEST_CASE( "experimental_vrange_compiles", "[experimental][ranges]" )
 	auto r = mart::experimental::vrange<float>( 0.1f, 0.3f ).step( 0.1f );
 	(void)r;
 }
+
+TEST_CASE( "experimental_enum_default_range", "[experimental][ranges]" )
+{
+	enum test_vals {a,b,c};
+	mart::experimental::DefaultEnumRange<test_vals> rnage();
+
+
+}

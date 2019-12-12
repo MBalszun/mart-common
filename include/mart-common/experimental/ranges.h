@@ -42,26 +42,26 @@ public:
 	constexpr Enum operator[]( int i ) const { return static_cast<Enum>( i ); }
 
 	struct Iterator {
-		constexpr Iterator( Enum e )
+		explicit constexpr Iterator( Enum e ) noexcept
 			: idx{toUType( e )}
 		{
 		}
-		constexpr Enum		   operator*() const { return static_cast<Enum>( idx ); }
-		/*constexpr*/ Iterator operator++() { return ++idx; }
-		Iterator			   operator++( int )
+		constexpr Enum      operator*() const noexcept { return static_cast<Enum>( idx ); }
+		constexpr Iterator operator++() noexcept { return {++idx}; }
+		constexpr Iterator  operator++( int ) noexcept
 		{
 			auto t = *this;
 			idx++;
 			return t;
 		}
-		friend bool operator!=( Iterator l, Iterator r ) { return l.idx != r.idx; }
-		friend bool operator!=( Iterator l, Iterator r ) { return l.idx == r.idx; }
+		friend constexpr bool operator!=( Iterator l, Iterator r ) noexcept { return l.idx != r.idx; }
+		friend constexpr bool operator==( Iterator l, Iterator r ) noexcept { return l.idx == r.idx; }
 
 	private:
 		Ut idx;
 	};
-	constexpr Iterator begin() const { return Iterator{first}; }
-	constexpr Iterator end() const { return Iterator{static_cast<Enum>( static_cast<Ut>( last ) + Ut{1} )}; }
+	constexpr Iterator begin() const noexcept { return Iterator {first}; }
+	constexpr Iterator end() const noexcept { return Iterator {static_cast<Enum>( static_cast<Ut>( last ) + Ut {1} )}; }
 	const Enum		   first;
 	const Enum		   last;
 };
