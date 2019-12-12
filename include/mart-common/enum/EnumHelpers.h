@@ -34,14 +34,14 @@ namespace mart {
  * @return corresponding underlying vale
  */
 template<class T>
-constexpr auto toUType( T e ) -> std::underlying_type_t<T>
+constexpr auto toUType( T e ) noexcept -> std::underlying_type_t<T>
 {
 	return static_cast<std::underlying_type_t<T>>( e );
 };
 
 // this is the fallback implementation if the enum author doesn't provide  mart_enumCnt_impl himself
 template<class Enum, int val = toUType( Enum::COUNT )>
-constexpr int mart_enumCnt_impl( Enum* )
+constexpr int mart_enumCnt_impl( Enum* ) noexcept
 {
 	return val;
 }
