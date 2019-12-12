@@ -196,7 +196,7 @@ public:
 	template<class... ARGS>
 	inline void trace_msg( ARGS&&... args )
 	{
-		log( Level::Debug, std::forward<ARGS>( args )... );
+		log( Level::Trace, std::forward<ARGS>( args )... );
 	}
 
 	/* ### Change logging behavior #### */
