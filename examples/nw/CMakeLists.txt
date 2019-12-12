@@ -30,3 +30,13 @@ target_link_libraries( mart-common_ex_udp_sender PUBLIC Mart::netlib)
 
 add_executable( mart-common_ex_udp_server udp_server.cpp )
 target_link_libraries( mart-common_ex_udp_server PUBLIC Mart::netlib Threads::Threads Mart::im_str)
+
+add_executable( mart-common_ex_write_udp_msg_to_file write_udp_msg_to_file.cpp )
+target_link_libraries( mart-common_ex_write_udp_msg_to_file PUBLIC Mart::netlib )
+target_compile_features(  mart-common_ex_write_udp_msg_to_file PUBLIC cxx_std_17)
+
+if(WIN32)
+add_executable( mart-common_ex_send_status_vals send_status_vals.cpp )
+target_link_libraries( mart-common_ex_send_status_vals PUBLIC Mart::netlib )
+target_compile_features(  mart-common_ex_send_status_vals PUBLIC cxx_std_17)
+endif()
