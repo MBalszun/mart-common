@@ -32,15 +32,15 @@ namespace log {
  */
 class ILogSink {
 public:
-	ILogSink( Level lvl = Level::TRACE )
+	ILogSink( Level lvl = Level::TRACE ) noexcept
 		: maxlvl( lvl )
 	{
 	}
 	virtual ~ILogSink() = default;
 
-	void enableThreadSafeMode( bool enable ) { _threadSafe = enable; }
+	void enableThreadSafeMode( bool enable ) noexcept { _threadSafe = enable; }
 
-	bool isInThreadSafeMode() const { return _threadSafe; }
+	bool isInThreadSafeMode() const noexcept { return _threadSafe; }
 
 	void writeToLog( std::string_view msg, Level lvl )
 	{
@@ -51,14 +51,14 @@ public:
 
 		if( _threadSafe ) {
 			std::lock_guard<std::mutex> ul( _mux );
-			_writeToLogImpl( msg );
+			_do_writeToLogImpl( msg );
 			if( lvl <= Level::STATUS ) {
-				_flush();
+				_do_flush();
 			}
 		} else {
-			_writeToLogImpl( msg );
+			_do_writeToLogImpl( msg );
 			if( lvl <= Level::STATUS ) {
-				_flush();
+				_do_flush();
 			}
 		}
 	}
@@ -67,9 +67,9 @@ public:
 	{
 		if( _threadSafe ) {
 			std::lock_guard<std::mutex> ul( _mux );
-			_flush();
+			_do_flush();
 		} else {
-			_flush();
+			_do_flush();
 		}
 	};
 
@@ -83,8 +83,8 @@ private:
 	std::atomic<bool> _threadSafe{true};
 
 	/// actual logging function that has to be implemented by sinks
-	virtual void _writeToLogImpl( std::string_view msg ) = 0;
-	virtual void _flush()								 = 0;
+	virtual void _do_writeToLogImpl( std::string_view msg ) = 0;
+	virtual void _do_flush()								= 0;
 };
 }
 }

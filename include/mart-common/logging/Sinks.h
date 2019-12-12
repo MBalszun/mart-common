@@ -33,11 +33,12 @@ namespace log {
 
 /*###### File log ######*/
 
-class FileLog : public ILogSink {
+class FileLog final : public ILogSink {
 	std::ofstream		_file;
 	mba::im_zstr	_fileName;
-	void _writeToLogImpl( std::string_view msg ) override { _file << msg; }
-	void _flush() override { _file.flush(); }
+
+	void _do_writeToLogImpl( std::string_view msg ) override { _file << msg; }
+	void _do_flush() override { _file.flush(); }
 
 public:
 	FileLog( mba::im_zstr name, Level lvl = Level::TRACE )
@@ -55,14 +56,15 @@ inline std::shared_ptr<ILogSink> makeSink( const FileLogConfig_t& cfg )
 
 /*###### StdOutLog ######*/
 
-class StdOutLog : public ILogSink {
+class StdOutLog final : public ILogSink {
 	StdOutLog()
 	{
 		// Most probably, stdout will be used in multiple different threads, so default to threadsafe mode
 		this->enableThreadSafeMode( true );
 	};
-	void _writeToLogImpl( std::string_view msg ) override { std::cout << msg; }
-	void _flush() override { std::cout.flush(); }
+
+	void _do_writeToLogImpl( std::string_view msg ) override { std::cout << msg; }
+	void _do_flush() override { std::cout.flush(); }
 
 public:
 	static std::shared_ptr<StdOutLog> getInstance()

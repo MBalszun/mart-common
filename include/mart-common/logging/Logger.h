@@ -129,23 +129,40 @@ public:
 	Logger make_child( const std::string_view subModuleName ) const { return Logger( subModuleName, *this ); }
 
 	/* ### Statics ### */
-	// NOTE: This is NOT a singleton
-	/**
-	 * Only has effect if called before first call to getDefaultLogger()
-	 */
-	static Logger& initDefaultLogger( const LoggerConf_t& conf )
+private:
+	// NOTE: this whole function will ever only be called once and only from initDefaultLogger
+	static Logger& _initDefaultLogger_impl( const LoggerConf_t& conf )
 	{
+		std::cout << "[MartLog] Initializing default logger\n";
 		static Logger instance( conf );
 		return instance;
 	}
 
+public:
+	// NOTE: This is NOT a singleton
+	/**
+	 * Only has effect if called before first call to getDefaultLogger()
+	 */
+	inline static Logger& initDefaultLogger( const LoggerConf_t& conf )
+	{
+		static Logger& instance = _initDefaultLogger_impl( conf );
+		return instance;
+	}
+
+	static Logger& initDefaultLogger( const LoggerConf_t& conf, std::shared_ptr<ILogSink> sink )
+	{
+		Logger& lref = initDefaultLogger( conf );
+		lref.addSink( std::move(sink) );
+		std::cout << "[MartLog] Added sink to default logger: " << sink->getName() << '\n';
+		return lref;
+	}
+
 	static Logger& initDefaultLogger( const LoggerConf_t& conf, const std::vector<std::shared_ptr<ILogSink>>& sinks )
 	{
-		std::cout << "Initializing default logger\n";
 		Logger& lref = initDefaultLogger( conf );
 		for( auto& sink : sinks ) {
 			lref.addSink( sink );
-			std::cout << "Added sink: " << sink->getName() << '\n';
+			std::cout << "[MartLog] Added sink to default logger: " << sink->getName() << '\n';
 		}
 		return lref;
 	}
@@ -160,7 +177,8 @@ public:
 	template<class... ARGS>
 	inline void log( Level lvl, ARGS&&... args )
 	{
-		// Bail out of formatting and stuff early, if message should not be logged in the first place
+		// If message should not be logged in the first place
+		// Bail out of formatting and other expensive stuff early
 		if( !_shouldBeLogged( lvl ) ) return;
 
 		// reduce the number of instantiations for log_impl by converting all string
@@ -204,16 +222,16 @@ public:
 	 * Gets the highest (TRACE > ERROR) log level with which messages are currently written to log
 	 * @return current log level
 	 */
-	Level getLogLevel() const { return _currentLogLevel.load( std::memory_order_relaxed ); }
-	void  setLogLevel( Level lvl ) { _currentLogLevel.store( lvl, std::memory_order_relaxed ); }
+	Level getLogLevel() const noexcept { return _currentLogLevel.load( std::memory_order_relaxed ); }
+	void  setLogLevel( Level lvl ) noexcept { _currentLogLevel.store( lvl, std::memory_order_relaxed ); }
 
 	/**
 	 * Enables or disables logging, without changing log level - currently only way to prevent logging of errors
 	 * @param enable
 	 */
-	void enable( bool enable = true ) { _enabled.store( enable, std::memory_order_relaxed ); }
-	void disable() { enable( false ); }
-	bool isEnabled() const { return _enabled; }
+	void enable( bool enable = true ) noexcept { _enabled.store( enable, std::memory_order_relaxed ); }
+	void disable() noexcept { enable( false ); }
+	bool isEnabled() const noexcept { return _enabled; }
 
 	void setName( const std::string_view name ) { _loggingName = _createLoggingName( name ); }
 
@@ -294,7 +312,7 @@ private:
 
 	// checks if a message  with priority <lvl> should be logged or not
 	// Note, this is thread safe, but doesn't synchronize with e.g. disable()
-	bool _shouldBeLogged( Level lvl )
+	inline bool _shouldBeLogged( Level lvl )
 	{
 		// TODO: look at log Level of attached logger?
 		return _enabled.load( std::memory_order_relaxed )

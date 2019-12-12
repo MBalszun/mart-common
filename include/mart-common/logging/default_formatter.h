@@ -81,10 +81,12 @@ inline void defaultFormatForLog(std::ostream& out, std::chrono::hours value)		{ 
 
 // TODO: c++11
 inline void defaultFormatForLog(std::ostream& out, std::chrono::system_clock::time_point value) {
+	using namespace std::chrono_literals;
+
 	const auto t = std::chrono::system_clock::to_time_t(value);
 	out << std::put_time(std::gmtime(&t), "(%Z) %F_%T-");
 	ostream_flag_saver _(out);
-	out << std::setfill('0') << std::setw(6) << std::chrono::duration_cast<std::chrono::microseconds>(value.time_since_epoch()).count() % 1000000;
+	out << std::setfill('0') << std::setw(6) << value.time_since_epoch() / 1us % 1000000 << "us";
 }
 
 template<class Clock, class Dur>
@@ -166,27 +168,23 @@ template <class T>
 inline void formatForLog( std::ostream& out, const T& value )
 {
 	//fallback to default formatters
-	defaultFormatForLog( out, value );
+	mart::log::defaultFormatForLog( out, value );
 }
 
 // overloads for types in the mart::log namespace
 inline void formatForLog( std::ostream& out, const Level& value )
 {
-	out << std::right << std::setw( 6 ) << to_string_view( value );
+	out << std::right << std::setw( 6 ) << mart::log::to_string_view( value );
 }
 inline void formatForLog( std::ostream& out, std::thread::id id )
 {
 	ostream_flag_saver _( out );
-	out << std::hex << "0x" << id;
+	out << "0x" << std::hex << id;
 }
 
 template <class... ARGS>
 inline void formatForLog( std::ostream& out, const ARGS&... args )
 {
-	/* Hack to put all arguments into stream, without recursion
-	 * Creates an integer array of zeros
-	 * and as a "by-product" adds each argument to the stream (which is actually what we want)
-	 */
 	( formatForLog( out, args ),...);
 }
 

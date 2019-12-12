@@ -44,7 +44,7 @@ enum class Level {
 constexpr Level defaultLogLevel = Level::Status;
 
 // clang-format off
-constexpr inline std::string_view to_string_view( Level lvl )
+constexpr inline std::string_view to_string_view( Level lvl ) noexcept
 {
 	constexpr std::array<std::string_view, 4> names{ {
 			std::string_view {"ERROR"},
@@ -55,7 +55,7 @@ constexpr inline std::string_view to_string_view( Level lvl )
 	return names[mart::toUType(lvl)];
 }
 
-constexpr inline std::string_view toStringView( Level lvl )
+[[deprecated("toStringView is deprecated. Please use to_string_view")]] constexpr inline std::string_view toStringView( Level lvl ) noexcept
 {
 	return to_string_view(lvl);
 }
