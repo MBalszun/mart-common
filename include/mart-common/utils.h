@@ -136,6 +136,16 @@ template<class T, class T1, class... Ts>
 
 using idx_t = std::ptrdiff_t;
 
+template<class F>
+struct ExecuteOnExit_t {
+    ExecuteOnExit_t( F f )
+        : _f( std::move(f) )
+    {
+    }
+    ~ExecuteOnExit_t() { _f(); }
+    F _f;
+};
+
 }//mart
 
 #endif //LIB_MART_COMMON_GUARD_UTILS_H

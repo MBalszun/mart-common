@@ -80,10 +80,21 @@ TEST_CASE( "narrow_cast", "[utils]" )
 	[[maybe_unused]] auto i = mart::narrow_cast<int>( 5ll );
 }
 
-TEST_CASE( "type_is_one_of", "[utils]" ) {
+TEST_CASE( "type_is_one_of", "[utils]" )
+{
 	CHECK( mart::type_is_any_of<int, long, char, int, double>() );
 	CHECK( !mart::type_is_any_of<int, long, char, double>() );
 }
 
 static_assert( mart::type_is_any_of<int, long, char, int, double>() );
 static_assert( !mart::type_is_any_of<int, long, char, double>() );
+
+TEST_CASE( "execute_on_exit", "[utils]" )
+{
+	bool flag_was_set = false;
+	{
+		mart::ExecuteOnExit_t guard( [&] { flag_was_set = true; } );
+		CHECK( flag_was_set == false );
+	}
+	CHECK( flag_was_set );
+}
