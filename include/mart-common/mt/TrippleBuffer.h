@@ -14,7 +14,6 @@
  *
  */
 
-#include <array>
 #include <atomic>
 #include <cstdint>
 
@@ -50,7 +49,7 @@ class TrippleBuffer {
 	// - One which we are currently writing to
 	// - One intermediate buffer
 	// Which position in the array fulfills which role changes dynamically
-	std::array<T, 3> data{};
+	T data[3]{};
 
 	struct alignas( 2 * sizeof( std::uint16_t ) ) Index {
 		std::uint16_t idx;
