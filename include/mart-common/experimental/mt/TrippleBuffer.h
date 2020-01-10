@@ -62,6 +62,7 @@ class TrippleBuffer {
 	Index write_idx{1, false};
 
 	std::atomic<Index> buffer_idx{Index{2, false}};
+	static_assert( std::atomic<Index>::is_always_lock_free );
 
 public:
 	T& get_write_buffer() { return data[write_idx.idx]; }
