@@ -115,6 +115,32 @@ T clamp(T val, T min_val, T max_val) {
 	return min(max_val, max(min_val,val));
 }
 
+template<class T>
+struct Limits1D {
+	Limits1D() = default;
+	Limits1D( T v )
+		: min( -v )
+		, max( v )
+	{
+	}
+	Limits1D( T min, T max )
+		: min {min}
+		, max {max}
+	{
+	}
+
+	T min;
+	T max;
+};
+
+template<class T>
+T clamp( T val, Limits1D<T> lim )
+{
+	using std::max;
+	using std::min;
+	return min( lim.max, max( val, lim.min ) );
+}
+
 
 //Flag that is sometimes used as a template parameter for policy based design
 enum class Synchonized {
