@@ -3,13 +3,13 @@
 /**
  * TrippleBuffer.h (mart-common/mt)
  *
- * Copyright (C) 018: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2018-2020: Michael Balszun <michael.balszun@tum.de>
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See either the LICENSE file in the library's root
  * directory or http://opensource.org/licenses/MIT for details.
  *
- * @author:	Michael Balszun <michael.balszun@mytum.de>
+ * @author:	Michael Balszun <michael.balszun@tum.de>
  * @brief:	A tripple buffer implementation
  *
  */
@@ -33,7 +33,7 @@ namespace mt {
  * 	}
  * }
  *
- * void consumber() {
+ * void consumer() {
  * 	for (;;) {
  * 		buffer.fetch_update();
  * 		std::string& t = buffer.get_read_buffer();
@@ -42,36 +42,57 @@ namespace mt {
  * }
  */
 
+/**
+ * Threadsafe tripple buffer datastructure
+ *
+ * Allows to decouple the rate at which the producer
+ * generates new values and the consumer consumes them.
+ *
+ * Does not provide an integrated way to efficiently wait for new content
+ *
+ */
 template<class T>
 class TrippleBuffer {
-	// The three buffer slots
-	// - One which we are currently reading from
-	// - One which we are currently writing to
-	// - One intermediate buffer
-	// Which position in the array fulfills which role changes dynamically
+	// The three slots and three indices:
+	// - read_idx:   Number of the slot currently read from
+	// - write_idx:  Number of the slot currently written to
+	// - buffer_idx: Number of the slot that was last updated but yet requested by the reader.
+
 	T data[3]{};
 
-	struct alignas( 2 * sizeof( std::uint16_t ) ) Index {
+	struct alignas( std::uint32_t ) Index {
 		std::uint16_t idx;
-		bool		  new_data;
+		bool          new_data;
 	};
+	static_assert( sizeof( Index ) <= sizeof( std::uint32_t ) );
+	static_assert( std::atomic<Index>::is_always_lock_free );
 
 	Index read_idx{0, false};
 	Index write_idx{1, false};
 
 	std::atomic<Index> buffer_idx{Index{2, false}};
-	static_assert( std::atomic<Index>::is_always_lock_free );
 
 public:
-	T& get_write_buffer() { return data[write_idx.idx]; }
-	T& get_read_buffer() { return data[read_idx.idx]; }
-
-	TrippleBuffer() = default;
-	explicit TrippleBuffer( const T& init )
+	constexpr TrippleBuffer() noexcept = default;
+	constexpr explicit TrippleBuffer( const T& init )
 		: data{init, init, init}
 	{
 	}
 
+	T& get_write_buffer() { return data[write_idx.idx]; }
+
+	// Todo switch this to returning const reference in a future version
+	T& get_read_buffer() { return data[read_idx.idx]; }
+
+	// This is mostly useful, if we want to move out the data from the buffer
+	T&       get_mutable_read_buffer() { return data[read_idx.idx]; }
+	const T& get_immutable_read_buffer() const { return data[read_idx.idx]; }
+
+	/*
+	 * Returns true if new buffer has been commited since last call to fetch_update,
+	 * and swaps indices for read and buffer slot.
+	 * Otherwise returns false and doesn't change indices
+	 */
 	bool fetch_update()
 	{
 		if( !buffer_idx.load().new_data ) {
@@ -81,19 +102,20 @@ public:
 		// mark current slot as outdated so we don't refetch it later
 		// and swap with buffer slot
 		read_idx.new_data = false;
-		read_idx		  = buffer_idx.exchange( read_idx );
+		read_idx          = buffer_idx.exchange( read_idx );
 		return true;
 	}
 
 	void commit()
 	{
-		// mart current slot as new
+		// mark current slot as new
 		// and swap with buffer slot
 		write_idx.new_data = true;
-		write_idx		   = buffer_idx.exchange( write_idx );
+		write_idx          = buffer_idx.exchange( write_idx );
 	}
 };
-}
-}
+
+} // namespace mt
+} // namespace mart
 
 #endif
