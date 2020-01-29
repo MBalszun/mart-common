@@ -42,7 +42,7 @@ struct StorageSlot {
 	using Mem_t = typename std::aligned_storage<sizeof( T ), alignof( T )>::type;
 	using Cnt_t = std::atomic<int>;
 
-	Cnt_t cnt {-1}; // -1 -> free (and not initialized), 0-> reserved but not initialized
+	Cnt_t cnt{-1}; // -1 -> free (and not initialized), 0-> reserved but not initialized
 	Mem_t mem;
 
 	T*   rcContent() { return reinterpret_cast<T*>( &mem ); }
@@ -61,7 +61,7 @@ struct StorageSlot<T, mart::Synchonized::False> {
 	using Mem_t = typename std::aligned_storage<sizeof( T ), alignof( T )>::type;
 	using Cnt_t = int;
 
-	Cnt_t cnt {-1};
+	Cnt_t cnt{-1};
 	Mem_t mem;
 
 	T*   rcContent() { return reinterpret_cast<T*>( &mem ); }
@@ -95,8 +95,8 @@ public:
 	{
 		auto* entry = this->alloc();
 		if( entry ) {
-			new( entry->rcContent() ) T {std::forward<ARGS>( args )...};
-			return ConstRef<T> {entry};
+			new( entry->rcContent() ) T{std::forward<ARGS>( args )...};
+			return ConstRef<T>{entry};
 		} else {
 			return {};
 		}
@@ -107,8 +107,8 @@ public:
 	{
 		auto* entry = this->alloc();
 		if( entry ) {
-			new( entry->rcContent() ) T {std::forward<ARGS>( args )...};
-			return Ref<T> {entry};
+			new( entry->rcContent() ) T{std::forward<ARGS>( args )...};
+			return Ref<T>{entry};
 		} else {
 			return {};
 		}
@@ -116,7 +116,7 @@ public:
 
 protected:
 	ObjectStore_Base( mart::ArrayView<Slot_t> store )
-		: _storageArea {store}
+		: _storageArea{store}
 	{
 	}
 
@@ -162,7 +162,7 @@ public:
 	}
 
 private:
-	std::array<typename ObjectStore_Base<T>::Slot_t, N> _data {};
+	std::array<typename ObjectStore_Base<T>::Slot_t, N> _data{};
 };
 
 template<class T, mart::Synchonized IsSynced>
@@ -173,7 +173,7 @@ public:
 	RcPtr<Target_t> ptr;
 	Ref() = default;
 	Ref( Target_t* e )
-		: ptr {e}
+		: ptr{e}
 	{
 	}
 	T&       operator*() const { return *ptr.get(); }
@@ -191,11 +191,11 @@ public:
 	RcPtr<Target_t> ptr;
 	constexpr ConstRef() = default;
 	constexpr ConstRef( Target_t* e )
-		: ptr {e}
+		: ptr{e}
 	{
 	}
 	ConstRef( Ref<T>&& other )
-		: ptr {std::move( other.ptr )}
+		: ptr{std::move( other.ptr )}
 	{
 	}
 	const T& operator*() const { return *ptr.get(); }

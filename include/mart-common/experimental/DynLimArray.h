@@ -106,7 +106,7 @@ protected:
 	}
 
 	int                     _size;
-	std::array<T, Capacity> _data {};
+	std::array<T, Capacity> _data{};
 
 	friend class ArrayViewAdaptor<T, DynLimArray<T, Capacity>>;
 	// interface for ArrayViewAdaptor

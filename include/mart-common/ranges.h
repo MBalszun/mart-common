@@ -30,7 +30,7 @@ template<class T>
 class Pointer {
 public:
 	Pointer( T* p = nullptr )
-		: ptr {p}
+		: ptr{p}
 	{
 	}
 	// operator T* const &() const { return ptr; }
@@ -97,7 +97,7 @@ public:
 	using iterator_category = std::random_access_iterator_tag;
 
 	IIterator( T value = T() )
-		: i {value} {};
+		: i{value} {};
 
 	reference operator*() const { return i; }
 	pointer   operator->() const { return &i; }
@@ -107,14 +107,14 @@ public:
 		++i;
 		return *this;
 	}
-	IIterator operator++( int ) { return IIterator {i++}; }
+	IIterator operator++( int ) { return IIterator{i++}; }
 
 	IIterator& operator--()
 	{
 		--i;
 		return *this;
 	}
-	IIterator operator--( int ) { return IIterator {i--}; }
+	IIterator operator--( int ) { return IIterator{i--}; }
 
 	IIterator& operator+=( difference_type diff )
 	{
@@ -151,8 +151,8 @@ class EndAwareIterator : public IT {
 public:
 	template<class C>
 	EndAwareIterator( IT it, C&& c )
-		: IT {it}
-		, _is_end {it == c.end()} {};
+		: IT{it}
+		, _is_end{it == c.end()} {};
 
 	explicit operator bool() const { return !_is_end; }
 	bool     is_end() const { return _is_end; }
@@ -204,13 +204,13 @@ struct has_random_it {
 template<class T>
 _impl_irange::irange_t<T> irange( _impl_irange::non_deduced_t<T> start, T end )
 {
-	return _impl_irange::irange_t<T> {start, end};
+	return _impl_irange::irange_t<T>{start, end};
 }
 
 template<class T, class = mart::enable_if_t<std::is_integral<T>::value>>
 _impl_irange::irange_t<T> irange( T end )
 {
-	return _impl_irange::irange_t<T> {0, end};
+	return _impl_irange::irange_t<T>{0, end};
 }
 
 template<class C,
@@ -219,13 +219,13 @@ template<class C,
                                                    typename std::iterator_traits<IT>::iterator_category>::value>>
 _impl_irange::irange_t<typename C::size_type> irange( const C& container )
 {
-	return _impl_irange::irange_t<typename C::size_type> {0, container.size()};
+	return _impl_irange::irange_t<typename C::size_type>{0, container.size()};
 }
 
 template<class T, size_t N>
 _impl_irange::irange_t<size_t> irange( const T ( & )[N] )
 {
-	return _impl_irange::irange_t<size_t> {0, N};
+	return _impl_irange::irange_t<size_t>{0, N};
 }
 
 } // namespace mart

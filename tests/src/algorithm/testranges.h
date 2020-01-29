@@ -3,7 +3,7 @@
 
 namespace {
 
-const std::vector<std::vector<int>> test_ranges {
+const std::vector<std::vector<int>> test_ranges{
 	{},
 	{1},
 	{-1, 2, 3, 4, 5, 6, 7, 8},

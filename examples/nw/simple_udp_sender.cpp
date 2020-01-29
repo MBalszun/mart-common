@@ -44,7 +44,7 @@ int main()
 {
 #ifdef USE_NATIVE_SOCKET_API
 
-	sockaddr_in address {};
+	sockaddr_in address{};
 	address.sin_family      = AF_INET;
 	address.sin_addr.s_addr = INADDR_LOOPBACK;
 	address.sin_port        = htons( 6565 );
@@ -52,7 +52,7 @@ int main()
 	auto handle = ::socket( AF_INET, SOCK_DGRAM, 0 );
 	if( handle == -1 ) {
 		close_socket( handle );
-		throw std::exception {};
+		throw std::exception{};
 	}
 
 	sendto( handle, message, sizeof( message ), 0, (sockaddr*)&address, sizeof( address ) );
@@ -64,11 +64,11 @@ int main()
 #ifdef USE_OLD_NETLIB
 	namespace udp = mart::experimental::nw::ip::udp;
 	auto dest     = udp::parse_v4_endpoint( "127.0.0.1:6345" ).value();
-	udp::Socket {}.sendto( mart::view_bytes( message ), dest );
+	udp::Socket{}.sendto( mart::view_bytes( message ), dest );
 #else
 	namespace udp = mart::nw::ip::udp;
 	auto dest     = udp::try_parse_v4_endpoint( "127.0.0.1:6345" ).value();
-	udp::Socket {}.try_sendto( mart::view_bytes( message ), dest );
+	udp::Socket{}.try_sendto( mart::view_bytes( message ), dest );
 #endif
 #endif
 }

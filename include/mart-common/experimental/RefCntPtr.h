@@ -83,7 +83,7 @@ public:
 	{
 	}
 	RcPtr( E* e )
-		: _ptr {e}
+		: _ptr{e}
 	{
 		_condInc();
 	}
@@ -95,7 +95,7 @@ public:
 		_condInc();
 	}
 	RcPtr( RcPtr&& other )
-		: _ptr {mart::exchange( other._ptr, nullptr )}
+		: _ptr{mart::exchange( other._ptr, nullptr )}
 	{
 	}
 

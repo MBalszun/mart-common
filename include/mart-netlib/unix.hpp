@@ -67,7 +67,7 @@ public:
 	friend bool operator<( const endpoint& l, const endpoint& r ) noexcept { return l._addr < r._addr; }
 
 private:
-	mba::im_zstr _addr {};
+	mba::im_zstr _addr{};
 };
 } // namespace un
 } // namespace mart::nw

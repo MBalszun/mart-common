@@ -44,7 +44,7 @@ struct EnumIdxArray : std::array<T, N> {
 
 	/* ###### CTORS ###### */
 	constexpr EnumIdxArray() noexcept
-		: Storage_t {} {};
+		: Storage_t{} {};
 	constexpr EnumIdxArray( const EnumIdxArray& other ) = default;
 	constexpr EnumIdxArray( EnumIdxArray&& )            = default;
 	EnumIdxArray& operator=( const EnumIdxArray& ) = default;
@@ -56,7 +56,7 @@ struct EnumIdxArray : std::array<T, N> {
 			 class... ARGS,
 			 class = mart::enable_if_t<!std::is_same<EnumIdxArray<T, EnumT, N>, mart::decay_t<A1>>::value>>
 	constexpr EnumIdxArray( A1&& arg, ARGS&&... args )
-		: Storage_t {{std::forward<A1>( arg ), std::forward<ARGS>( args )...}}
+		: Storage_t{{std::forward<A1>( arg ), std::forward<ARGS>( args )...}}
 	{
 	}
 

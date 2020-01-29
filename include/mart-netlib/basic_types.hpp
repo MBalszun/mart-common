@@ -145,7 +145,7 @@ struct byte_range_mut {
 	unsigned char* _data;
 	std::uintptr_t _size;
 
-	constexpr operator byte_range() const noexcept { return byte_range {_data, _size}; }
+	constexpr operator byte_range() const noexcept { return byte_range{_data, _size}; }
 
 	constexpr std::size_t    size() const noexcept { return _size; }
 	constexpr unsigned char* begin() const noexcept { return _data; }
@@ -158,19 +158,19 @@ struct byte_range_mut {
 template<class T>
 byte_range byte_range_from_pod( const T& pod )
 {
-	return byte_range {reinterpret_cast<const unsigned char*>( &pod ), sizeof( pod )};
+	return byte_range{reinterpret_cast<const unsigned char*>( &pod ), sizeof( pod )};
 }
 
 template<class T>
 byte_range_mut byte_range_from_pod( T& pod )
 {
-	return byte_range_mut {reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
+	return byte_range_mut{reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
 }
 
 template<class T>
 byte_range_mut byte_range_mut_rom_pod( T& pod )
 {
-	return byte_range_mut {reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
+	return byte_range_mut{reinterpret_cast<unsigned char*>( &pod ), sizeof( pod )};
 }
 
 namespace socks {
@@ -218,11 +218,11 @@ protected:
 
 	Sockaddr( Domain domain )
 		: _domain( domain )
-		, _raw_storage_range {} {};
+		, _raw_storage_range{} {};
 
 	Sockaddr( Domain domain, byte_range_mut data )
 		: _domain( domain )
-		, _raw_storage_range( data ) {};
+		, _raw_storage_range( data ){};
 
 	// default behavior is most likely wrong, as _raw_storage_range usually points into the datastructure
 	Sockaddr( const Sockaddr& ) = delete;
@@ -254,14 +254,14 @@ template<class T = int>
 struct ReturnValue {
 	ReturnValue() = default;
 	constexpr explicit ReturnValue( const T& value ) noexcept
-		: _value {value}
-		, _success {true}
+		: _value{value}
+		, _success{true}
 	{
 	}
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
-		: _errc {errc}
-		, _success {false}
+		: _errc{errc}
+		, _success{false}
 	{
 	}
 	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
@@ -270,7 +270,7 @@ struct ReturnValue {
 	constexpr T         value() const noexcept { return _value; }
 	constexpr ErrorCode error_code() const noexcept
 	{
-		return _success ? ErrorCode {ErrorCode::Value_t::NoError} : _errc;
+		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
 	}
 	constexpr int raw() const noexcept { return static_cast<int>( _errc.raw_value() ); }
 

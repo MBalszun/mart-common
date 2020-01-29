@@ -80,7 +80,7 @@ public:
 	};
 	RecvfromResult try_recvfrom( mart::MemoryView buffer ) noexcept
 	{
-		mart::nw::socks::port_layer::SockaddrIn addr {};
+		mart::nw::socks::port_layer::SockaddrIn addr{};
 		auto                                    res = _socket_handle.recvfrom( buffer, 0, addr );
 		return {res.received_data, endpoint( addr )};
 	}
@@ -107,8 +107,8 @@ private:
 	{
 		return ret.success() && mart::narrow<nw::socks::txrx_size_t>( data.size() ) == ret.value();
 	}
-	endpoint _ep_local {};
-	endpoint _ep_remote {};
+	endpoint _ep_local{};
+	endpoint _ep_remote{};
 	// SockaddrIn _sa_remote{}; //this is only for caching, so we don't have to convert _ep_remote to SockaddrIn every
 	// time.
 	nw::socks::RaiiSocket _socket_handle;

@@ -3,8 +3,8 @@
 
 namespace {
 
-constexpr auto v_list1 = mart::tmp::value_list<int, 1, 2, 3, 4, 5> {};
-constexpr auto v_list2 = mart::tmp::value_list<char, 'H', 'e', 'l', 'l', 'o'> {};
+constexpr auto v_list1 = mart::tmp::value_list<int, 1, 2, 3, 4, 5>{};
+constexpr auto v_list2 = mart::tmp::value_list<char, 'H', 'e', 'l', 'l', 'o'>{};
 
 static_assert( mart::tmp::get_Nth_element( 2, v_list1 ) == 3 );
 

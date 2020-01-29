@@ -83,10 +83,10 @@ public:
 	 * line in the log)
 	 */
 	Logger( const std::string_view moduleName, Level logLvl = defaultLogLevel )
-		: _startTime {mart::now()}
-		, _currentLogLevel {logLvl}
-		, _enabled {true}
-		, _sinks {}
+		: _startTime{mart::now()}
+		, _currentLogLevel{logLvl}
+		, _enabled{true}
+		, _sinks{}
 		, _loggingName( _createLoggingName( moduleName ) )
 	{
 	}
@@ -350,7 +350,7 @@ private:
 	void _writeBufferToSinks( Level lvl )
 	{
 		auto text = _sbuffer().str();
-		_sbuffer().str( std::string {} );
+		_sbuffer().str( std::string{} );
 		for( const auto& se : _sinks ) {
 			se->writeToLog( text, lvl );
 		}

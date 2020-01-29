@@ -7,12 +7,12 @@
 TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 {
 	using namespace mart::nw::ip;
-	udp::endpoint e1 = {mart::nw::ip::address_any, mart::nw::ip::port_nr {1573}};
-	udp::endpoint e2 = {mart::nw::ip::address_local_host, mart::nw::ip::port_nr {1455}};
-	udp::endpoint e3 {"127.0.0.1:3435"};
+	udp::endpoint e1 = {mart::nw::ip::address_any, mart::nw::ip::port_nr{1573}};
+	udp::endpoint e2 = {mart::nw::ip::address_local_host, mart::nw::ip::port_nr{1455}};
+	udp::endpoint e3{"127.0.0.1:3435"};
 	udp::Socket   s1;
 
-	udp::Socket s2 {};
+	udp::Socket s2{};
 
 	udp::Socket s3( e1, e3 );
 	s3.close();
@@ -43,11 +43,11 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 {
 	using namespace mart::nw::ip;
-	udp::Socket s {};
+	udp::Socket s{};
 
 	CHECK( s.is_blocking() );
 
-	CHECK_NOTHROW( s.bind( udp::endpoint {"127.0.0.1:3446"} ) );
+	CHECK_NOTHROW( s.bind( udp::endpoint{"127.0.0.1:3446"} ) );
 	using namespace std::chrono_literals;
 	CHECK( s.set_rx_timeout( 32ms ) ); // TODO: on some platforms (travis), must be multiple of 4ms
 	CHECK( s.set_tx_timeout( 20ms ) );
@@ -60,7 +60,7 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 	CHECK( s.try_send( mart::view_bytes( buffer ) ).size() != 0 );
 	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ).isValid() );
 	{
-		udp::endpoint e4 {};
+		udp::endpoint e4{};
 		CHECK( s.try_sendto( mart::view_bytes( buffer ), e4 ).size() != 0 );
 		CHECK_THROWS( s.sendto( mart::view_bytes( buffer ), e4 ).isValid() );
 	}
@@ -83,9 +83,9 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 TEST_CASE( "invalid_endpoint_strings_fail" )
 {
 	using namespace mart::nw::ip;
-	CHECK_THROWS( udp::endpoint {"127.0.0.1"} );
-	CHECK_THROWS( udp::endpoint {"127.0.0:5"} );
-	CHECK_THROWS( udp::endpoint {"127005"} );
-	CHECK_THROWS( udp::endpoint {"127.0.0.1:66999"} );
-	CHECK_THROWS( udp::endpoint {"1.333.0.1:669"} );
+	CHECK_THROWS( udp::endpoint{"127.0.0.1"} );
+	CHECK_THROWS( udp::endpoint{"127.0.0:5"} );
+	CHECK_THROWS( udp::endpoint{"127005"} );
+	CHECK_THROWS( udp::endpoint{"127.0.0.1:66999"} );
+	CHECK_THROWS( udp::endpoint{"1.333.0.1:669"} );
 }

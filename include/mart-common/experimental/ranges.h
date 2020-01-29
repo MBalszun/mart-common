@@ -33,7 +33,7 @@ template<class R>
 auto view_reversed( R&& r ) -> range<std::reverse_iterator<decltype( r.begin() )>>
 {
 	using Rit = std::reverse_iterator<decltype( r.begin() )>;
-	return {Rit {r.end()}, Rit {r.begin()}};
+	return {Rit{r.end()}, Rit{r.begin()}};
 }
 
 template<class Enum, class Ut = mart::underlying_type_t<Enum>>
@@ -43,7 +43,7 @@ public:
 
 	struct Iterator {
 		explicit constexpr Iterator( Enum e ) noexcept
-			: idx {toUType( e )}
+			: idx{toUType( e )}
 		{
 		}
 		constexpr Enum     operator*() const noexcept { return static_cast<Enum>( idx ); }
@@ -60,8 +60,8 @@ public:
 	private:
 		Ut idx;
 	};
-	constexpr Iterator begin() const noexcept { return Iterator {first}; }
-	constexpr Iterator end() const noexcept { return Iterator {static_cast<Enum>( static_cast<Ut>( last ) + Ut {1} )}; }
+	constexpr Iterator begin() const noexcept { return Iterator{first}; }
+	constexpr Iterator end() const noexcept { return Iterator{static_cast<Enum>( static_cast<Ut>( last ) + Ut{1} )}; }
 	const Enum         first;
 	const Enum         last;
 };
@@ -83,9 +83,9 @@ public:
 	using iterator_category = std::random_access_iterator_tag;
 
 	FIterator( T value = T(), T step = T( 1.0 ) )
-		: i {0}
-		, offset {value}
-		, step {step}
+		: i{0}
+		, offset{value}
+		, step{step}
 	{
 	}
 
@@ -194,18 +194,18 @@ struct frange_t {
 	static_assert( std::is_floating_point<T>::value, "frange can only be used for floating point values" );
 	using iterator = FIterator<T>;
 
-	iterator begin() const { return iterator {_start_v, _step}; };
+	iterator begin() const { return iterator{_start_v, _step}; };
 	iterator end() const
 	{
-		iterator ret {_start_v, _step};
+		iterator ret{_start_v, _step};
 		ret.i = static_cast<std::ptrdiff_t>( ( _end_v - _start_v ) / _step ) + 1;
 		return ret;
 	};
 
 	frange_t( T start, T end, T step = T( 1.0 ) )
-		: _start_v {start}
-		, _end_v {end}
-		, _step {step}
+		: _start_v{start}
+		, _end_v{end}
+		, _step{step}
 	{
 	}
 
@@ -226,7 +226,7 @@ struct frange_t {
 template<class T>
 _impl_frange::frange_t<T> frange( _impl_irange::non_deduced_t<T> start, T end )
 {
-	return _impl_frange::frange_t<T> {start, end};
+	return _impl_frange::frange_t<T>{start, end};
 }
 
 namespace _impl_vrange {
@@ -243,9 +243,9 @@ public:
 	VIterator_rnd() = default;
 
 	VIterator_rnd( T rng_start, T rng_step, T value )
-		: offset {rng_start}
-		, step {rng_step}
-		, i {value_to_idx( rng_start, rng_step, value )}
+		: offset{rng_start}
+		, step{rng_step}
+		, i{value_to_idx( rng_start, rng_step, value )}
 	{
 	}
 
@@ -378,8 +378,8 @@ public:
 
 	constexpr VIterator_fwd() = default;
 	constexpr VIterator_fwd( T rng_start, T rng_step, T value )
-		: value {rng_start}
-		, step {rng_step}
+		: value{rng_start}
+		, step{rng_step}
 	{
 		(void)value;
 	}
@@ -413,7 +413,7 @@ constexpr bool can_perform_arithmetic( T* )
 	return false;
 }
 
-template<class T, class = decltype( static_cast<std::ptrdiff_t>( ( T {} - T {} ) / T {} ) )>
+template<class T, class = decltype( static_cast<std::ptrdiff_t>( ( T{} - T{} ) / T{} ) )>
 constexpr bool can_perform_arithmetic( std::nullptr_t )
 {
 	return true;
@@ -432,12 +432,12 @@ template<class T>
 struct vrange_t {
 	using iterator = VIterator<T>;
 
-	iterator begin() const { return iterator {_start_v, _step, _start_v}; };
-	iterator end() const { return iterator {_start_v, _step, _end_v + _step}; };
+	iterator begin() const { return iterator{_start_v, _step, _start_v}; };
+	iterator end() const { return iterator{_start_v, _step, _end_v + _step}; };
 
 	vrange_t( T start, T end )
-		: _start_v {start}
-		, _end_v {end}
+		: _start_v{start}
+		, _end_v{end}
 	{
 	}
 
@@ -450,7 +450,7 @@ struct vrange_t {
 
 	T _start_v;
 	T _end_v;
-	T _step {};
+	T _step{};
 };
 
 } // namespace _impl_vrange
@@ -458,7 +458,7 @@ struct vrange_t {
 template<class T>
 _impl_vrange::vrange_t<T> vrange( _impl_irange::non_deduced_t<T> start, T end )
 {
-	return _impl_vrange::vrange_t<T> {start, end};
+	return _impl_vrange::vrange_t<T>{start, end};
 }
 
 } // namespace experimental

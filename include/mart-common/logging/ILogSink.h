@@ -73,7 +73,7 @@ public:
 
 private:
 	std::mutex        _mux;
-	std::atomic<bool> _threadSafe {true};
+	std::atomic<bool> _threadSafe{true};
 
 	/// actual logging function that has to be implemented by sinks
 	virtual void _do_writeToLogImpl( std::string_view msg ) = 0;

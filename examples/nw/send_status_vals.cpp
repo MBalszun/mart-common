@@ -40,7 +40,7 @@ bool is_key_pressed( char key )
 int main()
 {
 	mart::ExecuteOnExit_t cleanup(
-		[] { udp::Socket {}.sendto( mart::view_bytes( "EXIT" ).subview( 0, 4 ), destination ); } );
+		[] { udp::Socket{}.sendto( mart::view_bytes( "EXIT" ).subview( 0, 4 ), destination ); } );
 	std::atomic_int heart_rate = 0;
 	std::atomic_int blood_ox   = 0;
 	bool            changed    = true;
@@ -80,7 +80,7 @@ int main()
 			std::cout.write( vt_cmd_clear_line, sizeof( vt_cmd_clear_line ) );*/
 			clear_top_console_line();
 			std::cout << msg;
-			udp::Socket {}.sendto( mart::view_elements( msg ).asBytes(), destination );
+			udp::Socket{}.sendto( mart::view_elements( msg ).asBytes(), destination );
 		}
 		changed = false;
 	}

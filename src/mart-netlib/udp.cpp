@@ -40,7 +40,7 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 template<class... Elements>
 mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error, Elements&&... elements )
 {
-	std::array<char, 24> errno_buffer {};
+	std::array<char, 24> errno_buffer{};
 	return mba::concat( std::string_view( elements )...,
 						"| Error Code:",
 						errno_nr_as_string( error, errno_buffer ),
@@ -139,7 +139,7 @@ bool is_none_of( T v )
 Socket::RecvfromResult Socket::recvfrom( mart::MemoryView buffer )
 {
 	using mart::nw::socks::ErrorCodeValues;
-	mart::nw::socks::port_layer::SockaddrIn addr {};
+	mart::nw::socks::port_layer::SockaddrIn addr{};
 
 	auto res = _socket_handle.recvfrom( buffer, 0, addr );
 	if( !res.result
@@ -190,7 +190,7 @@ void Socket::clearRxBuff()
 	auto             res = _socket_handle.set_blocking( false );
 	if( !res ) { throw mart::nw::generic_nw_error( "Failed to set socket in non-blocking mode for ex cleanup" ); }
 
-	uint64_t buffer[8] {};
+	uint64_t buffer[8]{};
 	auto     buffer_view = mart::view_bytes_mutable( buffer );
 
 	while( _socket_handle.recv( buffer_view, 0 ).result.success() ) {

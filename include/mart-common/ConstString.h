@@ -104,7 +104,7 @@ public:
 	/* #################### CTORS ########################## */
 	// Default ConstString points at empty string
 	ConstString() noexcept
-		: StringView( mart::EmptyStringView ) {};
+		: StringView( mart::EmptyStringView ){};
 
 	explicit ConstString( StringView other ) { _copyFrom( other ); }
 
@@ -115,7 +115,7 @@ public:
 
 	struct trust_me_this_is_from_a_string_litteral_t {
 	};
-	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral {};
+	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral{};
 
 	constexpr explicit ConstString( std::string_view other, trust_me_this_is_from_a_string_litteral_t ) noexcept
 		: StringView( other )
@@ -220,16 +220,16 @@ private:
 
 		atomic_ref_cnt() = default;
 		explicit atomic_ref_cnt( std::unique_ptr<char[]>&& location ) noexcept
-			: _cnt {new( location.release() ) Cnt_t {1}}
+			: _cnt{new( location.release() ) Cnt_t{1}}
 		{
 		}
 		atomic_ref_cnt( const atomic_ref_cnt& other ) noexcept
-			: _cnt {other._cnt}
+			: _cnt{other._cnt}
 		{
 			_incref();
 		}
 		atomic_ref_cnt( atomic_ref_cnt&& other ) noexcept
-			: _cnt {other._cnt}
+			: _cnt{other._cnt}
 		{
 			other._cnt = nullptr;
 		}
@@ -302,7 +302,7 @@ private:
 	static inline atomic_ref_cnt _allocate_null_terminated_char_buffer( size_t size )
 	{
 		// c++20: std::make_unique_default_init<char[]>( size + 1 + atomic_ref_cnt::required_space )
-		atomic_ref_cnt data {std::unique_ptr<char[]>( new char[size + 1 + atomic_ref_cnt::required_space] )};
+		atomic_ref_cnt data{std::unique_ptr<char[]>( new char[size + 1 + atomic_ref_cnt::required_space] )};
 		data.get()[size] = '\0'; // zero terminate
 		return data;
 	}

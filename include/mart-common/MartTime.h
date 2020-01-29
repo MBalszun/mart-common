@@ -167,7 +167,7 @@ public:
 
 	explicit Timer( copter_default_period timeout )
 		: _start_time( Clock_t::now() )
-		, _timeout {timeout}
+		, _timeout{timeout}
 	{
 	}
 
@@ -191,7 +191,7 @@ public:
 	Dur remaining() const
 	{
 		using namespace std::chrono;
-		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( Clock_t::now() - _start_time ) ), Dur {} );
+		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( Clock_t::now() - _start_time ) ), Dur{} );
 	}
 
 	/// true if duration since creation or last call to reset is longer than the timeout that was specified upon
@@ -204,7 +204,7 @@ public:
 
 private:
 	Clock_t::time_point   _start_time;
-	copter_default_period _timeout {-1};
+	copter_default_period _timeout{-1};
 
 	// make sure we don't run into underflow issues
 	static_assert( std::is_signed<decltype( _timeout )::rep>::value, "" );

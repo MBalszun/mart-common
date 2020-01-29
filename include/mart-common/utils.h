@@ -52,7 +52,7 @@ struct sign_check {
 	// throws an narrowing error, if both parameters are of different signdness and one is negative
 	static void check( T t, U u )
 	{
-		if( ( t < T {} ) != ( u < U {} ) ) { throw narrowing_error(); }
+		if( ( t < T{} ) != ( u < U{} ) ) { throw narrowing_error(); }
 	}
 };
 
@@ -121,8 +121,8 @@ struct Limits1D {
 	{
 	}
 	Limits1D( T min, T max )
-		: min {min}
-		, max {max}
+		: min{min}
+		, max{max}
 	{
 	}
 

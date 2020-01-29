@@ -30,12 +30,12 @@ std::optional<udp::endpoint> get_local_address( const std::vector<std::string_vi
 
 std::optional<std::string> get_filename( const std::vector<std::string_view>& args )
 {
-	return std::string {"Testfile"};
+	return std::string{"Testfile"};
 }
 
 std::string_view to_stringview( mart::ConstMemoryView data )
 {
-	return std::string_view {data.asConstCharPtr(), data.size()};
+	return std::string_view{data.asConstCharPtr(), data.size()};
 }
 
 int main( int argc, char** argv )

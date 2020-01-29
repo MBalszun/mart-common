@@ -16,7 +16,7 @@ TEST_CASE( "mt_channel_clear_empties_buffer", "[channel]" )
 	ch.send( 10 );
 	ch.send( 15 );
 	ch.clear();
-	int r {};
+	int r{};
 	REQUIRE( !ch.try_receive( r ) );
 }
 

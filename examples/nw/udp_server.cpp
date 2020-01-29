@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 std::string_view to_stringview( mart::ConstMemoryView data )
 {
-	return std::string_view {data.asConstCharPtr(), data.size()};
+	return std::string_view{data.asConstCharPtr(), data.size()};
 }
 
 void serv_task( std::atomic<bool>& stop_requested, udp::endpoint local_ep )
@@ -39,7 +39,7 @@ int main()
 	std::cout << "Start sending data to the server at " << local_ep.toString() << " \n" << std::flush;
 	for( mart::PeriodicScheduler sched( 1000ms ); sched.invocationCnt() < 10; sched.sleep() ) {
 		auto msg = "PkgNr. " + std::to_string( sched.invocationCnt() );
-		udp::Socket {}.sendto( mart::view_elements( msg ).asBytes(), local_ep );
+		udp::Socket{}.sendto( mart::view_elements( msg ).asBytes(), local_ep );
 	}
 
 	std::cout << "Requesting server shutdown\n" << std::flush;

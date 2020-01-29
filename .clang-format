@@ -29,6 +29,7 @@ SortIncludes: 'true'
 SpaceAfterTemplateKeyword: 'false'
 SpaceBeforeAssignmentOperators: 'true'
 SpaceBeforeParens: Never
+SpaceBeforeCpp11BracedList: 'false'
 SpaceInEmptyParentheses: 'false'
 SpacesInAngles: 'false'
 SpacesInCStyleCastParentheses: 'false'

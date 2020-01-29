@@ -228,13 +228,13 @@ public:
 
 	constexpr ArrayView<T> max_subview( size_t offset, size_t count ) const noexcept
 	{
-		return offset > _size ? ArrayView<T> {} : ArrayView<T> {_data + offset, std::min( count, _size - offset )};
+		return offset > _size ? ArrayView<T>{} : ArrayView<T>{_data + offset, std::min( count, _size - offset )};
 	}
 
 	constexpr ArrayView<T> subview( size_t offset, size_t count ) const
 	{
 		_throwIfInvalidSubview( offset, count );
-		return ArrayView<T> {_data + offset, count};
+		return ArrayView<T>{_data + offset, count};
 	}
 
 	/**
@@ -253,19 +253,19 @@ public:
 	constexpr ArrayView<T> subview( size_t offset ) const
 	{
 		_throwIfInvalidSubview( offset, _size - offset );
-		return ArrayView<T> {_data + offset, _size - offset};
+		return ArrayView<T>{_data + offset, _size - offset};
 	}
 
 	constexpr ArrayView<T> max_subview( size_t offset ) const noexcept
 	{
-		return offset > _size ? ArrayView {} : ArrayView {_data + offset, _size - offset};
+		return offset > _size ? ArrayView{} : ArrayView{_data + offset, _size - offset};
 	}
 
 	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( size_t offset ) const
 	{
 		_throwIfOffsetOutOfRange( offset );
-		return std::pair<ArrayView<T>, ArrayView<T>> {ArrayView<T> {_data, offset},
-													  ArrayView<T> {_data + offset, _size - offset}};
+		return std::pair<ArrayView<T>, ArrayView<T>>{ArrayView<T>{_data, offset},
+													 ArrayView<T>{_data + offset, _size - offset}};
 	}
 
 	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( const_iterator splitpoint ) const
@@ -394,7 +394,7 @@ template<class T>
 auto copy( ArrayView<T> src, ArrayView<std::remove_const_t<T>> dest ) -> ArrayView<std::remove_const_t<T>>
 {
 	assert( src.size() <= dest.size() );
-	if( src.size() > dest.size() ) { return ArrayView<std::remove_const_t<T>> {}; }
+	if( src.size() > dest.size() ) { return ArrayView<std::remove_const_t<T>>{}; }
 	std::copy_n( src.cbegin(), src.size(), dest.begin() );
 	return dest.subview( src.size() );
 }

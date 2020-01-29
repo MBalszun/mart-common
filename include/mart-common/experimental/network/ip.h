@@ -80,7 +80,7 @@ inline bool is_invalid_number( std::string_view block )
 
 constexpr std::array<std::string_view, 4> split_blocks_unchecked( const std::string_view str )
 {
-	std::array<std::string_view, 4> ret {};
+	std::array<std::string_view, 4> ret{};
 	int                             cnt   = 0;
 	std::string_view::size_type     start = 0;
 	for( auto pos = start; pos < str.size(); ++pos ) {
@@ -123,7 +123,7 @@ public:
 	}
 	explicit address_v4( const char* str )
 	{
-		in_addr addr {};
+		in_addr addr{};
 
 		if( 1 == nw::ip::port_layer::inet_pres_to_net( AF_INET, str, &addr ) ) { _addr = uint32_net_t( addr.s_addr ); }
 	}
@@ -135,8 +135,8 @@ public:
 	mba::im_zstr asString() const
 	{
 		std::array<char, 24>
-				ret {}; // 17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
-		in_addr addr {};
+				ret{}; // 17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
+		in_addr addr{};
 		addr.s_addr = mart::toUType( _addr );
 		nw::ip::port_layer::inet_net_to_pres( AF_INET, &addr, ret.data(), ret.size() ); // mart::ArrayView<char>(ret)));
 
@@ -151,7 +151,7 @@ public:
 	friend bool operator<( address_v4 l, address_v4 r ) { return l._addr < r._addr; }
 
 private:
-	uint32_net_t _addr {};
+	uint32_net_t _addr{};
 
 	constexpr static uint32_host_t _parseIpV4String( const std::string_view str )
 	{
@@ -171,14 +171,14 @@ private:
 	}
 };
 
-constexpr address_v4 address_any {};
-constexpr address_v4 address_local_host( uint32_host_t {0x7F000001} );
+constexpr address_v4 address_any{};
+constexpr address_v4 address_local_host( uint32_host_t{0x7F000001} );
 
 inline std::optional<address_v4> parse_v4_address( const std::string_view string )
 {
 	auto res = impl_addr_v4::parse_address( string );
 	if( res ) {
-		return {address_v4 {*res}};
+		return {address_v4{*res}};
 	} else {
 		return {};
 	}
@@ -219,7 +219,7 @@ public:
 	friend bool             operator<( port_nr l, port_nr r ) { return l._p < r._p; }
 
 private:
-	uint16_net_t _p {};
+	uint16_net_t _p{};
 };
 
 inline std::optional<port_nr> parse_v4_port( const std::string_view string )
@@ -244,19 +244,19 @@ struct basic_endpoint_v4 {
 	constexpr explicit basic_endpoint_v4( const sockaddr_in& native )
 		: address( uint32_net_t( native.sin_addr.s_addr ) )
 		, port( uint16_net_t( native.sin_port ) )
-		, valid {native.sin_family == AF_INET ? true : throw std::invalid_argument( "Invalid sockaddr_in passed " )}
+		, valid{native.sin_family == AF_INET ? true : throw std::invalid_argument( "Invalid sockaddr_in passed " )}
 	{
 	}
 	constexpr basic_endpoint_v4( address_v4 address, port_nr port )
 		: address( address )
 		, port( port )
-		, valid {true}
+		, valid{true}
 	{
 	}
 	constexpr basic_endpoint_v4( uint32_host_t address, uint16_host_t port )
 		: address( address )
 		, port( port )
-		, valid {true}
+		, valid{true}
 	{
 	}
 	// expects format XXX.XXX.XXX.XXX:pppp
@@ -290,14 +290,14 @@ struct basic_endpoint_v4 {
 																   std::to_string( max_port_nr ),
 																   "]" ) );
 			}
-			return port_nr {static_cast<uint16_t>( parsed_port_nr )};
+			return port_nr{static_cast<uint16_t>( parsed_port_nr )};
 		}();
 		valid = true;
 	}
 
 	sockaddr_in toSockAddr_in() const
 	{
-		sockaddr_in sockaddr {};
+		sockaddr_in sockaddr{};
 		sockaddr.sin_family      = AF_INET;
 		sockaddr.sin_port        = mart::toUType( port.inNetOrder() );
 		sockaddr.sin_addr.s_addr = mart::toUType( address.inNetOrder() );
@@ -319,8 +319,8 @@ struct basic_endpoint_v4 {
 		return mba::concat( address.asString(), ":", std::to_string( port.inHostOrder() ), suffix );
 	}
 	/* ####### State ############ */
-	address_v4  address {};
-	port_nr     port {};
+	address_v4  address{};
+	port_nr     port{};
 	bool        valid = false;
 	friend bool operator==( basic_endpoint_v4 l, basic_endpoint_v4 r )
 	{
@@ -338,7 +338,7 @@ std::optional<basic_endpoint_v4<p>> parse_v4_endpoint( std::string_view str )
 	auto o_port    = parse_v4_port( ps.second );
 	if( !o_address ) { return {}; }
 	if( !o_port ) { return {}; }
-	return basic_endpoint_v4<p> {*o_address, *o_port};
+	return basic_endpoint_v4<p>{*o_address, *o_port};
 }
 
 template<TransportProtocol p>

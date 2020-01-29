@@ -140,7 +140,7 @@ inline bool waInit()
 
 	/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
 	WORD    wVersionRequested = MAKEWORD( 2, 2 );
-	WSADATA wsaData {};
+	WSADATA wsaData{};
 
 	int err = WSAStartup( wVersionRequested, &wsaData );
 	if( err != 0 ) {

@@ -90,7 +90,7 @@ template<template<class...> class Comb, // new list type template
 auto cartesian_value_product( List1 l1, List2 l2 )
 {
 	return detail::cartesian_value_product<Comb, V1, V2, T>(
-		l1, l2, mart::make_index_sequence<List1::size() * List2::size()> {} );
+		l1, l2, mart::make_index_sequence<List1::size() * List2::size()>{} );
 };
 
 template<class T, T... VALS>

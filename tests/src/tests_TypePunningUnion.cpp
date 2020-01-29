@@ -35,13 +35,13 @@ TEST_CASE( "TypePunningUnion_dummy", "[TypePunningUnion]" )
 	auto my_union3 = my_union1;
 	my_union3      = my_union2;
 
-	my_union3 = S3 {1.0, 1.0, 2.0};
-	const S1 s1 {2.0, 2.0, 3.0};
+	my_union3 = S3{1.0, 1.0, 2.0};
+	const S1 s1{2.0, 2.0, 3.0};
 	auto     mem_view_s1 = mart::view_bytes( s1 );
 
 	my_union3 = mem_view_s1;
 
-	my_union3 = S4 {1.0};
+	my_union3 = S4{1.0};
 	CHECK( my_union3.size() == sizeof( S4 ) );
 
 	auto ab3 = my_union3.all_bytes();

@@ -26,13 +26,13 @@ namespace mt {
  */
 class FastMutexImpl {
 	std::mutex       _mx;
-	std::atomic_flag _flag {};            // ATOMIC_FLAG_INIT;
-	bool             _mx_locked_by_me {}; // needs not be atomic as it is proteced by _flag and / or _mx
+	std::atomic_flag _flag{};            // ATOMIC_FLAG_INIT;
+	bool             _mx_locked_by_me{}; // needs not be atomic as it is proteced by _flag and / or _mx
 public:
 	// Make mutex copy / movable
 	FastMutexImpl() = default;
-	FastMutexImpl( FastMutexImpl&& ) {};
-	FastMutexImpl( const FastMutexImpl& ) {};
+	FastMutexImpl( FastMutexImpl&& ){};
+	FastMutexImpl( const FastMutexImpl& ){};
 	FastMutexImpl& operator=( FastMutexImpl&& ) { return *this; };
 	FastMutexImpl& operator=( const FastMutexImpl& ) { return *this; };
 

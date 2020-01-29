@@ -88,12 +88,12 @@ TEST_CASE( "ArrayViewAdaptor_can_iterate", "[ArrayViewAdaptor]" )
 
 	using namespace std::string_literals;
 
-	TestArray<int> int_array {1, 2, 3, 4, 5, 6};
+	TestArray<int> int_array{1, 2, 3, 4, 5, 6};
 
 	test_array(
 		std::move( int_array ), 1, 6, []( int& v ) { v++; }, []( int& v ) { v--; } );
 
-	TestArray<std::string> string_array {"a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa"};
+	TestArray<std::string> string_array{"a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa"};
 
 	test_array(
 		std::move( string_array ),

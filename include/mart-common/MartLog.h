@@ -23,14 +23,14 @@ namespace log {
 
 inline void defaultInit( Level logLvl = Level::Debug, mba::im_zstr name_tag = "main" )
 {
-	Logger& logger = Logger::initDefaultLogger( LoggerConf_t {name_tag, logLvl} );
-	logger.addSink( log::makeSink( log::StdOutLogConfig_t {Level::Debug} ) );
+	Logger& logger = Logger::initDefaultLogger( LoggerConf_t{name_tag, logLvl} );
+	logger.addSink( log::makeSink( log::StdOutLogConfig_t{Level::Debug} ) );
 }
 
 inline void defaultInit( mba::im_zstr file_tag, Level logLvl = Level::Debug, mba::im_zstr name_tag = "main" )
 {
-	Logger& logger = Logger::initDefaultLogger( LoggerConf_t {name_tag, logLvl} );
-	logger.addSink( log::makeSink( log::FileLogConfig_t {file_tag, Level::Trace} ) );
+	Logger& logger = Logger::initDefaultLogger( LoggerConf_t{name_tag, logLvl} );
+	logger.addSink( log::makeSink( log::FileLogConfig_t{file_tag, Level::Trace} ) );
 }
 
 using LOG_LVL = Level;

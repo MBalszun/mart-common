@@ -96,7 +96,7 @@ public:
 	using endpoint = EndpointT;
 
 	DgramSocket()
-		: DgramSocketBase( mart::nw::socks::Domain::Local ) {
+		: DgramSocketBase( mart::nw::socks::Domain::Local ){
 			// assert( _socket_handle.is_valid() );
 		};
 	DgramSocket( const endpoint& local, const endpoint& remote );
@@ -123,7 +123,7 @@ public:
 	RecvfromResult try_recvfrom( mart::MemoryView buffer ) noexcept
 	{
 		using abi_endpoint_type = typename EndpointT::abi_endpoint_type;
-		abi_endpoint_type addr {};
+		abi_endpoint_type addr{};
 		auto              res = _socket_handle.recvfrom( buffer, 0, addr );
 		return {res.received_data, endpoint( addr )};
 	}
@@ -133,8 +133,8 @@ public:
 	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
 
 private:
-	endpoint _ep_local {};
-	endpoint _ep_remote {};
+	endpoint _ep_local{};
+	endpoint _ep_remote{};
 };
 
 } // namespace detail

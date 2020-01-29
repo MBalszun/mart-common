@@ -69,7 +69,7 @@ public:
 	}
 
 private:
-	uint32_net_t _addr {};
+	uint32_net_t _addr{};
 
 	[[noreturn]] static void _throwParseIpV4StringError( const std::string_view str );
 
@@ -81,14 +81,14 @@ private:
 	}
 };
 
-constexpr address_v4 address_any {};
-constexpr address_v4 address_local_host( uint32_host_t {0x7F'00'00'01} );
+constexpr address_v4 address_any{};
+constexpr address_v4 address_local_host( uint32_host_t{0x7F'00'00'01} );
 
 constexpr std::optional<address_v4> try_parse_v4_address( const std::string_view string ) noexcept
 {
 	auto res = _impl_addr_v4::parse_address( string );
 	if( res ) {
-		return {address_v4 {*res}};
+		return {address_v4{*res}};
 	} else {
 		return {};
 	}
@@ -125,7 +125,7 @@ public:
 	static constexpr int max_port_nr = std::numeric_limits<uint16_t>::max();
 
 private:
-	uint16_net_t _p {};
+	uint16_net_t _p{};
 };
 
 constexpr std::optional<port_nr> try_parse_v4_port( const std::string_view string ) noexcept
@@ -152,8 +152,8 @@ struct basic_endpoint_v4_base {
 	using abi_endpoint_type = mart::nw::socks::port_layer::SockaddrIn;
 
 	/* ####### State ############ */
-	address_v4 address {};
-	port_nr    port {};
+	address_v4 address{};
+	port_nr    port{};
 	bool       valid = false;
 
 	/* ####### constructors ############ */
@@ -164,21 +164,21 @@ struct basic_endpoint_v4_base {
 	constexpr basic_endpoint_v4_base( address_v4 address, port_nr port ) noexcept
 		: address( address )
 		, port( port )
-		, valid {true}
+		, valid{true}
 	{
 	}
 
 	constexpr basic_endpoint_v4_base( uint32_host_t address, uint16_host_t port ) noexcept
 		: address( address )
 		, port( port )
-		, valid {true}
+		, valid{true}
 	{
 	}
 
 	constexpr basic_endpoint_v4_base( std::string_view address, uint16_host_t port ) noexcept
 		: address( address_v4( address ) )
 		, port( port )
-		, valid {true}
+		, valid{true}
 	{
 	}
 
@@ -228,7 +228,7 @@ constexpr std::optional<basic_endpoint_v4_base> try_parse_basic_v4_endpoint( std
 	const auto o_port = try_parse_v4_port( ps.second );
 	if( !o_port ) { return {}; }
 
-	return basic_endpoint_v4_base {*o_address, *o_port};
+	return basic_endpoint_v4_base{*o_address, *o_port};
 }
 
 } // namespace _impl_details_ip

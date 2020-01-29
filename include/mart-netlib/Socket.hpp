@@ -36,17 +36,17 @@ namespace socks {
 namespace _detail_socket_ {
 inline byte_range to_byte_range( const ::mart::ConstMemoryView memory )
 {
-	return byte_range {reinterpret_cast<unsigned char const*>( memory.data() ), memory.size()};
+	return byte_range{reinterpret_cast<unsigned char const*>( memory.data() ), memory.size()};
 }
 
 inline byte_range_mut to_mutable_byte_range( ::mart::MemoryView memory )
 {
-	return byte_range_mut {reinterpret_cast<unsigned char*>( memory.data() ), memory.size()};
+	return byte_range_mut{reinterpret_cast<unsigned char*>( memory.data() ), memory.size()};
 }
 
 inline byte_range to_byte_range( const std::string_view memory )
 {
-	return byte_range {reinterpret_cast<unsigned char const*>( memory.data() ), memory.size()};
+	return byte_range{reinterpret_cast<unsigned char const*>( memory.data() ), memory.size()};
 }
 
 } // namespace _detail_socket_
@@ -84,8 +84,8 @@ public:
 	RaiiSocket& operator=( const RaiiSocket& other ) = delete;
 
 	RaiiSocket( RaiiSocket&& other ) noexcept
-		: _handle {std::exchange( other._handle, port_layer::handle_t::Invalid )}
-		, _is_blocking {std::exchange( other._is_blocking, false )}
+		: _handle{std::exchange( other._handle, port_layer::handle_t::Invalid )}
+		, _is_blocking{std::exchange( other._is_blocking, false )}
 	{
 	}
 
@@ -140,7 +140,7 @@ public:
 		if( res.success() ) {
 			return {buffer.subview( 0, res.value() ), res};
 		} else {
-			return {mart::MemoryView {}, res};
+			return {mart::MemoryView{}, res};
 		}
 	}
 
@@ -150,7 +150,7 @@ public:
 		if( res.success() ) {
 			return {buffer.subview( 0, res.value() ), res};
 		} else {
-			return {mart::MemoryView {}, res};
+			return {mart::MemoryView{}, res};
 		}
 	}
 
@@ -168,7 +168,7 @@ public:
 		if( res ) {
 			return RaiiSocket( res.value() );
 		} else {
-			return RaiiSocket {};
+			return RaiiSocket{};
 		}
 	}
 
@@ -178,7 +178,7 @@ public:
 		if( res ) {
 			return RaiiSocket( res.value() );
 		} else {
-			return RaiiSocket {};
+			return RaiiSocket{};
 		}
 	}
 

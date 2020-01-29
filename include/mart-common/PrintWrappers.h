@@ -84,14 +84,14 @@ struct os_flag_guard {
 template<typename rep, typename period>
 inline auto sformat( std::chrono::duration<rep, period> dur ) -> _impl_print_chrono::PrintableDuration<rep, period>
 {
-	return _impl_print_chrono::PrintableDuration<rep, period> {dur};
+	return _impl_print_chrono::PrintableDuration<rep, period>{dur};
 }
 
 template<typename rep, typename period, typename repto = rep, typename periodto = period>
 inline auto sformat( std::chrono::duration<rep, period> dur, std::chrono::duration<repto, periodto> )
 	-> _impl_print_chrono::PrintableDuration<repto, periodto>
 {
-	return _impl_print_chrono::PrintableDuration<repto, periodto> {
+	return _impl_print_chrono::PrintableDuration<repto, periodto>{
 		std::chrono::duration_cast<std::chrono::duration<repto, periodto>>( dur )};
 }
 
@@ -138,7 +138,7 @@ struct data_fmt_info {
 	char        start_delimiter = '[';
 	char        end_delimiter   = ']';
 };
-static constexpr data_fmt_info default_data_fmt {};
+static constexpr data_fmt_info default_data_fmt{};
 
 struct formatted_data_range {
 	mart::ConstMemoryView range;
@@ -172,7 +172,7 @@ inline auto padded( std::string_view str, size_t total_length, Pad pad ) -> _imp
 
 inline auto sformat( mart::ConstMemoryView range, _impl_print::data_fmt_info fmt = _impl_print::default_data_fmt )
 {
-	return _impl_print::formatted_data_range {range, fmt};
+	return _impl_print::formatted_data_range{range, fmt};
 }
 
 } // namespace mart

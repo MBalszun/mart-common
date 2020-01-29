@@ -60,18 +60,18 @@ constexpr bool is_invalid_number( std::string_view block )
 // unchecked version of str.substr (which would throw exceptions)
 constexpr std::string_view substr( std::string_view str, std::size_t start, std::size_t length )
 {
-	return std::string_view {str.data() + start, length};
+	return std::string_view{str.data() + start, length};
 }
 
 // unchecked version of str.substr
 constexpr std::string_view substr( std::string_view str, std::size_t start )
 {
-	return std::string_view {str.data() + start, str.size() - start};
+	return std::string_view{str.data() + start, str.size() - start};
 }
 
 constexpr std::array<std::string_view, 4> split_blocks_unchecked( const std::string_view str )
 {
-	std::array<std::string_view, 4> ret {};
+	std::array<std::string_view, 4> ret{};
 	int                             cnt   = 0;
 	std::string_view::size_type     start = 0;
 	for( auto pos = start; pos < str.size(); ++pos ) {

@@ -49,8 +49,8 @@ TEST_CASE( "benchmark_FastMutexImpl_multi_threaded_lock_and_unlock_std_reference
 	std::mutex mx;
 	BENCHMARK( "lock_unlock_std_mutex_mt" )
 	{
-		std::thread th1 {[&] { lock_unlock( mx, 10'000'000 ); }};
-		std::thread th2 {[&] { lock_unlock( mx, 10'000'000 ); }};
+		std::thread th1{[&] { lock_unlock( mx, 10'000'000 ); }};
+		std::thread th2{[&] { lock_unlock( mx, 10'000'000 ); }};
 		th1.join();
 		th2.join();
 	};
@@ -63,8 +63,8 @@ TEST_CASE( "benchmark_FastMutexImpl_single_threaded_lock_and_unlock", "[mt][Fast
 	mart::experimental::mt::FastMutexImpl mx;
 	BENCHMARK( "lock_unlock_fast_mutex_mt" )
 	{
-		std::thread th1 {[&] { lock_unlock( mx, 10'000'000 ); }};
-		std::thread th2 {[&] { lock_unlock( mx, 10'000'000 ); }};
+		std::thread th1{[&] { lock_unlock( mx, 10'000'000 ); }};
+		std::thread th2{[&] { lock_unlock( mx, 10'000'000 ); }};
 		th1.join();
 		th2.join();
 	};

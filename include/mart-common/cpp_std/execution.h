@@ -60,9 +60,9 @@ class parallel_policy {};
 class parallel_unsequenced_policy {};
 // clang-format on
 
-inline constexpr sequenced_policy            seq {};
-inline constexpr parallel_policy             par {};
-inline constexpr parallel_unsequenced_policy par_unseq {};
+inline constexpr sequenced_policy            seq{};
+inline constexpr parallel_policy             par{};
+inline constexpr parallel_unsequenced_policy par_unseq{};
 
 } // namespace execution
 

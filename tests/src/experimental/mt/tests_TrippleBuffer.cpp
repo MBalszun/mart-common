@@ -186,7 +186,7 @@ TEST_CASE( "TrippleBuffer_mt_large_pod_producer_consumer", "[mt][TrippleBuffer][
 {
 	static constexpr int ItCnt = 500'000;
 
-	mart::experimental::mt::TrippleBuffer<LargePod> buffer( LargePod {-1} );
+	mart::experimental::mt::TrippleBuffer<LargePod> buffer( LargePod{-1} );
 
 	auto producer = [&buffer]() {
 		for( int i = 0; i < ItCnt; ++i ) {

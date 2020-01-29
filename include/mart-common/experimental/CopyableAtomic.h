@@ -42,7 +42,7 @@ public:
 
 	// defaultinitializes value (std::atomic doesn't)
 	constexpr CopyableAtomic() noexcept
-		: std::atomic<T>( T {} )
+		: std::atomic<T>( T{} )
 	{
 	}
 

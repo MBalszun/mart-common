@@ -33,10 +33,10 @@ class circular_buffer {
 				   "This circular buffer implementation currently only supports trivially destructible types" );
 	using index_type = int;
 
-	std::array<T, (std::size_t)N> data {};
+	std::array<T, (std::size_t)N> data{};
 
-	index_type m_next_read {};
-	index_type m_next_write {};
+	index_type m_next_read{};
+	index_type m_next_write{};
 
 	static index_type next( index_type current ) { return ( current + 1 ) % N; }
 

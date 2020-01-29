@@ -9,7 +9,7 @@ namespace mart::nw::ip {
 mba::im_zstr address_v4::asString() const
 {
 	// 17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
-	std::array<char, 24> ret {};
+	std::array<char, 24> ret{};
 
 	nw::socks::port_layer::inet_net_to_pres(
 		socks::Domain::Inet, &( this->_addr ), ret.data(), ret.size() ); // mart::ArrayView<char>(ret)));
@@ -48,7 +48,7 @@ namespace _impl_details_ip {
 basic_endpoint_v4_base::basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& addr )
 	: address( addr.address() )
 	, port( addr.port() )
-	, valid {addr.is_valid() ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
+	, valid{addr.is_valid() ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
 {
 }
 

@@ -53,13 +53,13 @@ public:
 		, _ep_local( std::move( other._ep_local ) )
 		, _ep_remote( std::move( other._ep_remote ) )
 	{
-		other = Socket {};
+		other = Socket{};
 	}
 	Socket& operator=( Socket&& other ) noexcept
 	{
 		_socket_handle = std::move( other._socket_handle );
-		_ep_local      = mart::exchange( other._ep_local, endpoint {} );
-		_ep_remote     = mart::exchange( other._ep_remote, endpoint {} );
+		_ep_local      = mart::exchange( other._ep_local, endpoint{} );
+		_ep_remote     = mart::exchange( other._ep_remote, endpoint{} );
 		return *this;
 	}
 	bool connect( endpoint ep )
@@ -103,19 +103,19 @@ private:
 	}
 	static endpoint getSockAddress( const nw::socks::Socket& socket )
 	{
-		sockaddr_in t_locaddr {};
+		sockaddr_in t_locaddr{};
 		socklen_t   addrlenLocal = sizeof( t_locaddr );
 		if( getsockname( socket.getNative(), (sockaddr*)&t_locaddr, &addrlenLocal ) == -1 ) {
-			return endpoint {};
+			return endpoint{};
 		} else {
 			return endpoint( t_locaddr );
 		}
 	}
 
 	friend Acceptor;
-	nw::socks::Socket _socket_handle {};
-	endpoint          _ep_local {};
-	endpoint          _ep_remote {};
+	nw::socks::Socket _socket_handle{};
+	endpoint          _ep_local{};
+	endpoint          _ep_remote{};
 };
 
 class Acceptor {
@@ -135,13 +135,13 @@ public:
 		, _ep_local( std::move( other._ep_local ) )
 		, _state( other._state )
 	{
-		other = Acceptor {};
+		other = Acceptor{};
 	}
 	Acceptor& operator=( Acceptor&& other ) noexcept
 	{
 		_socket_handle  = std::move( other._socket_handle );
 		_ep_local       = std::move( other._ep_local );
-		other._ep_local = endpoint {};
+		other._ep_local = endpoint{};
 		return *this;
 	}
 	/* Binds to an address and immediately starts to listen on that address*/
@@ -183,7 +183,7 @@ public:
 		switch( _state ) {
 			case State::listening: {
 				_socket_handle  = nw::socks::Socket();
-				this->_ep_local = tcp::endpoint {};
+				this->_ep_local = tcp::endpoint{};
 				this->_state    = State::closed;
 			} // deliberate fall through
 			case State::closed: {
@@ -205,12 +205,12 @@ public:
 private:
 	Socket try_accept_impl()
 	{
-		if( !_socket_handle.isValid() ) { return Socket {}; }
+		if( !_socket_handle.isValid() ) { return Socket{}; }
 
-		sockaddr_in sa_remote {};
+		sockaddr_in sa_remote{};
 		auto        handle = _socket_handle.accept( sa_remote );
-		if( !handle.isValid() ) { return Socket {}; }
-		Socket ret {};
+		if( !handle.isValid() ) { return Socket{}; }
+		Socket ret{};
 		ret.open_if_necessary();
 		ret._socket_handle = std::move( handle );
 		ret._ep_local      = _ep_local;
@@ -238,7 +238,7 @@ public:
 
 private:
 	nw::socks::Socket _socket_handle;
-	endpoint          _ep_local {};
+	endpoint          _ep_local{};
 	State             _state = State::closed;
 };
 

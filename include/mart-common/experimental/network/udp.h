@@ -110,13 +110,13 @@ public:
 	mart::MemoryView rec( mart::MemoryView buffer ) { return _socket_handle.recv( buffer, 0 ).first; }
 	mart::MemoryView recvfrom( mart::MemoryView buffer, endpoint& src_addr )
 	{
-		sockaddr_in src {};
+		sockaddr_in src{};
 		auto        tmp = _socket_handle.recvfrom( buffer, 0, src );
 		if( tmp.first.isValid() && src.sin_family == mart::toUType( nw::socks::Domain::inet ) ) {
 			src_addr = endpoint( src );
 			return tmp.first;
 		} else {
-			return mart::MemoryView {};
+			return mart::MemoryView{};
 		}
 	}
 	void clearRxBuff()
@@ -124,7 +124,7 @@ public:
 		// XXX: Make a RAII class for preserving the blocking state of the socket
 		auto t = _socket_handle.isBlocking();
 		_socket_handle.setBlocking( false );
-		uint64_t _tmp {};
+		uint64_t _tmp{};
 		auto     tmp = mart::view_bytes_mutable( _tmp );
 		try {
 			while( _socket_handle.recv( tmp, 0 ).first.isValid() ) {
@@ -157,10 +157,10 @@ private:
 	{
 		return mart::narrow<nw::socks::port_layer::txrx_size_t>( data.size() ) == ret;
 	}
-	endpoint _ep_local {};
-	endpoint _ep_remote {};
+	endpoint _ep_local{};
+	endpoint _ep_remote{};
 	sockaddr_in
-					  _sa_remote {}; // this is only for caching, so we don't have to convert _ep_remote to sockaddr_in  every time.
+					  _sa_remote{}; // this is only for caching, so we don't have to convert _ep_remote to sockaddr_in  every time.
 	nw::socks::Socket _socket_handle;
 };
 

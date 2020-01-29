@@ -72,15 +72,15 @@ struct StringView : std::string_view {
 	 */
 	constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
 	{
-		if( pos == npos || pos == size() ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
+		if( pos == npos || pos == size() ) { return std::pair<StringView, StringView>{*this, StringView{}}; }
 		assert( pos < this->size() );
-		return std::make_pair( StringView {this->data(), pos},
-							   StringView {this->data() + pos + 1, this->size() - pos - 1} );
+		return std::make_pair( StringView{this->data(), pos},
+							   StringView{this->data() + pos + 1, this->size() - pos - 1} );
 	}
 
 	constexpr std::pair<StringView, StringView> split( char at ) const noexcept
 	{
-		std::string_view tmp {*this};
+		std::string_view tmp{*this};
 		auto             pos = tmp.find( at );
 		if( pos == std::string_view::npos ) {
 			return {*this, {}};
@@ -161,9 +161,9 @@ public:
 	constexpr StringView substr( size_t offset, size_t count = npos ) const noexcept
 	{
 		assert( offset <= _size );
-		if( count == npos ) { return StringView {this->_start + offset, this->_size - offset}; }
+		if( count == npos ) { return StringView{this->_start + offset, this->_size - offset}; }
 		assert( offset + count <= _size );
-		return StringView {this->_start + offset, count};
+		return StringView{this->_start + offset, count};
 	}
 
 	/**
@@ -177,14 +177,14 @@ public:
 	 */
 	constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
 	{
-		if( pos == npos || pos == _size ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
+		if( pos == npos || pos == _size ) { return std::pair<StringView, StringView>{*this, StringView{}}; }
 		assert( pos < _size );
-		return std::make_pair( StringView {this->_start, pos}, StringView {this->_start + pos + 1, _size - pos - 1} );
+		return std::make_pair( StringView{this->_start, pos}, StringView{this->_start + pos + 1, _size - pos - 1} );
 	}
 
 	constexpr std::pair<StringView, StringView> split( char at ) const noexcept
 	{
-		std::string_view tmp {*this};
+		std::string_view tmp{*this};
 		auto             pos = tmp.find( at );
 		if( pos == std::string_view::npos ) {
 			return {*this, {}};
@@ -270,9 +270,9 @@ inline bool operator>=(const StringView& l, const StringView& r) { return !(l < 
 }
 #endif
 // clang-format on
-constexpr StringView EmptyStringView {""};
+constexpr StringView EmptyStringView{""};
 namespace _impl {
-constexpr StringView ViewOfSpaces {
+constexpr StringView ViewOfSpaces{
 	"                                                                                                              "
 	"    "
 	"                         "};
@@ -359,7 +359,7 @@ constexpr auto base( const std::string_view str ) -> std::enable_if_t<std::is_si
 template<class T = int>
 constexpr T to_integral( const std::string_view str )
 {
-	if( str.size() == 0 ) { return T {}; }
+	if( str.size() == 0 ) { return T{}; }
 	return details_to_integral::base<T>( str );
 }
 
@@ -368,7 +368,7 @@ constexpr T to_integral( const std::string_view str )
 template<class T = unsigned int>
 constexpr T to_integral_unsafe( std::string_view str )
 {
-	T value {};
+	T value{};
 	for( auto c : str ) {
 		value = value * 10 + c - '0';
 	}

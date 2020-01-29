@@ -23,7 +23,7 @@ TEST_CASE( "net_port-layer_check_function_implementation_exists" )
 		= pl::socket( socks::Domain::Inet, socks::TransportType::Datagram ).value_or( pl::handle_t::Invalid );
 	CHECK( s2 != pl::handle_t::Invalid );
 
-	pl::SockaddrIn addr {};
+	pl::SockaddrIn addr{};
 
 	CHECK( set_blocking( s2, false ) );
 	CHECK( !accept( s2 ) );

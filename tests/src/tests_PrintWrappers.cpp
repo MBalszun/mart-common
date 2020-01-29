@@ -33,7 +33,7 @@ TEST_CASE( "Padded", "[PrintWrappers]" )
 
 TEST_CASE( "Memory view", "[PrintWrappers]" )
 {
-	std::array<int, 40> data {};
+	std::array<int, 40> data{};
 	std::iota( data.begin(), data.end(), 0 );
 
 	std::stringstream ss;

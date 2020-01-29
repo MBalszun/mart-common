@@ -44,7 +44,7 @@ public:
 	FileLog( mba::im_zstr name, Level lvl = Level::TRACE )
 		: ILogSink( lvl )
 		, _file( std::string( std::string_view( name ) ) )
-		, _fileName( name ) {};
+		, _fileName( name ){};
 
 	mba::im_zstr getName() const override { return _fileName; }
 };
@@ -73,7 +73,7 @@ public:
 		const static auto instance = std::shared_ptr<StdOutLog>( new StdOutLog() );
 		return instance;
 	}
-	mba::im_zstr getName() const override { return mba::im_zstr {"COUT"}; }
+	mba::im_zstr getName() const override { return mba::im_zstr{"COUT"}; }
 };
 
 inline std::shared_ptr<ILogSink> makeSink( const StdOutLogConfig_t& cfg )

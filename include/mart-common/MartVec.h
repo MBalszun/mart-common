@@ -113,7 +113,7 @@ struct Vec {
 	}
 	static constexpr int size() { return N; }
 
-	square_type squareNorm() const { return std::inner_product( data.begin(), data.end(), data.begin(), T {} ); }
+	square_type squareNorm() const { return std::inner_product( data.begin(), data.end(), data.begin(), T{} ); }
 
 	T norm() const
 	{
@@ -143,14 +143,14 @@ struct Vec {
 	template<int K>
 	Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )> {} );
+		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
 	Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
 	{
-		return Vec<T, K> {( *this )[I]...};
+		return Vec<T, K>{( *this )[I]...};
 	}
 };
 
@@ -203,14 +203,14 @@ struct Vec<T, 2> {
 	template<int K>
 	Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )> {} );
+		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
 	Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
 	{
-		return Vec<T, K> {( *this )[I]...};
+		return Vec<T, K>{( *this )[I]...};
 	}
 };
 
@@ -269,14 +269,14 @@ struct Vec<T, 3> {
 	template<int K>
 	Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )> {} );
+		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
 	Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
 	{
-		return Vec<T, K> {( *this )[I]...};
+		return Vec<T, K>{( *this )[I]...};
 	}
 };
 
@@ -307,7 +307,7 @@ Vec<T, sizeof...( I1 ) + sizeof...( I2 )> concat_impl( const Vec<T, sizeof...( I
 template<class T, int N1, int N2>
 Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
 {
-	return _impl_mart_vec::concat_impl( v1, v2, mp::make_index_sequence<N1> {}, mp::make_index_sequence<N2> {} );
+	return _impl_mart_vec::concat_impl( v1, v2, mp::make_index_sequence<N1>{}, mp::make_index_sequence<N2>{} );
 }
 
 /**
@@ -335,7 +335,7 @@ Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
 template<class T, class U, int N>
 auto inner_product( const Vec<T, N>& l, const Vec<U, N>& r ) -> decltype( l[0] * r[0] )
 {
-	T ret {};
+	T ret{};
 	for( int i = 0; i < N; ++i ) {
 		ret += l[i] * r[i];
 	}
@@ -345,7 +345,7 @@ auto inner_product( const Vec<T, N>& l, const Vec<U, N>& r ) -> decltype( l[0] *
 template<class T, int N>
 Vec<T, N> mx_multiply( const Matrix<T, N>& mx, const Vec<T, N>& vec )
 {
-	Vec<T, N> ret {};
+	Vec<T, N> ret{};
 
 	for( int i = 0; i < N; ++i ) {
 		ret[i] = inner_product( mx[i], vec );
@@ -400,9 +400,9 @@ constexpr auto apply_helper( const Vec<T, sizeof...( I )>& l, const U& r, F func
 // c++14: remove -> decltype(...)
 template<int N, class F, class... ARGS>
 constexpr auto apply( F func, ARGS&&... args )
-	-> decltype( _impl_vec::apply_helper( std::forward<ARGS>( args )..., func, mp::make_index_sequence<N> {} ) )
+	-> decltype( _impl_vec::apply_helper( std::forward<ARGS>( args )..., func, mp::make_index_sequence<N>{} ) )
 {
-	return _impl_vec::apply_helper( std::forward<ARGS>( args )..., func, mp::make_index_sequence<N> {} );
+	return _impl_vec::apply_helper( std::forward<ARGS>( args )..., func, mp::make_index_sequence<N>{} );
 }
 
 // std::plus,td::multiplies,... - like function objects for maximum and minimum
@@ -531,38 +531,38 @@ struct logical_not {
 // c++14: remove "-> decltype(...)"
 #define DEFINE_HETEROGEN_ND_VECTOR_OP( OP, FUNC )                                                                      \
 	template<class T, class U, int N>                                                                                  \
-	constexpr auto OP( const Vec<T, N>& l, const Vec<U, N>& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )      \
+	constexpr auto OP( const Vec<T, N>& l, const Vec<U, N>& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )       \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}                                                                                                                  \
 	template<class T, class U, int N>                                                                                  \
-	constexpr auto OP( const U& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )              \
+	constexpr auto OP( const U& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )               \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}                                                                                                                  \
 	template<class T, class U, int N>                                                                                  \
-	constexpr auto OP( const Vec<T, N>& l, const U& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )              \
+	constexpr auto OP( const Vec<T, N>& l, const U& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )               \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}
 
 /** Same as DEFINE_HETEROGEN_ND_VECTOR_OP, but scalar types of left and right side have to  be identical */
 // c++14: remove "-> decltype(...)"
 #define DEFINE_HOMOGEN_ND_VECTOR_OP( OP, FUNC )                                                                        \
 	template<class T, int N>                                                                                           \
-	constexpr auto OP( const Vec<T, N>& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )      \
+	constexpr auto OP( const Vec<T, N>& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )       \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}                                                                                                                  \
 	template<class T, int N>                                                                                           \
-	constexpr auto OP( _impl_vec::Type<T>& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )   \
+	constexpr auto OP( _impl_vec::Type<T>& l, const Vec<T, N>& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )    \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}                                                                                                                  \
 	template<class T, int N>                                                                                           \
-	constexpr auto OP( const Vec<T, N>& l, _impl_vec::Type<T>& r )->decltype( _impl_vec::apply<N>( FUNC {}, l, r ) )   \
+	constexpr auto OP( const Vec<T, N>& l, _impl_vec::Type<T>& r )->decltype( _impl_vec::apply<N>( FUNC{}, l, r ) )    \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l, r );                                                                   \
+		return _impl_vec::apply<N>( FUNC{}, l, r );                                                                    \
 	}
 
 /**
@@ -570,9 +570,9 @@ struct logical_not {
  */
 #define DEFINE_UNARY_ND_VECTOR_OP( OP, FUNC )                                                                          \
 	template<class T, int N>                                                                                           \
-	constexpr auto OP( const Vec<T, N>& l )->decltype( _impl_vec::apply<N>( FUNC {}, l ) )                             \
+	constexpr auto OP( const Vec<T, N>& l )->decltype( _impl_vec::apply<N>( FUNC{}, l ) )                              \
 	{                                                                                                                  \
-		return _impl_vec::apply<N>( FUNC {}, l );                                                                      \
+		return _impl_vec::apply<N>( FUNC{}, l );                                                                       \
 	}
 
 //#### Define actual vector functions ######
@@ -626,7 +626,7 @@ template<class T, int N>
 constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r )
 {
 	// first compare the vectors element wise and then fold the results voer &&
-	return reduce( elementEquals( l, r ), std::logical_and<bool> {}, true );
+	return reduce( elementEquals( l, r ), std::logical_and<bool>{}, true );
 }
 
 template<class T, int N>

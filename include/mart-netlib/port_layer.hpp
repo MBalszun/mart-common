@@ -84,7 +84,7 @@ ErrorCode                              set_blocking( handle_t handle, bool shoul
 
 struct SockaddrIn : mart::nw::socks::Sockaddr {
 	SockaddrIn() noexcept
-		: SockaddrIn( Storage {} )
+		: SockaddrIn( Storage{} )
 	{
 	}
 	SockaddrIn( const SockaddrIn& other )
@@ -112,7 +112,7 @@ private:
 	struct alignas( 4 ) Storage {
 		char raw_bytes[16];
 	};
-	Storage _storage {};
+	Storage _storage{};
 
 	// All constructors forward to this
 	explicit SockaddrIn( const SockaddrIn::Storage& src )
@@ -124,7 +124,7 @@ private:
 
 struct SockaddrIn6 : mart::nw::socks::Sockaddr {
 	SockaddrIn6()
-		: SockaddrIn6( Storage {} )
+		: SockaddrIn6( Storage{} )
 	{
 	}
 	SockaddrIn6( const SockaddrIn6& other )
@@ -145,7 +145,7 @@ private:
 	struct alignas( 8 ) Storage {
 		char raw_bytes[32];
 	};
-	Storage _storage {};
+	Storage _storage{};
 
 	explicit SockaddrIn6( const SockaddrIn6::Storage& src )
 		: Sockaddr( mart::nw::socks::Domain::Inet6, byte_range_from_pod( _storage ) )
@@ -156,7 +156,7 @@ private:
 
 struct SockaddrUn : mart::nw::socks::Sockaddr {
 	SockaddrUn()
-		: SockaddrUn( Storage {} )
+		: SockaddrUn( Storage{} )
 	{
 	}
 	SockaddrUn( const SockaddrUn& other )
@@ -181,7 +181,7 @@ private:
 	struct alignas( 2 ) Storage {
 		char raw_bytes[110];
 	};
-	Storage _storage {};
+	Storage _storage{};
 
 	explicit SockaddrUn( const SockaddrUn::Storage& src )
 		: Sockaddr( mart::nw::socks::Domain::Local, byte_range_from_pod( _storage ) )

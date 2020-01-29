@@ -83,7 +83,7 @@ using buffer_len_t  = int;
 
 ErrorCode get_last_socket_error() noexcept
 {
-	return ErrorCode {static_cast<ErrorCode::Value_t>(
+	return ErrorCode{static_cast<ErrorCode::Value_t>(
 #ifdef MBA_UTILS_USE_WINSOCKS
 		WSAGetLastError()
 #else
@@ -158,7 +158,7 @@ template<class T>
 ReturnValue<T> make_return_value( const T error_value, non_deduced_t<T> function_result )
 {
 	if( function_result != error_value ) {
-		return ReturnValue<T> {function_result};
+		return ReturnValue<T>{function_result};
 	} else {
 		return ReturnValue<T>( get_last_socket_error() );
 	}
@@ -235,7 +235,7 @@ bool waInit() noexcept
 
 	/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
 	WORD    wVersionRequested = MAKEWORD( 2, 2 );
-	WSADATA wsaData {};
+	WSADATA wsaData{};
 
 	int err = WSAStartup( wVersionRequested, &wsaData );
 	if( err != 0 ) {
@@ -367,7 +367,7 @@ ReturnValue<handle_t> accept( handle_t handle ) noexcept
 
 ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noexcept
 {
-	return make_return_value( txrx_size_t {-1},
+	return make_return_value( txrx_size_t{-1},
 							  ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
@@ -397,10 +397,10 @@ ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, con
 	// sending messages to address 0.0.0.0 is apparently handled differently on different platforms,
 	// so we have to catch it manually here
 	if( is_invalid_destination_address( to ) ) {
-		return ReturnValue<txrx_size_t> {ErrorCode {ErrorCodeValues::InvalidArgument}};
+		return ReturnValue<txrx_size_t>{ErrorCode{ErrorCodeValues::InvalidArgument}};
 	}
 
-	return make_return_value( txrx_size_t {-1},
+	return make_return_value( txrx_size_t{-1},
 							  ::sendto( to_native( handle ),
 										buf.char_ptr(),
 										to_native_buf_len( buf.size() ),
@@ -411,7 +411,7 @@ ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, con
 
 ReturnValue<txrx_size_t> recv( handle_t handle, byte_range_mut buf, int flags ) noexcept
 {
-	return make_return_value( txrx_size_t {-1},
+	return make_return_value( txrx_size_t{-1},
 							  ::recv( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
@@ -421,7 +421,7 @@ ReturnValue<txrx_size_t> recvfrom( handle_t handle, byte_range_mut buf, int flag
 	auto ret      = ::recvfrom(
         to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags, from.to_native_ptr(), &from_len );
 	from.set_valid_data_range( from_len );
-	return make_return_value( txrx_size_t {-1}, ret );
+	return make_return_value( txrx_size_t{-1}, ret );
 }
 
 // implementation details for timeout related functions
@@ -432,7 +432,7 @@ template<class Dur>
 timeval to_timeval( Dur duration )
 {
 	using namespace std::chrono;
-	timeval ret {};
+	timeval ret{};
 	if( duration.count() > 0 ) {
 		auto s      = duration_cast<seconds>( duration );
 		ret.tv_sec  = narrow_cast<decltype( ret.tv_sec )>( s.count() );
@@ -472,16 +472,16 @@ ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction d
 	const auto option_name = direction == Direction::Tx ? SocketOption::so_sndtimeo : SocketOption::so_rcvtimeo;
 
 #ifdef MBA_UTILS_USE_WINSOCKS
-	dword native_timeout {};
+	dword native_timeout{};
 #else
-	timeval native_timeout {};
+	timeval native_timeout{};
 #endif
 
 	auto bytes = byte_range_from_pod( native_timeout );
 	auto res   = getsockopt( handle, SocketOptionLevel::Socket, option_name, bytes );
 
 	if( !res || bytes.size() != sizeof( native_timeout ) ) {
-		return ReturnValue<std::chrono::microseconds> {res};
+		return ReturnValue<std::chrono::microseconds>{res};
 	} else {
 #ifdef MBA_UTILS_USE_WINSOCKS
 		microseconds ret = microseconds( milliseconds( native_timeout ) );
@@ -505,7 +505,7 @@ namespace {
 
 ::sockaddr_in make_sockaddr_in( mart::nw::uint32_net_t address, mart::nw::uint16_net_t port )
 {
-	::sockaddr_in native {};
+	::sockaddr_in native{};
 	native.sin_family      = AF_INET;
 	native.sin_addr.s_addr = to_utype( address );
 	native.sin_port        = to_utype( port );
@@ -551,7 +551,7 @@ namespace {
 
 ::sockaddr_un make_sockaddr_un( const char* u8path, std::size_t length )
 {
-	::sockaddr_un         native {};
+	::sockaddr_un         native{};
 	constexpr std::size_t max_unix_path_length = sizeof( native.sun_path );
 	native.sun_family                          = AF_UNIX;
 	std::size_t actual_length                  = length < max_unix_path_length - 1 ? length : max_unix_path_length - 1;

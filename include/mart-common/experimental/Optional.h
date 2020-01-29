@@ -30,17 +30,17 @@ class Optional {
 
 	constexpr void throwIfInvalid() const
 	{
-		if( flag != OPT_FLAG::Valid ) { throw InvalidOptionalAcces {}; }
+		if( flag != OPT_FLAG::Valid ) { throw InvalidOptionalAcces{}; }
 	}
 
 public:
 	constexpr Optional() = default;
 	constexpr Optional( const T& data )
 		: data( data )
-		, flag( OPT_FLAG::Valid ) {};
+		, flag( OPT_FLAG::Valid ){};
 	constexpr Optional( T&& data )
 		: data( std::move( data ) )
-		, flag( OPT_FLAG::Valid ) {};
+		, flag( OPT_FLAG::Valid ){};
 
 	constexpr Optional( const Optional<T>& other ) = default;
 	constexpr Optional( Optional<T>&& other )      = default;

@@ -34,7 +34,7 @@ template<class Dur>
 timeval to_timeval( Dur duration )
 {
 	using namespace std::chrono;
-	timeval ret {};
+	timeval ret{};
 	if( duration.count() > 0 ) {
 		auto s      = duration_cast<seconds>( duration );
 		ret.tv_sec  = mart::narrow<decltype( ret.tv_sec )>( s.count() );
@@ -137,8 +137,8 @@ public:
 	Socket& operator=( const Socket& other ) = delete;
 
 	Socket( Socket&& other ) noexcept
-		: _handle {std::exchange( other._handle, port_layer::invalid_handle )}
-		, _is_blocking {std::exchange( other._is_blocking, true )}
+		: _handle{std::exchange( other._handle, port_layer::invalid_handle )}
+		, _is_blocking{std::exchange( other._is_blocking, true )}
 	{
 	}
 
@@ -191,7 +191,7 @@ public:
 		if( ret >= 0 ) {
 			return {buffer.subview( 0, ret ), 0};
 		} else {
-			return {mart::MemoryView {}, errno};
+			return {mart::MemoryView{}, errno};
 		}
 	}
 
@@ -208,7 +208,7 @@ public:
 		if( ret >= 0 && len == sizeof( src_addr ) ) {
 			return {buffer.subview( 0, ret ), 0};
 		} else {
-			return {mart::MemoryView {}, errno};
+			return {mart::MemoryView{}, errno};
 		}
 	}
 
@@ -231,11 +231,11 @@ public:
 	Socket accept( AddrT& remote_addr )
 	{
 		port_layer::address_len_t len = sizeof( remote_addr );
-		Socket                    h {::accept( _handle, asSockAddrPtr( remote_addr ), &len )};
+		Socket                    h{::accept( _handle, asSockAddrPtr( remote_addr ), &len )};
 		if( h.isValid() && ( len == sizeof( remote_addr ) ) ) {
 			return h;
 		} else {
-			return Socket {};
+			return Socket{};
 		}
 	}
 
@@ -291,13 +291,13 @@ public:
 	}
 	std::chrono::microseconds getTxTimeout()
 	{
-		timeval to {};
+		timeval to{};
 		this->getsockopt( SOL_SOCKET, SO_SNDTIMEO, to );
 		return nw::from_timeval<std::chrono::microseconds>( to );
 	}
 	std::chrono::microseconds getRxTimeout()
 	{
-		timeval to {};
+		timeval to{};
 		this->getsockopt( SOL_SOCKET, SO_RCVTIMEO, to );
 		return nw::from_timeval<std::chrono::microseconds>( to );
 	}
