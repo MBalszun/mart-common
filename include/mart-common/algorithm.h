@@ -25,11 +25,11 @@
 
 /* Project Includes */
 #include "./algorithms/find.h"
-#include "./algorithms/non-mod-sequence-ops.h"
 #include "./algorithms/mod-sequence-ops.h"
-#include "./algorithms/sorting.h"
+#include "./algorithms/non-mod-sequence-ops.h"
 #include "./algorithms/numeric.h"
 #include "./algorithms/set_ops.h"
+#include "./algorithms/sorting.h"
 #include "ranges.h"
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -129,13 +129,9 @@ template<class C, class UnaryPredicate>
 auto wrapped_find_if( C&& c, decltype( c.cbegin() ) start, UnaryPredicate p ) -> decltype( c.begin() )
 {
 	auto it = std::find_if( start, c.end(), p );
-	if( it != c.end() ) {
-		return it;
-	}
+	if( it != c.end() ) { return it; }
 	it = std::find_if( c.begin(), start, p );
-	if( it != start ) {
-		return it;
-	}
+	if( it != start ) { return it; }
 	return c.end();
 }
 
@@ -157,8 +153,6 @@ auto find_first_of_ex( C1&& in1, C2&& in2, BinaryPredicate p ) -> mart::EndAware
 {
 	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p ), in1};
 }
-
-
 
 template<class C>
 bool any_of( const C& c )
@@ -190,15 +184,11 @@ auto min_element( R&& range, const Projection pr ) -> decltype( pr( *std::begin(
 {
 	using std::begin;
 	using std::end;
-	if( begin( range ) == end( range ) ) {
-		return end( range );
-	}
-	auto	   it_min = begin( range );
+	if( begin( range ) == end( range ) ) { return end( range ); }
+	auto       it_min = begin( range );
 	const auto it_end = end( range );
 	for( auto it = it_min; it != it_end; ++it ) {
-		if( pr( *it ) < pr( *it_min ) ) {
-			it_min = it;
-		}
+		if( pr( *it ) < pr( *it_min ) ) { it_min = it; }
 	}
 	return it_min;
 }
@@ -225,15 +215,11 @@ auto max_element( R&& range, Projection pr ) -> decltype( pr( *std::begin( range
 {
 	using std::begin;
 	using std::end;
-	if( begin( range ) == end( range ) ) {
-		return end( range );
-	}
-	auto	   it_max = begin( range );
+	if( begin( range ) == end( range ) ) { return end( range ); }
+	auto       it_max = begin( range );
 	const auto it_end = end( range );
 	for( auto it = it_max; it != it_end; ++it ) {
-		if( pr( *it ) > pr( *it_max ) ) {
-			it_max = it;
-		}
+		if( pr( *it ) > pr( *it_max ) ) { it_max = it; }
 	}
 	return it_max;
 }
@@ -257,9 +243,6 @@ void transform( const Input& in, Output& out, UnaryOperation unary_op )
 {
 	std::transform( in.begin(), in.end(), out.begin(), unary_op );
 }
-
-
-
 
 /*### algorithm related ###*/
 
@@ -289,7 +272,7 @@ template<class MTYPE, class VAL>
 struct EqualByMemberObjectHelper {
 	static_assert( std::is_member_object_pointer<MTYPE>::value,
 				   "First Template argument is not a member object pointer" );
-	MTYPE	  _mem;
+	MTYPE      _mem;
 	const VAL* _value;
 
 	template<class T>
@@ -316,7 +299,7 @@ template<class MTYPE, class VAL>
 struct EqualByMemberFunctionHelper {
 	static_assert( std::is_member_function_pointer<MTYPE>::value,
 				   "First Template argument is not a member function pointer" );
-	MTYPE	  _mem;
+	MTYPE      _mem;
 	const VAL* _value;
 
 	template<class T>

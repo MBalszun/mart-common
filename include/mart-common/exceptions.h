@@ -22,6 +22,6 @@ struct InvalidArgument : RuntimeError {
 	using RuntimeError::RuntimeError;
 };
 
-} // namespace mart::experimental::nw
+} // namespace mart
 
 #endif

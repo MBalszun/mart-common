@@ -61,7 +61,8 @@ namespace detail {
 template<template<class...> class Comb, // new list type template
 		 class V1,                      // types of elements in list1
 		 class V2,                      // types of elements in list2
-		 template<V1, V2> class T,      // template for elements in combined list
+		 template<V1, V2>
+		 class T, // template for elements in combined list
 		 class List1,
 		 class List2,
 		 std::size_t... Is>
@@ -82,13 +83,14 @@ auto cartesian_value_product( List1, List2, std::index_sequence<Is...> )
 template<template<class...> class Comb, // new list type template
 		 class V1,                      // types of elements in list1
 		 class V2,                      // types of elements in list2
-		 template<V1, V2> class T,      // template for of elements in combined list
+		 template<V1, V2>
+		 class T, // template for of elements in combined list
 		 class List1,
 		 class List2>
 auto cartesian_value_product( List1 l1, List2 l2 )
 {
 	return detail::cartesian_value_product<Comb, V1, V2, T>(
-		l1, l2, mart::make_index_sequence<List1::size() * List2::size()>{} );
+		l1, l2, mart::make_index_sequence<List1::size() * List2::size()> {} );
 };
 
 template<class T, T... VALS>

@@ -34,11 +34,9 @@ struct generic_nw_error_base : nw_error {
 	mba::im_zstr _message;
 };
 
-
 struct generic_nw_error final : generic_nw_error_base {
 	using generic_nw_error_base::generic_nw_error_base;
 };
-
 
 struct invalid_address_string final : generic_nw_error_base {
 	using generic_nw_error_base::generic_nw_error_base;

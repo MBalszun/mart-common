@@ -34,12 +34,12 @@ struct TestTypeSingle {
 
 TEST_CASE( "square_user_defined", "[math]" )
 {
-	static_assert( std::is_same_v<decltype( mart::square( TestTypeSingle{} ) ), TestTypeSquared>,
+	static_assert( std::is_same_v<decltype( mart::square( TestTypeSingle {} ) ), TestTypeSquared>,
 				   "Return type of mart::square is wrong" );
 
-	CHECK( mart::square( TestTypeSingle{0.0} ) == TestTypeSquared{0.0} );
-	CHECK( mart::square( TestTypeSingle{234.3} ) == TestTypeSingle{234.3} * TestTypeSingle{234.3} );
-	CHECK( mart::square( TestTypeSingle{-234.3} ) == TestTypeSingle{-234.3} * TestTypeSingle{-234.3} );
+	CHECK( mart::square( TestTypeSingle {0.0} ) == TestTypeSquared {0.0} );
+	CHECK( mart::square( TestTypeSingle {234.3} ) == TestTypeSingle {234.3} * TestTypeSingle {234.3} );
+	CHECK( mart::square( TestTypeSingle {-234.3} ) == TestTypeSingle {-234.3} * TestTypeSingle {-234.3} );
 }
 
 } // namespace

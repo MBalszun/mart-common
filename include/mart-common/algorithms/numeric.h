@@ -54,14 +54,14 @@ T inner_product( const Src1& src1, const Src2& src2, T value, BinaryOp1 op1, Bin
 	return std::inner_product( MART_COMMON_ALL( src1 ), src2.begin(), value, op1, op2 );
 }
 
-//template<class Src, class Dest>
-//auto adjacent_difference( const Src& src, Dest& dest ) -> decltype( dest.begin() )
+// template<class Src, class Dest>
+// auto adjacent_difference( const Src& src, Dest& dest ) -> decltype( dest.begin() )
 //{
 //	return std::adjacent_difference( MART_COMMON_ALL( src ), dest.begin() );
 //}
 //
-//template<class Src, class Dest, class BinaryOp>
-//auto adjacent_difference( const Src& src, Dest& dest, BinaryOp op ) -> decltype( dest.begin() )
+// template<class Src, class Dest, class BinaryOp>
+// auto adjacent_difference( const Src& src, Dest& dest, BinaryOp op ) -> decltype( dest.begin() )
 //{
 //	return std::adjacent_difference( MART_COMMON_ALL( src ), dest.begin(), op );
 //}

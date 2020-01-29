@@ -152,7 +152,7 @@ public:
 	static Logger& initDefaultLogger( const LoggerConf_t& conf, std::shared_ptr<ILogSink> sink )
 	{
 		Logger& lref = initDefaultLogger( conf );
-		lref.addSink( std::move(sink) );
+		lref.addSink( std::move( sink ) );
 		std::cout << "[MartLog] Added sink to default logger: " << sink->getName() << '\n';
 		return lref;
 	}
@@ -299,7 +299,7 @@ private:
 
 	/*### Cached parts of logged message ### */
 	mba::im_zstr     _loggingName; // This is what can be grepped for in the logfile
-	std::string_view  _spacer;
+	std::string_view _spacer;
 
 	static constexpr std::string_view space_string_litteral
 		= "                                                                                                         ";
@@ -319,8 +319,7 @@ private:
 			   && ( lvl <= _currentLogLevel.load( std::memory_order_relaxed ) );
 	}
 
-	static mba::im_zstr _createLoggingName( const std::string_view moduleName,
-												 const std::string_view parentName = {} )
+	static mba::im_zstr _createLoggingName( const std::string_view moduleName, const std::string_view parentName = {} )
 	{
 		return mba::concat( parentName, "[", moduleName, "]" );
 	}

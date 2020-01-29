@@ -34,8 +34,8 @@ namespace log {
 /*###### File log ######*/
 
 class FileLog final : public ILogSink {
-	std::ofstream		_file;
-	mba::im_zstr	_fileName;
+	std::ofstream _file;
+	mba::im_zstr  _fileName;
 
 	void _do_writeToLogImpl( std::string_view msg ) override { _file << msg; }
 	void _do_flush() override { _file.flush(); }
@@ -43,8 +43,8 @@ class FileLog final : public ILogSink {
 public:
 	FileLog( mba::im_zstr name, Level lvl = Level::TRACE )
 		: ILogSink( lvl )
-		, _file( std::string(std::string_view(name)) )
-		, _fileName( name ){};
+		, _file( std::string( std::string_view( name ) ) )
+		, _fileName( name ) {};
 
 	mba::im_zstr getName() const override { return _fileName; }
 };
@@ -78,11 +78,11 @@ public:
 
 inline std::shared_ptr<ILogSink> makeSink( const StdOutLogConfig_t& cfg )
 {
-	auto tmp	= StdOutLog::getInstance();
+	auto tmp    = StdOutLog::getInstance();
 	tmp->maxlvl = cfg.maxLogLvl;
 	return tmp;
 }
-}
-}
+} // namespace log
+} // namespace mart
 
 #endif

@@ -14,7 +14,6 @@
  *
  */
 
-
 #include "types.h"
 
 #include <atomic>
@@ -22,7 +21,7 @@
 #include <string_view>
 
 namespace mba {
-	class im_zstr;
+class im_zstr;
 }
 
 namespace mart {
@@ -45,21 +44,15 @@ public:
 	void writeToLog( std::string_view msg, Level lvl )
 	{
 		// only log messages with lower or equal log level (higher importance) than maxlvl
-		if( lvl > maxlvl ) {
-			return;
-		}
+		if( lvl > maxlvl ) { return; }
 
 		if( _threadSafe ) {
 			std::lock_guard<std::mutex> ul( _mux );
 			_do_writeToLogImpl( msg );
-			if( lvl <= Level::STATUS ) {
-				_do_flush();
-			}
+			if( lvl <= Level::STATUS ) { _do_flush(); }
 		} else {
 			_do_writeToLogImpl( msg );
-			if( lvl <= Level::STATUS ) {
-				_do_flush();
-			}
+			if( lvl <= Level::STATUS ) { _do_flush(); }
 		}
 	}
 
@@ -79,14 +72,14 @@ public:
 	std::atomic<Level> maxlvl;
 
 private:
-	std::mutex		  _mux;
-	std::atomic<bool> _threadSafe{true};
+	std::mutex        _mux;
+	std::atomic<bool> _threadSafe {true};
 
 	/// actual logging function that has to be implemented by sinks
 	virtual void _do_writeToLogImpl( std::string_view msg ) = 0;
-	virtual void _do_flush()								= 0;
+	virtual void _do_flush()                                = 0;
 };
-}
-}
+} // namespace log
+} // namespace mart
 
 #endif

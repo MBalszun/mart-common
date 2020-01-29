@@ -38,15 +38,14 @@ std::string_view errno_nr_as_string( mart::ArrayView<char> buffer )
 }
 
 template<class... Elements>
-mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
-															   Elements&&... elements )
+mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error, Elements&&... elements )
 {
 	std::array<char, 24> errno_buffer {};
-	return mba::concat( std::string_view(elements)...,
-											  "| Error Code:",
-											  errno_nr_as_string( error, errno_buffer ),
-											  " Error Msg: ",
-											  socks::to_text_rep( error ) );
+	return mba::concat( std::string_view( elements )...,
+						"| Error Code:",
+						errno_nr_as_string( error, errno_buffer ),
+						" Error Msg: ",
+						socks::to_text_rep( error ) );
 }
 
 } // namespace
@@ -55,12 +54,11 @@ Socket::Socket()
 	: _socket_handle( socks::Domain::Inet, socks::TransportType::Datagram )
 {
 	if( !is_valid() ) {
-		// TODO: The creation of this exception message seems to be pretty costly in terms of binary size - have to investigate
-		// NOTE: Preliminary tests suggest, that the dynamic memory allocation for the message text could be the main problem,
-		// but that is just a possibility
-		throw generic_nw_error(
-			make_error_message_with_appended_last_errno(mart::nw::socks::port_layer::get_last_socket_error(),
-			 "Could not create udp socket."  ));
+		// TODO: The creation of this exception message seems to be pretty costly in terms of binary size - have to
+		// investigate NOTE: Preliminary tests suggest, that the dynamic memory allocation for the message text could be
+		// the main problem, but that is just a possibility
+		throw generic_nw_error( make_error_message_with_appended_last_errno(
+			mart::nw::socks::port_layer::get_last_socket_error(), "Could not create udp socket." ) );
 	}
 }
 

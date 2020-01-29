@@ -90,17 +90,17 @@ TEST_CASE( "ArrayViewAdaptor_can_iterate", "[ArrayViewAdaptor]" )
 
 	TestArray<int> int_array {1, 2, 3, 4, 5, 6};
 
-	test_array( std::move( int_array ), 1, 6, []( int& v ) { v++; }, []( int& v ) { v--; } );
+	test_array(
+		std::move( int_array ), 1, 6, []( int& v ) { v++; }, []( int& v ) { v--; } );
 
 	TestArray<std::string> string_array {"a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa"};
 
-	test_array( std::move( string_array ),
-				"a"s,
-				"aaaaaa"s,
-				[]( std::string& v ) { v += "a"; },
-				[]( std::string& v ) { v.resize( v.size() - 1 ); } );
-
-
+	test_array(
+		std::move( string_array ),
+		"a"s,
+		"aaaaaa"s,
+		[]( std::string& v ) { v += "a"; },
+		[]( std::string& v ) { v.resize( v.size() - 1 ); } );
 }
 
 } // namespace

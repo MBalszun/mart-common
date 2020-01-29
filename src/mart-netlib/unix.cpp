@@ -5,7 +5,6 @@ namespace mart::nw {
 // classes related to the unix sockets protocol in general
 namespace un {
 
-
 } // namespace un
 } // namespace mart::nw
 

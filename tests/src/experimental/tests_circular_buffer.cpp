@@ -5,9 +5,9 @@
 // check if buffer can be used as part of a constexpr variable
 [[maybe_unused]] constexpr mart::circular_buffer<int, 10> cxpr_buffer;
 
-TEST_CASE("circular_buffer_various", "[circular_buffer]")
+TEST_CASE( "circular_buffer_various", "[circular_buffer]" )
 {
-	mart::circular_buffer<int,10> buffer;
+	mart::circular_buffer<int, 10> buffer;
 	buffer.push_back( 1 );
 	CHECK( buffer.size() == 1 );
 	CHECK( buffer.pop_front() == 1 );

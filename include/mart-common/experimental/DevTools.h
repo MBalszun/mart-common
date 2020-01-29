@@ -14,18 +14,18 @@
  *
  */
 
-#include <chrono>
 #include <atomic>
+#include <chrono>
 
 namespace mart {
 namespace experimental {
 namespace dev {
 
 template<class F>
-std::chrono::nanoseconds execTimed(F&& f)
+std::chrono::nanoseconds execTimed( F&& f )
 {
 	using tclock = std::chrono::steady_clock;
-	auto start = tclock::now();
+	auto start   = tclock::now();
 	f();
 	auto end = tclock::now();
 	return end - start;
@@ -39,39 +39,39 @@ struct Counter {
 	static std::atomic<int> CopyAssignmentCnt;
 	static std::atomic<int> MoveAssignmentCnt;
 	static std::atomic<int> DestructionCnt;
-protected:
 
-	Counter() {
-		defaultConstructionCnt.fetch_add(1, std::memory_order_relaxed);
-	}
-	Counter(const Counter&) {
-		CopyConstructionCnt.fetch_add(1, std::memory_order_relaxed);
-	}
-	Counter(Counter&&) {
-		MoveConstructionCnt.fetch_add(1, std::memory_order_relaxed);
-	}
-	Counter& operator=(const Counter&) {
-		CopyAssignmentCnt.fetch_add(1, std::memory_order_relaxed);
+protected:
+	Counter() { defaultConstructionCnt.fetch_add( 1, std::memory_order_relaxed ); }
+	Counter( const Counter& ) { CopyConstructionCnt.fetch_add( 1, std::memory_order_relaxed ); }
+	Counter( Counter&& ) { MoveConstructionCnt.fetch_add( 1, std::memory_order_relaxed ); }
+	Counter& operator=( const Counter& )
+	{
+		CopyAssignmentCnt.fetch_add( 1, std::memory_order_relaxed );
 		return *this;
 	}
-	Counter& operator=(Counter&&) {
-		MoveAssignmentCnt.fetch_add(1, std::memory_order_relaxed);
+	Counter& operator=( Counter&& )
+	{
+		MoveAssignmentCnt.fetch_add( 1, std::memory_order_relaxed );
 		return *this;
 	}
-	~Counter() {
-		DestructionCnt.fetch_add(1, std::memory_order_relaxed);
-	}
+	~Counter() { DestructionCnt.fetch_add( 1, std::memory_order_relaxed ); }
 };
 
-template<class T> std::atomic<int> Counter<T>::defaultConstructionCnt;
-template<class T> std::atomic<int> Counter<T>::CopyConstructionCnt;
-template<class T> std::atomic<int> Counter<T>::MoveConstructionCnt;
-template<class T> std::atomic<int> Counter<T>::CopyAssignmentCnt;
-template<class T> std::atomic<int> Counter<T>::MoveAssignmentCnt;
-template<class T> std::atomic<int> Counter<T>::DestructionCnt;
+template<class T>
+std::atomic<int> Counter<T>::defaultConstructionCnt;
+template<class T>
+std::atomic<int> Counter<T>::CopyConstructionCnt;
+template<class T>
+std::atomic<int> Counter<T>::MoveConstructionCnt;
+template<class T>
+std::atomic<int> Counter<T>::CopyAssignmentCnt;
+template<class T>
+std::atomic<int> Counter<T>::MoveAssignmentCnt;
+template<class T>
+std::atomic<int> Counter<T>::DestructionCnt;
 
-}
-}
-}
+} // namespace dev
+} // namespace experimental
+} // namespace mart
 
 #endif

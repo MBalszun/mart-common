@@ -20,11 +20,11 @@
 #endif
 
 #if MART_COMMON_STRING_VIEW_USE_STD
+#include <cassert>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
 #include <tuple>
-#include <cassert>
 #else
 
 /* Standard Library Includes */
@@ -53,218 +53,214 @@ namespace mart {
 
 inline namespace sv_std {
 
-	struct StringView : std::string_view {
-		using std::string_view::string_view;
-		constexpr StringView( std::string_view other ) noexcept
-			: std::string_view( other )
-		{
-		}
-		std::string to_string() const { return std::string( *this ); }
+struct StringView : std::string_view {
+	using std::string_view::string_view;
+	constexpr StringView( std::string_view other ) noexcept
+		: std::string_view( other )
+	{
+	}
+	std::string to_string() const { return std::string( *this ); }
 
-		/**
-		 * Splits the string at given position and returns a pair holding both substrings
-		 *  - if 0 <= pos < size():
-		 *		return substrings [0...pos) [pos ... size())
-		 *	- if pos == size() or npos:
-		 *		returns a copy of the current stringview and a default constructed one
-		 *	- if pos > size()
-		 *		throws std::out_of_range exception
-		 */
-		constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
-		{
-			if( pos == npos || pos == size() ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
-			assert( pos < this->size() );
-			return std::make_pair( StringView {this->data(), pos},
-								   StringView {this->data() + pos + 1, this->size() - pos - 1} );
-		}
+	/**
+	 * Splits the string at given position and returns a pair holding both substrings
+	 *  - if 0 <= pos < size():
+	 *		return substrings [0...pos) [pos ... size())
+	 *	- if pos == size() or npos:
+	 *		returns a copy of the current stringview and a default constructed one
+	 *	- if pos > size()
+	 *		throws std::out_of_range exception
+	 */
+	constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
+	{
+		if( pos == npos || pos == size() ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
+		assert( pos < this->size() );
+		return std::make_pair( StringView {this->data(), pos},
+							   StringView {this->data() + pos + 1, this->size() - pos - 1} );
+	}
 
-		constexpr std::pair<StringView, StringView> split( char at ) const noexcept
-		{
-			std::string_view tmp {*this};
-			auto             pos = tmp.find( at );
-			if( pos == std::string_view::npos ) {
-				return {*this, {}};
-			} else {
-				return {this->substr( 0, pos ), this->substr( pos + 1, this->size() - pos - 1 )};
-			}
+	constexpr std::pair<StringView, StringView> split( char at ) const noexcept
+	{
+		std::string_view tmp {*this};
+		auto             pos = tmp.find( at );
+		if( pos == std::string_view::npos ) {
+			return {*this, {}};
+		} else {
+			return {this->substr( 0, pos ), this->substr( pos + 1, this->size() - pos - 1 )};
 		}
-	};
-} // namespace inlinesv_std
+	}
+};
+} // namespace sv_std
 
 #else
 inline namespace sv_custom {
 
-	class StringView : public ArrayViewAdaptor<const char, StringView> {
-	public:
-		// type defs
-		using CharT       = char;
-		using traits_type = std::char_traits<CharT>;
+class StringView : public ArrayViewAdaptor<const char, StringView> {
+public:
+	// type defs
+	using CharT       = char;
+	using traits_type = std::char_traits<CharT>;
 
-		static constexpr size_type npos = size_type( -1 );
+	static constexpr size_type npos = size_type( -1 );
 
-		/* #### CTORS #### */
-		constexpr StringView() noexcept = default;
+	/* #### CTORS #### */
+	constexpr StringView() noexcept = default;
 
-		constexpr operator std::string_view() const noexcept { return std::string_view( _start, _size ); }
+	constexpr operator std::string_view() const noexcept { return std::string_view( _start, _size ); }
 
-		StringView( const std::string& other ) noexcept
-			: _start( other.data() )
-			, _size( other.size() )
-		{
-		}
-
-		constexpr explicit StringView( const std::string_view other ) noexcept
-			: _start( other.data() )
-			, _size( other.size() )
-		{
-		}
-
-		constexpr StringView( const char* other, size_type size ) noexcept
-			: _start( other )
-			, _size( size )
-		{
-		}
-
-		constexpr static StringView fromZString( const char* other )
-		{
-			return {other, std::string_view( other ).size()};
-		}
-
-		// NOTE: Use only for string literals!!!
-		template<size_t N>
-		constexpr StringView( const char ( &other )[N] ) noexcept
-			: _start( other )
-			, _size( N - 1 )
-		{
-		}
-
-		constexpr StringView( const char& other ) noexcept
-			: _start( &other )
-			, _size( 1 )
-		{
-		}
-
-		// prevent construction from integral type except char
-		template<class T,
-				 class = typename std::enable_if<std::is_integral<T>::value && ( !std::is_same<T, char>::value )>::type>
-		constexpr StringView( const T& other ) = delete;
-
-		template<class T>
-		StringView( const T* const& other ) = delete;
-
-		/* #### Special member functions #### */
-		constexpr StringView( const StringView& other ) noexcept = default;
-		constexpr StringView& operator=( const StringView& other ) noexcept = default;
-		constexpr StringView( StringView&& other ) noexcept                 = default;
-		constexpr StringView& operator=( StringView&& other ) noexcept = default;
-
-		/*#### string functions ####*/
-		std::string to_string() const { return std::string( this->cbegin(), this->cend() ); }
-
-		constexpr StringView substr( size_t offset, size_t count = npos ) const noexcept
-		{
-			assert( offset <= _size );
-			if( count == npos ) { return StringView {this->_start + offset, this->_size - offset}; }
-			assert( offset + count <= _size );
-			return StringView {this->_start + offset, count};
-		}
-
-		/**
-		 * Splits the string at given position and returns a pair holding both substrings
-		 *  - if 0 <= pos < size():
-		 *		return substrings [0...pos) [pos ... size())
-		 *	- if pos == size() or npos:
-		 *		returns a copy of the current stringview and a default constructed one
-		 *	- if pos > size()
-		 *		throws std::out_of_range exception
-		 */
-		constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
-		{
-			if( pos == npos || pos == _size ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
-			assert( pos < _size );
-			return std::make_pair( StringView {this->_start, pos},
-								   StringView {this->_start + pos + 1, _size - pos - 1} );
-		}
-
-		constexpr std::pair<StringView, StringView> split( char at ) const noexcept
-		{
-			std::string_view tmp {*this};
-			auto             pos = tmp.find( at );
-			if( pos == std::string_view::npos ) {
-				return {*this, {}};
-			} else {
-				return {this->substr( 0, pos ), this->substr( pos + 1, this->size() - pos - 1 )};
-			}
-		}
-
-		/*#### algorithms ####*/
-
-		constexpr size_type find( char c, size_type start_pos = 0 ) const
-		{
-			if( start_pos >= size() ) { return npos; }
-			std::size_t pos = start_pos;
-			for( ; pos < size(); ++pos ) {
-				if( ( *this )[pos] == c ) { break; }
-			}
-
-			// const size_t pos = std::find(this->cbegin() + start_pos, this->cend(), c) - this->cbegin();
-			return pos < this->size() ? pos : npos;
-		}
-
-		template<class P>
-		size_type find_if( P p, size_type start_pos = 0 ) const
-		{
-			if( start_pos >= size() ) { return npos; }
-
-			const size_t pos = std::find_if( this->cbegin() + start_pos, this->cend(), p ) - this->cbegin();
-			return pos < this->size() ? pos : npos;
-		}
-
-		StringView substr_sentinel( size_t offset, char sentinel ) const
-		{
-			return substr( offset, this->find( sentinel, offset ) );
-		}
-
-		template<class P>
-		StringView substr_predicate( size_t offset, P p ) const
-		{
-			return substr( offset, this->find_if( p, offset ) );
-		}
-
-		friend int           compare( StringView l, StringView r );
-		friend std::ostream& operator<<( std::ostream& out, const StringView string );
-
-		bool isValid() const { return _start != nullptr; }
-
-	protected:
-		friend class ArrayViewAdaptor<const char, StringView>;
-		constexpr size_type     _arrayView_size() const { return _size; }
-		constexpr const_pointer _arrayView_data() const { return _start; }
-
-		const char* _start = nullptr;
-		size_type   _size  = 0;
-	};
-
-	static_assert( sizeof( StringView ) == sizeof( char* ) + sizeof( std::size_t ), "" );
-
-	inline int compare( StringView l, StringView r )
+	StringView( const std::string& other ) noexcept
+		: _start( other.data() )
+		, _size( other.size() )
 	{
-		if( ( l._start == r._start ) && ( l.size() == l.size() ) ) { return 0; }
-		int ret = StringView::traits_type::compare( l.cbegin(), r.cbegin(), std::min( l.size(), r.size() ) );
-
-		if( ret == 0 ) {
-			// couldn't find a difference yet -> compare sizes
-			if( l.size() < r.size() ) {
-				ret = -1;
-			} else if( l.size() > r.size() ) {
-				ret = 1;
-			}
-		}
-		return ret;
 	}
 
-	/* operator overloads */
-	// clang-format off
+	constexpr explicit StringView( const std::string_view other ) noexcept
+		: _start( other.data() )
+		, _size( other.size() )
+	{
+	}
+
+	constexpr StringView( const char* other, size_type size ) noexcept
+		: _start( other )
+		, _size( size )
+	{
+	}
+
+	constexpr static StringView fromZString( const char* other ) { return {other, std::string_view( other ).size()}; }
+
+	// NOTE: Use only for string literals!!!
+	template<size_t N>
+	constexpr StringView( const char ( &other )[N] ) noexcept
+		: _start( other )
+		, _size( N - 1 )
+	{
+	}
+
+	constexpr StringView( const char& other ) noexcept
+		: _start( &other )
+		, _size( 1 )
+	{
+	}
+
+	// prevent construction from integral type except char
+	template<class T,
+			 class = typename std::enable_if<std::is_integral<T>::value && ( !std::is_same<T, char>::value )>::type>
+	constexpr StringView( const T& other ) = delete;
+
+	template<class T>
+	StringView( const T* const& other ) = delete;
+
+	/* #### Special member functions #### */
+	constexpr StringView( const StringView& other ) noexcept = default;
+	constexpr StringView& operator=( const StringView& other ) noexcept = default;
+	constexpr StringView( StringView&& other ) noexcept                 = default;
+	constexpr StringView& operator=( StringView&& other ) noexcept = default;
+
+	/*#### string functions ####*/
+	std::string to_string() const { return std::string( this->cbegin(), this->cend() ); }
+
+	constexpr StringView substr( size_t offset, size_t count = npos ) const noexcept
+	{
+		assert( offset <= _size );
+		if( count == npos ) { return StringView {this->_start + offset, this->_size - offset}; }
+		assert( offset + count <= _size );
+		return StringView {this->_start + offset, count};
+	}
+
+	/**
+	 * Splits the string at given position and returns a pair holding both substrings
+	 *  - if 0 <= pos < size():
+	 *		return substrings [0...pos) [pos ... size())
+	 *	- if pos == size() or npos:
+	 *		returns a copy of the current stringview and a default constructed one
+	 *	- if pos > size()
+	 *		throws std::out_of_range exception
+	 */
+	constexpr std::pair<StringView, StringView> split( size_t pos ) const noexcept
+	{
+		if( pos == npos || pos == _size ) { return std::pair<StringView, StringView> {*this, StringView {}}; }
+		assert( pos < _size );
+		return std::make_pair( StringView {this->_start, pos}, StringView {this->_start + pos + 1, _size - pos - 1} );
+	}
+
+	constexpr std::pair<StringView, StringView> split( char at ) const noexcept
+	{
+		std::string_view tmp {*this};
+		auto             pos = tmp.find( at );
+		if( pos == std::string_view::npos ) {
+			return {*this, {}};
+		} else {
+			return {this->substr( 0, pos ), this->substr( pos + 1, this->size() - pos - 1 )};
+		}
+	}
+
+	/*#### algorithms ####*/
+
+	constexpr size_type find( char c, size_type start_pos = 0 ) const
+	{
+		if( start_pos >= size() ) { return npos; }
+		std::size_t pos = start_pos;
+		for( ; pos < size(); ++pos ) {
+			if( ( *this )[pos] == c ) { break; }
+		}
+
+		// const size_t pos = std::find(this->cbegin() + start_pos, this->cend(), c) - this->cbegin();
+		return pos < this->size() ? pos : npos;
+	}
+
+	template<class P>
+	size_type find_if( P p, size_type start_pos = 0 ) const
+	{
+		if( start_pos >= size() ) { return npos; }
+
+		const size_t pos = std::find_if( this->cbegin() + start_pos, this->cend(), p ) - this->cbegin();
+		return pos < this->size() ? pos : npos;
+	}
+
+	StringView substr_sentinel( size_t offset, char sentinel ) const
+	{
+		return substr( offset, this->find( sentinel, offset ) );
+	}
+
+	template<class P>
+	StringView substr_predicate( size_t offset, P p ) const
+	{
+		return substr( offset, this->find_if( p, offset ) );
+	}
+
+	friend int           compare( StringView l, StringView r );
+	friend std::ostream& operator<<( std::ostream& out, const StringView string );
+
+	bool isValid() const { return _start != nullptr; }
+
+protected:
+	friend class ArrayViewAdaptor<const char, StringView>;
+	constexpr size_type     _arrayView_size() const { return _size; }
+	constexpr const_pointer _arrayView_data() const { return _start; }
+
+	const char* _start = nullptr;
+	size_type   _size  = 0;
+};
+
+static_assert( sizeof( StringView ) == sizeof( char* ) + sizeof( std::size_t ), "" );
+
+inline int compare( StringView l, StringView r )
+{
+	if( ( l._start == r._start ) && ( l.size() == l.size() ) ) { return 0; }
+	int ret = StringView::traits_type::compare( l.cbegin(), r.cbegin(), std::min( l.size(), r.size() ) );
+
+	if( ret == 0 ) {
+		// couldn't find a difference yet -> compare sizes
+		if( l.size() < r.size() ) {
+			ret = -1;
+		} else if( l.size() > r.size() ) {
+			ret = 1;
+		}
+	}
+	return ret;
+}
+
+/* operator overloads */
+// clang-format off
 inline bool operator==(const StringView& l, const StringView& r) { return compare(l, r) == 0; }
 inline bool operator!=(const StringView& l, const StringView& r) { return !(l == r); }
 inline bool operator< (const StringView& l, const StringView& r) { return compare(l, r) < 0; }
@@ -273,15 +269,18 @@ inline bool operator<=(const StringView& l, const StringView& r) { return !(l>r)
 inline bool operator>=(const StringView& l, const StringView& r) { return !(l < r); }
 }
 #endif
-	// clang-format on
-	constexpr StringView EmptyStringView {""};
-	namespace _impl {
-	constexpr StringView ViewOfSpaces {
-		"                                                                                                              "
-		"    "
-		"                         "};
-	}
-	constexpr StringView getSpaces( size_t count ) { return _impl::ViewOfSpaces.substr( 0, count ); }
+// clang-format on
+constexpr StringView EmptyStringView {""};
+namespace _impl {
+constexpr StringView ViewOfSpaces {
+	"                                                                                                              "
+	"    "
+	"                         "};
+}
+constexpr StringView getSpaces( size_t count )
+{
+	return _impl::ViewOfSpaces.substr( 0, count );
+}
 
 } // namespace mart
 
@@ -317,8 +316,8 @@ constexpr T core( std::string_view str )
 		if( tmp >= std::numeric_limits<T>::max() / 16 ) { // quick check against simple constant
 			if( tmp > ( std::numeric_limits<T>::max() - d ) / 10 ) {
 #ifdef __cpp_rtti
-				throw std::out_of_range( "String representing an integral (\"" + std::string( str ) + "\") overflows type "
-										 + typeid( T ).name() );
+				throw std::out_of_range( "String representing an integral (\"" + std::string( str )
+										 + "\") overflows type " + typeid( T ).name() );
 
 #else
 				throw std::out_of_range( "String representing an integral (\"" + std::string( str )
@@ -364,7 +363,8 @@ constexpr T to_integral( const std::string_view str )
 	return details_to_integral::base<T>( str );
 }
 
-// minimal implementation for sanitized strings that only contain digits (no negative numbers) and isn't too big for the return type
+// minimal implementation for sanitized strings that only contain digits (no negative numbers) and isn't too big for the
+// return type
 template<class T = unsigned int>
 constexpr T to_integral_unsafe( std::string_view str )
 {

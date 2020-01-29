@@ -46,9 +46,8 @@ template<class R, class UnaryPredicate>
 constexpr auto find_if( R&& rng, UnaryPredicate p ) -> decltype( std::begin( rng ) )
 {
 	const auto& end = rng.end();
-	for (auto it = rng.begin(); it != end; ++it) {
-		if (p(*it)) { return it;
-		}
+	for( auto it = rng.begin(); it != end; ++it ) {
+		if( p( *it ) ) { return it; }
 	}
 	return end;
 }

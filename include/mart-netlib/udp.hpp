@@ -36,7 +36,8 @@ namespace udp {
 
 using endpoint = ip::basic_endpoint_v4<mart::nw::ip::TransportProtocol::Udp>;
 
-/* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is still very much in flux */
+/* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is
+ * still very much in flux */
 class Socket {
 public:
 	Socket();
@@ -79,8 +80,8 @@ public:
 	};
 	RecvfromResult try_recvfrom( mart::MemoryView buffer ) noexcept
 	{
-		mart::nw::socks::port_layer::SockaddrIn addr{};
-		auto res = _socket_handle.recvfrom( buffer, 0, addr);
+		mart::nw::socks::port_layer::SockaddrIn addr {};
+		auto                                    res = _socket_handle.recvfrom( buffer, 0, addr );
 		return {res.received_data, endpoint( addr )};
 	}
 	RecvfromResult recvfrom( mart::MemoryView buffer );

@@ -20,63 +20,51 @@ namespace mart {
 
 class Thread {
 public:
-	enum class OnDestruction {
-		Join,
-		Detach
-	};
+	enum class OnDestruction { Join, Detach };
 	Thread() = default;
 
-	template<class ... ARGS>
-	Thread(ARGS&& ... args)
-		: _thread(std::forward<ARGS>(args)...)
+	template<class... ARGS>
+	Thread( ARGS&&... args )
+		: _thread( std::forward<ARGS>( args )... )
 	{
 	}
 
-	Thread(Thread &&) = default;
+	Thread( Thread&& ) = default;
 
-	Thread& operator= (Thread&& other) {
+	Thread& operator=( Thread&& other )
+	{
 		execute_exit_action();
-		_thread = std::move(other._thread);
+		_thread = std::move( other._thread );
 		_onExit = other._onExit;
 		return *this;
 	}
 
-	void setExitAction(OnDestruction action) {
-		_onExit = action;
-	}
+	void setExitAction( OnDestruction action ) { _onExit = action; }
 
-	void join() {
-		_thread.join();
-	}
+	void join() { _thread.join(); }
 
-	bool joinable() const {
-		return _thread.joinable();
-	}
+	bool joinable() const { return _thread.joinable(); }
 
-	~Thread() {
-		execute_exit_action();
-	}
+	~Thread() { execute_exit_action(); }
 
-	std::thread& getThread() { return _thread; }
+	std::thread&       getThread() { return _thread; }
 	const std::thread& getThread() const { return _thread; }
+
 private:
-	void execute_exit_action() {
-		if (_thread.joinable()) {
-			switch (_onExit) {
-			case OnDestruction::Join:
-				_thread.join();
-				break;
-			case OnDestruction::Detach:
-				_thread.detach();
-				break;
+	void execute_exit_action()
+	{
+		if( _thread.joinable() ) {
+			switch( _onExit ) {
+				case OnDestruction::Join: _thread.join(); break;
+				case OnDestruction::Detach: _thread.detach(); break;
 			}
 		}
 	}
 
-	std::thread _thread;
+	std::thread   _thread;
 	OnDestruction _onExit = OnDestruction::Join;
 };
 
-}
+} // namespace mart
 
 #endif

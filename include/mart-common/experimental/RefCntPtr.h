@@ -14,108 +14,108 @@
  *
  */
 
-
- /* ######## INCLUDES ######### */
- /* Standard Library Includes */
+/* ######## INCLUDES ######### */
+/* Standard Library Includes */
 #include <type_traits>
 
- /* Proprietary Library Includes */
+/* Proprietary Library Includes */
 #include "../cpp_std/utility.h"
 
-
- /* Project Includes */
- /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
-
+/* Project Includes */
+/* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
 namespace experimental {
 
 namespace detail {
 namespace RcPtr {
-	template <typename U, typename = int>
-	struct Has_dec : std::false_type { };
+template<typename U, typename = int>
+struct Has_dec : std::false_type {
+};
 
-	template <typename U>
-	struct Has_dec <U, decltype((void)std::declval<U>().rcInc(), 0)> : std::true_type { };
+template<typename U>
+struct Has_dec<U, decltype( (void)std::declval<U>().rcInc(), 0 )> : std::true_type {
+};
 
-	template <typename U, typename = int>
-	struct Has_inc : std::false_type { };
+template<typename U, typename = int>
+struct Has_inc : std::false_type {
+};
 
-	template <typename U>
-	struct Has_inc <U, decltype((void)std::declval<U>().rcDec(), 0)> : std::true_type { };
+template<typename U>
+struct Has_inc<U, decltype( (void)std::declval<U>().rcDec(), 0 )> : std::true_type {
+};
 
-	template <typename U, typename = int>
-	struct Has_content : std::false_type { };
+template<typename U, typename = int>
+struct Has_content : std::false_type {
+};
 
-	template <typename U>
-	struct Has_content <U, decltype((void)std::declval<U>().rcContent(), 0)> : std::true_type { };
+template<typename U>
+struct Has_content<U, decltype( (void)std::declval<U>().rcContent(), 0 )> : std::true_type {
+};
 
-}
-}
+} // namespace RcPtr
+} // namespace detail
 
 /**
  * This class is meant to be a building block for clases that use intrusive ref counting
  * It is only concerned with correctly incrementing and decrementing ref counts, but doesn't
  * assign special meaning to them (e.g. it doesn't call delete when the refcount goes to zero)
  */
-template<class E, class T = typename std::decay<decltype(*std::declval<E>().rcContent()) > ::type>
+template<class E, class T = typename std::decay<decltype( *std::declval<E>().rcContent() )>::type>
 class RcPtr {
 	E* _ptr = nullptr;
+
 public:
-	//check presence of required member functions
-	static_assert(	detail::RcPtr::Has_dec<E>::value &&
-					detail::RcPtr::Has_dec<E>::value &&
-					detail::RcPtr::Has_content<E>::value, "Type must provide rcInc() and rcDec() and rcContent()");
+	// check presence of required member functions
+	static_assert( detail::RcPtr::Has_dec<E>::value && detail::RcPtr::Has_dec<E>::value
+					   && detail::RcPtr::Has_content<E>::value,
+				   "Type must provide rcInc() and rcDec() and rcContent()" );
 
 	// The refcount is stored as part of the target object.
 	// As this might be a wrapper around the actual type we want to point to,
 	// the user has the ability to treat the pointer as a class refering to a different type
-	//using T = typename std::decay<decltype(*std::declval<E>().rcContent()) > ::type;
+	// using T = typename std::decay<decltype(*std::declval<E>().rcContent()) > ::type;
 
-	//ctors
+	// ctors
 	RcPtr() = default;
-	RcPtr(E& e)
-		: RcPtr(&e)
+	RcPtr( E& e )
+		: RcPtr( &e )
 	{
 	}
-	RcPtr(E* e)
-		: _ptr{ e }
+	RcPtr( E* e )
+		: _ptr {e}
 	{
 		_condInc();
 	}
 
-	//special member functions
-	RcPtr(const RcPtr& other)
-		: _ptr(other._ptr)
+	// special member functions
+	RcPtr( const RcPtr& other )
+		: _ptr( other._ptr )
 	{
 		_condInc();
 	}
-	RcPtr(RcPtr&& other)
-		: _ptr{ mart::exchange(other._ptr, nullptr) }
+	RcPtr( RcPtr&& other )
+		: _ptr {mart::exchange( other._ptr, nullptr )}
 	{
 	}
 
-	RcPtr& operator=(const RcPtr& other)
+	RcPtr& operator=( const RcPtr& other )
 	{
-		//note: increment before decrement to ensure sane behavior in case of self assignment
+		// note: increment before decrement to ensure sane behavior in case of self assignment
 		other._condInc();
 		this->_condDec();
 		this->_ptr = other._ptr;
 		return *this;
 	}
 
-	RcPtr& operator=(RcPtr&& other)
+	RcPtr& operator=( RcPtr&& other )
 	{
 		this->_condDec();
-		this->_ptr = mart::exchange(other._ptr, nullptr);
+		this->_ptr = mart::exchange( other._ptr, nullptr );
 		return *this;
 	}
-	void reset(E* other = nullptr) {
-		*this = RcPtr<E>(other);
-	}
-	~RcPtr() {
-		_condDec();
-	}
+	void reset( E* other = nullptr ) { *this = RcPtr<E>( other ); }
+	~RcPtr() { _condDec(); }
 
 	// clang-format off
 	// pointer operations
@@ -132,21 +132,17 @@ public:
 	// clang-format on
 
 private:
-	void _condInc() const {
-		if (_ptr) {
-			_ptr->rcInc();
-		}
+	void _condInc() const
+	{
+		if( _ptr ) { _ptr->rcInc(); }
 	}
-	void _condDec() const {
-		if (_ptr) {
-			_ptr->rcDec();
-		}
+	void _condDec() const
+	{
+		if( _ptr ) { _ptr->rcDec(); }
 	}
 };
 
-
-
-}
-}
+} // namespace experimental
+} // namespace mart
 
 #endif

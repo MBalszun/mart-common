@@ -17,9 +17,9 @@ TEST_CASE( "constructed_from_container_has_same_elements", "[ArrayView]" )
 	std::array<int, 1>  a1 = {-10};
 	std::array<int, 10> a2 = {-15, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-	std::vector<int> v1{};
-	std::vector<int> v2{-10};
-	std::vector<int> v3{-15, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	std::vector<int> v1 {};
+	std::vector<int> v2 {-10};
+	std::vector<int> v3 {-15, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 	mart::ArrayView<int> view_na1( na1 );
 	mart::ArrayView<int> view_na2( na2 );
@@ -64,10 +64,10 @@ TEST_CASE( "array_view_subview_throws_when_invalid_range_is_specified", "[ArrayV
 TEST_CASE( "array_view_copy_works_and_doesnt_collide_with_general_std_copy_wrapper", "[ArrayView]" )
 {
 	const std::vector<int> src = {-3, 1, 5, 6, 7, 8};
-	std::vector<int>	   dest( src.size() + 5 );
+	std::vector<int>       dest( src.size() + 5 );
 
 	mart::ArrayView<const int> view_src( src );
-	mart::ArrayView<int>	   view_dest( dest );
+	mart::ArrayView<int>       view_dest( dest );
 
 	auto rem = mart::copy( view_src, view_dest );
 
@@ -77,8 +77,8 @@ TEST_CASE( "array_view_copy_works_and_doesnt_collide_with_general_std_copy_wrapp
 
 TEST_CASE( "asBytes", "[ArrayView]" )
 {
-	int		  i{1};
-	const int ci{2};
+	int       i {1};
+	const int ci {2};
 
 	auto crange1 = mart::view_bytes( i );
 	auto crange2 = mart::view_bytes_const( i );

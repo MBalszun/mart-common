@@ -87,15 +87,14 @@ bool is_none_of( T v )
 }
 
 template<class... Elements>
-mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error,
-															   Elements&&... elements )
+mba::im_zstr make_error_message_with_appended_last_errno( mart::nw::socks::ErrorCode error, Elements&&... elements )
 {
 	std::array<char, 24> errno_buffer {};
 	return mba::concat( std::string_view( elements )...,
-						 "| Error Code:",
-						 errno_nr_as_string( error, errno_buffer ),
-						 " Error Msg: ",
-						 socks::to_text_rep( error ) );
+						"| Error Code:",
+						errno_nr_as_string( error, errno_buffer ),
+						" Error Msg: ",
+						socks::to_text_rep( error ) );
 }
 
 /* WARNING: This is meant as a convenience class around the generic RaiiSocket for udp communication. Its interface is

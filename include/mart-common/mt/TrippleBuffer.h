@@ -58,7 +58,7 @@ class TrippleBuffer {
 	// - write_idx:  Number of the slot currently written to
 	// - buffer_idx: Number of the slot that was last updated but yet requested by the reader.
 
-	T data[3]{};
+	T data[3] {};
 
 	struct alignas( std::uint32_t ) Index {
 		std::uint16_t idx;
@@ -67,15 +67,15 @@ class TrippleBuffer {
 	static_assert( sizeof( Index ) <= sizeof( std::uint32_t ) );
 	static_assert( std::atomic<Index>::is_always_lock_free );
 
-	Index read_idx{0, false};
-	Index write_idx{1, false};
+	Index read_idx {0, false};
+	Index write_idx {1, false};
 
-	std::atomic<Index> buffer_idx{Index{2, false}};
+	std::atomic<Index> buffer_idx {Index {2, false}};
 
 public:
 	constexpr TrippleBuffer() noexcept = default;
 	constexpr explicit TrippleBuffer( const T& init )
-		: data{init, init, init}
+		: data {init, init, init}
 	{
 	}
 

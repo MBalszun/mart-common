@@ -33,10 +33,10 @@ class circular_buffer {
 				   "This circular buffer implementation currently only supports trivially destructible types" );
 	using index_type = int;
 
-	std::array<T, (std::size_t)N> data{};
+	std::array<T, (std::size_t)N> data {};
 
-	index_type m_next_read{};
-	index_type m_next_write{};
+	index_type m_next_read {};
+	index_type m_next_write {};
 
 	static index_type next( index_type current ) { return ( current + 1 ) % N; }
 
@@ -45,23 +45,23 @@ public:
 	void push_back( const T& value )
 	{
 		data[(std::size_t)m_next_write] = value;
-		m_next_write					  = next( m_next_write );
+		m_next_write                    = next( m_next_write );
 	};
 
 	T pop_front()
 	{
-		const auto ti   = m_next_read;
-		m_next_read = next( m_next_read );
+		const auto ti = m_next_read;
+		m_next_read   = next( m_next_read );
 		return std::move( data[(std::size_t)ti] );
 	};
 
 	void pop_front( T& out )
 	{
-		out		  = data[(std::size_t)m_next_read];
+		out         = data[(std::size_t)m_next_read];
 		m_next_read = next( m_next_read );
 	};
 
-	constexpr auto operator[]( int i )		 { return data[( m_next_read + i ) % N]; }
+	constexpr auto operator[]( int i ) { return data[( m_next_read + i ) % N]; }
 	constexpr auto operator[]( int i ) const { return data[( m_next_read + i ) % N]; }
 
 	constexpr int size() const

@@ -551,10 +551,10 @@ namespace {
 
 ::sockaddr_un make_sockaddr_un( const char* u8path, std::size_t length )
 {
-	::sockaddr_un native {};
+	::sockaddr_un         native {};
 	constexpr std::size_t max_unix_path_length = sizeof( native.sun_path );
 	native.sun_family                          = AF_UNIX;
-	std::size_t           actual_length        = length < max_unix_path_length - 1 ? length : max_unix_path_length - 1;
+	std::size_t actual_length                  = length < max_unix_path_length - 1 ? length : max_unix_path_length - 1;
 	std::memcpy( native.sun_path, u8path, actual_length );
 	native.sun_path[actual_length] = '\0';
 	return native;
@@ -583,7 +583,7 @@ const char* SockaddrUn::path() const noexcept
 
 std::size_t SockaddrUn::length() const noexcept
 {
-	return std::strlen(reinterpret_cast<const ::sockaddr_un*>( &_storage )->sun_path);
+	return std::strlen( reinterpret_cast<const ::sockaddr_un*>( &_storage )->sun_path );
 }
 
 const char* inet_net_to_pres( Domain af, const void* src, char* dst, size_t size )

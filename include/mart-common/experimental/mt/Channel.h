@@ -79,7 +79,7 @@ public:
 		_cv_non_empty.wait( ul, [this] { return !_fifo.empty() || _cancel; } );
 		if( _cancel ) {
 			_cancel = false;
-			throw Canceled{};
+			throw Canceled {};
 		}
 		receive_target = std::move( _fifo.front() );
 		_fifo.pop();
@@ -105,23 +105,23 @@ public:
 	{
 		using f_type = decltype( _fifo );
 		std::lock_guard<std::mutex> _( _mx );
-		f_type{}.swap( _fifo );
+		f_type {}.swap( _fifo );
 	}
 
 	// same as clear, but also resets the cancel_read flag
-	void reset() {
+	void reset()
+	{
 		using f_type = decltype( _fifo );
 		std::lock_guard<std::mutex> _( _mx );
 		f_type {}.swap( _fifo );
 		_cancel = false;
-
 	}
 
 	void operator<<( const T& v ) { send( v ); }
 	void operator<<( T&& v ) { send( std::move( v ) ); }
 
-	//class receiving {
-	//public:
+	// class receiving {
+	// public:
 	//	receiving( Channel* ch, T& receive_target )
 	//		: _ch( ch )
 	//		, _receive_target( receive_target )
@@ -146,7 +146,7 @@ public:
 	//		if( _ch ) _ch->receive( _receive_target );
 	//	}
 
-	//private:
+	// private:
 	//	Channel* _ch;
 	//	T&       _receive_target;
 	//};
@@ -163,7 +163,7 @@ public:
 	 * if (ch >> v) //non-blocking
 	 */
 
-	//receiving operator>>( T& v ) { return receiving( this, v ); }
+	// receiving operator>>( T& v ) { return receiving( this, v ); }
 
 	void operator>>( T& v ) { return receive( v ); }
 

@@ -5,7 +5,7 @@
 TEST_CASE( "experimental_exp_socket_is_blocking_after_construction", "[experimental][ranges]" )
 {
 	using namespace mart::experimental::nw;
-	//socks::port_layer::waInit();
+	// socks::port_layer::waInit();
 	socks::Socket socket( socks::Domain::inet6, socks::TransportType::datagram );
 	CHECK( socket.isValid() );
 	CHECK( socket.isBlocking() );

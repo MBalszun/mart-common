@@ -296,9 +296,9 @@ protected:
 				   ? true
 #ifndef NDEBUG
 				   : throw std::out_of_range(
-						 std::string( "Tried to create a subview that would exceed the original array view." )
-						 + "Original size: " + std::to_string( _size ) + ". Offset/Count:" + std::to_string( offset )
-						 + "/" + std::to_string( count ) + "\n" );
+					   std::string( "Tried to create a subview that would exceed the original array view." )
+					   + "Original size: " + std::to_string( _size ) + ". Offset/Count:" + std::to_string( offset )
+					   + "/" + std::to_string( count ) + "\n" );
 #else
 				   : throw std::out_of_range( "Tried to create a subview that would exceed the original array view." );
 #endif
@@ -308,7 +308,7 @@ protected:
 	size_type _size = 0;
 
 	// interface for ArrayViewAdaptor
-	constexpr       pointer _arrayView_data()       noexcept { return _data; }
+	constexpr pointer       _arrayView_data() noexcept { return _data; }
 	constexpr const_pointer _arrayView_data() const noexcept { return _data; }
 	constexpr size_type     _arrayView_size() const noexcept { return _size; }
 	friend class ArrayViewAdaptor<T, ArrayView<T>>;

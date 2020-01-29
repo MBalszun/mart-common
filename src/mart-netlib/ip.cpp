@@ -2,18 +2,17 @@
 
 #include <im_str/im_str.hpp>
 
-
 #include <mart-netlib/network_exceptions.hpp>
 
 namespace mart::nw::ip {
-
 
 mba::im_zstr address_v4::asString() const
 {
 	// 17 is maximal length a ipv4 address can have in the dotted notation: XXX.XXX.XXX.XXX\0
 	std::array<char, 24> ret {};
 
-	nw::socks::port_layer::inet_net_to_pres( socks::Domain::Inet, &(this->_addr), ret.data(), ret.size() ); // mart::ArrayView<char>(ret)));
+	nw::socks::port_layer::inet_net_to_pres(
+		socks::Domain::Inet, &( this->_addr ), ret.data(), ret.size() ); // mart::ArrayView<char>(ret)));
 
 	return mba::im_zstr( std::string_view( ret.data() ) );
 }
@@ -30,29 +29,26 @@ namespace _impl_details_ip {
 {
 	throw mart::nw::invalid_address_string(
 		mba::concat( "Creating ipv4 endpoint from string \"",
-											   str,
-											   "\" Failed. "
-											   "Addess must have format a.b.c.d:p - colon or p is missing" )
-									);
+					 str,
+					 "\" Failed. "
+					 "Addess must have format a.b.c.d:p - colon or p is missing" ) );
 }
 [[noreturn]] void _throw_ipv4_parse_fail_port( std::string_view str, std::string_view port )
 {
 	throw mart::nw::invalid_address_string( mba::concat( "Parsing port <",
-											   port,
-											   "> from ipv4 endpoint string"
-											   "\"",
-											   str,
-											   "\""
-											   " failed."
-											   "Note, port number has to be in the interval [0..65535]" )
-									 );
+														 port,
+														 "> from ipv4 endpoint string"
+														 "\"",
+														 str,
+														 "\""
+														 " failed."
+														 "Note, port number has to be in the interval [0..65535]" ) );
 }
 
 basic_endpoint_v4_base::basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& addr )
 	: address( addr.address() )
 	, port( addr.port() )
-	, valid { addr.is_valid()
-				 ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
+	, valid {addr.is_valid() ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
 {
 }
 

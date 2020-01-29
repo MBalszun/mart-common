@@ -1,5 +1,5 @@
-#include <mart-common/StringView.h>
 #include <mart-common/PrintWrappers.h>
+#include <mart-common/StringView.h>
 
 #include <iostream>
 
@@ -18,9 +18,9 @@ TEST_CASE( "various_string_view", "[StringView]" )
 
 TEST_CASE( "string_subview", "[StringView]" )
 {
-	//CHECK_THROWS( mart::StringView( "Hello" ).substr( 10 ) );
-	//CHECK_THROWS( mart::StringView( "Hello" ).substr( 3, 10 ) );
-	//CHECK_THROWS( mart::StringView( "Hello" ).substr( 10, 0 ) );
+	// CHECK_THROWS( mart::StringView( "Hello" ).substr( 10 ) );
+	// CHECK_THROWS( mart::StringView( "Hello" ).substr( 3, 10 ) );
+	// CHECK_THROWS( mart::StringView( "Hello" ).substr( 10, 0 ) );
 	CHECK( "Hello" == mart::StringView( "Hello" ).substr( 0, 5 ) );
 	CHECK( "" == mart::StringView( "Hello" ).substr( 5 ) );
 	CHECK( "" == mart::StringView( "Hello" ).substr( 5, 0 ) );

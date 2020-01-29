@@ -74,7 +74,7 @@ template <class Enum> constexpr auto getEnumNames ()               -> decltype( 
 // clang-format on
 
 template<class Enum>
-[[deprecated("Please use to_enum instead")]] constexpr Optional<Enum> toEnum( std::string_view str ) noexcept
+[[deprecated( "Please use to_enum instead" )]] constexpr Optional<Enum> toEnum( std::string_view str ) noexcept
 {
 	std::size_t idx = 0;
 	for( const auto& name : getEnumNames<Enum>() ) {

@@ -23,12 +23,11 @@
 /* Standard Library Includes */
 #include <algorithm>
 #include <chrono>
-#include <ostream>
 #include <ctime>
-#include <thread> //thread::id
 #include <iomanip>
+#include <ostream>
 #include <string_view>
-
+#include <thread> //thread::id
 
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -51,9 +50,9 @@ public:
 	}
 
 private:
-	std::ostream*	   _stream;
+	std::ostream*      _stream;
 	std::ios::fmtflags _flags;
-	char			   _fillc;
+	char               _fillc;
 };
 
 /**
@@ -104,16 +103,16 @@ inline void defaultFormatForLog( std::ostream& out, std::thread::id id )
 	out << std::hex << "0x" << id;
 }
 
-//Default for ArrayViews [a, b, c, d, ]
-template <class T>
+// Default for ArrayViews [a, b, c, d, ]
+template<class T>
 inline void defaultFormatForLog( std::ostream& out, mart::ArrayView<T> arr )
 {
 	out << '[';
-	if ( arr.size() > 0 ) {
-		formatForLog(out, arr[0]);
-		for (auto&& e : arr.subview(1)) {
+	if( arr.size() > 0 ) {
+		formatForLog( out, arr[0] );
+		for( auto&& e : arr.subview( 1 ) ) {
 			out << ", ";
-			formatForLog(out, e);
+			formatForLog( out, e );
 		}
 	}
 	out << ']';
@@ -122,19 +121,19 @@ inline void defaultFormatForLog( std::ostream& out, mart::ArrayView<T> arr )
 namespace _impl_log {
 inline void printOneLine( std::ostream& out, mart::ConstMemoryView mem, size_t fillto = 0 )
 {
-	constexpr std::string_view space("                                                                                                                                                     ");
-	const auto spaces = [&](size_t cnt) { return space.substr(0, std::min(cnt,space.size())); };
+	constexpr std::string_view space(
+		"                                                                                                              "
+		"                                       " );
+	const auto spaces = [&]( size_t cnt ) { return space.substr( 0, std::min( cnt, space.size() ) ); };
 
 	out << '[';
-	for ( ByteType b : mem ) {
+	for( ByteType b : mem ) {
 		out << ' ' << std::setw( 2 ) << static_cast<int>( b );
 	}
-	if ( fillto > mem.size() ) {
-		out << spaces( ( fillto - mem.size() ) * 3 );
-	}
+	if( fillto > mem.size() ) { out << spaces( ( fillto - mem.size() ) * 3 ); }
 	out << " ]";
 }
-}
+} // namespace _impl_log
 
 inline void defaultFormatForLog( std::ostream& out, mart::ConstMemoryView mem )
 {
@@ -143,10 +142,10 @@ inline void defaultFormatForLog( std::ostream& out, mart::ConstMemoryView mem )
 	ostream_flag_saver _( out );
 	out << std::right << std::hex << std::setfill( '0' );
 
-	if ( mem.size() <= ElementsPerLine ) {
+	if( mem.size() <= ElementsPerLine ) {
 		_impl_log::printOneLine( out, mem );
 	} else {
-		while ( !mem.empty() ) {
+		while( !mem.empty() ) {
 			out << "\n\t";
 			auto parts = mem.split( std::min( ElementsPerLine, mem.size() ) );
 			_impl_log::printOneLine( out, parts.first, ElementsPerLine );
@@ -164,10 +163,10 @@ inline void defaultFormatForLog( std::ostream& out, mart::ConstMemoryView mem )
  * @param out
  * @param value
  */
-template <class T>
+template<class T>
 inline void formatForLog( std::ostream& out, const T& value )
 {
-	//fallback to default formatters
+	// fallback to default formatters
 	mart::log::defaultFormatForLog( out, value );
 }
 
@@ -182,13 +181,13 @@ inline void formatForLog( std::ostream& out, std::thread::id id )
 	out << "0x" << std::hex << id;
 }
 
-template <class... ARGS>
+template<class... ARGS>
 inline void formatForLog( std::ostream& out, const ARGS&... args )
 {
-	( formatForLog( out, args ),...);
+	( formatForLog( out, args ), ... );
 }
 
-}
-}
+} // namespace log
+} // namespace mart
 
 #endif

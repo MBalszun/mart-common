@@ -34,7 +34,6 @@
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
-
 namespace mart::nw {
 // classes related to the ip protocol in general
 namespace ip {
@@ -211,11 +210,7 @@ struct basic_endpoint_v4_base {
 	}
 
 	// for use in generic contexts
-	mart::nw::socks::port_layer::SockaddrIn toSockAddr() const noexcept
-	{
-		return toSockAddr_in();
-	}
-
+	mart::nw::socks::port_layer::SockaddrIn toSockAddr() const noexcept { return toSockAddr_in(); }
 
 	mba::im_zstr toString() const;
 
@@ -267,8 +262,6 @@ private:
 	{
 	}
 };
-
-
 
 constexpr bool is_valid_v4_endpoint( std::string_view str )
 {

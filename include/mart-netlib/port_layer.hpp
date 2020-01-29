@@ -53,7 +53,8 @@ int to_native( Protocol protocol ) noexcept;
 /* ################################################################################ */
 /* ############# Wrapper around native socket API ################################# */
 
-ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default ) noexcept;
+ReturnValue<handle_t>
+		  socket( Domain domain, TransportType transport_type, Protocol protocol = Protocol::Default ) noexcept;
 ErrorCode close_socket( handle_t handle ) noexcept;
 
 ReturnValue<handle_t> accept( handle_t handle, Sockaddr& addr ) noexcept;
@@ -77,7 +78,6 @@ bool      waInit() noexcept;
 ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept;
 ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept;
 ErrorCode                              set_blocking( handle_t handle, bool should_block ) noexcept;
-
 
 /* ################################################################################ */
 /* ############# Wrapper for various address types ################################ */
@@ -178,7 +178,7 @@ struct SockaddrUn : mart::nw::socks::Sockaddr {
 
 private:
 	// this should have the same size and alignment as the platform's SockaddrIn
-	struct alignas (2) Storage {
+	struct alignas( 2 ) Storage {
 		char raw_bytes[110];
 	};
 	Storage _storage {};
@@ -189,7 +189,6 @@ private:
 	{
 	}
 };
-
 
 const char* inet_net_to_pres( mart::nw::socks::Domain af, const void* src, char* dst, size_t size );
 int         inet_pres_to_net( mart::nw::socks::Domain af, const char* src, void* dst );

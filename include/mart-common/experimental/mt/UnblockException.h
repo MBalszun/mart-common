@@ -21,10 +21,9 @@ namespace mart {
 namespace experimental {
 namespace mt {
 struct Canceled : std::exception {
-
 };
-}
-}
-}
+} // namespace mt
+} // namespace experimental
+} // namespace mart
 
 #endif

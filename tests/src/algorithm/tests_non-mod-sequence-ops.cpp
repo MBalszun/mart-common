@@ -97,10 +97,11 @@ TEST_CASE( "mismatch_compare_mart_output_to_std_output", "[algorithm][search]" )
 {
 	for( auto&& rng1 : test_ranges ) {
 		for( auto&& rng2 : test_ranges ) {
-			CHECK( mart::mismatch(rng1,rng2) == std::mismatch(rng1.begin(), rng1.end(), rng2.begin(), rng2.end()) );
+			CHECK( mart::mismatch( rng1, rng2 )
+				   == std::mismatch( rng1.begin(), rng1.end(), rng2.begin(), rng2.end() ) );
 			for( auto&& p : binary_preds ) {
-				CHECK( mart::mismatch( rng1, rng2,p  )
-					   == std::mismatch( rng1.begin(), rng1.end(), rng2.begin(), rng2.end(),p ) );
+				CHECK( mart::mismatch( rng1, rng2, p )
+					   == std::mismatch( rng1.begin(), rng1.end(), rng2.begin(), rng2.end(), p ) );
 			}
 		}
 	}

@@ -35,7 +35,7 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 
 	CHECK_NOTHROW( s2.send( mart::view_bytes( 5 ) ) );
 	// TODO calling sendto on a connected socket has different behavior on linux and windows
-	//CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e2 ) );
+	// CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e2 ) );
 
 	CHECK_THROWS( s2.sendto( mart::view_bytes( 5 ), e1 ) ); // invalid target address
 }
@@ -49,14 +49,13 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	CHECK_NOTHROW( s.bind( udp::endpoint {"127.0.0.1:3446"} ) );
 	using namespace std::chrono_literals;
-	CHECK( s.set_rx_timeout( 32ms ) ); //TODO: on some platforms (travis), must be multiple of 4ms
+	CHECK( s.set_rx_timeout( 32ms ) ); // TODO: on some platforms (travis), must be multiple of 4ms
 	CHECK( s.set_tx_timeout( 20ms ) );
 	CHECK( s.get_tx_timeout() == 20ms );
 	CHECK( s.get_rx_timeout() == 32ms );
 
 	int buffer = 0;
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
-
 
 	CHECK( s.try_send( mart::view_bytes( buffer ) ).size() != 0 );
 	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ).isValid() );
@@ -71,7 +70,6 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	CHECK( !s.recv( mart::view_bytes_mutable( buffer ) ).isValid() );
 	CHECK( !s.recvfrom( mart::view_bytes_mutable( buffer ) ).data.isValid() );
-
 
 	s.clearRxBuff();
 

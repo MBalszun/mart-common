@@ -25,7 +25,7 @@
 /* Proprietary Library Includes */
 /* Project Includes */
 #include "./ArrayView.h"
-#include "./StringView.h"        //getSpaces
+#include "./StringView.h" //getSpaces
 #include "./StringViewOstream.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 

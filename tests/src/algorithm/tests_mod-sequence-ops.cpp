@@ -74,8 +74,7 @@ TEST_CASE( "generate_compare_mart_output_to_std_output", "[algorithm][generate]"
 {
 
 	for( auto&& gen : generators ) {
-		for( int i = -5; i < 5; i++ ) {
-		}
+		for( int i = -5; i < 5; i++ ) {}
 		std::vector<int> rng_mart( 10 );
 		std::vector<int> rng_std( 10 );
 		mart::generate( rng_mart, gen );
@@ -93,7 +92,6 @@ TEST_CASE( "generate_n_compare_mart_output_to_std_output", "[algorithm][generate
 			mart::generate_n( rng_mart, i, gen );
 			std::generate_n( rng_std.begin(), i, gen );
 			CHECK( rng_mart == rng_std );
-
 		}
 	}
 }

@@ -16,8 +16,8 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <stdexcept>
 #include <cstdint>
+#include <stdexcept>
 
 /* Proprietary Library Includes */
 #include "./cpp_std/type_traits.h"
@@ -26,62 +26,58 @@
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
-
 namespace mart {
 
 /* ######## narrowing ################################################ */
 
 // narrow_cast(): a searchable way to do unchecked narrowing casts of values
-template <class T, class U>
-inline constexpr T narrow_cast(U u) noexcept
+template<class T, class U>
+inline constexpr T narrow_cast( U u ) noexcept
 {
-	static_assert(std::is_arithmetic<T>::value, "Narrow cast can only be used for arithmetic types");
-	return static_cast<T>(u);
+	static_assert( std::is_arithmetic<T>::value, "Narrow cast can only be used for arithmetic types" );
+	return static_cast<T>( u );
 }
 
-struct narrowing_error : std::exception {};
+struct narrowing_error : std::exception {
+};
 
 namespace _impl_narrow {
 
-template <class T, class U>
-struct is_same_signedness
-	: std::integral_constant<bool, std::is_signed<T>::value == std::is_signed<U>::value> {};
+template<class T, class U>
+struct is_same_signedness : std::integral_constant<bool, std::is_signed<T>::value == std::is_signed<U>::value> {
+};
 
-template <class T, class U, bool SameSigndness= is_same_signedness<T,U>::value>
+template<class T, class U, bool SameSigndness = is_same_signedness<T, U>::value>
 struct sign_check {
-	//throws an narrowing error, if both parameters are of different signdness and one is negative
-	static void check(T t,U u)
+	// throws an narrowing error, if both parameters are of different signdness and one is negative
+	static void check( T t, U u )
 	{
-		if ((t < T{}) != (u < U{})) {
-			throw narrowing_error();
-		}
+		if( ( t < T {} ) != ( u < U {} ) ) { throw narrowing_error(); }
 	}
 };
 
-template <class T, class U>
-struct sign_check<T,U,true> {
-	//if both parameters are of same signess, we don't have to do anything
-	static void check(T, U)
-	{}
+template<class T, class U>
+struct sign_check<T, U, true> {
+	// if both parameters are of same signess, we don't have to do anything
+	static void check( T, U ) {}
 };
 
-} // _impl_narrow
+} // namespace _impl_narrow
 
 /**
- * Performs a narrowing cast and throws a narrowing_error exception if the source value can't be represented in the target type
+ * Performs a narrowing cast and throws a narrowing_error exception if the source value can't be represented in the
+ * target type
  */
-template <class T, class U>
-inline T narrow(U u)
+template<class T, class U>
+inline T narrow( U u )
 {
-	T t = narrow_cast<T>(u);
+	T t = narrow_cast<T>( u );
 
 	// this only does any work if T and U are of different signdness
-	_impl_narrow::sign_check<T,U>::check(t, u);
+	_impl_narrow::sign_check<T, U>::check( t, u );
 
-	//check if roundtrip looses information
-	if (static_cast<U>(t) != u) {
-		throw narrowing_error();
-	}
+	// check if roundtrip looses information
+	if( static_cast<U>( t ) != u ) { throw narrowing_error(); }
 
 	return t;
 }
@@ -101,18 +97,19 @@ inline T narrow(U u)
  */
 
 template<class T>
-T make_with_capacity(size_t i)
+T make_with_capacity( size_t i )
 {
 	T t;
-	t.reserve(i);
+	t.reserve( i );
 	return t;
 }
 /* ######## math ################################################ */
 template<class T>
-T clamp(T val, T min_val, T max_val) {
-	using std::min;
+T clamp( T val, T min_val, T max_val )
+{
 	using std::max;
-	return min(max_val, max(min_val,val));
+	using std::min;
+	return min( max_val, max( min_val, val ) );
 }
 
 template<class T>
@@ -141,21 +138,17 @@ T clamp( T val, Limits1D<T> lim )
 	return min( lim.max, max( val, lim.min ) );
 }
 
+// Flag that is sometimes used as a template parameter for policy based design
+enum class Synchonized { False, True };
 
-//Flag that is sometimes used as a template parameter for policy based design
-enum class Synchonized {
-	False,
-	True
-};
-
-
-template<class T, class ... Ts>
-constexpr bool type_is_any_of() {
+template<class T, class... Ts>
+constexpr bool type_is_any_of()
+{
 	return ( std::is_same_v<T, Ts> || ... || false );
 }
 
 template<class T, class T1, class... Ts>
-[[deprecated("Please use type_is_any_of instead")]] constexpr bool type_is_one_of()
+[[deprecated( "Please use type_is_any_of instead" )]] constexpr bool type_is_one_of()
 {
 	return type_is_any_of<T, T1, Ts...>();
 }
@@ -164,14 +157,14 @@ using idx_t = std::ptrdiff_t;
 
 template<class F>
 struct ExecuteOnExit_t {
-    ExecuteOnExit_t( F f )
-        : _f( std::move(f) )
-    {
-    }
-    ~ExecuteOnExit_t() { _f(); }
-    F _f;
+	ExecuteOnExit_t( F f )
+		: _f( std::move( f ) )
+	{
+	}
+	~ExecuteOnExit_t() { _f(); }
+	F _f;
 };
 
-}//mart
+} // namespace mart
 
-#endif //LIB_MART_COMMON_GUARD_UTILS_H
+#endif // LIB_MART_COMMON_GUARD_UTILS_H

@@ -26,10 +26,10 @@ namespace mart {
 // note: not fully compliant, as it doesn't check for std::reference_wrapper
 namespace _helper_make_array {
 template<class T, class... ARGS>
-using return_type = std::array<						 // type is an array of
+using return_type = std::array<                      // type is an array of
 	std::conditional_t<std::is_same<T, void>::value, // if T is of type void (the default type)
 					   std::common_type_t<ARGS...>,  // deduce the element type as common type
-					   T							 // otherwise use T as element type
+					   T                             // otherwise use T as element type
 					   >,
 	sizeof...( ARGS ) // number of elements is equal to number of parameters
 	>;

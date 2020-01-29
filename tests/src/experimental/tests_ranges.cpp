@@ -16,8 +16,6 @@ TEST_CASE( "experimental_vrange_compiles", "[experimental][ranges]" )
 
 TEST_CASE( "experimental_enum_default_range", "[experimental][ranges]" )
 {
-	enum test_vals {a,b,c};
+	enum test_vals { a, b, c };
 	mart::experimental::DefaultEnumRange<test_vals> rnage();
-
-
 }

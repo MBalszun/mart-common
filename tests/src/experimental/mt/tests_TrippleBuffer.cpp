@@ -11,7 +11,7 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_more_writes_than_reads", "[mt][Tripple
 
 	for( int i = 0; i < 100; i += 2 ) {
 		auto& wrt_buff1 = buffer.get_write_buffer();
-		wrt_buff1		= std::to_string( i );
+		wrt_buff1       = std::to_string( i );
 		buffer.commit();
 
 		if( i % 3 == 0 ) {
@@ -20,12 +20,12 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_more_writes_than_reads", "[mt][Tripple
 		}
 
 		auto& wrt_buff2 = buffer.get_write_buffer();
-		wrt_buff2		= std::to_string( i + 1 );
+		wrt_buff2       = std::to_string( i + 1 );
 		buffer.commit();
 
 		buffer.fetch_update();
 		auto& rd_buff = buffer.get_read_buffer();
-		auto  r		  = std::stoi( rd_buff );
+		auto  r       = std::stoi( rd_buff );
 		CHECK( r == i + 1 );
 	}
 }
@@ -36,17 +36,17 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_more_reads_than_writes", "[mt][Tripple
 
 	for( int i = 0; i < 100; ++i ) {
 		auto& wrt_buff1 = buffer.get_write_buffer();
-		wrt_buff1		= std::to_string( i );
+		wrt_buff1       = std::to_string( i );
 		buffer.commit();
 
 		CHECK( buffer.fetch_update() );
 		auto& rd_buff1 = buffer.get_read_buffer();
-		auto  r1	   = std::stoi( rd_buff1 );
+		auto  r1       = std::stoi( rd_buff1 );
 		CHECK( r1 == i );
 
 		CHECK( !buffer.fetch_update() );
 		auto& rd_buff2 = buffer.get_read_buffer();
-		auto  r2	   = std::stoi( rd_buff2 );
+		auto  r2       = std::stoi( rd_buff2 );
 		CHECK( r2 == i );
 
 		if( i % 3 == 0 ) {
@@ -74,12 +74,12 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_varying_write_read_ratios", "[mt][Trip
 		}
 
 		auto& wrt_buff = buffer.get_write_buffer();
-		wrt_buff	   = std::to_string( i );
+		wrt_buff       = std::to_string( i );
 		buffer.commit();
 
 		CHECK( buffer.fetch_update() );
 		auto& rd_buff = buffer.get_read_buffer();
-		auto  r1	  = std::stoi( rd_buff );
+		auto  r1      = std::stoi( rd_buff );
 		CHECK( r1 == i );
 
 		if( i % 2 == 1 ) {
@@ -117,7 +117,7 @@ TEST_CASE( "TrippleBuffer_mt_complex_producer_consumer", "[mt][TrippleBuffer][th
 			bool newData = buffer.fetch_update();
 
 			std::string& t = buffer.get_read_buffer();
-			auto		 r = std::stoi( t );
+			auto         r = std::stoi( t );
 
 			CHECK( r < ItCnt );
 			CHECK( last <= r );
@@ -152,7 +152,7 @@ TEST_CASE( "TrippleBuffer_mt_simple_producer_consumer", "[mt][TrippleBuffer][thr
 		for( ; last < ItCnt - 1; ) {
 			bool newData = buffer.fetch_update();
 
-			auto r		 = buffer.get_read_buffer();
+			auto r = buffer.get_read_buffer();
 			CHECK( r < ItCnt );
 			CHECK( last <= r );
 
@@ -180,13 +180,13 @@ struct LargePod {
 	}
 	std::array<int, 211> data; // spanning multiple cache lines
 };
-}
+} // namespace
 
 TEST_CASE( "TrippleBuffer_mt_large_pod_producer_consumer", "[mt][TrippleBuffer][threaded_test]" )
 {
 	static constexpr int ItCnt = 500'000;
 
-	mart::experimental::mt::TrippleBuffer<LargePod> buffer( LargePod{-1} );
+	mart::experimental::mt::TrippleBuffer<LargePod> buffer( LargePod {-1} );
 
 	auto producer = [&buffer]() {
 		for( int i = 0; i < ItCnt; ++i ) {

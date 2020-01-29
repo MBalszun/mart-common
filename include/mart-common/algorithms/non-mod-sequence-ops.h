@@ -47,15 +47,15 @@ bool none_of( const R& c, Pred p )
 }
 
 template<class R, class T>
-constexpr auto count(const R& r, const T& value)
+constexpr auto count( const R& r, const T& value )
 {
 	std::ptrdiff_t cnt = 0;
-	const auto& end = r.end();
-	for (auto it = r.begin(); it != end; ++it) {
+	const auto&    end = r.end();
+	for( auto it = r.begin(); it != end; ++it ) {
 		cnt += *it == value;
 	}
 	return cnt;
-	//return count( MART_COMMON_ALL( r ), value );
+	// return count( MART_COMMON_ALL( r ), value );
 }
 
 template<class R, class UnaryPredicate>
@@ -64,16 +64,16 @@ auto count_if( const R& r, UnaryPredicate p )
 	return count_if( MART_COMMON_ALL( r ), p );
 }
 
-template< class R, class UnaryFunction >
-UnaryFunction for_each(R&& r, UnaryFunction f)
+template<class R, class UnaryFunction>
+UnaryFunction for_each( R&& r, UnaryFunction f )
 {
-   return std::for_each(MART_COMMON_ALL( r ),f);
+	return std::for_each( MART_COMMON_ALL( r ), f );
 }
 
 template<class R1, class R2>
 auto mismatch( R1&& r1, R2&& r2 )
 {
-	return std::mismatch(MART_COMMON_ALL( r1 ), MART_COMMON_ALL( r2 ));
+	return std::mismatch( MART_COMMON_ALL( r1 ), MART_COMMON_ALL( r2 ) );
 }
 
 template<class R1, class R2, class BinaryPredicate>

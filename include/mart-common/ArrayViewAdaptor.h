@@ -17,8 +17,8 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <iterator>
 #include <exception>
+#include <iterator>
 #include <type_traits>
 
 #ifndef NDEBUG

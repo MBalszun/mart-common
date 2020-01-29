@@ -53,8 +53,8 @@ using std::aligned_union;
 using std::aligned_union_t;
 
 struct nonesuch {
-	nonesuch()					= delete;
-	~nonesuch()					= delete;
+	nonesuch()                  = delete;
+	~nonesuch()                 = delete;
 	nonesuch( nonesuch const& ) = delete;
 	void operator=( nonesuch const& ) = delete;
 };
@@ -67,14 +67,14 @@ namespace detail_detection {
 template<class Default, class AlwaysVoid, template<class...> class Op, class... Args>
 struct detector {
 	using value_t = std::false_type;
-	using type	= Default;
+	using type    = Default;
 };
 
 template<class Default, template<class...> class Op, class... Args>
 struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
 	// Note that std::void_t is a C++17 feature
 	using value_t = std::true_type;
-	using type	= Op<Args...>;
+	using type    = Op<Args...>;
 };
 
 } // namespace detail_detection
