@@ -172,6 +172,7 @@ TEST_CASE( "TrippleBuffer_mt_simple_producer_consumer", "[mt][TrippleBuffer][thr
 
 namespace {
 struct LargePod {
+	LargePod() = default;
 	explicit LargePod( int i ) { fill( i ); }
 	void fill( int i ) { std::fill( data.begin(), data.end(), i ); }
 	bool is_consistent() const
