@@ -71,6 +71,8 @@ if( NOT hasParent )
 	set_target_properties ( mart_im_str PROPERTIES EXPORT_NAME im_str )
 
 	mart_install_targets(
+		PACKAGE_NAME
+			MartCommon
 		TARGETS
 			mart_im_str
 			mart-common

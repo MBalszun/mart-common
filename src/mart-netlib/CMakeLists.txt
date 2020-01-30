@@ -20,9 +20,7 @@ endif()
 add_library( mart-netlib-portlayer STATIC ${CMAKE_CURRENT_SOURCE_DIR}/port_layer.cpp )
 target_include_directories( mart-netlib-portlayer
 	PRIVATE
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>
-	INTERFACE
-		$<INSTALL_INTERFACE:include>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
 add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
@@ -43,5 +41,5 @@ target_sources(mart-netlib
 set_target_properties ( mart-netlib PROPERTIES EXPORT_NAME netlib )
 target_include_directories( mart-netlib
 	PRIVATE
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )

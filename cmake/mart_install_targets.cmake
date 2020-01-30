@@ -2,26 +2,26 @@
 # https://cmake.org/cmake/help/latest/command/find_package.html
 
 function(mart_install_targets)
-cmake_parse_arguments(PARSE_ARGV 0 install_param "" "NAMESPACE" "TARGETS;HEADER_DIRS")
+cmake_parse_arguments(PARSE_ARGV 0 install_param "" "PACKAGE_NAME;NAMESPACE" "TARGETS;HEADER_DIRS")
 
-set( INSTALL_DIR_CMAKE share/MartCommon )
-set( CONFIG_STEM_NAME MartCommonConfig )
+set( INSTALL_DIR_CMAKE share/${install_param_PACKAGE_NAME} )
+set( CONFIG_STEM_NAME ${install_param_PACKAGE_NAME}Config )
 
 include(GNUInstallDirs)
 
 # install results from compiling the targets and export the
 # relevant information into file
-install( TARGETS ${install_param_TARGETS} EXPORT ${CONFIG_STEM_NAME}
+install( TARGETS ${install_param_TARGETS} EXPORT ${install_param_PACKAGE_NAME}
 	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 foreach( dir IN LISTS install_param_HEADER_DIRS)
-install( DIRECTORY ${dir} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
+	install( DIRECTORY ${dir} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
 endforeach()
 
 
 # install the CmakeConfig file holding the infromation about the isntalled targets
-install( EXPORT ${CONFIG_STEM_NAME}
+install( EXPORT ${install_param_PACKAGE_NAME}
 	FILE
 		${CONFIG_STEM_NAME}.cmake
 	NAMESPACE
