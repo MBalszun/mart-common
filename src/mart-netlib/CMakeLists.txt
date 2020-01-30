@@ -27,7 +27,6 @@ target_include_directories( mart-netlib-portlayer
 
 add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
 set_target_properties( mart-netlib-portlayer PROPERTIES EXPORT_NAME netlib-portlayer )
-set_target_properties( mart-netlib-portlayer PROPERTIES CXX_STANDARD 11)
 
 ######
 # netlib library

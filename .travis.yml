@@ -24,6 +24,10 @@ jobs:
   include:
     - env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - env: MATRIX_EVAL="CC=clang && CXX=clang++"
+    - script:
+      - cmake -DCMAKE_CXX_STANDARD=11 .
+      - cmake --build . --target mart-netlib-portlayer
+
 
 before_install:
   - eval "${MATRIX_EVAL}"
