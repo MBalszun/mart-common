@@ -4,6 +4,7 @@
 
 #include <string>
 #include <thread>
+#include <array>
 
 TEST_CASE( "TrippleBuffer_sync_can_handle_more_writes_than_reads", "[mt][TrippleBuffer]" )
 {
