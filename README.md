@@ -4,40 +4,41 @@ This is a small utilities library for usage in software related to the mart proj
 
 The library is in an early phase and currently, no versioning scheme is used. Compatibility may be broken between each and every commit. That being said, except for types in the subfolder "experimental", we try to keep the interfaces as stable as possible.
 
-We currently require c++17 and cmake 3.10. An older version based on c++11 & cmake 2.8.12 can be found in the branch `cpp11`. From time to time we cherry-pick some commits from master to that branch if they don't rely on modern toolchains
+We currently require c++17 and cmake 3.13. 
 
 # Structure
-Currently this is a header-only library with all header files lying in the `./include/mart-common` sub folder. For usage either add "./include" to your include path or add the root folder as a subfolder in cmake
+There are three components:
+- im_str: This is a separate library (https://github.com/MBalszun/im_str) providing an immutable string class which is integrated here for convenience sake (usable as Mart::im_str target in cmake)
+- mart-common: A header only collection of various utility functions and sub-libraries (Mart::common)
+- mart-netlib: A simple portability layer over the raw c-bsd socket interface (Mart::netlib). This library is NOT header only!
+
 
 # Content
 This is a short (and probably out of data) overview over the content provided by this library
 
-- `algorithm.h`:
-  Wrapper around some standard algorithms that take a range (anything with a begin and end) as a parameter instead of two iterators.
-  ```
-   vector<int> v{...};
-   sort(v); // instead of sort(v.begin(),v.end());
-  ```
-  Currently (2016-11-08) only a few example algorithms are provided but expect more to come
+
+- `MartLog.h`: Logging framework 
+
+
 
 - `ArrayView.h`:
   Contains an array view class similar to `gsl::span`. Basically a wrapper around a pointer and a length.
   Can be used as a parameter for many functions that ordinarily would e.g. take a `vector<T>&` but is more generic than that
 
-- `ConstString.h`:
+- `ConstString.h`:  **By now essentially a wrapper around im_str / im_zstr:**
   String that can't be modified after creation using a ref-counted implementation.
   Main advantages over std::string:
 	- Doesn't allocate memory when constructed from string litteral
 	- Concatenation of multiple string-like objects requires only a single dynamic memory allocation
     - Copying and creating substrings is pretty cheap
 
-- `MartLog.h`:
-  Header that provides a simple logging mechanism
+- `exceptions`: Common exceptions used in this library. In particular making use of im_str
 
 - `MartTime.h`:
   Collection of timing related function. Main purpose is making the usage of std::chrono facilities less painfull
   (e.g. when checking for timeouts or interacting with legacy api's)
 
+- `MartVec.h`: A very simple vector class, that provides support for basic vector operations like addition, (matrix-) multiplication, rotation 
 
 - `PrintWrappers.h`:
   Wrapper classes for some types (currently only std::chrono::duration) that determine how those types are formatted when inserted into a stream
@@ -47,14 +48,27 @@ This is a short (and probably out of data) overview over the content provided by
   Some utility range classes (mainly for usage with range based for)
   ` for (auto i : irange(0,20)){} // i will have values from 0 to 19 inclusive`
 
+- `random.h`: Producing a pseudo random numer with a single function call.
+
 - `StringView.h`:
   Class similar (but not compatible) to std::string_view. Essentiallly a targeted ArrayView, that encapsulates a pointer and a length.
+  
+- `TypePunningUnion`: Class that allows reinterpretation of one bitpattern as a different bitpattern in a c++ conforming manner. This is primarily used to allow you to read bytes from a stream and then cast theminto the c++ type.
 
 - `utils.h`:
   Random collection of small helper functions and classes
 
 ## Folders
  The following folders are inside include/mart-common:
+ 
+ - `algorithms`:
+  Wrapper around some standard algorithms that take a range (anything with a begin and end) as a parameter instead of two iterators.
+  ```
+   vector<int> v{...};
+   sort(v); // instead of sort(v.begin(),v.end());
+  ```
+  
+- `enum`: Various helpers with the goal to define sets of enums which can be easily converted to and from stirngs and iterated over.
 
 - `cpp_std`:
   Brings some modern c++14/17/20 etc. types into the mart namespace - either as an alias or as a reimplementation. Mainly leftover from the time when we had to use the standard library that shipped with gcc 4.8 / 4.9. They are designed to be an exact drop in replaccement for the standard types and once the compiler is upgraded they can directly be replaced
@@ -66,9 +80,11 @@ This is a short (and probably out of data) overview over the content provided by
    - `DynLimArray.h` (Name subject to change in the near future). A stack allocated array with compiletime capacity but a size that is determined at runtime during construction. Ideally suited to return e.g. a short array of numbers from a function
    - `Optional.h`: A class similar to std::optional
    - `out_param.h`: Class to make outparameter explicit at call site
-   - `network`: Folder containing slim abstraction layer above (win/unix) sockets for compatibility across windows and linux udp and tcp sockets
+   - `network`: Folder containing slim abstraction layer above (win/unix) sockets for compatibility across windows and linux udp and tcp sockets (superseeded by netlib)
 
-- `logging`: Subfolder for classes related to logging. If you jsut want to use martlog, simply include MartLog.h from the main include directoy
+- `logging`: Subfolder for classes related to logging. If you just want to use martlog, simply include MartLog.h from the main include directoy
+
+- `mt`: Datastructures related to multithreading (e.g. a tripplebuffer or queues)
 
 # Contributing
 
