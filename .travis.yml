@@ -1,6 +1,6 @@
 language: cpp
 
-sudo: false
+os: linux
 
 dist: bionic
 
@@ -20,7 +20,7 @@ addons:
       - g++-8
       - lcov
 
-matrix:
+jobs:
   include:
     - env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - env: MATRIX_EVAL="CC=clang && CXX=clang++"
