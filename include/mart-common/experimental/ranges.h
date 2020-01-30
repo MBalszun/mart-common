@@ -36,6 +36,7 @@ auto view_reversed( R&& r ) -> range<std::reverse_iterator<decltype( r.begin() )
 	return {Rit{r.end()}, Rit{r.begin()}};
 }
 
+// TODO: missing auto detection of start end end by default
 template<class Enum, class Ut = mart::underlying_type_t<Enum>>
 class DefaultEnumRange {
 public:
@@ -60,8 +61,10 @@ public:
 	private:
 		Ut idx;
 	};
+
 	constexpr Iterator begin() const noexcept { return Iterator{first}; }
 	constexpr Iterator end() const noexcept { return Iterator{static_cast<Enum>( static_cast<Ut>( last ) + Ut{1} )}; }
+
 	const Enum         first;
 	const Enum         last;
 };

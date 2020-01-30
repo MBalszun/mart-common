@@ -32,7 +32,6 @@ target_link_libraries( mart-common INTERFACE Mart::im_str )
 target_include_directories( mart-common
 	INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include>
 )
 target_compile_features( mart-common INTERFACE cxx_std_17 )
 
@@ -52,7 +51,6 @@ if( MART_COMMON_INCLUDE_NET_LIB )
 	target_include_directories( mart-netlib
 		INTERFACE
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-			$<INSTALL_INTERFACE:include>
 	)
 
 	add_subdirectory( src/mart-netlib )
@@ -68,11 +66,23 @@ endif()
 # support installation
 get_directory_property( hasParent PARENT_DIRECTORY )
 if( NOT hasParent )
-	include( cmake/install_targets.cmake )
+	include( cmake/mart_install_targets.cmake )
 
 	set_target_properties ( mart_im_str PROPERTIES EXPORT_NAME im_str )
-	install_targets( "mart_im_str"  Mart:: "${CMAKE_CURRENT_LIST_DIR}/im_str/include" "im_str") #todo: ugly hack - this should probably not work
-	install_targets( "mart-common;mart-netlib;mart-netlib-portlayer" Mart:: "${CMAKE_CURRENT_LIST_DIR}/include"  "mart-common;mart-netlib")
+
+	mart_install_targets(
+		TARGETS
+			mart_im_str
+			mart-common
+			mart-netlib
+			mart-netlib-portlayer
+		HEADER_DIRS
+			im_str/include/im_str
+			include/mart-common
+			include/mart-netlib
+		NAMESPACE
+			Mart::
+	)
 endif()
 
 

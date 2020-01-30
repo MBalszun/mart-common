@@ -1,7 +1,8 @@
 
 # https://cmake.org/cmake/help/latest/command/find_package.html
 
-function(install_targets targets namespace tl_include_dir include_dirs)
+function(mart_install_targets)
+cmake_parse_arguments(PARSE_ARGV 0 install_param "" "NAMESPACE" "TARGETS;HEADER_DIRS")
 
 set( INSTALL_DIR_CMAKE share/MartCommon )
 set( CONFIG_STEM_NAME MartCommonConfig )
@@ -10,26 +11,24 @@ include(GNUInstallDirs)
 
 # install results from compiling the targets and export the
 # relevant information into file
-install( TARGETS ${targets} EXPORT ${CONFIG_STEM_NAME}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install( TARGETS ${install_param_TARGETS} EXPORT ${CONFIG_STEM_NAME}
+	INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
+
+foreach( dir IN LISTS install_param_HEADER_DIRS)
+install( DIRECTORY ${dir} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
+endforeach()
+
 
 # install the CmakeConfig file holding the infromation about the isntalled targets
 install( EXPORT ${CONFIG_STEM_NAME}
 	FILE
 		${CONFIG_STEM_NAME}.cmake
 	NAMESPACE
-		${namespace}
+		${install_param_NAMESPACE}
 	DESTINATION
 		${INSTALL_DIR_CMAKE}
 )
-
-
-foreach(dir IN LISTS include_dirs)
-	install( DIRECTORY ${tl_include_dir}/${dir} DESTINATION include/ )
-endforeach()
 
 include(CMakePackageConfigHelpers)
 
@@ -49,7 +48,7 @@ install(
 	FILES
 		"LICENSE.md"
 	DESTINATION
-		share
+		${INSTALL_DIR_CMAKE}
 )
 
 endfunction()
