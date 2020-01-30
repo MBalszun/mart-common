@@ -1,8 +1,4 @@
-cmake_minimum_required( VERSION 3.12 )
-
-if(POLICY CMP0077)
-  cmake_policy(SET CMP0077 NEW)
-endif()
+cmake_minimum_required( VERSION 3.12..3.16 )
 
 project(mart-common_testing LANGUAGES CXX)
 
@@ -12,13 +8,13 @@ option(MART_COMMON_UPLOAD_COVERAGE "" OFF)
 set(CMAKE_CXX_STANDARD 17)
 
 if(MSVC)
-	string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 	add_compile_definitions(
 		_CRT_SECURE_NO_WARNINGS
-		_SCL_SECURE_NO_WARNINGS
-		_SILENCE_PARALLEL_ALGORITHMS_EXPERIMENTAL_WARNING
 	)
 	add_compile_options(
+			/W4
 			/permissive-
 	)
 else()
@@ -75,13 +71,13 @@ ADD_TEST(NAME ctest_build_test_code COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BIN
 
 ParseAndAddCatchTests(testing_mart-common)
 
-if(${MART_COMMON_UPLOAD_COVERAGE})
-if(CMAKE_COMPILER_IS_GNUCXX)
-	include(libs/CodeCoverage.cmake)
-	APPEND_COVERAGE_COMPILER_FLAGS()
-	set(COVERAGE_EXCLUDES '/usr/include/*' '${PROJECT_SOURCE_DIR}/*')
-	setup_target_for_coverage(NAME testing_mart-common_coverage EXECUTABLE testing_mart-common DEPENDENCIES testing_mart-common)
-endif()
+if( MART_COMMON_UPLOAD_COVERAGE )
+	if(CMAKE_COMPILER_IS_GNUCXX)
+		include(libs/CodeCoverage.cmake)
+		APPEND_COVERAGE_COMPILER_FLAGS()
+		set(COVERAGE_EXCLUDES '/usr/include/*' '${PROJECT_SOURCE_DIR}/*')
+		setup_target_for_coverage(NAME testing_mart-common_coverage EXECUTABLE testing_mart-common DEPENDENCIES testing_mart-common)
+	endif()
 endif()
 
 add_subdirectory(src/netlib)

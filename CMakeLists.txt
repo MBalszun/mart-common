@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.13)
-
-if(POLICY CMP0077)
-  cmake_policy(SET CMP0077 NEW) # allow to override options in submake files by setting the corresponding vairable locally
-endif()
+# Note: 3.13 is required to install targets from other directories.
+cmake_minimum_required(VERSION 3.13...3.16)
 
 # guard against multiple inclusions in a single super project as we have sometimes in the mart project
 if(TARGET mart-common )
@@ -11,21 +8,25 @@ if(TARGET mart-common )
 	return()
 endif()
 
-project( MartCommon VERSION 3.0 LANGUAGES CXX)
+project( MartCommon
+	VERSION 3.0
+	LANGUAGES CXX
+)
 
 option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 option( MART_COMMON_INCLUDE_NET_LIB "Also build netlib components (Those are not header only)" ON)
 
-add_subdirectory(im_str)
-
-add_library(Mart::im_str ALIAS mart_im_str)
+####### im_str is a separately devoped library that was copied into mart common for convenience
+#
+add_subdirectory( im_str )
+add_library( Mart::im_str ALIAS mart_im_str )
 
 ####### create mart-common library
 #
 add_library( mart-common INTERFACE )
 add_library( Mart::common ALIAS mart-common )
-set_target_properties ( mart-common PROPERTIES EXPORT_NAME common )
+set_target_properties( mart-common PROPERTIES EXPORT_NAME common )
 target_link_libraries( mart-common INTERFACE Mart::im_str )
 
 target_include_directories( mart-common
@@ -38,7 +39,7 @@ target_compile_features( mart-common INTERFACE cxx_std_17 )
 
 ####### create mart-netlib library
 #
-if(MART_COMMON_INCLUDE_NET_LIB)
+if( MART_COMMON_INCLUDE_NET_LIB )
 
 	add_library( mart-netlib )
 	add_library( Mart::netlib ALIAS mart-netlib)
@@ -66,7 +67,6 @@ endif()
 
 # support installation
 get_directory_property( hasParent PARENT_DIRECTORY )
-#if( False ) #Visual studio 2019 currently (16.2.0) fails when having an installation target
 if( NOT hasParent )
 	include( cmake/install_targets.cmake )
 
@@ -77,6 +77,6 @@ endif()
 
 
 if( MART_COMMON_INCLUDE_EXAMPLES )
-	add_subdirectory(examples/nw)
+	add_subdirectory( examples/nw )
 endif()
 

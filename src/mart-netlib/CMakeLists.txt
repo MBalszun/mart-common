@@ -1,13 +1,6 @@
-#MRemove W3 warning flag from MSVC if necessary
-if(MSVC)
-	if(POLICY CMP0092)
-		cmake_policy(SET CMP0092 NEW) # MSVC warning flags are not in CMAKE_<LANG>_FLAGS by default.
-	else()
-		string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	endif()
-endif()
 
 if(MSVC)
+	string( REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 	add_compile_options( /W4 )
 else()
