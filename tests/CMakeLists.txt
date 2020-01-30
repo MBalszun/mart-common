@@ -4,7 +4,7 @@ if(POLICY CMP0077)
   cmake_policy(SET CMP0077 NEW)
 endif()
 
-project(mart-common_testing)
+project(mart-common_testing LANGUAGES CXX)
 
 option(MART_COMMON_RUN_BENCHMARKS "run benchmarks as part of unit_test source" OFF)
 option(MART_COMMON_UPLOAD_COVERAGE "" OFF)
@@ -57,7 +57,7 @@ add_executable(testing_mart-common
 	${TEST_RCS}
 )
 
-find_package(Threads REQUIRED)
+find_package(Threads REQUIRED QUIET)
 
 target_link_libraries(testing_mart-common PRIVATE Mart::common Threads::Threads Catch2::Catch2)
 
