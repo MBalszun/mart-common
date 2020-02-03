@@ -95,9 +95,9 @@ struct Vec {
 	using square_type        = decltype( std::declval<T>() * std::declval<T>() );
 	std::array<T, N> data;
 	// c++14:
-	//	constexpr Vec(std::initializer_list<T> init){
-	//		std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
-	//	}
+	// constexpr Vec(std::initializer_list<T> init){
+	//	std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
+	//}
 
 	//### Data access ###
 	constexpr T& operator[]( int idx )
@@ -113,7 +113,10 @@ struct Vec {
 	}
 	static constexpr int size() { return N; }
 
-	square_type squareNorm() const { return std::inner_product( data.begin(), data.end(), data.begin(), T{} ); }
+	constexpr square_type squareNorm() const
+	{
+		return std::inner_product( data.begin(), data.end(), data.begin(), T{} );
+	}
 
 	T norm() const
 	{
@@ -121,10 +124,10 @@ struct Vec {
 		return sqrt( squareNorm() );
 	}
 
-	Vec<T, N>& operator+=( const Vec<T, N>& other );
-	Vec<T, N>& operator-=( const Vec<T, N>& other );
-	Vec<T, N>& operator*=( const Vec<T, N>& other );
-	Vec<T, N>& operator/=( const Vec<T, N>& other );
+	constexpr Vec<T, N>& operator+=( const Vec<T, N>& other );
+	constexpr Vec<T, N>& operator-=( const Vec<T, N>& other );
+	constexpr Vec<T, N>& operator*=( const Vec<T, N>& other );
+	constexpr Vec<T, N>& operator/=( const Vec<T, N>& other );
 
 	// Creates a vector of length 1 that points in the same direction as the original one
 	Vec<T, N> unityVec() const
@@ -141,7 +144,7 @@ struct Vec {
 	// if K<=N, the first K values are copied
 	// if K>N, all values are copied and the remaining values are zero-initialized
 	template<int K>
-	Vec<T, K> toKDim() const
+	constexpr Vec<T, K> toKDim() const
 	{
 		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
 	}
@@ -251,10 +254,10 @@ struct Vec<T, 3> {
 		return sqrt( squareNorm() );
 	}
 
-	Vec& operator+=( const Vec& other );
-	Vec& operator-=( const Vec& other );
-	Vec& operator*=( const Vec& other );
-	Vec& operator/=( const Vec& other );
+	constexpr Vec& operator+=( const Vec& other );
+	constexpr Vec& operator-=( const Vec& other );
+	constexpr Vec& operator*=( const Vec& other );
+	constexpr Vec& operator/=( const Vec& other );
 
 	// Creates a vector of length 1 that points in the same direction as the original one
 	Vec unityVec() const
@@ -274,14 +277,14 @@ struct Vec<T, 3> {
 
 private:
 	template<int K, int... I>
-	Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
+	constexpr Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
 	{
 		return Vec<T, K>{( *this )[I]...};
 	}
 };
 
 template<int K, class T>
-Vec<T, K> expand_to_dim( T v )
+constexpr Vec<T, K> expand_to_dim( T v )
 {
 	Vec<T, K> vec;
 	for( int i = 0; i < K; ++i ) {
@@ -295,17 +298,18 @@ static_assert( std::is_trivial<Vec<int, 5>>::value, "mart::Vec is not a trivial 
 
 namespace _impl_mart_vec {
 template<class T, int... I1, int... I2>
-Vec<T, sizeof...( I1 ) + sizeof...( I2 )> concat_impl( const Vec<T, sizeof...( I1 )>& v1,
-													   const Vec<T, sizeof...( I2 )>& v2,
-													   mp::index_sequence<I1...>,
-													   mp::index_sequence<I2...> )
+constexpr auto concat_impl( const Vec<T, sizeof...( I1 )>& v1,
+							const Vec<T, sizeof...( I2 )>& v2,
+							mp::index_sequence<I1...>,
+							mp::index_sequence<I2...> ) //
+	-> Vec<T, sizeof...( I1 ) + sizeof...( I2 )>
 {
 	return {v1[I1]..., v2[I2]...};
 }
 } // namespace _impl_mart_vec
 
 template<class T, int N1, int N2>
-Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
+constexpr Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
 {
 	return _impl_mart_vec::concat_impl( v1, v2, mp::make_index_sequence<N1>{}, mp::make_index_sequence<N2>{} );
 }
@@ -333,7 +337,7 @@ Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
 //}
 
 template<class T, class U, int N>
-auto inner_product( const Vec<T, N>& l, const Vec<U, N>& r ) -> decltype( l[0] * r[0] )
+constexpr auto inner_product( const Vec<T, N>& l, const Vec<U, N>& r ) -> decltype( l[0] * r[0] )
 {
 	T ret{};
 	for( int i = 0; i < N; ++i ) {
@@ -343,7 +347,7 @@ auto inner_product( const Vec<T, N>& l, const Vec<U, N>& r ) -> decltype( l[0] *
 }
 
 template<class T, int N>
-Vec<T, N> mx_multiply( const Matrix<T, N>& mx, const Vec<T, N>& vec )
+constexpr Vec<T, N> mx_multiply( const Matrix<T, N>& mx, const Vec<T, N>& vec )
 {
 	Vec<T, N> ret{};
 
@@ -636,28 +640,28 @@ constexpr bool operator!=( const Vec<T, N> l, const Vec<T, N> r )
 }
 
 template<class T, int N>
-Vec<T, N>& Vec<T, N>::operator+=( const Vec<T, N>& other )
+constexpr Vec<T, N>& Vec<T, N>::operator+=( const Vec<T, N>& other )
 {
 	*this = *this + other;
 	return *this;
 }
 
 template<class T, int N>
-Vec<T, N>& Vec<T, N>::operator-=( const Vec<T, N>& other )
+constexpr Vec<T, N>& Vec<T, N>::operator-=( const Vec<T, N>& other )
 {
 	*this = *this - other;
 	return *this;
 };
 
 template<class T, int N>
-Vec<T, N>& Vec<T, N>::operator*=( const Vec<T, N>& other )
+constexpr Vec<T, N>& Vec<T, N>::operator*=( const Vec<T, N>& other )
 {
 	*this = *this * other;
 	return *this;
 };
 
 template<class T, int N>
-Vec<T, N>& Vec<T, N>::operator/=( const Vec<T, N>& other )
+constexpr Vec<T, N>& Vec<T, N>::operator/=( const Vec<T, N>& other )
 {
 	*this = *this / other;
 	return *this;
