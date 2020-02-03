@@ -1,4 +1,4 @@
-# ImStr [![Build Status](https://travis-ci.org/Mike-Bal/im_str.svg?branch=master)](https://travis-ci.org/Mike-Bal/im_str)
+# ImStr [![Build Status](https://travis-ci.org/MBalszun/im_str.svg?branch=master)](https://travis-ci.org/Mike-Bal/im_str)
 An immutable string class which doesn't allocate if constructed from a string litteral.
 
 **NOTE: This readme is an early draft. It’s known to be incomplet and incorrekt**
