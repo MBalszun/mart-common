@@ -26,10 +26,10 @@
 namespace mart {
 
 /* ######## random ################################################ */
-inline std::default_random_engine& getRandomEngine()
+inline std::random_device& getRandomEngine()
 {
-	thread_local std::default_random_engine rg( std::random_device{}() );
-	return rg;
+	thread_local  std::random_device rng{};
+	 return rng;
 }
 
 // Shorthand to get an random integral random number within a certain range
