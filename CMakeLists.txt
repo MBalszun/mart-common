@@ -20,8 +20,9 @@ add_library( ImStr::im_str ALIAS mart_im_str )
 target_include_directories( mart_im_str
 	INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-		$<INSTALL_INTERFACE:include>
 )
+
+target_compile_features( mart_im_str INTERFACE cxx_std_17)
 
 if( ${IM_STR_INCLUDE_TESTS} )
 	enable_testing()
