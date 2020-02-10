@@ -188,10 +188,26 @@ struct Vec<T, 2> {
 		return sqrt( squareNorm() );
 	}
 
-	Vec<T, 2>& operator+=( const Vec<T, 2>& other );
-	Vec<T, 2>& operator-=( const Vec<T, 2>& other );
-	Vec<T, 2>& operator*=( const Vec<T, 2>& other );
-	Vec<T, 2>& operator/=( const Vec<T, 2>& other );
+	constexpr Vec& operator+=( const Vec& other )
+	{
+		*this = *this + other;
+		return *this;
+	}
+	constexpr Vec& operator-=( const Vec& other )
+	{
+		*this = *this - other;
+		return *this;
+	}
+	constexpr Vec& operator*=( const Vec& other )
+	{
+		*this = *this * other;
+		return *this;
+	}
+	constexpr Vec& operator/=( const Vec& other )
+	{
+		*this = *this / other;
+		return *this;
+	}
 
 	// Creates a vector of length 1 that points in the same direction as the original one
 	Vec<T, 2> unityVec() const
@@ -254,10 +270,26 @@ struct Vec<T, 3> {
 		return sqrt( squareNorm() );
 	}
 
-	constexpr Vec& operator+=( const Vec& other );
-	constexpr Vec& operator-=( const Vec& other );
-	constexpr Vec& operator*=( const Vec& other );
-	constexpr Vec& operator/=( const Vec& other );
+	constexpr Vec& operator+=( const Vec& other )
+	{
+		*this = *this + other;
+		return *this;
+	}
+	constexpr Vec& operator-=( const Vec& other )
+	{
+		*this = *this - other;
+		return *this;
+	}
+	constexpr Vec& operator*=( const Vec& other )
+	{
+		*this = *this * other;
+		return *this;
+	}
+	constexpr Vec& operator/=( const Vec& other )
+	{
+		*this = *this / other;
+		return *this;
+	}
 
 	// Creates a vector of length 1 that points in the same direction as the original one
 	Vec unityVec() const
