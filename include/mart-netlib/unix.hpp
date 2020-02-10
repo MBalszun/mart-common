@@ -45,7 +45,7 @@ public:
 	}
 	explicit endpoint( const std::filesystem::path& path ) noexcept
 		// TODO use "native()" on platforms that use u8 encoding natively
-		: _addr( std::string_view( path.u8string() ) )
+		: _addr( std::string_view( path.string() ) )
 	{
 	}
 
