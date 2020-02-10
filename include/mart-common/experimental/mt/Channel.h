@@ -14,7 +14,7 @@
  *
  */
 
-#include "UnblockException.h"
+#include "../../exceptions.h"
 
 #include <atomic>
 #include <chrono>
@@ -25,6 +25,8 @@
 namespace mart {
 namespace experimental {
 namespace mt {
+
+using Canceled = mart::BlockingOpCanceled;
 
 template<class T>
 class Channel {

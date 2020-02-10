@@ -20,7 +20,9 @@
 namespace mart {
 namespace experimental {
 namespace mt {
-struct Canceled : std::exception {
+
+struct [[deprecated]] Canceled : std::exception{
+
 };
 } // namespace mt
 } // namespace experimental
