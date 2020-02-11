@@ -373,13 +373,13 @@ template<class T>
 template<class T>
 [[deprecated( "Please use view_bytes instead" )]] ConstMemoryView viewMemory( const T& e )
 {
-	return asBytes( e );
+	return view_bytes( e );
 }
 
 template<class T>
 [[deprecated( "Please use view_bytes instead" )]] ConstMemoryView viewMemoryConst( const T& e )
 {
-	return asBytes( e );
+	return view_bytes( e );
 }
 
 template<class T>
