@@ -42,20 +42,21 @@ class circular_buffer {
 
 public:
 	constexpr circular_buffer() = default;
-	void push_back( const T& value )
+
+	constexpr void push_back( const T& value )
 	{
 		data[(std::size_t)m_next_write] = value;
 		m_next_write                    = next( m_next_write );
 	};
 
-	T pop_front()
+	constexpr T pop_front()
 	{
 		const auto ti = m_next_read;
 		m_next_read   = next( m_next_read );
 		return std::move( data[(std::size_t)ti] );
 	};
 
-	void pop_front( T& out )
+	constexpr void pop_front( T& out )
 	{
 		out         = data[(std::size_t)m_next_read];
 		m_next_read = next( m_next_read );
