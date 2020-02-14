@@ -1,4 +1,4 @@
-#include <mart-common/experimental/mt/TrippleBuffer.h>
+#include <mart-common/mt/TrippleBuffer.h>
 
 #include <catch2/catch.hpp>
 
@@ -8,7 +8,7 @@
 
 TEST_CASE( "TrippleBuffer_sync_can_handle_more_writes_than_reads", "[mt][TrippleBuffer]" )
 {
-	mart::experimental::mt::TrippleBuffer<std::string> buffer( "0" );
+	mart::mt::TrippleBuffer<std::string> buffer( "0" );
 
 	for( int i = 0; i < 100; i += 2 ) {
 		auto& wrt_buff1 = buffer.get_write_buffer();
@@ -33,7 +33,7 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_more_writes_than_reads", "[mt][Tripple
 
 TEST_CASE( "TrippleBuffer_sync_can_handle_more_reads_than_writes", "[mt][TrippleBuffer]" )
 {
-	mart::experimental::mt::TrippleBuffer<std::string> buffer( "0" );
+	mart::mt::TrippleBuffer<std::string> buffer( "0" );
 
 	for( int i = 0; i < 100; ++i ) {
 		auto& wrt_buff1 = buffer.get_write_buffer();
@@ -60,7 +60,7 @@ TEST_CASE( "TrippleBuffer_sync_can_handle_more_reads_than_writes", "[mt][Tripple
 
 TEST_CASE( "TrippleBuffer_sync_can_handle_varying_write_read_ratios", "[mt][TrippleBuffer]" )
 {
-	mart::experimental::mt::TrippleBuffer<std::string> buffer( "0" );
+	mart::mt::TrippleBuffer<std::string> buffer( "0" );
 
 	for( int i = 0; i < 100; ++i ) {
 
@@ -101,7 +101,7 @@ TEST_CASE( "TrippleBuffer_mt_complex_producer_consumer", "[mt][TrippleBuffer][th
 {
 	static constexpr int ItCnt = 5000;
 
-	mart::experimental::mt::TrippleBuffer<std::string> buffer( "-1" );
+	mart::mt::TrippleBuffer<std::string> buffer( "-1" );
 
 	auto producer = [&buffer]() {
 		for( int i = 0; i < ItCnt; ++i ) {
@@ -140,7 +140,7 @@ TEST_CASE( "TrippleBuffer_mt_simple_producer_consumer", "[mt][TrippleBuffer][thr
 {
 	static constexpr int ItCnt = 500'000;
 
-	mart::experimental::mt::TrippleBuffer<int> buffer( -1 );
+	mart::mt::TrippleBuffer<int> buffer( -1 );
 
 	auto producer = [&buffer]() {
 		for( int i = 0; i < ItCnt; ++i ) {
@@ -188,7 +188,7 @@ TEST_CASE( "TrippleBuffer_mt_large_pod_producer_consumer", "[mt][TrippleBuffer][
 {
 	static constexpr int ItCnt = 500'000;
 
-	mart::experimental::mt::TrippleBuffer<LargePod> buffer( LargePod{-1} );
+	mart::mt::TrippleBuffer<LargePod> buffer( LargePod{-1} );
 
 	auto producer = [&buffer]() {
 		for( int i = 0; i < ItCnt; ++i ) {

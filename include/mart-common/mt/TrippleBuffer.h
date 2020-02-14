@@ -73,27 +73,27 @@ class TrippleBuffer {
 	std::atomic<Index> buffer_idx{Index{2, false}};
 
 public:
-	constexpr TrippleBuffer() noexcept = default;
-	constexpr explicit TrippleBuffer( const T& init )
+	constexpr TrippleBuffer() noexcept( noexcept(T{}) ) = default;
+	constexpr explicit TrippleBuffer( const T& init ) noexcept( noexcept( T{init} ) )
 		: data{init, init, init}
 	{
 	}
 
-	T& get_write_buffer() { return data[write_idx.idx]; }
+	T& get_write_buffer() noexcept { return data[write_idx.idx]; }
 
 	// Todo switch this to returning const reference in a future version
-	T& get_read_buffer() { return data[read_idx.idx]; }
+	T& get_read_buffer() noexcept { return data[read_idx.idx]; }
 
 	// This is mostly useful, if we want to move out the data from the buffer
-	T&       get_mutable_read_buffer() { return data[read_idx.idx]; }
-	const T& get_immutable_read_buffer() const { return data[read_idx.idx]; }
+	T&       get_mutable_read_buffer() noexcept { return data[read_idx.idx]; }
+	const T& get_immutable_read_buffer() const noexcept  { return data[read_idx.idx]; }
 
 	/*
 	 * Returns true if new buffer has been commited since last call to fetch_update,
 	 * and swaps indices for read and buffer slot.
 	 * Otherwise returns false and doesn't change indices
 	 */
-	bool fetch_update()
+	bool fetch_update() noexcept
 	{
 		if( !buffer_idx.load().new_data ) {
 			// no new content since last fetch
@@ -106,7 +106,7 @@ public:
 		return true;
 	}
 
-	void commit()
+	void commit() noexcept
 	{
 		// mark current slot as new
 		// and swap with buffer slot
