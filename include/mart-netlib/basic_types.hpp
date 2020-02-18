@@ -235,7 +235,8 @@ enum class ErrorCodeValues : int {
 	TryAgain        = EAGAIN,
 	InvalidArgument = EINVAL,
 	WouldBlock      = EWOULDBLOCK,
-	Timeout         = 10060 // Windows
+	Timeout         = 10060, // Windows
+	WsaeConnReset   = 0x00002746 // Windows WSAECONNRESET ECONNRESET
 
 };
 struct ErrorCode {
@@ -285,6 +286,8 @@ private:
 } // namespace socks
 
 } // namespace nw
+
+namespace net = nw;
 } // namespace mart
 
 #endif

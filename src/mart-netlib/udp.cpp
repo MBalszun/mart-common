@@ -146,7 +146,8 @@ Socket::RecvfromResult Socket::recvfrom( mart::MemoryView buffer )
 		&& is_none_of<ErrorCodeValues,
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
-					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
+					  ErrorCodeValues::Timeout,
+					  ErrorCodeValues::WsaeConnReset>( res.result.error_code().value() ) ) {
 		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
 			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
@@ -162,7 +163,8 @@ mart::MemoryView Socket::recv( mart::MemoryView buffer )
 		&& is_none_of<ErrorCodeValues,
 					  ErrorCodeValues::WouldBlock,
 					  ErrorCodeValues::TryAgain,
-					  ErrorCodeValues::Timeout>( res.result.error_code().value() ) ) {
+					  ErrorCodeValues::Timeout,
+					  ErrorCodeValues::WsaeConnReset>( res.result.error_code().value() ) ) {
 		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
 			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
