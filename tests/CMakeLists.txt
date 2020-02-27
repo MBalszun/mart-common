@@ -46,8 +46,8 @@ if(NOT TARGET Catch2::Catch2)
 	endif()
 endif()
 
-file(GLOB_RECURSE TEST_RCS tests_*.cpp)
-list(FILTER TEST_RCS EXCLUDE REGEX netlib)
+file(GLOB_RECURSE TEST_SRC tests_*.cpp)
+list(FILTER TEST_SRC EXCLUDE REGEX netlib)
 add_executable(testing_mart-common
 	main.cpp
 	${TEST_RCS}
