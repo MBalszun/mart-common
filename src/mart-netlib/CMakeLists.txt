@@ -22,9 +22,11 @@ target_include_directories( mart-netlib-portlayer
 	PRIVATE
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
-
 add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
 set_target_properties( mart-netlib-portlayer PROPERTIES EXPORT_NAME netlib-portlayer )
+
+#windows.h doesn't yet work with the new preprocessor
+target_compile_options( mart-netlib-portlayer PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/experimental:preprocessor->)
 
 ######
 # netlib library
