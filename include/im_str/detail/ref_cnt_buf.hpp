@@ -78,30 +78,19 @@ struct Stats {
 #else
 struct Stats {
 	constexpr Stats() noexcept = default;
-
+	constexpr Stats( const Stats& other ) noexcept = default;
+	
 	constexpr void inc_ref() noexcept {}
 	constexpr void dec_ref() noexcept {}
 	constexpr void alloc() noexcept {}
 	constexpr void dealloc() noexcept {}
 	constexpr void reset() noexcept {};
 
-
-
 	constexpr std::uint64_t get_total_cnt_accesses() const noexcept { return 0; };
 	constexpr std::uint64_t get_total_allocs() const noexcept { return 0; };
 	constexpr std::uint64_t get_current_allocs() const noexcept { return 0; };
 	constexpr std::uint64_t get_inc_ref_cnt() const noexcept { return 0; };
 	constexpr std::uint64_t get_dec_ref_cnt() const noexcept { return 0; };
-
-	constexpr Stats() noexcept = default;
-	Stats( const Stats& other ) noexcept
-		: total_cnt_accesses( other.total_cnt_accesses.load( std::memory_order_relaxed ) )
-		, total_allocs( other.total_allocs.load( std::memory_order_relaxed ) )
-		, current_allocs( other.current_allocs.load( std::memory_order_relaxed ) )
-		, inc_ref_cnt( other.inc_ref_cnt.load( std::memory_order_relaxed ) )
-		, dec_ref_cnt( other.dec_ref_cnt.load( std::memory_order_relaxed ) )
-	{
-	}
 };
 #endif
 
