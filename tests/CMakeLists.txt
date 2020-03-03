@@ -50,7 +50,7 @@ file(GLOB_RECURSE TEST_SRC tests_*.cpp)
 list(FILTER TEST_SRC EXCLUDE REGEX netlib)
 add_executable(testing_mart-common
 	main.cpp
-	${TEST_RCS}
+	${TEST_SRC}
 )
 
 find_package(Threads REQUIRED QUIET)
