@@ -1,4 +1,3 @@
-#include <mart-common/PrintWrappers.h>
 #include <mart-common/StringView.h>
 
 #include <iostream>
@@ -10,7 +9,7 @@
 TEST_CASE( "various_string_view", "[StringView]" )
 {
 	CHECK( "Hello" == mart::StringView( "Hello" ) );
-	CHECK( "Hello" == mart::StringView( "Hello" ).to_string() );
+	CHECK( "Hello" == std::string(mart::StringView( "Hello" )) );
 	CHECK( "Hello" == mart::StringView( "1 Hello 123" ).substr( 2, 5 ) );
 	CHECK( "Hello 123" == mart::StringView( "1 Hello 123" ).substr( 2 ) );
 	CHECK( "Hello " != mart::StringView( "Hello" ) );

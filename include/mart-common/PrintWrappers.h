@@ -26,7 +26,6 @@
 /* Project Includes */
 #include "./ArrayView.h"
 #include "./StringView.h" //getSpaces
-#include "./StringViewOstream.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
