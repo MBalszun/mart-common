@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(mat-common-nw-examples)
+project(mat-common-nw-examples LANGUAGES CXX)
 
 #add_compile_options(/LTCG /O2)
 #add_link_options(/LTCG)

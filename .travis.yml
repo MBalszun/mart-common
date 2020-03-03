@@ -14,48 +14,49 @@ notifications:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       - g++-8
-      - lcov
+
+env:
+  global:
+    - BUILD_DIR_MAIN=${TRAVIS_BUILD_DIR}/build
+    - BUILD_DIR_EXAMPLE=${TRAVIS_BUILD_DIR}/build_example
+    - INSTALL_DIR=${TRAVIS_BUILD_DIR}/install
+    - DEPS_DIR=${TRAVIS_BUILD_DIR}/deps
+    - CMAKE_VERSION=3.16.3-Linux-x86_64
+    - CMAKE_URL=https://github.com/Kitware/CMake/releases/download/v3.16.3/cmake-${CMAKE_VERSION}.tar.gz
+  jobs:
+    - CC=gcc-8 CXX=g++-8
+    - CC=clang CXX=clang++
 
 jobs:
   include:
-    - env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - env: MATRIX_EVAL="CC=clang && CXX=clang++"
-    - env: CHECK_CXX_11_COMPAT
+    - name: CheckCxx11Compat
       script:
-      - cmake -DCMAKE_CXX_STANDARD=11 .
-      - cmake --build . --target mart-netlib-portlayer
+        - cmake -DCMAKE_CXX_STANDARD=11 .
+        - cmake --build . --target mart-netlib-portlayer
+    - name: CheckInstallation
+      env: CC=gcc-8 CXX=g++-8
+      script:
+        - cmake -S ${TRAVIS_BUILD_DIR} -B ${BUILD_DIR_MAIN} -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_BUILD_TYPE=Debug
+        - cmake --build ${BUILD_DIR_MAIN} --target install
+        - cmake -S ${TRAVIS_BUILD_DIR}/examples/nw -B ${BUILD_DIR_EXAMPLE} -DCMAKE_PREFIX_PATH=${INSTALL_DIR} -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES=ON
+        - cmake --build ${BUILD_DIR_EXAMPLE}
+        - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_sender
+        - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_server
 
-
-before_install:
-  - eval "${MATRIX_EVAL}"
 
 # the install step will take care of deploying a newer cmake version
 install:
-  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-  - travis_retry wget https://github.com/Kitware/CMake/releases/download/v3.16.3/cmake-3.16.3-Linux-x86_64.tar.gz
-  - tar -xvf cmake-3.16.3-Linux-x86_64.tar.gz > /dev/null
-  - mv cmake-3.16.3-Linux-x86_64 cmake-install
+  - mkdir -p ${DEPS_DIR}
+  - travis_retry wget ${CMAKE_URL} -P ${DEPS_DIR}
+  - tar -xvf ${DEPS_DIR}/cmake-${CMAKE_VERSION}.tar.gz -C ${DEPS_DIR}
+  - mv ${DEPS_DIR}/cmake-${CMAKE_VERSION} ${DEPS_DIR}/cmake-install
   - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
-  - cd -
-
 
 script:
   - cmake --version
-  - BUILD_DIR_MAIN=${TRAVIS_BUILD_DIR}/build
-  - BUILD_DIR_EXAMPLE=${TRAVIS_BUILD_DIR}/build_example
-  - echo ${BUILD_DIR_MAIN}
-  - echo ${BUILD_DIR_EXAMPLE}
-  - cmake -S ${TRAVIS_BUILD_DIR} -B ${BUILD_DIR_MAIN} -DCMAKE_INSTALL_PREFIX=${TRAVIS_BUILD_DIR}/install -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON -DMART_COMMON_INCLUDE_EXAMPLES=ON -DMART_COMMON_UPLOAD_COVERAGE=On -DMART_NETLIB_TEST_UNIX_DOMAIN_SOCKS=ON # -DMART_COMMON_UPLOAD_COVERAGE=On
+  - cmake -S ${TRAVIS_BUILD_DIR} -B ${BUILD_DIR_MAIN} -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_INCLUDE_TESTS=ON -DMART_COMMON_INCLUDE_EXAMPLES=ON -DMART_NETLIB_TEST_UNIX_DOMAIN_SOCKS=ON
   - cmake --build ${BUILD_DIR_MAIN}
-  - cd ${BUILD_DIR_MAIN} && ctest --output-on-failure . && cd -
-  - cmake --build ${BUILD_DIR_MAIN} --target install
-  - cmake -S ${TRAVIS_BUILD_DIR}/examples/nw -B ${BUILD_DIR_EXAMPLE} -DCMAKE_PREFIX_PATH=${TRAVIS_BUILD_DIR}/install -DCMAKE_BUILD_TYPE=Debug -DMART_COMMON_EXAMPLE_NW_USE_INSTALLED_LIBRARIES=ON
-  - cmake --build ${BUILD_DIR_EXAMPLE}
-  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_sender
-  - ${BUILD_DIR_EXAMPLE}/mart-common_ex_udp_server
-#  - make testing_mart-common_coverage && bash <(curl -s https://codecov.io/bash) || true
+  - cd ${BUILD_DIR_MAIN} && ctest --output-on-failure && cd -
+
