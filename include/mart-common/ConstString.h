@@ -3,14 +3,15 @@
 /**
  * ConstString.h (mart-common)
  *
- * Copyright (C) 2016-2017: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2016-2019: Michael Balszun <michael.balszun@mytum.de>
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See either the LICENSE file in the library's root
  * directory or http://opensource.org/licenses/MIT for details.
  *
- * @author: Michael Balszun <michael.balszun@mytum.de>
- * @brief: Provides ConstString.h a refcounted implementation of an immutable string
+ * @author: Michael Balszun <michael.balszun@tum.de>
+ * @brief: Provides ConstString a refcounted implementation of an immutable string
+ *         By now it essentially forwards to mba::im_str
  *
  */
 
@@ -28,7 +29,7 @@ namespace mart {
  * ConstString is a ref-counted String implementation, that doesn't allow the modification of the underlying storage at
  * all.
  *
- * One particular property is that when it is constructed from a "const char [N]" argument it is assumed, that this
+ * One particular property is that when it is constructed from a "const char [N]" argument it is assumed that this
  * represents a string litteral, in which case ConstString doesn't perform any copy or dynamic memory allocation and
  * also copying the ConstString will not result in any copies or refcount updates.
  *
