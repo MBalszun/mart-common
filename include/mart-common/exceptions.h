@@ -1,9 +1,23 @@
-#ifndef LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_EXCEPTIONS_H
-#define LIB_MART_COMMON_GUARD_EXPERIMENTAL_NW_EXCEPTIONS_H
+#ifndef LIB_MART_COMMON_GUARD_EXCEPTIONS_H
+#define LIB_MART_COMMON_GUARD_EXCEPTIONS_H
+
+/**
+ * exceptions.h (mart-common)
+ *
+ * Copyright (C) 2016-2020: Michael Balszun <michael.balszun@mytum.de>
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license. See either the LICENSE file in the library's root
+ * directory or http://opensource.org/licenses/MIT for details.
+ *
+ * @author: Michael Balszun <michael.balszun@tum.de>
+ * @brief: Custom runtime exceptions that accept a mba::im_zstr
+ *
+ */
+
+#include <im_str/im_str.hpp>
 
 #include <exception>
-
-#include "ConstString.h"
 
 namespace mart {
 
