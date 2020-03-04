@@ -17,10 +17,9 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <type_traits>
+#include <utility>
 
 /* Proprietary Library Includes */
-#include "../cpp_std/utility.h"
-
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -95,7 +94,7 @@ public:
 		_condInc();
 	}
 	RcPtr( RcPtr&& other )
-		: _ptr{mart::exchange( other._ptr, nullptr )}
+		: _ptr{std::exchange( other._ptr, nullptr )}
 	{
 	}
 
@@ -111,7 +110,7 @@ public:
 	RcPtr& operator=( RcPtr&& other )
 	{
 		this->_condDec();
-		this->_ptr = mart::exchange( other._ptr, nullptr );
+		this->_ptr = std::exchange( other._ptr, nullptr );
 		return *this;
 	}
 	void reset( E* other = nullptr ) { *this = RcPtr<E>( other ); }

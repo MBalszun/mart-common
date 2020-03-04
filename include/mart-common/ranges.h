@@ -90,7 +90,7 @@ class IIterator {
 	static_assert( std::is_integral<T>::value, "IIterator can only be used for integral values" );
 
 public:
-	using difference_type   = mart::make_signed_t<T>;
+	using difference_type   = std::make_signed_t<T>;
 	using value_type        = T;
 	using pointer           = T*;
 	using reference         = const T&;
@@ -207,7 +207,7 @@ _impl_irange::irange_t<T> irange( _impl_irange::non_deduced_t<T> start, T end )
 	return _impl_irange::irange_t<T>{start, end};
 }
 
-template<class T, class = mart::enable_if_t<std::is_integral<T>::value>>
+template<class T, class = std::enable_if_t<std::is_integral<T>::value>>
 _impl_irange::irange_t<T> irange( T end )
 {
 	return _impl_irange::irange_t<T>{0, end};
@@ -215,7 +215,7 @@ _impl_irange::irange_t<T> irange( T end )
 
 template<class C,
 		 class IT = typename C::iterator,
-		 class    = mart::enable_if_t<std::is_base_of<std::random_access_iterator_tag,
+		 class    = std::enable_if_t<std::is_base_of<std::random_access_iterator_tag,
                                                    typename std::iterator_traits<IT>::iterator_category>::value>>
 _impl_irange::irange_t<typename C::size_type> irange( const C& container )
 {

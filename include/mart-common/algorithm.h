@@ -325,28 +325,28 @@ struct LessByMemberFunctionHelper {
 } // namespace _impl_algo
 
 template<class MTYPE, class VAL>
-mart::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::EqualByMemberObjectHelper<MTYPE, VAL>>
+std::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::EqualByMemberObjectHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
 	return {member, &value};
 }
 
 template<class MTYPE, class VAL>
-mart::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::EqualByMemberFunctionHelper<MTYPE, VAL>>
+std::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::EqualByMemberFunctionHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
 	return {member, &value};
 }
 
 template<class MTYPE>
-mart::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::LessByMemberObjectHelper<MTYPE>>
+std::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::LessByMemberObjectHelper<MTYPE>>
 byMember( MTYPE member )
 {
 	return {member};
 }
 
 template<class MTYPE>
-mart::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::LessByMemberFunctionHelper<MTYPE>>
+std::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::LessByMemberFunctionHelper<MTYPE>>
 byMember( MTYPE member )
 {
 	return {member};

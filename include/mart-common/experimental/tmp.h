@@ -17,7 +17,6 @@
 /* ######## INCLUDES ######### */
 /* Proprietary Library Includes */
 #include "../cpp_std/type_traits.h"
-#include "../cpp_std/utility.h"
 
 /* Standard Library Includes */
 #include <cstdint>
@@ -44,7 +43,7 @@ constexpr c_array<T, sizeof...( Is )> to_carray( sequence<T, Is...> )
 }
 
 template<class T, T... Is>
-constexpr T get_Nth_element( std::size_t Idx, mart::integer_sequence<T, Is...> sequ )
+constexpr T get_Nth_element( std::size_t Idx, std::integer_sequence<T, Is...> sequ )
 {
 	return to_carray( sequ )[Idx];
 }
@@ -90,7 +89,7 @@ template<template<class...> class Comb, // new list type template
 auto cartesian_value_product( List1 l1, List2 l2 )
 {
 	return detail::cartesian_value_product<Comb, V1, V2, T>(
-		l1, l2, mart::make_index_sequence<List1::size() * List2::size()>{} );
+		l1, l2, std::make_index_sequence<List1::size() * List2::size()>{} );
 };
 
 template<class T, T... VALS>

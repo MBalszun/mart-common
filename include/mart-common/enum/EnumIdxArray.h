@@ -17,11 +17,12 @@
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
 #include <array>
+#include <type_traits>
 
 /* Proprietary Library Includes */
 
 /* Project Includes */
-#include "../cpp_std/type_traits.h"
+
 #include "EnumHelpers.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -54,7 +55,7 @@ struct EnumIdxArray : std::array<T, N> {
 	// but we have to make sure it doesn't superseed the copy constructor -> hence the enable_if
 	template<class A1,
 			 class... ARGS,
-			 class = mart::enable_if_t<!std::is_same<EnumIdxArray<T, EnumT, N>, mart::decay_t<A1>>::value>>
+			 class = std::enable_if_t<!std::is_same<EnumIdxArray<T, EnumT, N>, std::decay_t<A1>>::value>>
 	constexpr EnumIdxArray( A1&& arg, ARGS&&... args )
 		: Storage_t{{std::forward<A1>( arg ), std::forward<ARGS>( args )...}}
 	{
@@ -64,7 +65,7 @@ private:
 	/*#### data ####*/
 	static constexpr auto toIdx( EnumT e ) -> size_type
 	{
-		return static_cast<size_type>( static_cast<underlying_type_t<EnumT>>( e ) );
+		return static_cast<size_type>( static_cast<std::underlying_type_t<EnumT>>( e ) );
 	};
 	Storage_t&                 as_array() { return static_cast<Storage_t&>( *this ); }
 	constexpr const Storage_t& as_array() const { return static_cast<const Storage_t&>( *this ); }

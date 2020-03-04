@@ -15,8 +15,7 @@
  *
  */
 
-#include "type_traits.h"
-
+#include <type_traits>
 #include <array>
 #include <utility>
 

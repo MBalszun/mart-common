@@ -22,7 +22,6 @@
 /* Proprietary Library Includes */
 #include "../../ArrayView.h"
 #include "../../MartTime.h"
-#include "../../cpp_std/utility.h"
 #include "../../utils.h"
 
 /* Project Includes */
@@ -58,8 +57,8 @@ public:
 	Socket& operator=( Socket&& other ) noexcept
 	{
 		_socket_handle = std::move( other._socket_handle );
-		_ep_local      = mart::exchange( other._ep_local, endpoint{} );
-		_ep_remote     = mart::exchange( other._ep_remote, endpoint{} );
+		_ep_local      = std::exchange( other._ep_local, endpoint{} );
+		_ep_remote     = std::exchange( other._ep_remote, endpoint{} );
 		return *this;
 	}
 	bool connect( endpoint ep )
