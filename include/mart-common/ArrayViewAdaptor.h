@@ -3,7 +3,7 @@
 /**
  * ArrayViewAdaptor.h (mart-common)
  *
- * Copyright (C) 2016-2017: Michael Balszun <michael.balszun@mytum.de>
+ * Copyright (C) 2016-2020: Michael Balszun <michael.balszun@mytum.de>
  *
  * This software may be modified and distributed under the terms
  * of the MIT license. See either the LICENSE file in the library's root
@@ -16,18 +16,11 @@
  */
 
 /* ######## INCLUDES ######### */
-/* Standard Library Includes */
-#include <exception>
-#include <iterator>
-#include <type_traits>
-
-#ifndef NDEBUG
-#include <stdexcept>
-#include <string> //exception messages
-#endif
-
-/* Proprietary Library Includes */
 /* Project Includes */
+/* Proprietary Library Includes */
+/* Standard Library Includes */
+#include <cstddef>
+
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
@@ -37,9 +30,9 @@ namespace mart {
  * For this you have to
  * - inherit form it
  * - provide 3 functions:
- * 	-                 T* _arrayView_data()
- * 	- constexpr const T* _arrayView_data() const
- * 	- constexpr size_t   _arrayView_size() const;
+ * 	-       T* _arrayView_data()
+ * 	- const T* _arrayView_data() const
+ * 	- size_t   _arrayView_size() const;
  *
  * 	e.g.:
  *
@@ -74,9 +67,9 @@ namespace mart {
 template<class T, class DerivedType>
 class ArrayViewAdaptor {
 public:
-	// clang format doesn't support alignment of individual parts of a declaration/definition
+    // clang format doesn't support alignment of individual parts of a declaration/definition
 	// clang-format off
-	static_assert( std::is_reference<T>::value == false, "T must not be a reference type" );
+
 	//The usual type defs for c++ container
 	using value_type      = T;
 	using size_type       = std::size_t;
@@ -87,67 +80,38 @@ public:
 	using const_pointer   = const value_type*; //const T*;
 	using       iterator  =       pointer;
 	using const_iterator  = const_pointer;
-	using       reverse_iterator = std::reverse_iterator<iterator>;
-	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 	/* #### container functions #### */
+	[[nodiscard]] constexpr       iterator begin()         noexcept { return _data(); }
+	[[nodiscard]] constexpr       iterator end()           noexcept { return _data() + _size(); }
+	[[nodiscard]] constexpr const_iterator cbegin()  const noexcept { return _data(); }
+	[[nodiscard]] constexpr const_iterator cend()    const noexcept { return _data() + _size(); }
+	[[nodiscard]] constexpr const_iterator begin()   const noexcept { return cbegin(); }
+	[[nodiscard]] constexpr const_iterator end()     const noexcept { return cend(); }
 
-	constexpr       iterator begin()          noexcept { return _data(); }
-	constexpr       iterator end()            noexcept { return _data() + _size(); }
-	constexpr const_iterator cbegin()   const noexcept { return _data(); }
-	constexpr const_iterator cend()     const noexcept { return _data() + _size(); }
-	constexpr const_iterator begin()    const noexcept { return cbegin(); }
-	constexpr const_iterator end()      const noexcept { return cend(); }
+	[[nodiscard]] constexpr	      reference front()        noexcept { return *begin(); }
+	[[nodiscard]] constexpr const_reference front()  const noexcept { return *begin(); }
+	[[nodiscard]] constexpr		  reference back()         noexcept { return *( end() - 1 ); }
+	[[nodiscard]] constexpr const_reference back()   const noexcept { return *( end() - 1 ); }
 
-	constexpr       reverse_iterator rbegin()        { return reverse_iterator( end() ); }
-	constexpr       reverse_iterator rend()          { return reverse_iterator( begin() ); }
-	constexpr const_reverse_iterator crbegin() const { return const_reverse_iterator( end() ); }
-	constexpr const_reverse_iterator crend()   const { return const_reverse_iterator( begin() ); }
-	constexpr const_reverse_iterator rbegin()  const { return crbegin(); }
-	constexpr const_reverse_iterator rend()    const { return crend(); }
-
-	constexpr	    reference front()       noexcept { return *begin(); }
-	constexpr const_reference front() const noexcept { return *begin(); }
-	constexpr		reference back()        noexcept { return *( end() - 1 ); }
-	constexpr const_reference back()  const noexcept { return *( end() - 1 ); }
-
-    constexpr size_type length() const noexcept { return _size(); }
-
-    constexpr       reference operator[]( size_t idx )       noexcept { return _data()[idx]; }
-	constexpr const_reference operator[]( size_t idx ) const noexcept { return _data()[idx]; }
-
-	constexpr       reference at( size_t idx )       { _throwIfOutOfRange( idx ); return _data()[idx]; }
-	constexpr const_reference at( size_t idx ) const { _throwIfOutOfRange( idx ); return _data()[idx]; }
+    [[nodiscard]] constexpr       reference operator[]( size_t idx )       noexcept { return _data()[idx]; }
+	[[nodiscard]] constexpr const_reference operator[]( size_t idx ) const noexcept { return _data()[idx]; }
 
 	/* #### container functions #### */
-	constexpr          bool empty() const noexcept { return _size() == 0; }
-	constexpr     size_type size()  const noexcept { return _size(); }
-	                pointer data()        noexcept { return _data(); }
-	constexpr const_pointer data()  const noexcept { return _data(); }
+	[[nodiscard]] constexpr            bool empty() const noexcept { return _size() == 0; }
+	[[nodiscard]] constexpr       size_type size()  const noexcept { return _size(); }
+	[[nodiscard]] constexpr         pointer data()        noexcept { return _data(); }
+	[[nodiscard]] constexpr   const_pointer data()  const noexcept { return _data(); }
 
 protected:
-	//those special member functions are protected
+	//special member functions are protected
 	//in order to prevent ArrayViewAdaptor to be instantiated on it's own
 	constexpr ArrayViewAdaptor() noexcept	= default;
 
-	constexpr bool _throwIfOutOfRange(size_t idx) const {
-		if (idx < _size()) {
-			return true;
-		} else {
-#ifndef NDEBUG
-			throw std::out_of_range( "Tried to access " + std::to_string( idx )
-                                   + "th element of an array of size" + std::to_string( _size() ) );
-#else
-			throw std::exception{};
-#endif
-		}
-	}
-
 private:
-	constexpr       pointer _data()       noexcept { return static_cast<      DerivedType*>(this)->_arrayView_data(); }
-	constexpr const_pointer _data() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_data(); }
-	constexpr     size_type _size() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_size(); }
-
+	[[nodiscard]] constexpr       pointer _data()       noexcept { return static_cast<      DerivedType*>(this)->_arrayView_data(); }
+	[[nodiscard]] constexpr const_pointer _data() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_data(); }
+	[[nodiscard]] constexpr     size_type _size() const noexcept { return static_cast<const DerivedType*>(this)->_arrayView_size(); }
 	// clang-format on
 };
 
