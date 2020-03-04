@@ -79,7 +79,7 @@ struct Stats {
 struct Stats {
 	constexpr Stats() noexcept = default;
 	constexpr Stats( const Stats& other ) noexcept = default;
-	
+
 	constexpr void inc_ref() noexcept {}
 	constexpr void dec_ref() noexcept {}
 	constexpr void alloc() noexcept {}
@@ -115,14 +115,6 @@ constexpr T c_expr_exchange( T& obj, U&& new_value )
 inline constexpr std::size_t c_expr_max( std::size_t l, std::size_t r )
 {
 	return l > r ? l : r;
-}
-inline constexpr std::size_t c_expr_aligned_offset( std::size_t alignment, std::size_t min )
-{
-	if( alignment >= min ) {
-		return alignment;
-	} else {
-		return min + ( alignment - min % alignment );
-	}
 }
 
 struct AllocResult;
