@@ -18,6 +18,7 @@
 #include <im_str/im_str.hpp>
 
 #include "StringView.h"
+#include "./port_layer.h"
 
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -81,55 +82,20 @@ public:
 using mba::concat;
 
 ////######## impl helper for concat ###############
-//namespace detail {
-//
-//inline void _addTo( char*& buffer, const std::string_view str )
-//{
-//	std::copy_n( str.cbegin(), str.size(), buffer );
-//	buffer += str.size();
-//}
-//
-//template<class... ARGS>
-//inline void _write_to_buffer( char* buffer, ARGS... args )
-//{
-//	( _addTo( buffer, args ), ... );
-//}
-//
-//} // namespace detail
-//
-
-//
-///**
-// * Function that can concatenate an arbitrary number of objects from which a mart::string_view can be constructed
-// * returned constStr will always be zero terminated
-// */
-//template<class... ARGS>
-//ConstString concat( const ARGS&... args )
-//{
-//	return ConstString::_concat_impl( std::string_view( args )... );
-//}
-//
-//template<class... ARGS>
-//inline ConstString ConstString::_concat_impl( ARGS... args )
-//{
-//	const size_t newSize = ( 0 + ... + args.size() );
-//
-//	auto data = _allocate_null_terminated_char_buffer( newSize );
-//
-//	detail::_write_to_buffer( data.get(), args... );
-//
-//	return ConstString( std::move( data ), newSize );
-//}
-
-//inline const mart::ConstString& getEmptyConstString()
-//{
-//	const static mart::ConstString str( mart::EmptyStringView );
-//	return str;
-//}
-
-//#endif
-
 namespace detail {
+
+inline void _addTo( char*& buffer, const std::string_view str )
+{
+	std::copy_n( str.cbegin(), str.size(), buffer );
+	buffer += str.size();
+}
+
+template<class... ARGS>
+inline void _write_to_buffer( char* buffer, ARGS... args )
+{
+	( _addTo( buffer, args ), ... );
+}
+
 template<class... ARGS>
 std::string concat_cpp_str( ARGS... args )
 {
@@ -146,7 +112,7 @@ std::string concat_cpp_str( ARGS... args )
 } // namespace detail
 
 template<class... ARGS>
-std::string concat_cpp_str( const ARGS&... args )
+LIB_MART_COMMON_ALWAYS_INLINE std::string concat_cpp_str( const ARGS&... args )
 {
 	return detail::concat_cpp_str( std::string_view( args )... );
 }
