@@ -18,8 +18,7 @@
 
 #include <im_str/im_str.hpp>
 
-namespace mart {
-namespace log {
+namespace mart::log {
 
 inline void defaultInit( Level logLvl = Level::Debug, mba::im_zstr name_tag = "main" )
 {
@@ -33,9 +32,8 @@ inline void defaultInit( mba::im_zstr file_tag, Level logLvl = Level::Debug, mba
 	logger.addSink( log::makeSink( log::FileLogConfig_t{file_tag, Level::Trace} ) );
 }
 
-using LOG_LVL = Level;
+using LOG_LVL [[deprecated( "log::LOG_LVL is deprecated - use log::Level instead" )]] = Level;
 
-} // namespace log
-} // namespace mart
+} // namespace mart::log
 
 #endif
