@@ -23,12 +23,12 @@ std::vector<std::string_view> make_arglist( int argc, char** argv )
 	return ret;
 }
 
-std::optional<udp::endpoint> get_local_address( const std::vector<std::string_view>& args )
+std::optional<udp::endpoint> get_local_address( const std::vector<std::string_view>& )
 {
 	return udp::try_parse_v4_endpoint( "127.0.0.1:3435" );
 }
 
-std::optional<std::string> get_filename( const std::vector<std::string_view>& args )
+std::optional<std::string> get_filename( const std::vector<std::string_view>& )
 {
 	return std::string{"Testfile"};
 }
