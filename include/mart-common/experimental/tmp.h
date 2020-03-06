@@ -16,10 +16,11 @@
 
 /* ######## INCLUDES ######### */
 /* Proprietary Library Includes */
-#include "../cpp_std/type_traits.h"
 
 /* Standard Library Includes */
 #include <cstdint>
+#include <type_traits>
+#include <utility>
 
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
