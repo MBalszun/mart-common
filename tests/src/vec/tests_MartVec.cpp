@@ -6,23 +6,26 @@
 
 namespace {
 // Useful for debugging
-// template<class T, int N>
-// std::ostream& operator<<( std::ostream& out, mart::Vec<T, N> vec )
-//{
-//	out << "[";
-//	for( int i = 0; i < N; ++i ) {
-//		out << vec[i] << ", ";
-//	}
-//	out << "]";
-//	return out;
-//}
+template<class T, int N>
+[[maybe_unused]] std::ostream& operator<<( std::ostream& out, mart::Vec<T, N> vec )
+{
+	out << "[";
+	for( int i = 0; i < N; ++i ) {
+		out << vec[i] << ", ";
+	}
+	out << "]";
+	return out;
+}
 
 struct Wrapper {
-	int                      v;
-	friend constexpr Wrapper operator*( Wrapper l, int r ) { return {l.v * r}; }
-	friend constexpr Wrapper operator*( int l, Wrapper r ) { return {l * r.v}; }
-	friend constexpr Wrapper operator*( Wrapper l, Wrapper r ) { return {l.v * r.v}; }
-	friend constexpr bool    operator==( Wrapper l, Wrapper r ) { return l.v == r.v; }
+	int                                       v;
+	[[maybe_unused]] friend constexpr Wrapper operator*( Wrapper l, int r ) { return {l.v * r}; }
+	[[maybe_unused]] friend constexpr Wrapper operator*( int l, Wrapper r ) { return {l * r.v}; }
+	[[maybe_unused]] friend constexpr Wrapper operator*( Wrapper l, Wrapper r ) { return {l.v * r.v}; }
+	[[maybe_unused]] friend constexpr Wrapper operator/( Wrapper l, int r ) { return {l.v / r}; }
+	[[maybe_unused]] friend constexpr Wrapper operator/( int l, Wrapper r ) { return {l / r.v}; }
+	[[maybe_unused]] friend constexpr Wrapper operator/( Wrapper l, Wrapper r ) { return {l.v / r.v}; }
+	friend constexpr bool                     operator==( Wrapper l, Wrapper r ) { return l.v == r.v; }
 };
 
 template<class T, int N>
@@ -64,7 +67,7 @@ template<class T, int N>
 constexpr mart::Vec<T, N> generate3()
 {
 	mart::Vec<T, N> vec{};
-	T               v{0};
+	T               v{1};
 	for( int i = 0; i < N; ++i ) {
 		vec[i] = v;
 		v      = v * 2;
@@ -79,16 +82,40 @@ constexpr bool check_addition_subtraction()
 	constexpr auto v2 = generate2<T, N>();
 	constexpr auto v3 = v1 + v2;
 
-	return v1 == v3 - v2;
+	const bool check1 = v1 == v3 - v2;
+
+	constexpr auto v4 = generate1<T, N>();
+	constexpr auto v5 = generate1<T, N>();
+	auto           vt = v4;
+	vt += v5;
+
+	const bool check2 = vt == v4 + v5;
+
+	vt -= v5;
+	const bool check3 = vt == v4;
+
+	return check1 && check2 && check3;
 }
 
 template<class T, int N>
 constexpr bool check_multiplication_division()
 {
-	constexpr auto v1 = generate1<T, N>();
-	constexpr auto v2 = generate1<T, N>() * generate1<T, N>() + generateOnes<T, N>();
-	constexpr auto v3 = v1 * v2;
-	return v1 == v3 / v2;
+	constexpr auto v1     = generate1<T, N>();
+	constexpr auto v2     = generate1<T, N>() * generate1<T, N>() + generateOnes<T, N>();
+	constexpr auto v3     = v1 * v2;
+	constexpr bool check1 = v1 == v3 / v2;
+
+	constexpr auto v4 = generate1<T, N>();
+	constexpr auto v5 = generate3<T, N>(); // all entries must be non-zero
+	auto           vt = v4;
+	vt *= v5;
+
+	const bool check2 = vt == v4 * v5;
+
+	vt /= v5;
+	const bool check3 = vt == v4;
+
+	return check1 && check2 && check3;
 }
 
 namespace same_type_math_ops {
@@ -148,42 +175,167 @@ static_assert( mart::min( vec1, vec2 ) == Vec_t{1, -4, -2, 3, -10} );
 
 } // namespace element_wise_min_max
 
+namespace equal_unequal {
+using Vec_t = mart::Vec<int, 5>;
 
-namespace equal_unequal
+constexpr Vec_t v1{1, 2, 3, 4, -5};
+constexpr Vec_t v2{1, 2, 3, 4, -5};
+constexpr Vec_t v3{1, 2, 3, 4, 5};
+
+static_assert( v1 == v2 );
+static_assert( v1 != v3 );
+
+static_assert( v2 == v1 );
+static_assert( v2 != v3 );
+
+static_assert( v3 != v1 );
+static_assert( v3 != v2 );
+} // namespace equal_unequal
+
+namespace random_math {
+
+constexpr mart::Vec3D<Wrapper> base{{1}, {1}, {2}};
+
+constexpr auto r1 = base * mart::Vec3D<int>{1, 2, -1};
+static_assert( std::is_same_v<std::remove_cv_t<decltype( r1 )>, mart::Vec3D<decltype( Wrapper{} * int{} )>> );
+static_assert( r1 == mart::Vec3D<Wrapper>{{1}, {2}, {-2}} );
+
+constexpr auto r2 = base * base;
+static_assert( std::is_same_v<mart::Vec3D<decltype( Wrapper{} * Wrapper{} )>, std::remove_cv_t<decltype( r2 )>> );
+static_assert( r2 == mart::Vec3D<Wrapper>{{1}, {1}, {4}} );
+
+static_assert( 2 * base * 2 == mart::Vec3D<Wrapper>{{4}, {4}, {8}} );
+} // namespace random_math
+
+namespace matrix_multiplication {
+constexpr auto mx1 = mart::Matrix<int, 3>{           //
+										  {0, 1, 2}, //
+										  {3, 4, 5}, //
+										  {6, 7, 8}};
+
+constexpr auto mx2 = mart::Matrix<int, 3>{              //
+										  {12, 23, 34}, //
+										  {45, 56, 67}, //
+										  {78, 89, 90}};
+
+constexpr auto res = mart::Matrix<int, 3>{                 //
+										  {201, 234, 247}, //
+										  {606, 738, 820}, //
+										  {1011, 1242, 1393}};
+
+static_assert( res == mx_multiply( mx1, mx2 ) );
+
+} // namespace matrix_multiplication
+
+template<class T, int N>
+constexpr bool check_constexpr_operator_availability()
 {
-	using Vec_t = mart::Vec<int, 5>;
-
-	constexpr Vec_t v1{1, 2, 3, 4, -5};
-	constexpr Vec_t v2{1, 2, 3, 4, -5};
-	constexpr Vec_t v3{1, 2, 3, 4, 5};
-
-	static_assert( v1 == v2 );
-	static_assert( v1 != v3 );
-
-	static_assert( v2 == v1 );
-	static_assert( v2 != v3 );
-
-	static_assert( v3 != v1 );
-	static_assert( v3 != v2 );
+	constexpr auto v1               = generate1<T, N>();
+	[[maybe_unused]] constexpr auto t = v1.squareNorm();
+	return true;
 }
 
-namespace random_math
+static_assert( check_constexpr_operator_availability<int, 1>() );
+static_assert( check_constexpr_operator_availability<int, 2>() );
+static_assert( check_constexpr_operator_availability<int, 3>() );
+static_assert( check_constexpr_operator_availability<int, 4>() );
+static_assert( check_constexpr_operator_availability<int, 5>() );
+static_assert( check_constexpr_operator_availability<int, 6>() );
+static_assert( check_constexpr_operator_availability<int, 7>() );
+static_assert( check_constexpr_operator_availability<int, 8>() );
+static_assert( check_constexpr_operator_availability<int, 9>() );
+static_assert( check_constexpr_operator_availability<int, 10>() );
+
+static_assert( check_constexpr_operator_availability<int, 11>() );
+static_assert( check_constexpr_operator_availability<int, 12>() );
+static_assert( check_constexpr_operator_availability<int, 13>() );
+static_assert( check_constexpr_operator_availability<int, 14>() );
+static_assert( check_constexpr_operator_availability<int, 15>() );
+static_assert( check_constexpr_operator_availability<int, 16>() );
+static_assert( check_constexpr_operator_availability<int, 17>() );
+static_assert( check_constexpr_operator_availability<int, 18>() );
+static_assert( check_constexpr_operator_availability<int, 19>() );
+
+static_assert(check_constexpr_operator_availability<double, 1>())  ;
+static_assert(check_constexpr_operator_availability<double, 2>())  ;
+static_assert(check_constexpr_operator_availability<double, 3>())  ;
+static_assert(check_constexpr_operator_availability<double, 4>())  ;
+static_assert(check_constexpr_operator_availability<double, 5>())  ;
+static_assert(check_constexpr_operator_availability<double, 6>())  ;
+static_assert(check_constexpr_operator_availability<double, 7>())  ;
+static_assert(check_constexpr_operator_availability<double, 8>())  ;
+static_assert(check_constexpr_operator_availability<double, 9>())  ;
+static_assert(check_constexpr_operator_availability<double, 10>()) ;
+
+static_assert(check_constexpr_operator_availability<double, 11>()) ;
+static_assert(check_constexpr_operator_availability<double, 12>()) ;
+static_assert(check_constexpr_operator_availability<double, 13>()) ;
+static_assert(check_constexpr_operator_availability<double, 14>()) ;
+static_assert(check_constexpr_operator_availability<double, 15>()) ;
+static_assert(check_constexpr_operator_availability<double, 16>()) ;
+static_assert(check_constexpr_operator_availability<double, 17>()) ;
+static_assert(check_constexpr_operator_availability<double, 18>()) ;
+static_assert(check_constexpr_operator_availability<double, 19>()) ;
+
+template<class T, int N>
+void check_runtime_operator_availability()
 {
-
-	constexpr mart::Vec3D<Wrapper> base{{1}, {1}, {2}};
-
-	constexpr auto r1 = base * mart::Vec3D<int>{1, 2, -1};
-	static_assert( std::is_same_v<std::remove_cv_t<decltype( r1 )>, mart::Vec3D<decltype( Wrapper{} * int{} )>> );
-	static_assert( r1 == mart::Vec3D<Wrapper>{1, 2, -2} );
-
-	constexpr auto r2 = base * base;
-	static_assert( std::is_same_v<mart::Vec3D<decltype( Wrapper{} * Wrapper{} )>, std::remove_cv_t<decltype( r2 )>> );
-	static_assert( r2 == mart::Vec3D<Wrapper>{1, 1, 4} );
-
-	static_assert( 2 * base * 2 == mart::Vec3D<Wrapper>{{4}, {4}, {8}} );
+	if constexpr( !std::is_same_v<T, int> ) {
+		constexpr auto v1 = generate1<T, N>();
+		(void) v1.norm();
+		(void) v1.unityVec();
+	}
 }
 
 } // namespace
+
+TEST_CASE( "MartVec_operator_availability_int", "[vec]" )
+{
+	check_runtime_operator_availability<int, 1>();
+	check_runtime_operator_availability<int, 2>();
+	check_runtime_operator_availability<int, 3>();
+	check_runtime_operator_availability<int, 4>();
+	check_runtime_operator_availability<int, 5>();
+	check_runtime_operator_availability<int, 6>();
+	check_runtime_operator_availability<int, 7>();
+	check_runtime_operator_availability<int, 8>();
+	check_runtime_operator_availability<int, 9>();
+	check_runtime_operator_availability<int, 10>();
+
+	check_runtime_operator_availability<int, 11>();
+	check_runtime_operator_availability<int, 12>();
+	check_runtime_operator_availability<int, 13>();
+	check_runtime_operator_availability<int, 14>();
+	check_runtime_operator_availability<int, 15>();
+	check_runtime_operator_availability<int, 16>();
+	check_runtime_operator_availability<int, 17>();
+	check_runtime_operator_availability<int, 18>();
+	check_runtime_operator_availability<int, 19>();
+}
+
+TEST_CASE( "MartVec_operator_availability_double", "[vec]" )
+{
+	check_runtime_operator_availability<double, 1>();
+	check_runtime_operator_availability<double, 2>();
+	check_runtime_operator_availability<double, 3>();
+	check_runtime_operator_availability<double, 4>();
+	check_runtime_operator_availability<double, 5>();
+	check_runtime_operator_availability<double, 6>();
+	check_runtime_operator_availability<double, 7>();
+	check_runtime_operator_availability<double, 8>();
+	check_runtime_operator_availability<double, 9>();
+	check_runtime_operator_availability<double, 10>();
+
+	check_runtime_operator_availability<double, 11>();
+	check_runtime_operator_availability<double, 12>();
+	check_runtime_operator_availability<double, 13>();
+	check_runtime_operator_availability<double, 14>();
+	check_runtime_operator_availability<double, 15>();
+	check_runtime_operator_availability<double, 16>();
+	check_runtime_operator_availability<double, 17>();
+	check_runtime_operator_availability<double, 18>();
+	check_runtime_operator_availability<double, 19>();
+}
 
 TEST_CASE( "MartVec_decimal_to_integral", "[vec]" )
 {
