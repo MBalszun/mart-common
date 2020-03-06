@@ -27,13 +27,8 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
-#include <functional>
-#include <numeric>
-#include <type_traits>
 #include <utility>
 
 /* Proprietary Library Includes */
@@ -75,12 +70,7 @@ struct Vec {
 	static constexpr int Dim = N;
 	using value_type         = T;
 
-	std::array<T, N> data;
-
-	// c++14:
-	// constexpr Vec(std::initializer_list<T> init){
-	//	std::copy_n(init.begin(),std::min(init.size(),data.size()),data.begin());
-	//}
+	T data[N];
 
 	//### Data access ###
 	[[nodiscard]] constexpr T& operator[]( int idx )
@@ -312,9 +302,6 @@ template<int K, class T>
 	return vec;
 }
 
-// there should be a check for any instantiated vector type, but this has to do for now
-static_assert( std::is_trivial<Vec<int, 5>>::value, "mart::Vec is not a trivial type" );
-
 namespace _impl_mart_vec {
 template<class T, int... I1, int... I2>
 constexpr auto concat_impl( const Vec<T, sizeof...( I1 )>& v1,
@@ -462,13 +449,12 @@ constexpr auto apply_binary( F func, const T1& arg1, const T2& arg2 )
 	return _impl_vec::apply_binary_helper( arg1, arg2, func, mp::make_index_sequence<N>{} );
 }
 
-// std::plus,td::multiplies,... - like function objects for maximum and minimum
+// std::plus,td::multiplies,... - like function objects
 struct maximum {
 	template<class T>
 	constexpr T operator()( const T& l, const T& r ) const noexcept
 	{
-		using std::max;
-		return max( l, r );
+		return l > r ? l : r;
 	}
 };
 
@@ -476,8 +462,7 @@ struct minimum {
 	template<class T>
 	constexpr T operator()( const T& l, const T& r ) const noexcept
 	{
-		using std::min;
-		return min( l, r );
+		return l < r ? l : r;
 	}
 };
 
@@ -541,6 +526,7 @@ struct divides {
 		return l / r;
 	}
 };
+
 struct plus {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept
@@ -548,6 +534,7 @@ struct plus {
 		return l + r;
 	}
 };
+
 struct minus {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept
@@ -555,6 +542,7 @@ struct minus {
 		return l - r;
 	}
 };
+
 struct negate {
 	template<class T>
 	constexpr auto operator()( const T& l ) const noexcept
@@ -562,6 +550,7 @@ struct negate {
 		return -l;
 	}
 };
+
 struct logical_not {
 	template<class T>
 	constexpr auto operator()( const T& l ) const noexcept
@@ -570,7 +559,60 @@ struct logical_not {
 	}
 };
 
-struct less {
+struct logical_or {
+	template<class T, class U>
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	{
+		return l || r;
+	}
+};
+
+struct logical_and {
+	template<class T, class U>
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	{
+		return l && r;
+	}
+};
+
+struct element_equal {
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept -> decltype( elementEquals( l, r ) )
+	{
+		return elementEquals( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l == r )
+	{
+		return l == r;
+	}
+
+	template<class T, class U>
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	{
+		return this->impl( l, r, nullptr );
+	}
+};
+
+struct element_not_equal {
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept -> decltype( elementNE( l, r ) )
+	{
+		return elementNE( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l != r )
+	{
+		return l != r;
+	}
+	template<class T, class U>
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	{
+		return this->impl( l, r, nullptr );
+	}
+};
+
+struct element_less {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l < r )
 	{
@@ -583,7 +625,7 @@ struct less {
 	}
 };
 
-struct less_equal {
+struct element_less_equal {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l <= r )
 	{
@@ -596,7 +638,7 @@ struct less_equal {
 	}
 };
 
-struct greater {
+struct element_greater {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l > r )
 	{
@@ -609,7 +651,7 @@ struct greater {
 	}
 };
 
-struct greater_equal {
+struct element_greater_equal {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l >= r )
 	{
@@ -703,18 +745,18 @@ DEFINE_HOMOGEN_ND_VECTOR_OP( max, _impl_vec::maximum )
 DEFINE_HOMOGEN_ND_VECTOR_OP( min, _impl_vec::minimum )
 
 // element wise logical ops
-DEFINE_UNARY_ND_VECTOR_OP( operator!, std::logical_not<void>)
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementAnd, std::logical_and<void> )
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementOr, std::logical_or<void> )
+DEFINE_UNARY_ND_VECTOR_OP( elementNot, _impl_vec::logical_not )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementAnd, _impl_vec::logical_and )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementOr, _impl_vec::logical_or )
 
 // element wise comparison operations
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementEquals, std::equal_to<void> )
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementNE, std::not_equal_to<void> )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementEquals, _impl_vec::element_equal )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementNE, _impl_vec::element_not_equal )
 
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementLess, _impl_vec::less )
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementLessEqual, _impl_vec::less_equal )
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementGreater, _impl_vec::greater )
-DEFINE_HETEROGEN_ND_VECTOR_OP( elementGreaterEqual, _impl_vec::greater_equal )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementLess, _impl_vec::element_less )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementLessEqual, _impl_vec::element_less_equal )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementGreater, _impl_vec::element_greater )
+DEFINE_HETEROGEN_ND_VECTOR_OP( elementGreaterEqual, _impl_vec::element_greater_equal )
 
 #undef DEFINE_UNARY_ND_VECTOR_OP
 #undef DEFINE_HETEROGEN_ND_VECTOR_OP
@@ -732,8 +774,10 @@ template<class T, int N, class F, class Init_t>
 template<class T, int N>
 [[nodiscard]] constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r )
 {
-	// first compare the vectors element wise and then fold the results voer &&
-	return reduce( elementEquals( l, r ), std::logical_and<bool>{}, true );
+	for( int i = 0; i < N; ++i ) {
+		if( !( l[i] == r[i] ) ) { return false; }
+	}
+	return true;
 }
 
 template<class T, int N>

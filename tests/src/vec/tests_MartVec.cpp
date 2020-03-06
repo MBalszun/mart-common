@@ -225,13 +225,30 @@ constexpr auto res = mart::Matrix<int, 3>{                 //
 
 static_assert( res == mx_multiply( mx1, mx2 ) );
 
+static_assert( mart::Matrix<bool, 3>{{true, true, true}, //
+									 {true, true, true}, //
+									 {true, true, true}} //
+			   == mart::elementEquals( mx1, mx1 ) );
+
+static_assert( mart::Matrix<bool, 3>{{true, true, true},  //
+									 {true, false, true}, //
+									 {true, true, true}}  //
+			   != mart::elementEquals( mx1, mx1 ) );
+
+static_assert( mart::Matrix<bool, 3>{{false, false, false}, //
+									 {false, false, false}, //
+									 {false, false, false}} //
+			   == mart::elementNE( mx1, mx1 ) );
+
 } // namespace matrix_multiplication
 
 template<class T, int N>
 constexpr bool check_constexpr_operator_availability()
 {
-	constexpr auto v1               = generate1<T, N>();
-	[[maybe_unused]] constexpr auto t = v1.squareNorm();
+	static_assert( std::is_trivial_v<mart::Vec<T, N>> || !std::is_trivial_v<T>, "mart::Vec is not a trivial type" );
+
+	constexpr auto                  v1 = generate1<T, N>();
+	[[maybe_unused]] constexpr auto t  = v1.squareNorm();
 	return true;
 }
 
@@ -256,34 +273,34 @@ static_assert( check_constexpr_operator_availability<int, 17>() );
 static_assert( check_constexpr_operator_availability<int, 18>() );
 static_assert( check_constexpr_operator_availability<int, 19>() );
 
-static_assert(check_constexpr_operator_availability<double, 1>())  ;
-static_assert(check_constexpr_operator_availability<double, 2>())  ;
-static_assert(check_constexpr_operator_availability<double, 3>())  ;
-static_assert(check_constexpr_operator_availability<double, 4>())  ;
-static_assert(check_constexpr_operator_availability<double, 5>())  ;
-static_assert(check_constexpr_operator_availability<double, 6>())  ;
-static_assert(check_constexpr_operator_availability<double, 7>())  ;
-static_assert(check_constexpr_operator_availability<double, 8>())  ;
-static_assert(check_constexpr_operator_availability<double, 9>())  ;
-static_assert(check_constexpr_operator_availability<double, 10>()) ;
+static_assert( check_constexpr_operator_availability<double, 1>() );
+static_assert( check_constexpr_operator_availability<double, 2>() );
+static_assert( check_constexpr_operator_availability<double, 3>() );
+static_assert( check_constexpr_operator_availability<double, 4>() );
+static_assert( check_constexpr_operator_availability<double, 5>() );
+static_assert( check_constexpr_operator_availability<double, 6>() );
+static_assert( check_constexpr_operator_availability<double, 7>() );
+static_assert( check_constexpr_operator_availability<double, 8>() );
+static_assert( check_constexpr_operator_availability<double, 9>() );
+static_assert( check_constexpr_operator_availability<double, 10>() );
 
-static_assert(check_constexpr_operator_availability<double, 11>()) ;
-static_assert(check_constexpr_operator_availability<double, 12>()) ;
-static_assert(check_constexpr_operator_availability<double, 13>()) ;
-static_assert(check_constexpr_operator_availability<double, 14>()) ;
-static_assert(check_constexpr_operator_availability<double, 15>()) ;
-static_assert(check_constexpr_operator_availability<double, 16>()) ;
-static_assert(check_constexpr_operator_availability<double, 17>()) ;
-static_assert(check_constexpr_operator_availability<double, 18>()) ;
-static_assert(check_constexpr_operator_availability<double, 19>()) ;
+static_assert( check_constexpr_operator_availability<double, 11>() );
+static_assert( check_constexpr_operator_availability<double, 12>() );
+static_assert( check_constexpr_operator_availability<double, 13>() );
+static_assert( check_constexpr_operator_availability<double, 14>() );
+static_assert( check_constexpr_operator_availability<double, 15>() );
+static_assert( check_constexpr_operator_availability<double, 16>() );
+static_assert( check_constexpr_operator_availability<double, 17>() );
+static_assert( check_constexpr_operator_availability<double, 18>() );
+static_assert( check_constexpr_operator_availability<double, 19>() );
 
 template<class T, int N>
 void check_runtime_operator_availability()
 {
 	if constexpr( !std::is_same_v<T, int> ) {
 		constexpr auto v1 = generate1<T, N>();
-		(void) v1.norm();
-		(void) v1.unityVec();
+		(void)v1.norm();
+		(void)v1.unityVec();
 	}
 }
 
