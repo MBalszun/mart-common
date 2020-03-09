@@ -53,16 +53,6 @@ using Vec4D = Vec<T, 4>;
 template<class T, int N>
 using Matrix = Vec<Vec<T, N>, N>; // each vector is a row
 
-// some metaprogramming stuff
-namespace mp {
-
-template<int... I>
-using index_sequence = std::integer_sequence<int, I...>;
-
-template<int N>
-using make_index_sequence = std::make_integer_sequence<int, N>;
-} // namespace mp
-
 /*################# Vec class implementation ######################*/
 template<class T, int N>
 struct Vec {
@@ -124,12 +114,12 @@ struct Vec {
 	template<int K>
 	[[nodiscard]] constexpr Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
+		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
-	[[nodiscard]] Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
+	[[nodiscard]] Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
 	{
 		return Vec<T, K>{( *this )[I]...};
 	}
@@ -200,12 +190,12 @@ struct Vec<T, 2> {
 	template<int K>
 	[[nodiscard]] Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
+		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
-	Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
+	Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
 	{
 		return Vec<T, K>{( *this )[I]...};
 	}
@@ -281,12 +271,12 @@ struct Vec<T, 3> {
 	template<int K>
 	[[nodiscard]] Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( mp::make_index_sequence<( K < N ? K : N )>{} );
+		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 
 private:
 	template<int K, int... I>
-	[[nodiscard]] constexpr Vec<T, K> toKDim_helper( mp::index_sequence<I...> ) const
+	[[nodiscard]] constexpr Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
 	{
 		return Vec<T, K>{( *this )[I]...};
 	}
@@ -306,8 +296,8 @@ namespace _impl_mart_vec {
 template<class T, int... I1, int... I2>
 constexpr auto concat_impl( const Vec<T, sizeof...( I1 )>& v1,
 							const Vec<T, sizeof...( I2 )>& v2,
-							mp::index_sequence<I1...>,
-							mp::index_sequence<I2...> ) //
+							std::integer_sequence<int, I1...>,
+							std::integer_sequence<int, I2...> ) //
 	-> Vec<T, sizeof...( I1 ) + sizeof...( I2 )>
 {
 	return {v1[I1]..., v2[I2]...};
@@ -317,7 +307,8 @@ constexpr auto concat_impl( const Vec<T, sizeof...( I1 )>& v1,
 template<class T, int N1, int N2>
 [[nodiscard]] constexpr Vec<T, N1 + N2> concat( const Vec<T, N1>& v1, const Vec<T, N2>& v2 )
 {
-	return _impl_mart_vec::concat_impl( v1, v2, mp::make_index_sequence<N1>{}, mp::make_index_sequence<N2>{} );
+	return _impl_mart_vec::concat_impl(
+		v1, v2, std::make_integer_sequence<int, N1>{}, std::make_integer_sequence<int, N2>{} );
 }
 
 template<class T, class U, int N>
@@ -373,10 +364,10 @@ template<class T, int N>
 template<class T, class U, int N>
 [[nodiscard]] constexpr auto mx_multiply( const Matrix<T, N>& mx, const Vec<U, N>& vec )
 {
-	Vec<decltype( inner_product( mx[0], vec ) ), N> ret{};
+	Vec<decltype( mart::inner_product( mx[0], vec ) ), N> ret{};
 
 	for( int i = 0; i < N; ++i ) {
-		ret[i] = inner_product( mx[i], vec );
+		ret[i] = mart::inner_product( mx[i], vec );
 	}
 	return ret;
 }
@@ -408,29 +399,31 @@ using Type = T;
 
 // applies unary function F to each element of l and stores the results in a new vector
 template<class T, class F, int... I>
-constexpr auto apply_unary_helper( const Vec<T, sizeof...( I )>& l, F func, mp::index_sequence<I...> s )
+constexpr auto apply_unary_helper( const Vec<T, sizeof...( I )>& l, F func, std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l[0] ) ), s.size()>;
 	return r_type{func( l[I] )...};
 }
 
 template<class T, class U, class F, int... I>
-constexpr auto apply_binary_helper( const Vec<T, sizeof...( I )>& l,
-									const Vec<U, sizeof...( I )>& r,
-									F                             func,
-									mp::index_sequence<I...>      s )
+constexpr auto apply_binary_helper( const Vec<T, sizeof...( I )>&    l,
+									const Vec<U, sizeof...( I )>&    r,
+									F                                func,
+									std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l[0], r[0] ) ), s.size()>;
 	return r_type{func( l[I], r[I] )...};
 }
 template<class T, class U, class F, int... I>
-constexpr auto apply_binary_helper( const U& l, const Vec<T, sizeof...( I )>& r, F func, mp::index_sequence<I...> s )
+constexpr auto
+apply_binary_helper( const U& l, const Vec<T, sizeof...( I )>& r, F func, std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l, r[0] ) ), s.size()>;
 	return r_type{func( l, r[I] )...};
 }
 template<class T, class U, class F, int... I>
-constexpr auto apply_binary_helper( const Vec<T, sizeof...( I )>& l, const U& r, F func, mp::index_sequence<I...> s )
+constexpr auto
+apply_binary_helper( const Vec<T, sizeof...( I )>& l, const U& r, F func, std::integer_sequence<int, I...> s )
 {
 	using r_tye = mart::Vec<decltype( func( l[0], r ) ), s.size()>;
 	return r_tye{func( l[I], r )...};
@@ -440,13 +433,13 @@ constexpr auto apply_binary_helper( const Vec<T, sizeof...( I )>& l, const U& r,
 template<int N, class F, class T>
 constexpr auto apply_unary( F func, T&& arg )
 {
-	return _impl_vec::apply_unary_helper( arg, func, mp::make_index_sequence<N>{} );
+	return _impl_vec::apply_unary_helper( arg, func, std::make_integer_sequence<int, N>{} );
 }
 
 template<int N, class F, class T1, class T2>
 constexpr auto apply_binary( F func, const T1& arg1, const T2& arg2 )
 {
-	return _impl_vec::apply_binary_helper( arg1, arg2, func, mp::make_index_sequence<N>{} );
+	return _impl_vec::apply_binary_helper( arg1, arg2, func, std::make_integer_sequence<int, N>{} );
 }
 
 // std::plus,td::multiplies,... - like function objects
@@ -605,6 +598,7 @@ struct element_not_equal {
 	{
 		return l != r;
 	}
+
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
@@ -614,53 +608,78 @@ struct element_not_equal {
 
 struct element_less {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l < r )
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept -> decltype( elementLess( l, r ) )
+	{
+		return elementLess( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l < r )
 	{
 		return l < r;
 	}
+
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( elementLess( l, r ) )
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
-		return elementLess( l, r );
+		return this->impl( l, r, nullptr );
 	}
 };
 
 struct element_less_equal {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l <= r )
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept -> decltype( elementLessEqual( l, r ) )
+	{
+		return elementLessEqual( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l <= r )
 	{
 		return l <= r;
 	}
+
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( elementLessEqual( l, r ) )
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
-		return elementLess( l, r );
+		return this->impl( l, r, nullptr );
 	}
 };
 
 struct element_greater {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l > r )
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept -> decltype( elementGreater( l, r ) )
+	{
+		return elementGreater( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l > r )
 	{
 		return l > r;
 	}
+
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( elementGreater( l, r ) )
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
-		return elementGreater( l, r );
+		return this->impl( l, r, nullptr );
 	}
 };
 
 struct element_greater_equal {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( l >= r )
+	constexpr auto impl( const T& l, const U& r, std::nullptr_t ) const noexcept
+		-> decltype( elementGreaterEqual( l, r ) )
+	{
+		return elementGreaterEqual( l, r );
+	}
+	template<class T, class U>
+	constexpr auto impl( const T& l, const U& r, const void* ) const noexcept -> decltype( l >= r )
 	{
 		return l >= r;
 	}
+
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept -> decltype( elementGreaterEqual( l, r ) )
+	constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
-		return elementGreaterEqual( l, r );
+		return this->impl( l, r, nullptr );
 	}
 };
 
@@ -704,12 +723,12 @@ struct element_greater_equal {
 		return _impl_vec::apply_binary<N>( FUNC{}, l, r );                                                             \
 	}                                                                                                                  \
 	template<class T, int N>                                                                                           \
-	[[nodiscard]] constexpr auto OP( _impl_vec::Type<T>& l, const Vec<T, N>& r )                                       \
+	[[nodiscard]] constexpr auto OP( const _impl_vec::Type<T>& l, const Vec<T, N>& r )                                 \
 	{                                                                                                                  \
 		return _impl_vec::apply_binary<N>( FUNC{}, l, r );                                                             \
 	}                                                                                                                  \
 	template<class T, int N>                                                                                           \
-	[[nodiscard]] constexpr auto OP( const Vec<T, N>& l, _impl_vec::Type<T>& r )                                       \
+	[[nodiscard]] constexpr auto OP( const Vec<T, N>& l, const _impl_vec::Type<T>& r )                                 \
 	{                                                                                                                  \
 		return _impl_vec::apply_binary<N>( FUNC{}, l, r );                                                             \
 	}
@@ -774,10 +793,11 @@ template<class T, int N, class F, class Init_t>
 template<class T, int N>
 [[nodiscard]] constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r )
 {
+	bool ret = true;
 	for( int i = 0; i < N; ++i ) {
-		if( !( l[i] == r[i] ) ) { return false; }
+		ret = ret & ( l[i] == r[i] );
 	}
-	return true;
+	return ret;
 }
 
 template<class T, int N>
