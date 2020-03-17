@@ -57,8 +57,12 @@
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
+#ifdef __has_cpp_attribute
 #if __has_cpp_attribute( maybe_unused )
 #define MART_NETLIB_PORT_LAYER_MAYBE_UNUSED [[maybe_unused]]
+#else
+#define MART_NETLIB_PORT_LAYER_MAYBE_UNUSED
+#endif
 #else
 #define MART_NETLIB_PORT_LAYER_MAYBE_UNUSED
 #endif

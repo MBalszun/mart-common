@@ -261,7 +261,7 @@ struct ReturnValue {
 	}
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
-		: _errc{errc}
+		: _errc(errc)
 		, _success{false}
 	{
 	}
