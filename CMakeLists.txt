@@ -1,17 +1,17 @@
 # Note: 3.13 is required to install targets from other directories.
 cmake_minimum_required(VERSION 3.13...3.16)
 
-# guard against multiple inclusions in a single super project as we have sometimes in the mart project
-if(TARGET mart-common )
-	get_target_property(PREV_SOURCE_DIR mart-common SOURCE_DIR)
-	message(WARNING "[MART-COMMON] -- \"${PROJECT_NAME}\" included multiple times --\n-- Only one directory will be built --\n-- Selected dir: ${PREV_SOURCE_DIR}")
-	return()
-endif()
-
 project( MartCommon
 	VERSION 3.0
 	LANGUAGES CXX
 )
+# guard against multiple inclusions in a single super project as we have sometimes in the mart project
+if(TARGET mart-common )
+	get_target_property(PREV_SOURCE_DIR mart-netlib SOURCE_DIR) # NOTE: mart-common is an interface library and hence doesn't have the property SOURCE_DIR
+	message(WARNING "[MART-COMMON] -- \"${PROJECT_NAME}\" included multiple times --\n-- Only one directory will be built --\n-- Selected dir: ${PREV_SOURCE_DIR}")
+	return()
+endif()
+
 
 option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
