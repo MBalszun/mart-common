@@ -38,7 +38,7 @@ namespace mart {
 template<class T>
 class CopyableAtomic : public std::atomic<T> {
 public:
-	static_assert( sizeof( T ) < 8 && std::is_pod<T>::value, "Class is only meant for trivial buildin types" );
+	static_assert( sizeof( T ) < 8 && std::is_trivially_copyable<T>::value, "Class is only meant for trivial buildin types" );
 
 	// defaultinitializes value (std::atomic doesn't)
 	constexpr CopyableAtomic() noexcept
