@@ -39,20 +39,26 @@ target_compile_features( mart-common INTERFACE cxx_std_17 )
 ####### create mart-netlib library
 #
 if( MART_COMMON_INCLUDE_NET_LIB )
+	# here, only interface properties are set, the build properties are set in src/mart-netlib
+
+	add_library( mart-netlib-portlayer STATIC )
+	add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
+	set_target_properties ( mart-netlib-portlayer PROPERTIES EXPORT_NAME netlib-portlayer )
+	target_include_directories( mart-netlib-portlayer
+		INTERFACE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	)
 
 	add_library( mart-netlib )
 	add_library( Mart::netlib ALIAS mart-netlib)
 	set_target_properties ( mart-netlib PROPERTIES EXPORT_NAME netlib )
-
-	# here, only interface properties are set, the build properties are set in src/mart-netlib
-	target_link_libraries( mart-netlib PUBLIC Mart::common Mart::netlib-portlayer)
-
-	target_compile_features( mart-netlib INTERFACE cxx_std_17 )
 	target_include_directories( mart-netlib
 		INTERFACE
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	)
 
+	target_link_libraries( mart-netlib INTERFACE Mart::common Mart::netlib-portlayer)
+	target_compile_features( mart-netlib INTERFACE cxx_std_17 )
 	add_subdirectory( src/mart-netlib )
 
 endif()

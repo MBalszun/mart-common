@@ -14,34 +14,34 @@ endif()
 #
 # NOTE: The port-layer is supposed to be a c++11 library, while the rest is c++17.
 #		In order do make sure that we don't accidentially use c++14/17 features
-#		this library is explicitly compiled in c++11 mode
-#
 
-add_library( mart-netlib-portlayer STATIC ${CMAKE_CURRENT_SOURCE_DIR}/port_layer.cpp )
+target_sources( mart-netlib-portlayer
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/port_layer.cpp
+)
 target_include_directories( mart-netlib-portlayer
 	PRIVATE
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
-add_library( Mart::netlib-portlayer ALIAS mart-netlib-portlayer )
-set_target_properties( mart-netlib-portlayer PROPERTIES EXPORT_NAME netlib-portlayer )
-
 #windows.h doesn't yet work with the new preprocessor
-target_compile_options( mart-netlib-portlayer PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/experimental:preprocessor->)
+target_compile_options( mart-netlib-portlayer
+	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/experimental:preprocessor->
+)
 
 ######
 # netlib library
 #
 #  network library build ontop of mart-commmon and netlib-portlayer
 #
-
 target_sources(mart-netlib
 	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/ip.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/udp.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unix.cpp
 )
-set_target_properties ( mart-netlib PROPERTIES EXPORT_NAME netlib )
 target_include_directories( mart-netlib
 	PRIVATE
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
+target_compile_features( mart-netlib PRIVATE cxx_std_17 )
+target_link_libraries( mart-netlib PRIVATE Mart::common Mart::netlib-portlayer)
