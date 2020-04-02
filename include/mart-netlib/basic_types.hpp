@@ -283,6 +283,77 @@ private:
 	bool _success = false;
 };
 
+template<class T = int>
+struct NonTrivialReturnValue {
+	NonTrivialReturnValue() = default;
+	NonTrivialReturnValue( NonTrivialReturnValue&& other )
+	{
+		if( _success ) { _value.~T(); }
+		if( other._success ) {
+			_value = std::move( other._value );
+		} else {
+			_errc = other._errc;
+		}
+		_success = other._success;
+	}
+
+	constexpr explicit NonTrivialReturnValue( const T& value ) noexcept
+		: _value{value}
+		, _success{true}
+	{
+	}
+	constexpr explicit NonTrivialReturnValue( T&& value ) noexcept
+		: _value{std::move( value )}
+		, _success{true}
+	{
+	}
+
+	constexpr explicit NonTrivialReturnValue( ErrorCode errc ) noexcept
+		: _errc( errc )
+		, _success{false}
+	{
+	}
+	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
+	constexpr bool      success() const noexcept { return _success; }
+	constexpr explicit  operator bool() const noexcept { return success(); }
+	constexpr const T&  value() const noexcept { return _value; }
+	constexpr ErrorCode error_code() const noexcept
+	{
+		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
+	}
+	constexpr int raw() const noexcept { return static_cast<int>( _errc.raw_value() ); }
+
+	~NonTrivialReturnValue()
+	{
+		if( _success ) { _value.~T(); }
+	}
+
+private:
+	union {
+		ErrorCode _errc;
+		T         _value;
+	};
+	bool _success = false;
+};
+
+struct ISockaddrPolyWrapper {
+	virtual ~ISockaddrPolyWrapper()             = default;
+	virtual const Sockaddr& to_Sockaddr() const = 0;
+							operator const Sockaddr&() const { return to_Sockaddr(); };
+};
+
+template<class SockAddrT>
+struct SockaddrPolyWrapper : ISockaddrPolyWrapper {
+	SockaddrPolyWrapper( const SockAddrT& sock_addr )
+		: addr( sock_addr )
+	{
+	}
+
+	SockAddrT addr;
+
+	const Sockaddr& to_Sockaddr() const override { return addr; }
+};
+
 } // namespace socks
 
 } // namespace nw
