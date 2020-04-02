@@ -588,6 +588,23 @@ SockaddrIn6::SockaddrIn6( const ::sockaddr_in6& native )
 	std::memcpy( _storage.raw_bytes, &native, sizeof( native ) );
 }
 
+const ::sockaddr_in6& SockaddrIn6::native() const noexcept
+{
+	return *MBA_LAUNDER( reinterpret_cast<const ::sockaddr_in6*>( _storage.raw_bytes ) );
+}
+
+::sockaddr_in6& SockaddrIn6::native() noexcept
+{
+	return *MBA_LAUNDER( reinterpret_cast<::sockaddr_in6*>( _storage.raw_bytes ) );
+}
+
+std::array<std::uint8_t,16> SockaddrIn6::address() const noexcept
+{
+	std::array<std::uint8_t, 16> ret;
+	std::memcpy( ret.data(), native().sin6_addr.s6_addr, 16 );
+	return ret;
+}
+
 namespace {
 
 ::sockaddr_un make_sockaddr_un( const char* u8path, std::size_t length )

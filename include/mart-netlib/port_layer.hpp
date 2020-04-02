@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <chrono>
 #include <errno.h>
+#include <array>
 
 namespace mart {
 namespace nw {
@@ -137,6 +138,10 @@ struct SockaddrIn6 : mart::nw::socks::Sockaddr {
 		_storage = other._storage;
 		return *this;
 	}
+
+	const ::sockaddr_in6& native() const noexcept;
+	::sockaddr_in6& native() noexcept;
+	std::array<std::uint8_t, 16> address() const noexcept;
 
 	explicit SockaddrIn6( const ::sockaddr_in6& native );
 
