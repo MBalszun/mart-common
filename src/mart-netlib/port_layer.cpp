@@ -54,6 +54,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h> //close
+#include <netdb.h>	//addrinfo
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -661,6 +662,80 @@ int inet_pres_to_net( Domain af, const char* src, void* dst )
 	return inet_pton( to_native( af ), src, dst );
 #endif
 }
+
+namespace {
+
+::addrinfo to_native_hint( const AddrInfo& address_info ) noexcept
+{
+	::addrinfo ret{};
+	ret.ai_family   = port_layer::to_native( address_info.family );
+	ret.ai_socktype = port_layer::to_native( address_info.socktype );
+	ret.ai_protocol = port_layer::to_native( address_info.protocol );
+
+	return ret;
+}
+
+AddrInfo from_native( const ::addrinfo& native )
+{
+	AddrInfo ret{};
+
+	ret.flags    = native.ai_flags;
+	ret.family   = port_layer::from_native_domain( native.ai_family );
+	ret.socktype = port_layer::from_native_transport_type( native.ai_socktype );
+	ret.protocol = port_layer::from_native_protocol( native.ai_protocol );
+
+	switch( from_native_domain( native.ai_addr->sa_family ) ) {
+
+		case Domain::Local:
+			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrUn>>( new SockaddrPolyWrapper<SockaddrUn>{
+				SockaddrUn( *reinterpret_cast<const ::sockaddr_un*>( native.ai_addr ) )} );
+			break;
+		case Domain::Inet6:
+			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrIn6>>( new SockaddrPolyWrapper<SockaddrIn6>{
+				SockaddrIn6( *reinterpret_cast<const ::sockaddr_in6*>( native.ai_addr ) )} );
+			break;
+		case Domain::Inet:
+			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrIn>>( new SockaddrPolyWrapper<SockaddrIn>{
+				SockaddrIn( *reinterpret_cast<const ::sockaddr_in*>( native.ai_addr ) )} );
+			break;
+		case Domain::Invalid: break;
+		case Domain::Unspec: break;
+	}
+
+	if( native.ai_canonname ) { ret.canonname = native.ai_canonname; }
+
+	return ret;
+}
+
+} // namespace
+
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo( const char* node_name, const char* service_name, const AddrInfo& hints ) noexcept
+{
+	::addrinfo* native_addr;
+	const auto  native_hint = to_native_hint( hints );
+	auto       res = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
+	if( res != 0 ) { return NonTrivialReturnValue<std::vector<AddrInfo>>( {static_cast<ErrorCode::Value_t>( res )} ); }
+
+	std::vector<AddrInfo> ret;
+	while (native_addr != nullptr) {
+		ret.push_back( from_native( *native_addr ) );
+		native_addr = native_addr->ai_next;
+	}
+
+	return NonTrivialReturnValue<std::vector<AddrInfo>>( std::move(ret) );
+}
+
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo(const char* node_name, const char* service_name, Domain addr_type) noexcept {
+	AddrInfo hint{};
+	hint.family = addr_type;
+	hint.flags  = AI_CANONNAME;
+	return getaddrinfo( node_name, service_name, hint );
+
+
+}
+
 } // namespace port_layer
 } // namespace socks
 } // namespace nw

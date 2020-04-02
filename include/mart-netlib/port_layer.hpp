@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <chrono>
 #include <errno.h>
+#include <vector>
 #include <array>
 
 namespace mart {
@@ -75,6 +76,9 @@ ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption opt
 
 ErrorCode get_last_socket_error() noexcept;
 bool      waInit() noexcept;
+
+NonTrivialReturnValue<std::vector<AddrInfo>> getaddrinfo(const char* node_name, const char* service_name, const AddrInfo& hints) noexcept;
+NonTrivialReturnValue<std::vector<AddrInfo>> getaddrinfo( const char* node_name, const char* service_name, Domain addr_type ) noexcept;
 
 ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept;
 ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept;
