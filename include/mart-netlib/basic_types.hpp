@@ -25,6 +25,8 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <string>
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 #ifndef MBA_UTILS_USE_WINSOCKS
@@ -352,6 +354,15 @@ struct SockaddrPolyWrapper : ISockaddrPolyWrapper {
 	SockAddrT addr;
 
 	const Sockaddr& to_Sockaddr() const override { return addr; }
+};
+
+struct AddrInfo {
+	int                                   flags;
+	Domain                                family;
+	TransportType                         socktype;
+	Protocol                              protocol;
+	std::unique_ptr<ISockaddrPolyWrapper> addr;
+	std::string                           canonname;
 };
 
 } // namespace socks
