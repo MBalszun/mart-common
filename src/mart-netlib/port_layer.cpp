@@ -256,24 +256,50 @@ bool waInit() noexcept
 int to_native( Domain domain ) noexcept
 {
 	switch( domain ) {
-		case mart::nw::socks::Domain::Invalid: return -1; break;
-		case mart::nw::socks::Domain::Local: return AF_UNIX; break;
-		case mart::nw::socks::Domain::Inet: return AF_INET; break;
-		case mart::nw::socks::Domain::Inet6: return AF_INET6; break;
+		case mart::nw::socks::Domain::Invalid: return -1;
+		case mart::nw::socks::Domain::Local: return AF_UNIX;
+		case mart::nw::socks::Domain::Inet: return AF_INET;
+		case mart::nw::socks::Domain::Inet6: return AF_INET6;
+		case mart::nw::socks::Domain::Unspec: return AF_UNSPEC;
 	}
 	assert( false );
 	return -1;
 }
 
+Domain from_native_domain( int domain ) noexcept
+{
+	switch( domain ) {
+		case -1: return mart ::nw::socks::Domain::Invalid;
+		case AF_UNIX: return mart::nw::socks::Domain::Local;
+		case AF_INET: return mart::nw::socks::Domain::Inet;
+		case AF_INET6: return mart::nw::socks::Domain::Inet6;
+		case AF_UNSPEC: return mart::nw::socks::Domain::Unspec;
+	}
+	assert( false );
+	return mart ::nw::socks::Domain::Invalid;
+}
+
 int to_native( TransportType transport_type ) noexcept
 {
 	switch( transport_type ) {
-		case mart::nw::socks::TransportType::Stream: return SOCK_STREAM; break;
-		case mart::nw::socks::TransportType::Datagram: return SOCK_DGRAM; break;
-		case mart::nw::socks::TransportType::Seqpacket: return SOCK_SEQPACKET; break;
+		case mart::nw::socks::TransportType::Stream: return SOCK_STREAM;
+		case mart::nw::socks::TransportType::Datagram: return SOCK_DGRAM;
+		case mart::nw::socks::TransportType::Seqpacket: return SOCK_SEQPACKET;
+		case mart::nw::socks::TransportType::Invalid: return 0;
 	}
 	assert( false );
 	return -1;
+}
+
+TransportType from_native_transport_type( int transport_type ) noexcept
+{
+	switch( transport_type ) {
+		case SOCK_STREAM: return mart::nw::socks::TransportType::Stream;
+		case SOCK_DGRAM: return mart::nw::socks::TransportType::Datagram;
+		case SOCK_SEQPACKET: return mart::nw::socks::TransportType::Seqpacket;
+	}
+	assert( false );
+	return mart::nw::socks::TransportType::Invalid;
 }
 
 int to_native( Protocol protocol ) noexcept
@@ -285,6 +311,17 @@ int to_native( Protocol protocol ) noexcept
 	}
 	assert( false );
 	return static_cast<int>( protocol );
+}
+
+Protocol from_native_protocol( int protocol ) noexcept
+{
+	switch( protocol ) {
+		case 0: return mart::nw::socks::Protocol::Default;
+		case IPPROTO_UDP: return mart::nw::socks::Protocol::Udp;
+		case IPPROTO_TCP: return mart::nw::socks::Protocol::Tcp;
+	}
+	assert( false );
+	return static_cast<Protocol>( protocol );
 }
 
 namespace {

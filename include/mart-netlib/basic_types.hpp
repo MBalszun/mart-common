@@ -182,9 +182,11 @@ enum class Domain {
 	Local,
 	Inet,
 	Inet6,
+	Unspec,
 };
 
 enum class TransportType {
+	Invalid,
 	Stream,
 	Datagram,
 	Seqpacket,
@@ -237,7 +239,7 @@ enum class ErrorCodeValues : int {
 	TryAgain        = EAGAIN,
 	InvalidArgument = EINVAL,
 	WouldBlock      = EWOULDBLOCK,
-	Timeout         = 10060, // Windows
+	Timeout         = 10060,     // Windows
 	WsaeConnReset   = 0x00002746 // Windows WSAECONNRESET ECONNRESET
 
 };
@@ -263,7 +265,7 @@ struct ReturnValue {
 	}
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
-		: _errc(errc)
+		: _errc( errc )
 		, _success{false}
 	{
 	}
