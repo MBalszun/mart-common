@@ -341,9 +341,11 @@ private:
 };
 
 struct ISockaddrPolyWrapper {
-	virtual ~ISockaddrPolyWrapper()             = default;
+	virtual ~ISockaddrPolyWrapper() = default;
+
 	virtual const Sockaddr& to_Sockaddr() const = 0;
-							operator const Sockaddr&() const { return to_Sockaddr(); };
+
+	operator const Sockaddr&() const { return to_Sockaddr(); };
 };
 
 template<class SockAddrT>
@@ -353,9 +355,10 @@ struct SockaddrPolyWrapper : ISockaddrPolyWrapper {
 	{
 	}
 
+	const Sockaddr& to_Sockaddr() const override { return addr; }
+
 	SockAddrT addr;
 
-	const Sockaddr& to_Sockaddr() const override { return addr; }
 };
 
 struct AddrInfo {
