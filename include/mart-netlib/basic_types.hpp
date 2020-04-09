@@ -382,6 +382,13 @@ struct AddrInfo {
 	std::string                           canonname;
 };
 
+struct AddrInfoHints {
+	int           flags;
+	Domain        family;
+	TransportType socktype;
+	Protocol      protocol;
+};
+
 } // namespace socks
 
 } // namespace nw

@@ -267,17 +267,18 @@ int to_native( Domain domain ) noexcept
 	return -1;
 }
 
-Domain from_native_domain( int domain ) noexcept
+mart ::nw::socks::ReturnValue<mart ::nw::socks::Domain> from_native_domain( int domain ) noexcept
 {
+	using RType = mart ::nw::socks::ReturnValue<mart::nw::socks::Domain>;
 	switch( domain ) {
-		case -1: return mart ::nw::socks::Domain::Invalid;
-		case AF_UNIX: return mart::nw::socks::Domain::Local;
-		case AF_INET: return mart::nw::socks::Domain::Inet;
-		case AF_INET6: return mart::nw::socks::Domain::Inet6;
-		case AF_UNSPEC: return mart::nw::socks::Domain::Unspec;
+		case -1: return RType{mart ::nw::socks::Domain::Invalid};
+		case AF_UNIX: return RType{mart::nw::socks::Domain::Local};
+		case AF_INET: return RType{mart::nw::socks::Domain::Inet};
+		case AF_INET6: return RType{mart::nw::socks::Domain::Inet6};
+		case AF_UNSPEC: return RType{mart::nw::socks::Domain::Unspec};
 	}
 	assert( false );
-	return mart ::nw::socks::Domain::Invalid;
+	return RType{ErrorCodeValues::InvalidArgument};
 }
 
 int to_native( TransportType transport_type ) noexcept
@@ -292,15 +293,16 @@ int to_native( TransportType transport_type ) noexcept
 	return -1;
 }
 
-TransportType from_native_transport_type( int transport_type ) noexcept
+mart::nw::socks::ReturnValue<TransportType> from_native_transport_type( int transport_type ) noexcept
 {
+	using RType = mart ::nw::socks::ReturnValue<mart::nw::socks::TransportType>;
 	switch( transport_type ) {
-		case SOCK_STREAM: return mart::nw::socks::TransportType::Stream;
-		case SOCK_DGRAM: return mart::nw::socks::TransportType::Datagram;
-		case SOCK_SEQPACKET: return mart::nw::socks::TransportType::Seqpacket;
+		case SOCK_STREAM: return RType{mart::nw::socks::TransportType::Stream};
+		case SOCK_DGRAM: return RType{mart::nw::socks::TransportType::Datagram};
+		case SOCK_SEQPACKET: return RType{mart::nw::socks::TransportType::Seqpacket};
 	}
 	assert( false );
-	return mart::nw::socks::TransportType::Invalid;
+	return RType{ErrorCodeValues::InvalidArgument};
 }
 
 int to_native( Protocol protocol ) noexcept
@@ -314,15 +316,16 @@ int to_native( Protocol protocol ) noexcept
 	return static_cast<int>( protocol );
 }
 
-Protocol from_native_protocol( int protocol ) noexcept
+mart ::nw::socks::ReturnValue<mart::nw::socks::Protocol> from_native_protocol( int protocol ) noexcept
 {
+	using RType = mart::nw::socks::ReturnValue<mart::nw::socks::Protocol>;
 	switch( protocol ) {
-		case 0: return mart::nw::socks::Protocol::Default;
-		case IPPROTO_UDP: return mart::nw::socks::Protocol::Udp;
-		case IPPROTO_TCP: return mart::nw::socks::Protocol::Tcp;
+		case 0: return RType{mart::nw::socks::Protocol::Default};
+		case IPPROTO_UDP: return RType{mart::nw::socks::Protocol::Udp};
+		case IPPROTO_TCP: return RType{mart::nw::socks::Protocol::Tcp};
 	}
 	assert( false );
-	return static_cast<Protocol>( protocol );
+	return RType{ErrorCodeValues::InvalidArgument};
 }
 
 namespace {
@@ -650,6 +653,109 @@ const char* inet_net_to_pres( Domain af, const void* src, char* dst, size_t size
 	return inet_ntop( to_native( af ), src, dst, size );
 }
 
+const char* inet_net_to_pres( const ::sockaddr_in* src, char* dst, std::size_t size )
+{
+	auto res = ::inet_ntop( AF_INET, &src->sin_addr, dst, size );
+	if( res == nullptr ) { return nullptr; }
+	auto addrlen = std::strlen( dst );
+
+	auto portstr = std::to_string( mart::net::to_host_order( mart::net::uint16_net_t( src->sin_port ) ) );
+	if( addrlen + portstr.size() + 2 + 1 > size ) {
+		// can't append port if not enough space for ":", port string and null terminator
+		return dst;
+	}
+	std::strncat( dst, ":", 2 );
+	std::strncat( dst, portstr.c_str(), size - addrlen - 3 );
+	return dst;
+}
+
+const char* inet_net_to_pres( const ::sockaddr_in6* src, char* dst, std::size_t size )
+{
+	auto res = ::inet_ntop( AF_INET6, &src->sin6_addr, dst, size );
+	if( res == nullptr ) { return nullptr; }
+	auto addrlen = std::strlen( dst );
+
+	auto portstr = std::to_string( mart::net::to_host_order( mart::net::uint16_net_t( src->sin6_port ) ) );
+	if( addrlen + portstr.size() + 2 + 1 > size ) {
+		// can't append port if not enough space for ":", port string and null terminator
+		return dst;
+	}
+	std::strncat( dst, ":", 2 );
+	std::strncat( dst, portstr.c_str(), size - addrlen - 3 );
+	return dst;
+}
+
+const char* inet_net_to_pres( const ::sockaddr* src, char* dst, std::size_t size )
+{
+	auto res = from_native_domain( src->sa_family );
+
+	switch( res.value_or( mart::nw::socks::Domain::Invalid ) ) {
+		case mart::nw::socks::Domain::Inet: {
+			return inet_net_to_pres( reinterpret_cast<const ::sockaddr_in*>( src ), dst, size );
+		}
+		case mart::nw::socks::Domain::Inet6: {
+			return inet_net_to_pres( reinterpret_cast<const ::sockaddr_in6*>( src ), dst, size );
+		}
+		case mart::nw::socks::Domain::Local:
+			return std::strncpy( dst, reinterpret_cast<const ::sockaddr_un*>( src )->sun_path, size );
+
+		case mart::nw::socks::Domain::Invalid: break;
+		case mart::nw::socks::Domain::Unspec: break;
+	}
+
+	return "Invalid Domain for inet_net_to_pres";
+}
+
+std::string to_string( const ::sockaddr_in& addr )
+{
+	// address format: aaa.bbb.ccc.ddd:XXXXX\0
+	char buffer[4 * 4 + 5 + 1];
+
+	(void)::inet_ntop( AF_INET, &addr.sin_addr, buffer, sizeof( buffer ) );
+	std::strncat( buffer, ":", 1 );
+	auto portstr = std::to_string( mart::net::to_host_order( mart::net::uint16_net_t( addr.sin_port ) ) );
+	std::strncat( buffer, portstr.c_str(), sizeof( buffer ) - std::strlen( buffer ) - 1 );
+	return std::string( buffer );
+}
+
+std::string to_string( const ::sockaddr_in6& addr )
+{
+	// address format: aaaa:bbbb:cccc:dddd:eeee:ffff:gggg:hhhh:XXXXX\0
+	char buffer[8 * 5 + 5 + 1];
+	(void)::inet_ntop( AF_INET6, &addr.sin6_addr, buffer, sizeof( buffer ) );
+	std::strncat( buffer, ":", 1 );
+	auto portstr = std::to_string( mart::net::to_host_order( mart::net::uint16_net_t( addr.sin6_port ) ) );
+	std::strncat( buffer, portstr.c_str(), sizeof( buffer ) - std::strlen( buffer ) - 1 );
+	return std::string( buffer );
+}
+
+std::string to_string( const ::sockaddr_un& addr )
+{
+	return std::string( addr.sun_path );
+}
+
+std::string to_string( const Sockaddr& addr )
+{
+	const auto* native = addr.to_native_ptr();
+
+	switch( from_native_domain( native->sa_family ).value_or( mart::nw::socks::Domain::Invalid ) ) {
+		case mart::nw::socks::Domain::Inet: {
+			return to_string( *reinterpret_cast<const ::sockaddr_in*>( native ) );
+		}
+		case mart::nw::socks::Domain::Inet6: {
+			return to_string( *reinterpret_cast<const ::sockaddr_in6*>( native ) );
+		}
+		case mart::nw::socks::Domain::Local: {
+			return to_string( *reinterpret_cast<const ::sockaddr_un*>( native ) );
+		}
+
+		case mart::nw::socks::Domain::Invalid: break;
+		case mart::nw::socks::Domain::Unspec: break;
+	}
+
+	return "Invalid Domain for inet_net_to_pres";
+}
+
 int inet_pres_to_net( Domain af, const char* src, void* dst )
 {
 	return inet_pton( to_native( af ), src, dst );
@@ -667,17 +773,27 @@ namespace {
 	return ret;
 }
 
+::addrinfo to_native_hint( const AddrInfoHints& address_info ) noexcept
+{
+	::addrinfo ret{};
+	ret.ai_family   = port_layer::to_native( address_info.family );
+	ret.ai_socktype = port_layer::to_native( address_info.socktype );
+	ret.ai_protocol = port_layer::to_native( address_info.protocol );
+
+	return ret;
+}
+
 AddrInfo from_native( const ::addrinfo& native )
 {
 	AddrInfo ret{};
 
 	ret.flags    = native.ai_flags;
-	ret.family   = port_layer::from_native_domain( native.ai_family );
-	ret.socktype = port_layer::from_native_transport_type( native.ai_socktype );
-	ret.protocol = port_layer::from_native_protocol( native.ai_protocol );
+	ret.family   = port_layer::from_native_domain( native.ai_family ).value_or( Domain::Invalid );
+	ret.socktype = port_layer::from_native_transport_type( native.ai_socktype )
+					   .value_or( mart::net::socks::TransportType::Invalid );
+	ret.protocol = port_layer::from_native_protocol( native.ai_protocol ).value_or( Protocol::Default );
 
-	switch( from_native_domain( native.ai_addr->sa_family ) ) {
-
+	switch( from_native_domain( native.ai_addr->sa_family ).value_or( Domain::Invalid ) ) {
 		case Domain::Local:
 			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrUn>>( new SockaddrPolyWrapper<SockaddrUn>{
 				SockaddrUn( *reinterpret_cast<const ::sockaddr_un*>( native.ai_addr ) )} );
@@ -706,26 +822,43 @@ getaddrinfo( const char* node_name, const char* service_name, const AddrInfo& hi
 {
 	::addrinfo* native_addr;
 	const auto  native_hint = to_native_hint( hints );
-	auto       res = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
+	auto        res         = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
 	if( res != 0 ) { return NonTrivialReturnValue<std::vector<AddrInfo>>( {static_cast<ErrorCode::Value_t>( res )} ); }
 
 	std::vector<AddrInfo> ret;
-	while (native_addr != nullptr) {
+	while( native_addr != nullptr ) {
 		ret.push_back( from_native( *native_addr ) );
 		native_addr = native_addr->ai_next;
 	}
 
-	return NonTrivialReturnValue<std::vector<AddrInfo>>( std::move(ret) );
+	return NonTrivialReturnValue<std::vector<AddrInfo>>( std::move( ret ) );
 }
 
 NonTrivialReturnValue<std::vector<AddrInfo>>
-getaddrinfo(const char* node_name, const char* service_name, Domain addr_type) noexcept {
-	AddrInfo hint{};
-	hint.family = addr_type;
-	hint.flags  = AI_CANONNAME;
+getaddrinfo( const char* node_name, const char* service_name, const AddrInfoHints& hints ) noexcept
+{
+	::addrinfo* native_addr;
+	const auto  native_hint = to_native_hint( hints );
+	auto        res         = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
+	if( res != 0 ) { return NonTrivialReturnValue<std::vector<AddrInfo>>( {static_cast<ErrorCode::Value_t>( res )} ); }
+
+	std::vector<AddrInfo> ret;
+	while( native_addr != nullptr ) {
+		ret.push_back( from_native( *native_addr ) );
+		native_addr = native_addr->ai_next;
+	}
+
+	return NonTrivialReturnValue<std::vector<AddrInfo>>( std::move( ret ) );
+}
+
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo( const char* node_name, const char* service_name, Domain addr_type ) noexcept
+{
+	AddrInfoHints hint{};
+	hint.family   = addr_type;
+	hint.flags    = AI_CANONNAME;
+	hint.socktype = TransportType::Invalid; // allows for any
 	return getaddrinfo( node_name, service_name, hint );
-
-
 }
 
 } // namespace port_layer

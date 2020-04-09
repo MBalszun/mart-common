@@ -2,6 +2,8 @@
 
 #include <catch2/catch.hpp>
 
+#include <iostream>
+
 namespace pl    = mart::nw::socks::port_layer;
 namespace socks = mart::nw::socks;
 
@@ -35,4 +37,35 @@ TEST_CASE( "net_port-layer_check_function_implementation_exists" )
 	bind( s2, addr );
 	// CHECK( !listen( s2, 10 ) );
 	listen( s2, 10 );
+}
+
+TEST_CASE( "net_port-layer_getaddrinfo" )
+{
+	socks::AddrInfoHints hints{};
+	hints.flags    = 0;
+	hints.family   = socks::Domain::Unspec;
+	hints.socktype = socks::TransportType::Stream;
+
+	auto info1 = pl::getaddrinfo( "www.google.de", "https", hints );
+
+	CHECK( info1.success() );
+	auto& sockaddr_list = info1.value();
+
+	for( const auto& e : sockaddr_list ) {
+
+		char buffer[30]{};
+		pl::inet_net_to_pres( e.addr->to_Sockaddr().to_native_ptr(), buffer, sizeof( buffer ) );
+		std::cout << "Connecting to " << &( buffer[0] ) << std::endl;
+
+		std::cout << "Connecting to " << pl::to_string( e.addr->to_Sockaddr() ) << std::endl;
+
+		socks::ReturnValue<pl::handle_t> res = pl::socket( e.family, e.socktype, e.protocol );
+		CHECK( res.success() );
+		CHECK( res.value_or( pl::handle_t::Invalid ) != pl::handle_t::Invalid );
+
+		auto handle = res.value();
+
+		CHECK( pl::connect( handle, e.addr->to_Sockaddr() ).success() );
+		CHECK( pl::close_socket( handle ).success() );
+	}
 }
