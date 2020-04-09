@@ -1,4 +1,6 @@
 
+option(MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET "Build high level support for unix domain sockets (requires std::filesystem)" ON)
+
 if(MSVC)
 	string( REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
 	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
@@ -37,8 +39,15 @@ target_sources(mart-netlib
 	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/ip.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/udp.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unix.cpp
 )
+
+if(MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET)
+	target_sources(mart-netlib
+		PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/unix.cpp
+	)
+endif()
+
 target_include_directories( mart-netlib
 	PRIVATE
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

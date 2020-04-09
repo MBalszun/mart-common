@@ -1,6 +1,12 @@
 option(MART_NETLIB_TEST_UNIX_DOMAIN_SOCKS off)
 
 file(GLOB_RECURSE TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tests_*.cpp)
+
+if(NOT MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET)
+	message(STATUS "[MART-COMMON][NETLIB][TESTS] NOT Building tests for unix domain sockets (set MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET to enable them)")
+	list(REMOVE_ITEM TEST_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tests_unix.cpp)
+endif()
+
 add_executable(testing_mart-netlib
 	main.cpp
 	${TEST_SRC}
