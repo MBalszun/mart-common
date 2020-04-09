@@ -27,6 +27,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility> // move
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 #ifndef MBA_UTILS_USE_WINSOCKS

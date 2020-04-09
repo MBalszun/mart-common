@@ -53,4 +53,4 @@ target_include_directories( mart-netlib
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 target_compile_features( mart-netlib PRIVATE cxx_std_17 )
-target_link_libraries( mart-netlib PRIVATE Mart::common Mart::netlib-portlayer)
+#target_link_libraries( mart-netlib PRIVATE Mart::common Mart::netlib-portlayer)
