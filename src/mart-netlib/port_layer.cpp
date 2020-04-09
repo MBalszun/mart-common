@@ -50,11 +50,11 @@
 #include <arpa/inet.h>
 #include <cerrno>
 #include <fcntl.h>
+#include <netdb.h> //addrinfo
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h> //close
-#include <netdb.h>	//addrinfo
 #endif
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -599,7 +599,7 @@ const ::sockaddr_in6& SockaddrIn6::native() const noexcept
 	return *MBA_LAUNDER( reinterpret_cast<::sockaddr_in6*>( _storage.raw_bytes ) );
 }
 
-std::array<std::uint8_t,16> SockaddrIn6::address() const noexcept
+std::array<std::uint8_t, 16> SockaddrIn6::address() const noexcept
 {
 	std::array<std::uint8_t, 16> ret;
 	std::memcpy( ret.data(), native().sin6_addr.s6_addr, 16 );

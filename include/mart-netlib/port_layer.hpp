@@ -16,11 +16,11 @@
 
 #include "basic_types.hpp"
 
+#include <array>
 #include <cerrno>
 #include <chrono>
 #include <errno.h>
 #include <vector>
-#include <array>
 
 namespace mart {
 namespace nw {
@@ -143,14 +143,14 @@ struct SockaddrIn6 : mart::nw::socks::Sockaddr {
 		return *this;
 	}
 
-	const ::sockaddr_in6& native() const noexcept;
-	::sockaddr_in6& native() noexcept;
+	const ::sockaddr_in6&        native() const noexcept;
+	::sockaddr_in6&              native() noexcept;
 	std::array<std::uint8_t, 16> address() const noexcept;
 
 	explicit SockaddrIn6( const ::sockaddr_in6& native );
 
 private:
-	// this should have the same size and alignment as the platform's SockaddrIn
+	// this should have the same size and alignment as the platform's SockaddrIn6
 	struct alignas( 8 ) Storage {
 		char raw_bytes[32];
 	};
