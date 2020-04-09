@@ -16,9 +16,11 @@
 
 #include "basic_types.hpp"
 
+#include <array>
 #include <cerrno>
 #include <chrono>
 #include <errno.h>
+#include <vector>
 
 namespace mart {
 namespace nw {
@@ -48,7 +50,11 @@ int to_native( Domain domain ) noexcept;
 int to_native( TransportType transport_Type ) noexcept;
 int to_native( Protocol protocol ) noexcept;
 
-// Wrapper functions for socket related functions, that are specific to a certain platform
+// Conversion from native value to mart enum - if no  equivalent enum value exists,
+// The return value is constructed from ErrorCodeValues::InvalidArgument is returned
+ReturnValue<Domain>        from_native_domain( int domain ) noexcept;
+ReturnValue<TransportType> from_native_transport_type( int transport_type ) noexcept;
+ReturnValue<Protocol>      from_native_protocol( int protocol ) noexcept;
 
 /* ################################################################################ */
 /* ############# Wrapper around native socket API ################################# */
@@ -74,6 +80,13 @@ ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption opt
 
 ErrorCode get_last_socket_error() noexcept;
 bool      waInit() noexcept;
+
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo( const char* node_name, const char* service_name, const AddrInfo& hints ) noexcept;
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo( const char* node_name, const char* service_name, const AddrInfoHints& hints ) noexcept;
+NonTrivialReturnValue<std::vector<AddrInfo>>
+getaddrinfo( const char* node_name, const char* service_name, Domain addr_type ) noexcept;
 
 ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::microseconds timeout ) noexcept;
 ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction direction ) noexcept;
@@ -138,10 +151,14 @@ struct SockaddrIn6 : mart::nw::socks::Sockaddr {
 		return *this;
 	}
 
+	const ::sockaddr_in6&        native() const noexcept;
+	::sockaddr_in6&              native() noexcept;
+	std::array<std::uint8_t, 16> address() const noexcept;
+
 	explicit SockaddrIn6( const ::sockaddr_in6& native );
 
 private:
-	// this should have the same size and alignment as the platform's SockaddrIn
+	// this should have the same size and alignment as the platform's SockaddrIn6
 	struct alignas( 8 ) Storage {
 		char raw_bytes[32];
 	};
@@ -190,8 +207,12 @@ private:
 	}
 };
 
-const char* inet_net_to_pres( mart::nw::socks::Domain af, const void* src, char* dst, size_t size );
-int         inet_pres_to_net( mart::nw::socks::Domain af, const char* src, void* dst );
+const char* inet_net_to_pres( mart::nw::socks::Domain af, const void* src, char* dst, size_t size ); // inet_ntop
+const char* inet_net_to_pres( const ::sockaddr* src, char* dst, size_t size );                       // inet_ntop
+int         inet_pres_to_net( mart::nw::socks::Domain af, const char* src, void* dst );              // inet_pton
+
+std::string to_string( const Sockaddr& addr );
+
 } // namespace port_layer
 } // namespace socks
 

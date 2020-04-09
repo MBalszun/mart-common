@@ -25,6 +25,8 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <string>
 #include <utility> // move
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
@@ -181,9 +183,11 @@ enum class Domain {
 	Local,
 	Inet,
 	Inet6,
+	Unspec,
 };
 
 enum class TransportType {
+	Invalid,
 	Stream,
 	Datagram,
 	Seqpacket,
@@ -236,10 +240,10 @@ enum class ErrorCodeValues : int {
 	TryAgain        = EAGAIN,
 	InvalidArgument = EINVAL,
 	WouldBlock      = EWOULDBLOCK,
-	Timeout         = 10060, // Windows
+	Timeout         = 10060,     // Windows
 	WsaeConnReset   = 0x00002746 // Windows WSAECONNRESET ECONNRESET
-
 };
+
 struct ErrorCode {
 	// TODO list more error codes
 	using Value_t = ErrorCodeValues;
@@ -262,14 +266,23 @@ struct ReturnValue {
 	}
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
-		: _errc(errc)
+		: _errc( errc )
 		, _success{false}
 	{
 	}
-	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
-	constexpr bool      success() const noexcept { return _success; }
-	constexpr explicit  operator bool() const noexcept { return success(); }
-	constexpr T         value() const noexcept { return _value; }
+
+	constexpr explicit ReturnValue( ErrorCodeValues errc ) noexcept
+		: _errc{errc}
+		, _success{false}
+	{
+	}
+
+	constexpr bool     success() const noexcept { return _success; }
+	constexpr explicit operator bool() const noexcept { return success(); }
+
+	constexpr T value() const noexcept { return _value; }
+	constexpr T value_or( const T& default_value ) const { return _success ? value() : default_value; }
+
 	constexpr ErrorCode error_code() const noexcept
 	{
 		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
@@ -303,6 +316,7 @@ struct NonTrivialReturnValue {
 		, _success{true}
 	{
 	}
+
 	constexpr explicit NonTrivialReturnValue( T&& value ) noexcept
 		: _value{std::move( value )}
 		, _success{true}
@@ -314,10 +328,13 @@ struct NonTrivialReturnValue {
 		, _success{false}
 	{
 	}
-	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
-	constexpr bool      success() const noexcept { return _success; }
-	constexpr explicit  operator bool() const noexcept { return success(); }
-	constexpr const T&  value() const noexcept { return _value; }
+
+	constexpr bool     success() const noexcept { return _success; }
+	constexpr explicit operator bool() const noexcept { return success(); }
+
+	constexpr const T& value() const noexcept { return _value; }
+	T&                 value() noexcept { return _value; } // can't be constexpr in c++11
+
 	constexpr ErrorCode error_code() const noexcept
 	{
 		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
@@ -338,9 +355,11 @@ private:
 };
 
 struct ISockaddrPolyWrapper {
-	virtual ~ISockaddrPolyWrapper()             = default;
+	virtual ~ISockaddrPolyWrapper() = default;
+
 	virtual const Sockaddr& to_Sockaddr() const = 0;
-							operator const Sockaddr&() const { return to_Sockaddr(); };
+
+	operator const Sockaddr&() const { return to_Sockaddr(); };
 };
 
 template<class SockAddrT>
@@ -350,9 +369,25 @@ struct SockaddrPolyWrapper : ISockaddrPolyWrapper {
 	{
 	}
 
-	SockAddrT addr;
-
 	const Sockaddr& to_Sockaddr() const override { return addr; }
+
+	SockAddrT addr;
+};
+
+struct AddrInfo {
+	int                                   flags;
+	Domain                                family;
+	TransportType                         socktype;
+	Protocol                              protocol;
+	std::unique_ptr<ISockaddrPolyWrapper> addr;
+	std::string                           canonname;
+};
+
+struct AddrInfoHints {
+	int           flags;
+	Domain        family;
+	TransportType socktype;
+	Protocol      protocol;
 };
 
 } // namespace socks
