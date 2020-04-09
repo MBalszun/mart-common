@@ -275,10 +275,13 @@ struct ReturnValue {
 		, _success{false}
 	{
 	}
-	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
-	constexpr bool      success() const noexcept { return _success; }
-	constexpr explicit  operator bool() const noexcept { return success(); }
-	constexpr T         value() const noexcept { return _value; }
+
+	constexpr bool     success() const noexcept { return _success; }
+	constexpr explicit operator bool() const noexcept { return success(); }
+
+	constexpr T value() const noexcept { return _value; }
+	constexpr T value_or( const T& default_value ) const { return _success ? value() : default_value; }
+
 	constexpr ErrorCode error_code() const noexcept
 	{
 		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
@@ -312,6 +315,7 @@ struct NonTrivialReturnValue {
 		, _success{true}
 	{
 	}
+
 	constexpr explicit NonTrivialReturnValue( T&& value ) noexcept
 		: _value{std::move( value )}
 		, _success{true}
@@ -324,11 +328,11 @@ struct NonTrivialReturnValue {
 	{
 	}
 
-	constexpr bool      success() const noexcept { return _success; }
-	constexpr explicit  operator bool() const noexcept { return success(); }
+	constexpr bool     success() const noexcept { return _success; }
+	constexpr explicit operator bool() const noexcept { return success(); }
 
-	constexpr const T&  value() const noexcept { return _value; }
-	T&                  value() noexcept { return _value; } // can't be constexpr in c++11
+	constexpr const T& value() const noexcept { return _value; }
+	T&                 value() noexcept { return _value; } // can't be constexpr in c++11
 
 	constexpr ErrorCode error_code() const noexcept
 	{
