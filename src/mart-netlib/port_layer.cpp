@@ -647,20 +647,12 @@ std::size_t SockaddrUn::length() const noexcept
 
 const char* inet_net_to_pres( Domain af, const void* src, char* dst, size_t size )
 {
-#ifdef MBA_UTILS_USE_WINSOCKS // detect windows os - use other guards if necessary
-	return InetNtop( to_native( af ), src, dst, size );
-#else
 	return inet_ntop( to_native( af ), src, dst, size );
-#endif
 }
 
 int inet_pres_to_net( Domain af, const char* src, void* dst )
 {
-#ifdef MBA_UTILS_USE_WINSOCKS // detect windows os - use other guards if necessary
-	return InetPton( to_native( af ), src, dst );
-#else
 	return inet_pton( to_native( af ), src, dst );
-#endif
 }
 
 namespace {
