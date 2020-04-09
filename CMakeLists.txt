@@ -57,7 +57,7 @@ if( MART_COMMON_INCLUDE_NET_LIB )
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	)
 
-	target_link_libraries( mart-netlib INTERFACE Mart::common Mart::netlib-portlayer)
+	target_link_libraries( mart-netlib PUBLIC Mart::common Mart::netlib-portlayer)
 	target_compile_features( mart-netlib INTERFACE cxx_std_17 )
 	add_subdirectory( src/mart-netlib )
 
