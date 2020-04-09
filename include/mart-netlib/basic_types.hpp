@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
+#include <utility> // move
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 #ifndef MBA_UTILS_USE_WINSOCKS
