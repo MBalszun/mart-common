@@ -53,19 +53,19 @@ TEST_CASE( "net_port-layer_getaddrinfo" )
 
 	for( const auto& e : sockaddr_list ) {
 
-		char buffer[30]{};
-		pl::inet_net_to_pres( e.addr->to_Sockaddr().to_native_ptr(), buffer, sizeof( buffer ) );
-		std::cout << "Connecting to " << &( buffer[0] ) << std::endl;
-
-		std::cout << "Connecting to " << pl::to_string( e.addr->to_Sockaddr() ) << std::endl;
-
 		socks::ReturnValue<pl::handle_t> res = pl::socket( e.family, e.socktype, e.protocol );
 		CHECK( res.success() );
-		CHECK( res.value_or( pl::handle_t::Invalid ) != pl::handle_t::Invalid );
-
 		auto handle = res.value();
 
-		CHECK( pl::connect( handle, e.addr->to_Sockaddr() ).success() );
+		std::cout << "Connecting to (to_string)       : " << pl::to_string( e.addr->to_Sockaddr() ) << std::endl;
+
+		char buffer[30]{};
+		pl::inet_net_to_pres( e.addr->to_Sockaddr().to_native_ptr(), buffer, sizeof( buffer ) );
+		std::cout << "Connecting to (inet_net_to_pres): " << &( buffer[0] ) << std::endl;
+
+		auto con_res = pl::connect( handle, e.addr->to_Sockaddr() );
+		if( !con_res.success() ) { std::cout << "Failed with error code: " << con_res.raw_value() << std::endl; }
+
 		CHECK( pl::close_socket( handle ).success() );
 	}
 }
