@@ -241,8 +241,8 @@ enum class ErrorCodeValues : int {
 	WouldBlock      = EWOULDBLOCK,
 	Timeout         = 10060,     // Windows
 	WsaeConnReset   = 0x00002746 // Windows WSAECONNRESET ECONNRESET
-
 };
+
 struct ErrorCode {
 	// TODO list more error codes
 	using Value_t = ErrorCodeValues;
@@ -266,6 +266,12 @@ struct ReturnValue {
 
 	constexpr explicit ReturnValue( ErrorCode errc ) noexcept
 		: _errc( errc )
+		, _success{false}
+	{
+	}
+
+	constexpr explicit ReturnValue( ErrorCodeValues errc ) noexcept
+		: _errc{errc}
 		, _success{false}
 	{
 	}
@@ -317,10 +323,13 @@ struct NonTrivialReturnValue {
 		, _success{false}
 	{
 	}
-	constexpr T         value_or( const T& default_value ) const { return _success ? value() : default_value; }
+
 	constexpr bool      success() const noexcept { return _success; }
 	constexpr explicit  operator bool() const noexcept { return success(); }
+
 	constexpr const T&  value() const noexcept { return _value; }
+	T&                  value() noexcept { return _value; } // can't be constexpr in c++11
+
 	constexpr ErrorCode error_code() const noexcept
 	{
 		return _success ? ErrorCode{ErrorCode::Value_t::NoError} : _errc;
@@ -358,7 +367,6 @@ struct SockaddrPolyWrapper : ISockaddrPolyWrapper {
 	const Sockaddr& to_Sockaddr() const override { return addr; }
 
 	SockAddrT addr;
-
 };
 
 struct AddrInfo {
