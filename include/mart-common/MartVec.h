@@ -53,6 +53,25 @@ using Vec4D = Vec<T, 4>;
 template<class T, int N>
 using Matrix = Vec<Vec<T, N>, N>; // each vector is a row
 
+namespace _impl_mart_vec {
+
+template<int K, class T, int N, int... I>
+[[nodiscard]] constexpr Vec<T, K> toKDim_helper( const Vec<T, N>& base, std::integer_sequence<int, I...> )
+{
+#ifndef _MSC_VER
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif // ! _MSC_VER
+
+	return Vec<T, K>{( base )[I]...};
+
+#ifndef _MSC_VER
+#pragma GCC diagnostic pop
+#endif // ! _MSC_VER
+}
+
+} // namespace _vec_impl
+
 /*################# Vec class implementation ######################*/
 template<class T, int N>
 struct Vec {
@@ -114,14 +133,10 @@ struct Vec {
 	template<int K>
 	[[nodiscard]] constexpr Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
-	}
-
-private:
-	template<int K, int... I>
-	[[nodiscard]] Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
-	{
-		return Vec<T, K>{( *this )[I]...};
+		// C++20:
+		// return [this]<int... I>( std::integer_sequence<int, I...> ) { return Vec<T, K>{( *this )[I]...}; }
+		//( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
+		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 };
 
@@ -188,16 +203,13 @@ struct Vec<T, 2> {
 	// if K<=N, the first K values are copied
 	// if K>N, all values are copied and the remaining values are zero-initialized
 	template<int K>
-	[[nodiscard]] Vec<T, K> toKDim() const
+	[[nodiscard]] constexpr Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
-	}
+		// C++20:
+		// return [this]<int... I>( std::integer_sequence<int, I...> ) { return Vec<T, K>{( *this )[I]...}; }
+		//( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 
-private:
-	template<int K, int... I>
-	Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
-	{
-		return Vec<T, K>{( *this )[I]...};
+		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 };
 
@@ -269,16 +281,9 @@ struct Vec<T, 3> {
 	// if K<=N, the first K values are copied
 	// if K>N, all values are copied and the remaining values are zero-initialized
 	template<int K>
-	[[nodiscard]] Vec<T, K> toKDim() const
+	[[nodiscard]] constexpr Vec<T, K> toKDim() const
 	{
-		return toKDim_helper<K>( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
-	}
-
-private:
-	template<int K, int... I>
-	[[nodiscard]] constexpr Vec<T, K> toKDim_helper( std::integer_sequence<int, I...> ) const
-	{
-		return Vec<T, K>{( *this )[I]...};
+		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
 };
 

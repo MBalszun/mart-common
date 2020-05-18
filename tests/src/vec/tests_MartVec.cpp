@@ -248,7 +248,19 @@ constexpr bool check_constexpr_operator_availability()
 	static_assert( std::is_trivial_v<mart::Vec<T, N>> || !std::is_trivial_v<T>, "mart::Vec is not a trivial type" );
 
 	constexpr auto                  v1 = generate1<T, N>();
-	[[maybe_unused]] constexpr auto t  = v1.squareNorm();
+	[[maybe_unused]] constexpr auto t1 = v1.squareNorm();
+	[[maybe_unused]] constexpr auto t2  = v1.template toKDim<1>();
+	[[maybe_unused]] constexpr auto t3  = v1.template toKDim<2>();
+	[[maybe_unused]] constexpr auto t4  = v1.template toKDim<3>();
+	[[maybe_unused]] constexpr auto t5  = v1.template toKDim<4>();
+	[[maybe_unused]] constexpr auto t6  = v1.template toKDim<5>();
+	[[maybe_unused]] constexpr auto t7  = v1.template toKDim<6>();
+	[[maybe_unused]] constexpr auto t8  = v1.template toKDim<7>();
+	[[maybe_unused]] constexpr auto t9  = v1.template toKDim<8>();
+	[[maybe_unused]] constexpr auto t10  = v1.template toKDim<9>();
+	[[maybe_unused]] constexpr auto t11  = v1.template toKDim<10>();
+	[[maybe_unused]] constexpr auto t12  = v1.template toKDim<11>();
+	[[maybe_unused]] constexpr auto t13  = v1.template toKDim<12>();
 	return true;
 }
 
