@@ -239,3 +239,22 @@ TEST_CASE( "upper_bound_of_compare_mart_output_to_std_output", "[algorithm][uppe
 		}
 	}
 }
+
+TEST_CASE("min_max_element", "[algorithm][min_max_element]") {
+	const int data[] = { 0, 1, 2, 3, -1, 4, 5, 6, 7, 8, 9 };
+
+	const auto regular_min = &data[4];
+	CHECK(mart::min_element(data) == regular_min);
+
+	const auto regular_max = std::end(data)-1;
+	CHECK( mart::max_element( data ) == regular_max );
+
+	const auto make_odd_negative = []( int i ) { return (1+(i % 2)*-2)*i; };
+
+	const auto odd_min = std::end( data ) - 1;	 // 9
+	CHECK( mart::min_element( data , make_odd_negative ) == odd_min );
+
+	const auto odd_max = std::end( data ) - 2;	 // 8
+	CHECK( mart::max_element( data, make_odd_negative ) == odd_max );
+
+}

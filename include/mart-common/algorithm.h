@@ -116,13 +116,13 @@ auto find_last_if( C&& c, UnaryPredicate p ) -> decltype( c.begin() )
 template<class C, class V>
 auto find_ex( C&& c, const V& value ) -> mart::EndAwareIterator<decltype( c.begin() )>
 {
-	return {std::find( c.begin(), c.end(), value ), c};
+	return { std::find( c.begin(), c.end(), value ), c };
 }
 
 template<class C, class UnaryPredicate>
 auto find_if_ex( C&& c, UnaryPredicate p ) -> mart::EndAwareIterator<decltype( c.begin() )>
 {
-	return {std::find_if( c.begin(), c.end(), p ), c};
+	return { std::find_if( c.begin(), c.end(), p ), c };
 }
 
 template<class C, class UnaryPredicate>
@@ -139,19 +139,19 @@ template<class C, class UnaryPredicate>
 auto wrapped_find_if_ex( C&& c, decltype( c.cbegin() ) start, UnaryPredicate p )
 	-> mart::EndAwareIterator<decltype( c.begin() )>
 {
-	return {wrapped_find_if( c, start, p ), c};
+	return { wrapped_find_if( c, start, p ), c };
 }
 
 template<class C1, class C2>
 auto find_first_of_ex( C1&& in1, C2&& in2 ) -> mart::EndAwareIterator<decltype( std::begin( in1 ) )>
 {
-	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end() ), in1};
+	return { std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end() ), in1 };
 }
 
 template<class C1, class C2, class BinaryPredicate>
 auto find_first_of_ex( C1&& in1, C2&& in2, BinaryPredicate p ) -> mart::EndAwareIterator<decltype( std::begin( in1 ) )>
 {
-	return {std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p ), in1};
+	return { std::find_first_of( in1.begin(), in1.end(), in2.begin(), in2.end(), p ), in1 };
 }
 
 template<class C>
@@ -179,20 +179,6 @@ auto min_element( R&& range, Compare comp )
 	return std::min_element( begin( range ), end( range ), comp );
 }
 
-template<class R, class Projection>
-auto min_element( R&& range, const Projection pr ) -> decltype( pr( *std::begin( range ) ), std::begin( range ) )
-{
-	using std::begin;
-	using std::end;
-	if( begin( range ) == end( range ) ) { return end( range ); }
-	auto       it_min = begin( range );
-	const auto it_end = end( range );
-	for( auto it = it_min; it != it_end; ++it ) {
-		if( pr( *it ) < pr( *it_min ) ) { it_min = it; }
-	}
-	return it_min;
-}
-
 template<class R>
 auto max_element( R&& range ) -> decltype( std::begin( range ) )
 {
@@ -210,18 +196,43 @@ auto max_element( R&& range, Compare comp )
 	return std::max_element( begin( range ), end( range ), comp );
 }
 
-template<class R, class Projection>
-auto max_element( R&& range, Projection pr ) -> decltype( pr( *std::begin( range ) ), std::begin( range ) )
+
+template<class R, class Projection, class Cmp>
+auto min_max_element_pr_cmp_impl( R&& range, const Projection pr, const Cmp cmp )
+	-> decltype( cmp( pr( *std::begin( range ) ), pr( *std::begin( range ) ) ), std::begin( range ) )
 {
 	using std::begin;
 	using std::end;
-	if( begin( range ) == end( range ) ) { return end( range ); }
-	auto       it_max = begin( range );
 	const auto it_end = end( range );
-	for( auto it = it_max; it != it_end; ++it ) {
-		if( pr( *it ) > pr( *it_max ) ) { it_max = it; }
+	auto       it_min = begin( range );
+
+	if( it_min == it_end ) { return end( range ); }
+
+	auto min_val = pr( *it_min );
+
+	for( auto it = it_min; it != it_end; ++it ) {
+		const auto val = pr( *it );
+		if( cmp( val, min_val ) ) {
+			it_min  = it;
+			min_val = val;
+		}
 	}
-	return it_max;
+	return it_min;
+}
+
+template<class R, class Projection, class Cmp = std::less<>>
+auto min_element( R&& range, const Projection pr, const Cmp cmp = std::less<>{} )
+	-> decltype( cmp( pr( *std::begin( range ) ), pr( *std::begin( range ) ) ), std::begin( range ) )
+{
+	return ::mart::min_max_element_pr_cmp_impl( std::forward<R>( range ), pr, cmp );
+}
+
+
+template<class R, class Projection, class Cmp = std::greater<>>
+auto max_element( R&& range, const Projection pr, const Cmp cmp = std::greater<>{} )
+	-> decltype( cmp( pr( *std::begin( range ) ), pr( *std::begin( range ) ) ), std::begin( range ) )
+{
+	return ::mart::min_max_element_pr_cmp_impl( std::forward<R>( range ), pr, cmp );
 }
 
 template<class R>
@@ -328,28 +339,28 @@ template<class MTYPE, class VAL>
 std::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::EqualByMemberObjectHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
-	return {member, &value};
+	return { member, &value };
 }
 
 template<class MTYPE, class VAL>
 std::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::EqualByMemberFunctionHelper<MTYPE, VAL>>
 byMember( MTYPE member, const VAL& value )
 {
-	return {member, &value};
+	return { member, &value };
 }
 
 template<class MTYPE>
 std::enable_if_t<std::is_member_object_pointer<MTYPE>::value, _impl_algo::LessByMemberObjectHelper<MTYPE>>
 byMember( MTYPE member )
 {
-	return {member};
+	return { member };
 }
 
 template<class MTYPE>
 std::enable_if_t<std::is_member_function_pointer<MTYPE>::value, _impl_algo::LessByMemberFunctionHelper<MTYPE>>
 byMember( MTYPE member )
 {
-	return {member};
+	return { member };
 }
 } // namespace mart
 
