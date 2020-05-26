@@ -29,57 +29,57 @@ namespace mart {
 template<class T>
 class Pointer {
 public:
-	Pointer( T* p = nullptr )
+	constexpr Pointer( T* p = nullptr )
 		: ptr{p}
 	{
 	}
 	// operator T* const &() const { return ptr; }
 	// operator T*&() { return ptr; }
-	T*&       get() { return ptr; }
-	T* const& get() const { return ptr; }
+	constexpr T*& get() { return ptr; }
+	constexpr T* const& get() const { return ptr; }
 
-	T& operator*() const { return *ptr; }
-	T* operator->() const { return ptr; }
+	constexpr T& operator*() const { return *ptr; }
+	constexpr T* operator->() const { return ptr; }
 
-	Pointer& operator++()
+	constexpr Pointer& operator++()
 	{
 		++ptr;
 		return *this;
 	}
-	Pointer operator++( int ) { return ptr++; }
+	constexpr Pointer operator++( int ) { return ptr++; }
 
-	Pointer& operator--()
+	constexpr Pointer& operator--()
 	{
 		--ptr;
 		return *this;
 	}
-	Pointer operator--( int ) { return ptr--; }
+	constexpr Pointer operator--( int ) { return ptr--; }
 
-	Pointer& operator+=( std::ptrdiff_t diff )
+	constexpr Pointer& operator+=( std::ptrdiff_t diff )
 	{
 		ptr += diff;
 		return *this;
 	}
-	Pointer& operator-=( std::ptrdiff_t diff )
+	constexpr Pointer& operator-=( std::ptrdiff_t diff )
 	{
 		ptr -= diff;
 		return *this;
 	}
 
-	T& operator[]( std::ptrdiff_t diff ) const { return ptr + diff; }
+	constexpr T& operator[]( std::ptrdiff_t diff ) const { return ptr + diff; }
 
-	friend bool operator!=( Pointer l, Pointer r ) { return l.ptr != r.ptr; }
-	friend bool operator==( Pointer l, Pointer r ) { return l.ptr == r.ptr; }
-	friend bool operator<( Pointer l, Pointer r ) { return l.ptr < r.ptr; }
-	friend bool operator<=( Pointer l, Pointer r ) { return l.ptr <= r.ptr; }
-	friend bool operator>( Pointer l, Pointer r ) { return l.ptr > r.ptr; }
-	friend bool operator>=( Pointer l, Pointer r ) { return l.ptr >= r.ptr; }
+	friend constexpr bool operator!=( Pointer l, Pointer r ) { return l.ptr != r.ptr; }
+	friend constexpr bool operator==( Pointer l, Pointer r ) { return l.ptr == r.ptr; }
+	friend constexpr bool operator<( Pointer l, Pointer r ) { return l.ptr < r.ptr; }
+	friend constexpr bool operator<=( Pointer l, Pointer r ) { return l.ptr <= r.ptr; }
+	friend constexpr bool operator>( Pointer l, Pointer r ) { return l.ptr > r.ptr; }
+	friend constexpr bool operator>=( Pointer l, Pointer r ) { return l.ptr >= r.ptr; }
 
-	friend Pointer operator+( Pointer l, std::ptrdiff_t n ) { return l.ptr + n; }
-	friend Pointer operator+( std::ptrdiff_t n, Pointer l ) { return n + l.ptr; }
+	friend constexpr Pointer operator+( Pointer l, std::ptrdiff_t n ) { return l.ptr + n; }
+	friend constexpr Pointer operator+( std::ptrdiff_t n, Pointer l ) { return n + l.ptr; }
 
-	friend std::ptrdiff_t operator-( Pointer l, Pointer r ) { return l.ptr - r.ptr; }
-	friend Pointer        operator-( Pointer l, std::ptrdiff_t n ) { return l.ptr - n; }
+	friend constexpr std::ptrdiff_t operator-( Pointer l, Pointer r ) { return l.ptr - r.ptr; }
+	friend constexpr Pointer        operator-( Pointer l, std::ptrdiff_t n ) { return l.ptr - n; }
 
 private:
 	T* ptr;
@@ -96,51 +96,51 @@ public:
 	using reference         = const T&;
 	using iterator_category = std::random_access_iterator_tag;
 
-	IIterator( T value = T() )
+	constexpr IIterator( T value = T() )
 		: i{value} {};
 
-	reference operator*() const { return i; }
-	pointer   operator->() const { return &i; }
+	constexpr reference operator*() const { return i; }
+	constexpr pointer   operator->() const { return &i; }
 
-	IIterator& operator++()
+	constexpr IIterator& operator++()
 	{
 		++i;
 		return *this;
 	}
-	IIterator operator++( int ) { return IIterator{i++}; }
+	constexpr IIterator operator++( int ) { return IIterator{ i++ }; }
 
-	IIterator& operator--()
+	constexpr IIterator& operator--()
 	{
 		--i;
 		return *this;
 	}
-	IIterator operator--( int ) { return IIterator{i--}; }
+	constexpr IIterator operator--( int ) { return IIterator{ i-- }; }
 
-	IIterator& operator+=( difference_type diff )
+	constexpr IIterator& operator+=( difference_type diff )
 	{
 		i += diff;
 		return *this;
 	}
-	IIterator& operator-=( difference_type diff )
+	constexpr IIterator& operator-=( difference_type diff )
 	{
 		i -= diff;
 		return *this;
 	}
 
-	value_type operator[]( difference_type diff ) const { return i + diff; }
+	constexpr value_type operator[]( difference_type diff ) const { return i + diff; }
 
-	friend bool operator!=( IIterator l, IIterator r ) { return l.i != r.i; }
-	friend bool operator==( IIterator l, IIterator r ) { return l.i == r.i; }
-	friend bool operator<( IIterator l, IIterator r ) { return l.i < r.i; }
-	friend bool operator<=( IIterator l, IIterator r ) { return l.i <= r.i; }
-	friend bool operator>( IIterator l, IIterator r ) { return l.i > r.i; }
-	friend bool operator>=( IIterator l, IIterator r ) { return l.i >= r.i; }
+	friend constexpr bool operator!=( IIterator l, IIterator r ) { return l.i != r.i; }
+	friend constexpr bool operator==( IIterator l, IIterator r ) { return l.i == r.i; }
+	friend constexpr bool operator<( IIterator l, IIterator r ) { return l.i < r.i; }
+	friend constexpr bool operator<=( IIterator l, IIterator r ) { return l.i <= r.i; }
+	friend constexpr bool operator>( IIterator l, IIterator r ) { return l.i > r.i; }
+	friend constexpr bool operator>=( IIterator l, IIterator r ) { return l.i >= r.i; }
 
-	friend IIterator operator+( IIterator l, difference_type n ) { return l.i + n; }
-	friend IIterator operator+( difference_type n, IIterator l ) { return n + l.i; }
+	friend constexpr IIterator operator+( IIterator l, difference_type n ) { return l.i + n; }
+	friend constexpr IIterator operator+( difference_type n, IIterator l ) { return n + l.i; }
 
-	friend difference_type operator-( IIterator l, IIterator r ) { return l.i - r.i; }
-	friend IIterator       operator-( IIterator l, difference_type n ) { return l.i - n; }
+	friend constexpr difference_type operator-( IIterator l, IIterator r ) { return l.i - r.i; }
+	friend constexpr IIterator       operator-( IIterator l, difference_type n ) { return l.i - n; }
 
 private:
 	T i;
@@ -150,12 +150,12 @@ template<class IT>
 class EndAwareIterator : public IT {
 public:
 	template<class C>
-	EndAwareIterator( IT it, C&& c )
+	constexpr EndAwareIterator( IT it, C&& c )
 		: IT{it}
 		, _is_end{it == c.end()} {};
 
-	explicit operator bool() const { return !_is_end; }
-	bool     is_end() const { return _is_end; }
+	constexpr explicit operator bool() const { return !_is_end; }
+	constexpr bool     is_end() const { return _is_end; }
 
 private:
 	bool _is_end;
@@ -173,8 +173,8 @@ struct irange_t {
 	static_assert( std::is_integral<T>::value, "irange can only be used for integral values" );
 	using iterator = IIterator<T>;
 
-	iterator begin() const { return _start; };
-	iterator end() const { return _past_end; };
+	constexpr iterator begin() const { return _start; };
+	constexpr iterator end() const { return _past_end; };
 
 	iterator _start;
 	iterator _past_end;
@@ -202,13 +202,13 @@ struct has_random_it {
 } // namespace _impl_irange
 
 template<class T>
-_impl_irange::irange_t<T> irange( _impl_irange::non_deduced_t<T> start, T end )
+constexpr _impl_irange::irange_t<T> irange( _impl_irange::non_deduced_t<T> start, T end )
 {
 	return _impl_irange::irange_t<T>{start, end};
 }
 
 template<class T, class = std::enable_if_t<std::is_integral<T>::value>>
-_impl_irange::irange_t<T> irange( T end )
+constexpr _impl_irange::irange_t<T> irange( T end )
 {
 	return _impl_irange::irange_t<T>{0, end};
 }
@@ -217,13 +217,13 @@ template<class C,
 		 class IT = typename C::iterator,
 		 class    = std::enable_if_t<std::is_base_of<std::random_access_iterator_tag,
                                                    typename std::iterator_traits<IT>::iterator_category>::value>>
-_impl_irange::irange_t<typename C::size_type> irange( const C& container )
+constexpr _impl_irange::irange_t<typename C::size_type> irange( const C& container )
 {
 	return _impl_irange::irange_t<typename C::size_type>{0, container.size()};
 }
 
 template<class T, size_t N>
-_impl_irange::irange_t<size_t> irange( const T ( & )[N] )
+constexpr _impl_irange::irange_t<size_t> irange( const T ( & )[N] )
 {
 	return _impl_irange::irange_t<size_t>{0, N};
 }
