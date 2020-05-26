@@ -10,6 +10,7 @@ namespace socks = mart::nw::socks;
 // call ech function at least once to ensure the implementation is there
 TEST_CASE( "net_port-layer_check_function_implementation_exists" )
 {
+	CHECK( pl::startup() );
 	[[maybe_unused]] auto nh = pl::to_native( pl::handle_t::Invalid );
 	[[maybe_unused]] int  d  = pl::to_native( socks::Domain::Inet );
 	[[maybe_unused]] int  t  = pl::to_native( socks::TransportType::Datagram );
@@ -41,6 +42,7 @@ TEST_CASE( "net_port-layer_check_function_implementation_exists" )
 
 TEST_CASE( "net_port-layer_getaddrinfo" )
 {
+	CHECK( pl::startup() );
 	socks::AddrInfoHints hints{};
 	hints.flags    = 0;
 	hints.family   = socks::Domain::Unspec;
@@ -48,7 +50,9 @@ TEST_CASE( "net_port-layer_getaddrinfo" )
 
 	auto info1 = pl::getaddrinfo( "www.google.de", "https", hints );
 
+	if( !info1.success() ) { std::cout << "Error in getaddrinfo:" << info1.error_code().raw_value() << std::endl; }
 	CHECK( info1.success() );
+
 	auto& sockaddr_list = info1.value();
 
 	for( const auto& e : sockaddr_list ) {

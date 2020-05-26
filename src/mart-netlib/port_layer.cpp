@@ -207,13 +207,13 @@ ErrorCode set_blocking( handle_t socket, bool should_block ) noexcept
 	return get_appropriate_error_code( ret );
 }
 
-namespace {
 // TODO: throw exception on failure?
-void startup()
+bool startup()
 {
 	MART_NETLIB_PORT_LAYER_MAYBE_UNUSED const static bool isInit = port_layer::waInit();
+	return isInit;
 }
-} // namespace
+
 
 ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol ) noexcept
 {

@@ -81,6 +81,9 @@ ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption opt
 ErrorCode get_last_socket_error() noexcept;
 bool      waInit() noexcept;
 
+// TODO: throw exception on failure?
+bool startup();
+
 NonTrivialReturnValue<std::vector<AddrInfo>>
 getaddrinfo( const char* node_name, const char* service_name, const AddrInfo& hints ) noexcept;
 NonTrivialReturnValue<std::vector<AddrInfo>>
