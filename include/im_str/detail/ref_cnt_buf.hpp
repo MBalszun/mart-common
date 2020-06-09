@@ -4,9 +4,9 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <new>     // placement new
 #include <utility> // std::move
-#include <cstdlib>
 
 #ifndef IM_STR_USE_ALLOC
 	#if __has_include( <memory_resource>)
@@ -24,11 +24,11 @@ namespace mba::detail {
 #ifdef IM_STR_DEBUG_HOOKS
 inline namespace debug_version {
 struct Stats {
-	std::atomic_uint64_t total_cnt_accesses {0};
-	std::atomic_uint64_t total_allocs {0};
-	std::atomic_uint64_t current_allocs {0};
-	std::atomic_uint64_t inc_ref_cnt {0};
-	std::atomic_uint64_t dec_ref_cnt {0};
+	std::atomic_uint64_t total_cnt_accesses{ 0 };
+	std::atomic_uint64_t total_allocs{ 0 };
+	std::atomic_uint64_t current_allocs{ 0 };
+	std::atomic_uint64_t inc_ref_cnt{ 0 };
+	std::atomic_uint64_t dec_ref_cnt{ 0 };
 
 	void inc_ref() noexcept
 	{
@@ -50,7 +50,10 @@ struct Stats {
 
 	void dealloc() noexcept { current_allocs.fetch_sub( 1, std::memory_order_relaxed ); }
 
-	std::uint64_t get_total_cnt_accesses() const noexcept{ return total_cnt_accesses.load( std::memory_order_relaxed ); };
+	std::uint64_t get_total_cnt_accesses() const noexcept
+	{
+		return total_cnt_accesses.load( std::memory_order_relaxed );
+	};
 	std::uint64_t get_total_allocs() const noexcept { return total_allocs.load( std::memory_order_relaxed ); };
 	std::uint64_t get_current_allocs() const noexcept { return current_allocs.load( std::memory_order_relaxed ); };
 	std::uint64_t get_inc_ref_cnt() const noexcept { return inc_ref_cnt.load( std::memory_order_relaxed ); };
@@ -77,13 +80,13 @@ struct Stats {
 };
 #else
 struct Stats {
-	constexpr Stats() noexcept = default;
+	constexpr Stats() noexcept                     = default;
 	constexpr Stats( const Stats& other ) noexcept = default;
 
-	constexpr void inc_ref() noexcept {}
-	constexpr void dec_ref() noexcept {}
-	constexpr void alloc() noexcept {}
-	constexpr void dealloc() noexcept {}
+	constexpr void inc_ref() noexcept { }
+	constexpr void dec_ref() noexcept { }
+	constexpr void alloc() noexcept { }
+	constexpr void dealloc() noexcept { }
 	constexpr void reset() noexcept {};
 
 	constexpr std::uint64_t get_total_cnt_accesses() const noexcept { return 0; };
@@ -96,7 +99,7 @@ struct Stats {
 
 static Stats& stats()
 {
-	static Stats stats {};
+	static Stats stats{};
 	return stats;
 }
 
@@ -135,22 +138,22 @@ public:
 #else
 	using alloc_ptr_t = std::nullptr_t;
 #endif
-	/*#### Constructors and special member functions ######*/
+	/*vvvv Constructors and special member functions vvvvv*/
 	static AllocResult allocate_null_terminated_char_buffer( int size, alloc_ptr_t = nullptr );
 
 	constexpr atomic_ref_cnt_buffer() noexcept = default;
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t ) noexcept
-		: _cnt {other._cnt}
+		: _cnt{ other._cnt }
 	{
 	}
 
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other ) noexcept
-		: _cnt {other._cnt}
+		: _cnt{ other._cnt }
 	{
 		_incref();
 	}
 	constexpr atomic_ref_cnt_buffer( atomic_ref_cnt_buffer&& other ) noexcept
-		: _cnt {c_expr_exchange( other._cnt, nullptr )}
+		: _cnt{ c_expr_exchange( other._cnt, nullptr ) }
 	{
 	}
 
@@ -202,7 +205,8 @@ private:
 		size_type   size;
 		alloc_ptr_t alloc;
 	};
-	static_assert( sizeof( Header ) <= 4+4+sizeof(void*) ); // make sure there is no padding and we use 32bit integers
+	static_assert( sizeof( Header )
+				   <= 4 + 4 + sizeof( void* ) ); // make sure there is no padding and we use 32bit integers
 
 	// This is used in allocate_null_terminated_char_buffer
 	constexpr explicit atomic_ref_cnt_buffer( Header& buffer ) noexcept
@@ -246,23 +250,23 @@ inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( 
 	assert( size >= 0 );
 	stats().alloc();
 
-	const auto total_size       = sizeof( Header ) + size + 1;
+	const auto total_size = sizeof( Header ) + size + 1;
 
 #if IM_STR_USE_ALLOC
-	const bool bool_use_default = resource == nullptr;
-	char* const start = (char*)( bool_use_default                //
-									 ? std::malloc( total_size ) //
-									 : resource->allocate( total_size, alignment ) );
+	const bool  bool_use_default = ( resource == nullptr );
+	char* const start            = (char*)( bool_use_default                //
+                                     ? std::malloc( total_size ) //
+                                     : resource->allocate( total_size, alignment ) );
 #else
 	char* const start = (char*)std::malloc( total_size );
 #endif
 
-	auto* const header_ptr = new( start ) Header {Cnt_t {1}, size_type {size}, resource};
+	auto* const header_ptr = new( start ) Header{ Cnt_t{ 1 }, size_type{ size }, resource };
 
 	auto* const data_ptr = start + sizeof( Header ); // Start of string
 	data_ptr[size]       = '\0';                     // zero terminate
 
-	return {data_ptr, atomic_ref_cnt_buffer {*header_ptr}};
+	return { data_ptr, atomic_ref_cnt_buffer{ *header_ptr } };
 }
 
 inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )

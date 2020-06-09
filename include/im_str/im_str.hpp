@@ -45,7 +45,8 @@ public:
 #else
 	using DynArray_t = std::vector<im_str>;
 #endif
-	/* #################### CTORS ########################## */
+	/* #################### CTORS ################################################################################### */
+
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
@@ -254,7 +255,7 @@ protected:
 					  const detail::atomic_ref_cnt_buffer& data,
 					  detail::defer_ref_cnt_tag_t ) noexcept
 		: std::string_view( sv )
-		, _handle {data, detail::defer_ref_cnt_tag_t {}}
+		, _handle{ data, detail::defer_ref_cnt_tag_t{} }
 	{
 	}
 	/**
@@ -267,7 +268,7 @@ protected:
 	}
 
 protected:
-	Handle_t _handle {};
+	Handle_t _handle{};
 
 	friend void swap( im_str& l, im_str& r )
 	{
@@ -283,7 +284,7 @@ protected:
 	void _copy_from( const std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
 		if( other.data() == nullptr ) {
-			this->_as_strview() = std::string_view {""};
+			this->_as_strview() = std::string_view{ "" };
 			return;
 		}
 		// create buffer and copy data over
@@ -314,7 +315,7 @@ im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T&
 namespace detail {
 inline constexpr std::string_view getEmptyZeroTerminatedStringView() noexcept
 {
-	return std::string_view {""};
+	return std::string_view{ "" };
 }
 } // namespace detail
 
@@ -323,7 +324,7 @@ class im_zstr : public im_str {
 
 public:
 	constexpr im_zstr() noexcept
-		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag {} )
+		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag{} )
 	{
 	}
 	explicit im_zstr( std::string_view other )
@@ -398,7 +399,7 @@ inline im_zstr im_str::unshare() const
 inline im_zstr im_str::create_zstr() const&
 {
 	if( is_zero_terminated() ) {
-		return im_zstr {{*this}, is_zero_terminated_tag {}}; // just copy
+		return im_zstr{ { *this }, is_zero_terminated_tag{} }; // just copy
 	} else {
 		return unshare();
 	}
@@ -407,7 +408,7 @@ inline im_zstr im_str::create_zstr() const&
 inline im_zstr im_str::create_zstr() &&
 {
 	if( is_zero_terminated() ) {
-		return im_zstr {std::move( *this ), is_zero_terminated_tag {}}; // already zero terminated - just move
+		return im_zstr{ std::move( *this ), is_zero_terminated_tag{} }; // already zero terminated - just move
 	} else {
 		return unshare();
 	}
