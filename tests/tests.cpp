@@ -168,10 +168,16 @@ TEST_CASE( "Copy", "[im_str]" )
 		mba::im_str str1;
 		{
 			// no heap allocation
-			mba::im_str tcs = "Hello World";
+			mba::im_str tcs = "Hello World1";
 			str1            = tcs;
 		}
-		REQUIRE( str1 == "Hello World" );
+		REQUIRE( str1 == "Hello World1" );
+		{
+			// no heap allocation
+			mba::im_str tcs = "Hello World2";
+			str1            = std::move( tcs );
+		}
+		REQUIRE( str1 == "Hello World2" );
 
 		mba::im_str str2;
 		{
