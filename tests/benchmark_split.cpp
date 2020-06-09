@@ -12,7 +12,7 @@
 
 using namespace mba;
 
-std::vector<std::string> generate_random_strings(int cnt)
+std::vector<std::string> generate_random_strings( int cnt )
 {
 	std::vector<std::string> ret;
 
@@ -66,7 +66,7 @@ im_str run( const im_str::DynArray_t& strings, const std::vector<char>& split_ch
 		size_t i = 0;
 
 		for( auto&& s : cstrings ) {
-			static_assert( 0 < Algo && Algo < 2 , "No algorithm with that number available at the moment" );
+			static_assert( 0 < Algo && Algo < 2, "No algorithm with that number available at the moment" );
 			if constexpr( Algo == 1 ) {
 				tmp[i++] = s.split_full( split_char );
 			} /*else {
@@ -78,7 +78,6 @@ im_str run( const im_str::DynArray_t& strings, const std::vector<char>& split_ch
 
 	return concat( cstrings );
 }
-
 
 template<int Algo>
 // __declspec(noinline)
@@ -96,18 +95,15 @@ void test_algo( const im_str::DynArray_t& s, const std::vector<char>& split_char
 			auto end = steady_clock::now();
 			total += ( end - start );
 		}
-		std::cout << total / std::chrono::milliseconds{1} / 20 << std::endl;
+		std::cout << total / std::chrono::milliseconds{ 1 } / 20 << std::endl;
 	}
-
 }
-
-
 
 int main()
 {
-	const auto my_strings = generate_random_strings(200);
+	const auto my_strings = generate_random_strings( 200 );
 
-	const std::vector<char>   split_chars{' ', ':', '/', ';', ','};
+	const std::vector<char> split_chars{ ' ', ':', '/', ';', ',' };
 	im_str::DynArray_t      cstrings( my_strings.size() );
 
 	auto it = cstrings.begin();
@@ -118,15 +114,15 @@ int main()
 
 	test_algo<1>( cstrings, split_chars );
 	std::cout << "========================================================" << std::endl;
-	//test_algo<2>( cstrings, split_chars );
-	//std::cout << "========================================================" << std::endl;
-	//test_algo<3>( cstrings, split_chars );
-	//std::cout << "========================================================" << std::endl;
-	//test_algo<3>( cstrings, split_chars );
-	//std::cout << "========================================================" << std::endl;
-	//test_algo<2>( cstrings, split_chars );
-	//std::cout << "========================================================" << std::endl;
-	//test_algo<1>( cstrings, split_chars );
-	//std::cout << mba::detail::stats().get_total_allocs() << std::endl;
+	// test_algo<2>( cstrings, split_chars );
+	// std::cout << "========================================================" << std::endl;
+	// test_algo<3>( cstrings, split_chars );
+	// std::cout << "========================================================" << std::endl;
+	// test_algo<3>( cstrings, split_chars );
+	// std::cout << "========================================================" << std::endl;
+	// test_algo<2>( cstrings, split_chars );
+	// std::cout << "========================================================" << std::endl;
+	// test_algo<1>( cstrings, split_chars );
+	// std::cout << mba::detail::stats().get_total_allocs() << std::endl;
 	std::cout << "========================================================" << std::endl;
 }

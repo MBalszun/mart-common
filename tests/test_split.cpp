@@ -135,7 +135,7 @@ TEST_CASE( "Split Separator multi", "[im_str]" )
 
 TEST_CASE( "Split full", "[im_str]" )
 {
-	std::vector<im_str> ref {"Hello", "my", "dear!", "How", "are", "you?"};
+	std::vector<im_str> ref{ "Hello", "my", "dear!", "How", "are", "you?" };
 
 	std::string base = "Hello my dear! How are you?";
 	im_str      s( base );
@@ -148,7 +148,7 @@ TEST_CASE( "Split full", "[im_str]" )
 
 TEST_CASE( "Split_on_nonexisting_char", "[im_str]" )
 {
-	im_str ref {"Hello"};
+	im_str ref{ "Hello" };
 
 	{
 		auto [first, second] = ref.split_on_first( 'r', im_str::Split::Before );
@@ -169,7 +169,7 @@ TEST_CASE( "Split_on_nonexisting_char", "[im_str]" )
 
 TEST_CASE( "Split_empty_string", "[im_str]" )
 {
-	im_str ref {""};
+	im_str ref{ "" };
 
 	{
 		auto [first, second] = ref.split_on_first( 'r', im_str::Split::Before );
@@ -190,7 +190,7 @@ TEST_CASE( "Split_empty_string", "[im_str]" )
 
 TEST_CASE( "Split_on_last_char", "[im_str]" )
 {
-	im_str ref {"Hello"};
+	im_str ref{ "Hello" };
 
 	{
 		auto [first, second] = ref.split_on_first( 'o', im_str::Split::Before );
@@ -227,7 +227,7 @@ TEST_CASE( "Split_on_last_char", "[im_str]" )
 
 TEST_CASE( "Split_on_first_char", "[im_str]" )
 {
-	im_str ref {"Hello"};
+	im_str ref{ "Hello" };
 
 	{
 		auto [first, second] = ref.split_on_first( 'H', im_str::Split::Before );
@@ -261,6 +261,3 @@ TEST_CASE( "Split_on_first_char", "[im_str]" )
 		CHECK( second == "ello" );
 	}
 }
-
-
-

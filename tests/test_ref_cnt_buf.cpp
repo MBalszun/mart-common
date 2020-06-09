@@ -30,7 +30,7 @@ TEST_CASE( "ref_cnt_buf_default_construction_does_nothing", "[im_str]" )
 
 	detail::atomic_ref_cnt_buffer b1;
 
-	auto b2 = detail::atomic_ref_cnt_buffer {};
+	auto b2 = detail::atomic_ref_cnt_buffer{};
 	auto b3( b2 );
 
 #ifdef __clang__
@@ -39,7 +39,7 @@ TEST_CASE( "ref_cnt_buf_default_construction_does_nothing", "[im_str]" )
 #endif
 
 	// yes, we want to check self assignment here
-	//TODO: also check with non-default constructed buffers
+	// TODO: also check with non-default constructed buffers
 	b1 = b1;
 
 #ifdef __clang__
@@ -90,7 +90,7 @@ struct Foo {
 Foo foo()
 {
 	auto [data, handle] = detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( 14 );
-	return {std::move( handle ), 14, data};
+	return { std::move( handle ), 14, data };
 }
 } // namespace
 
