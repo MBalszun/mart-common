@@ -65,10 +65,23 @@ public:
 
 	struct trust_me_this_is_from_a_string_litteral_t {
 	};
-	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral {};
 
-	constexpr im_str( std::string_view other, trust_me_this_is_from_a_string_litteral_t ) noexcept
-		: std::string_view( other )
+	static constexpr trust_me_this_is_from_a_string_litteral_t trust_me_this_is_from_a_string_litteral{};
+
+	/**
+	 * @brief Create a im_str from a string_view referring to data with static lifetime.
+	 *
+	 * Usually, when creating im_str from a string_view, it will allocate
+	 * the necessary amount of memory on the heap and copy the data over.
+	 * data over
+	 *
+	 *
+	 * @param string
+	 * @param Tag type
+	 * @return
+	 */
+	constexpr im_str( std::string_view string, trust_me_this_is_from_a_string_litteral_t ) noexcept
+		: std::string_view( string )
 	{
 	}
 
@@ -77,25 +90,31 @@ public:
 	template<class T>
 	im_str( T const* const& other ) = delete;
 
-	/* ############### Special member functions ######################################## */
-	im_str( const im_str& other ) noexcept = default;
-	im_str& operator=( const im_str& other ) noexcept = default;
-
-	im_str( im_str&& other ) noexcept
-		: std::string_view( std::exchange( other._as_strview(), std::string_view {} ) )
+	/* ############### Special member functions ##################################################################### */
+	constexpr im_str( const im_str& other ) noexcept = default;
+	constexpr im_str( im_str&& other ) noexcept
+		: std::string_view( detail::c_expr_exchange( other._as_strview(), std::string_view{} ) )
 		, _handle( std::move( other._handle ) )
 	{
 	}
 
-	im_str& operator=( im_str&& other ) noexcept
+	// NOTE could be = defaulted in c++20 but needs to be written down explicitly in c++17 in order to be constexpr
+	constexpr im_str& operator=( const im_str& other ) noexcept
 	{
-		this->_as_strview() = std::exchange( other._as_strview(), std::string_view {} );
+		this->_handle                           = other._handle;
+		static_cast<std::string_view&>( *this ) = static_cast<const std::string_view&>( other );
+		return *this;
+	}
+
+	constexpr im_str& operator=( im_str&& other ) noexcept
+	{
+		this->_as_strview() = detail::c_expr_exchange( other._as_strview(), std::string_view{} );
 		_handle             = std::move( other._handle );
 		return *this;
 	}
 
-	/* ################## String functions  ################################# */
-	im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
+	/* ################## String functions  ######################################################################### */
+	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
 	{
 		im_str retval;
 		retval._as_strview() = this->_as_strview().substr( offset, count );
@@ -103,28 +122,37 @@ public:
 		return retval;
 	}
 
-	im_str substr( std::string_view range ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::string_view range ) const
 	{
-		assert( data() <= range.data() && range.data() + range.size() <= data() + size() );
+		// TODO: structly speaking those pointer comparisons are UB
+		assert( ( data() <= range.data() ) && ( range.data() + range.size() <= data() + size() ) );
 		im_str retval;
 		retval._as_strview() = range;
 		retval._handle       = this->_handle;
 		return retval;
 	}
 
-	im_str substr( iterator start, iterator end ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( iterator start, iterator end ) const
 	{
 		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer on platforms where they are
 		// not the same type
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
-	im_str substr_sentinel( std::size_t offset, char sentinel ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr_sentinel( std::size_t offset, char sentinel ) const
 	{
 		const auto size = this->find( sentinel, offset );
 		return substr( offset, size == npos ? this->size() - offset : size - offset );
 	}
 
+	/*
+	 * Most split functions allow you to specify if the string should be split before or after
+	 * the specified characteor or if the char should be dropped completely
+	 *
+	 * e.g.		auto[f,s] = im_str("Hello World!").split_at(6, im_str:Split::Before); // -> f = "Hello"  s = " World!"
+	 *			auto[f,s] = im_str("Hello World!").split_at(6, im_str:Split::After);  // -> f = "Hello " s =  "World!"
+	 *			auto[f,s] = im_str("Hello World!").split_at(6, im_str:Split::Drop);   // -> f = "Hello"  s =  "World!"
+	 */
 	enum class Split { Drop, Before, After };
 
 	// split string into two substrings [0,i) and [i, this->size() )
@@ -134,44 +162,45 @@ public:
 	}
 
 	// split string into two substrings [0,i) and [i, this->size() )
-	std::pair<im_str, im_str> split_at( std::size_t i ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_at( std::size_t i ) const
 	{
 		assert( i < size() || i == npos );
-		if( i == npos ) { return {*this, {}}; }
-		return {substr( 0, i ), substr( i, npos )};
+		if( i == npos ) { return { *this, {} }; }
+		return { substr( 0, i ), substr( i, npos ) };
 	}
 
 	// split string into two substrings [0,i) and [i, this->size() )
-	std::pair<im_str, im_str> split_at( std::size_t i, Split s ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_at( std::size_t i, Split s ) const
 	{
 		assert( i < size() || i == npos );
-		if( i == npos ) { return {*this, {}}; }
-		return {substr( 0, i + ( s == Split::After ) ), substr( i + ( s == Split::After || s == Split::Drop ), npos )};
+		if( i == npos ) { return { *this, {} }; }
+		return { substr( 0, i + ( s == Split::After ) ),
+				 substr( i + ( s == Split::After || s == Split::Drop ), npos ) };
 	}
 
 	// split string on first occurence of c.
-	[[deprecated( "Use split_on_first instead" )]] std::pair<im_str, im_str> split_first( char  c = ' ',
-																						  Split s = Split::Drop ) const
+	[[deprecated( "Use split_on_first instead" )]] IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str>
+																			   split_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_first( c, s );
 	}
 
 	// split string on last occurence of c.
-	[[deprecated( "Use split_on_last instead" )]] std::pair<im_str, im_str> split_last( char  c = ' ',
-																						Split s = Split::Drop ) const
+	[[deprecated( "Use split_on_last instead" )]] IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str>
+																			  split_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_last( c, s );
 	}
 
 	// split string on first occurence of c.
-	std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		auto pos = this->find( c );
 		return split_at( pos, s );
 	}
 
 	// split string on last occurence of c
-	std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
+	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		auto pos = this->rfind( c );
 		return split_at( pos, s );
@@ -231,12 +260,12 @@ public:
 	/**
 	 * Returns a copy if the string is already zero terminated and calls unshare otherwise
 	 */
-	im_zstr create_zstr() const&;
+	IM_STR_CONSTEXPR_DESTRUCTOR im_zstr create_zstr() const&;
 
 	/**
 	 * Moves "this" into the return value if string is already zero terminated and calls unshare otherwise
 	 */
-	im_zstr create_zstr() &&;
+	IM_STR_CONSTEXPR_DESTRUCTOR im_zstr create_zstr() &&;
 
 protected:
 	class static_lifetime_tag {
@@ -261,7 +290,7 @@ protected:
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
-	im_str( detail::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
+	constexpr im_str( detail::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
 		: std::string_view( data, size )
 		, _handle( std::move( handle ) )
 	{
@@ -277,9 +306,9 @@ protected:
 		swap( l._handle, r._handle );
 	}
 
-	std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
+	constexpr std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
 
-	const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
+	constexpr const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
 
 	void _copy_from( const std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
@@ -332,12 +361,12 @@ public:
 	{
 	}
 
-	explicit im_zstr( const im_str& other, is_zero_terminated_tag ) noexcept
+	constexpr im_zstr( const im_str& other, is_zero_terminated_tag ) noexcept
 		: im_str( other )
 	{
 	}
 
-	explicit im_zstr( im_str&& other, is_zero_terminated_tag ) noexcept
+	constexpr im_zstr( im_str&& other, is_zero_terminated_tag ) noexcept
 		: im_str( std::move( other ) )
 	{
 	}
@@ -349,7 +378,7 @@ public:
 	{
 	}
 
-	constexpr im_zstr( std::string_view other, trust_me_this_is_from_a_string_litteral_t t) noexcept
+	constexpr im_zstr( std::string_view other, trust_me_this_is_from_a_string_litteral_t t ) noexcept
 		: im_str( other, t )
 	{
 	}
@@ -396,7 +425,7 @@ inline im_zstr im_str::unshare() const
 	return im_zstr( static_cast<std::string_view>( *this ) );
 }
 
-inline im_zstr im_str::create_zstr() const&
+IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() const&
 {
 	if( is_zero_terminated() ) {
 		return im_zstr{ { *this }, is_zero_terminated_tag{} }; // just copy
@@ -405,7 +434,7 @@ inline im_zstr im_str::create_zstr() const&
 	}
 }
 
-inline im_zstr im_str::create_zstr() &&
+IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() &&
 {
 	if( is_zero_terminated() ) {
 		return im_zstr{ std::move( *this ), is_zero_terminated_tag{} }; // already zero terminated - just move
@@ -458,6 +487,8 @@ im_zstr range_helper( const T& args )
 	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
 }
 
+// overloads that use memory resources
+
 template<class... ARGS>
 im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args )
 {
@@ -499,7 +530,7 @@ inline auto concat( const ARG1 arg1, const ARGS&... args )
 	-> std::enable_if_t<std::is_convertible_v<ARG1, std::string_view>, im_zstr>
 {
 	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
-				   "variadic concat can only be used with arguments that can be converted to string_view" );
+				   "variadic concat can only be used with arguments that can be converted to std::string_view" );
 	return detail_concat::variadic_helper( std::string_view( arg1 ), std::string_view( args )... );
 }
 template<class T>

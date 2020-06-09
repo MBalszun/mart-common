@@ -8,16 +8,40 @@
 #include <new>     // placement new
 #include <utility> // std::move
 
+// clang format doesn't indent neste #if blocks, so lets do it manually
+// clang-format off
+
+// In c++20, our destructor can be declared constexpr
+// that then propagetes to many member functions of im_str.
+#ifndef IM_STR_USE_CONSTEXPR_DESTRUCTOR
+	#if __cpp_constexpr >= 201907
+		#define IM_STR_USE_CONSTEXPR_DESTRUCTOR 1
+		#define IM_STR_CONSTEXPR_DESTRUCTOR constexpr
+	#else
+		#define IM_STR_USE_CONSTEXPR_DESTRUCTOR 0
+		#define IM_STR_CONSTEXPR_DESTRUCTOR
+	#endif
+#endif // !IM_STR_CONSTEXPR_DESTRUCTOR
+
+
+// Handle custom allocation logic via pmr memory_resource
 #ifndef IM_STR_USE_ALLOC
+
+	// default to no and overwrite later if appropriate
+	#define IM_STR_USE_ALLOC 0
+
 	#if __has_include( <memory_resource>)
 		#include <memory_resource>
-		#define IM_STR_USE_ALLOC 1
+		#if defined( __cpp_lib_memory_resource ) && __cpp_lib_memory_resource >= 201603L
+
+			#undef IM_STR_USE_ALLOC
+			#define IM_STR_USE_ALLOC 1
+
+		#endif
 	#endif
-#else
-	#define IM_STR_USE_ALLOC 0
+
 #endif
-
-
+// clang-format on
 
 namespace mba::detail {
 
@@ -108,16 +132,11 @@ constexpr struct defer_ref_cnt_tag_t {
 
 // Note: std::exchange is not constexpr in c++17
 template<class T, class U = T>
-constexpr T c_expr_exchange( T& obj, U&& new_value )
+constexpr T c_expr_exchange( T& obj, U&& new_value ) noexcept
 {
 	T old_value = std::move( obj );
 	obj         = std::forward<U>( new_value );
 	return old_value;
-}
-
-inline constexpr std::size_t c_expr_max( std::size_t l, std::size_t r )
-{
-	return l > r ? l : r;
 }
 
 struct AllocResult;
@@ -173,7 +192,7 @@ public:
 		return *this;
 	}
 
-	~atomic_ref_cnt_buffer() { _decref(); }
+	IM_STR_CONSTEXPR_DESTRUCTOR ~atomic_ref_cnt_buffer() { _decref(); }
 
 	friend constexpr void swap( atomic_ref_cnt_buffer& l, atomic_ref_cnt_buffer& r ) noexcept
 	{
@@ -182,22 +201,27 @@ public:
 		l._cnt   = r._cnt;
 		r._cnt   = tmp;
 	}
-	/*#### API ######*/
 
-	constexpr int add_ref_cnt( int cnt ) const
+	/*^^^^ Constructors and special member functions ^^^^*/
+
+	/*vvvv API vvvv*/
+	constexpr int add_ref_cnt( int cnt ) const noexcept
 	{
-		if( !_cnt ) {
+		if( _cnt == nullptr ) {
 			return 0;
 		} else {
 			stats().inc_ref();
 			return _cnt->fetch_add( cnt, std::memory_order_relaxed ) + cnt;
 		}
 	}
+	/*^^^^ API ^^^^*/
 
-	friend constexpr bool operator==( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt == nullptr; }
-	friend constexpr bool operator==( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt == nullptr; }
-	friend constexpr bool operator!=( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt != nullptr; }
-	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt != nullptr; }
+	// clang-format off
+	friend constexpr bool operator==( const atomic_ref_cnt_buffer& l, std::nullptr_t ) noexcept { return l._cnt == nullptr; }
+	friend constexpr bool operator==( std::nullptr_t, const atomic_ref_cnt_buffer& r ) noexcept { return r._cnt == nullptr; }
+	friend constexpr bool operator!=( const atomic_ref_cnt_buffer& l, std::nullptr_t ) noexcept { return l._cnt != nullptr; }
+	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) noexcept { return r._cnt != nullptr; }
+	// clang-format on
 
 private:
 	struct Header {

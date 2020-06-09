@@ -351,3 +351,12 @@ TEST_CASE( "Examples", "[im_str]" )
 		c_func( fullz.c_str() );
 	}
 }
+
+#if IM_STR_USE_CONSTEXPR_DESTRUCTOR
+
+[[maybe_unused]] constexpr mba::im_str str1( "Hello World1" );
+[[maybe_unused]] constexpr mba::im_str str2{ "Hello World2" };
+[[maybe_unused]] constexpr mba::im_str str3 = "Hello World3";
+// static_assert( 0 );
+
+#endif
