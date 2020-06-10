@@ -42,6 +42,6 @@ install:
 
 script:
   - mkdir build && cd build
-  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_INCLUDE_TESTS=ON -DIM_STR_RUN_SANITIZERS=ON -DCMAKE_CXX_EXTENSIONS=Off ..
+  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_INCLUDE_TESTS=ON -DIM_STR_RUN_SANITIZERS=ON -DCMAKE_CXX_EXTENSIONS=Off -DCMAKE_CXX_STANDARD=${CXX_STD} ..
   - cmake --build . -- -j2
   - ctest .
