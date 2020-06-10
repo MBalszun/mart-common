@@ -1,22 +1,37 @@
 language: cpp
 
-sudo: false
+os: linux
+dist: bionic
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-
-    packages:
-    - g++-8
-
-matrix:
+jobs:
   include:
-    - env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - env: MATRIX_EVAL="CC=clang && CXX=clang++"
+    - name: gcc-default
+      before_install:
+        - export CC=gcc && export CXX=g++
+        - export CXX_STD=17
 
-before_install:
-  - eval "${MATRIX_EVAL}"
+    - name: clang-default
+      before_install:
+        - export CC=clang && export CXX=clang++
+        - export CXX_STD=17
+
+    - name: gcc-10
+      before_install:
+        - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        - sudo apt update
+        - sudo apt install g++-10
+        - export CC=gcc-10 && export CXX=g++-10
+        - export CXX_STD=20
+
+    - name: clang-10
+      before_install:
+        - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        - sudo add-apt-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+        - sudo apt update
+        - sudo apt install clang-10
+        - export CC=clang-10 && export CXX=clang++-10
+        - export CXX_STD=20
+
 
 install:
   - git clone https://github.com/catchorg/Catch2.git && mkdir -p Catch2/build && cd Catch2/build
@@ -27,6 +42,6 @@ install:
 
 script:
   - mkdir build && cd build
-  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_INCLUDE_TESTS=ON -DIM_STR_RUN_SANITIZERS=ON ..
+  - cmake -DCMAKE_PREFIX_PATH=~/cmake_local -DCMAKE_BUILD_TYPE=Debug -DIM_STR_INCLUDE_TESTS=ON -DIM_STR_RUN_SANITIZERS=ON -DCMAKE_CXX_EXTENSIONS=Off ..
   - cmake --build . -- -j2
   - ctest .
