@@ -10,8 +10,6 @@
 
 #include "./config.hpp"
 
-
-
 namespace mba::detail {
 
 #ifdef IM_STR_DEBUG_HOOKS
@@ -109,7 +107,6 @@ constexpr T c_expr_exchange( T& obj, U&& new_value ) noexcept
 }
 
 struct AllocResult;
-
 /**
  * Note: Almost all of the member functions are labled constexpr.
  * However, they can only be used in a constexpr context if the
@@ -120,6 +117,11 @@ class atomic_ref_cnt_buffer {
 	using size_type = int;
 
 public:
+/*
+ * Use different types	to somewhat mitigate the ODR viaolation problem:
+ * Function versions that have been compiled with support for  std::pmr::memory_resource will
+ * get a different mangled name than functions without
+ */
 #if IM_STR_USE_ALLOC
 	using alloc_t     = std::pmr::memory_resource;
 	using alloc_ptr_t = alloc_t*;
@@ -174,6 +176,16 @@ public:
 	/*^^^^ Constructors and special member functions ^^^^*/
 
 	/*vvvv API vvvv*/
+
+	/**
+	 * @brief Bump the ref count by \p cnt
+	 *
+	 * Intended to be used with the atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t )
+	 * constructor
+	 *
+	 * @param cnt
+	 * @return new ref count
+	 */
 	constexpr int add_ref_cnt( int cnt ) const noexcept
 	{
 		if( _cnt == nullptr ) {
@@ -183,6 +195,7 @@ public:
 			return _cnt->fetch_add( cnt, std::memory_order_relaxed ) + cnt;
 		}
 	}
+
 	/*^^^^ API ^^^^*/
 
 	// clang-format off
@@ -271,7 +284,7 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 	if( alloc == nullptr ) {
 		std::free( header );
 	} else {
-		size_type size = header->size;
+		size_type  size       = header->size;
 		const auto total_size = sizeof( Header ) + size + 1;
 		alloc->deallocate( header, total_size, alignment );
 	}
