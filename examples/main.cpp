@@ -16,4 +16,6 @@ int main() {
 	auto greeting = mba::concat( str1, "World"s, "!" );
 
 	std::cout << greeting << std::endl;
+
+	std::cout << greeting.size() << " == " << c_api_func( greeting.c_str() ) << std::endl;
 }
