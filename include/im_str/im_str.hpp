@@ -88,9 +88,14 @@ public:
 	}
 
 	// don't accept c-strings in the form of pointer
-	// if you need to create a im_str from a c string use the explicit conversion to string_view
+	// if you need to create a im_str from a c string use the factory function im_str::from_c_str
 	template<class T>
 	im_str( T const* const& other ) = delete;
+
+	IM_STR_CONSTEXPR_DESTRUCTOR static im_str from_c_str( const char* str )
+	{
+		return im_str{ std::string_view( str ) };
+	};
 
 	/* ############### Special member functions ##################################################################### */
 	constexpr im_str( const im_str& other ) noexcept = default;
@@ -384,6 +389,11 @@ public:
 		: im_str( other, t )
 	{
 	}
+
+	IM_STR_CONSTEXPR_DESTRUCTOR static im_zstr from_c_str( const char* str )
+	{
+		return im_zstr{ std::string_view( str ) };
+	};
 
 	constexpr const char* c_str() const { return this->data(); }
 
