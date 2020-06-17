@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-int c_api_func(const char* str) {
+std::size_t c_api_func(const char* str) {
 	return std::strlen( str );
 }
 
