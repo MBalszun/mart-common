@@ -1,20 +1,21 @@
 #ifndef IM_STR_IM_STR_H
 #define IM_STR_IM_STR_H
 
+#include "detail/config.hpp"
 #include "detail/ref_cnt_buf.hpp"
+
+#if IM_STR_USE_CUSTOM_DYN_ARRAY
+#include "detail/dynamic_array.hpp"
+#else
+#include <vector> // used for split_full TODO: move this into separate file
+#endif            // IM_STR_USE_CUSTOM_DYN_ARRAY
 
 #include <algorithm>
 #include <cassert>
 #include <numeric>
 #include <string_view>
+#include <type_traits>
 #include <utility> // tuple/pair
-
-#define IM_STR_USE_CUSTOM_DYN_ARRAY
-#ifdef IM_STR_USE_CUSTOM_DYN_ARRAY
-#include "detail/dynamic_array.hpp"
-#else
-#include <vector> // used for split_full TODO: move this into separate file
-#endif            // IM_STR_USE_CUSTOM_DYN_ARRAY
 
 namespace mba {
 
@@ -37,11 +38,11 @@ class im_str : public std::string_view {
 	using Base_t = std::string_view;
 
 protected:
-	using Handle_t = detail::atomic_ref_cnt_buffer;
+	using Handle_t = _detail_im_str::atomic_ref_cnt_buffer;
 
 public:
 #ifdef IM_STR_USE_CUSTOM_DYN_ARRAY
-	using DynArray_t = detail::dynamic_array<im_str>;
+	using DynArray_t = _detail_im_str::dynamic_array<im_str>;
 #else
 	using DynArray_t = std::vector<im_str>;
 #endif
@@ -50,7 +51,8 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	explicit im_str( std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
+	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_str( std::string_view                                   other,
+												 _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
 	}
@@ -86,14 +88,19 @@ public:
 	}
 
 	// don't accept c-strings in the form of pointer
-	// if you need to create a im_str from a c string use the explicit conversion to string_view
+	// if you need to create a im_str from a c string use the factory function im_str::from_c_str
 	template<class T>
 	im_str( T const* const& other ) = delete;
+
+	IM_STR_CONSTEXPR_DESTRUCTOR static im_str from_c_str( const char* str )
+	{
+		return im_str{ std::string_view( str ) };
+	};
 
 	/* ############### Special member functions ##################################################################### */
 	constexpr im_str( const im_str& other ) noexcept = default;
 	constexpr im_str( im_str&& other ) noexcept
-		: std::string_view( detail::c_expr_exchange( other._as_strview(), std::string_view{} ) )
+		: std::string_view( _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} ) )
 		, _handle( std::move( other._handle ) )
 	{
 	}
@@ -108,7 +115,7 @@ public:
 
 	constexpr im_str& operator=( im_str&& other ) noexcept
 	{
-		this->_as_strview() = detail::c_expr_exchange( other._as_strview(), std::string_view{} );
+		this->_as_strview() = _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} );
 		_handle             = std::move( other._handle );
 		return *this;
 	}
@@ -221,13 +228,14 @@ public:
 		for( auto& slice : ret ) {
 
 			const auto found_pos = this->find( delimiter, start_pos );
-			slice                = im_str(
-                // std::string_view::substr(offset,count) allows count to be bigger than size,
-                // so we don't have to check for npos here
-                self_view.substr( start_pos, found_pos - start_pos ),
-                _handle,
-                detail::defer_ref_cnt_tag // ref count will be incremented at the end of the function
-            );
+
+			slice = im_str(
+				// std::string_view::substr(offset,count) allows count to be bigger than size,
+				// so we don't have to check for npos here
+				self_view.substr( start_pos, found_pos - start_pos ),
+				_handle,
+				_detail_im_str::defer_ref_cnt_tag // ref count will be incremented at the end of the function
+			);
 
 			start_pos = found_pos + 1u;
 		}
@@ -236,14 +244,12 @@ public:
 #ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4307 ) // we know that this overflows
+#endif
 
-		assert( start_pos == std::string_view::npos + (std::size_t)1 );
+		assert( start_pos == std::string_view::npos + (std::size_t)1u );
 
+#ifdef _MSC_VER
 #pragma warning( pop )
-#else
-
-		assert( start_pos == std::string_view::npos + (std::size_t)1 );
-
 #endif
 
 		return ret;
@@ -252,7 +258,7 @@ public:
 	constexpr bool is_zero_terminated() const { return this->data()[size()] == '\0'; }
 
 	/**
-	 * This will create a new im_str (actuall a im_zstr) whose data resides in a freshly
+	 * This will create a new im_str (actually a im_zstr) whose data resides in a freshly
 	 * allocated memory block
 	 */
 	im_zstr unshare() const;
@@ -281,36 +287,34 @@ protected:
 	}
 
 	constexpr im_str( std::string_view                     sv,
-					  const detail::atomic_ref_cnt_buffer& data,
-					  detail::defer_ref_cnt_tag_t ) noexcept
+					  const _detail_im_str::atomic_ref_cnt_buffer& data,
+					  _detail_im_str::defer_ref_cnt_tag_t ) noexcept
 		: std::string_view( sv )
-		, _handle{ data, detail::defer_ref_cnt_tag_t{} }
+		, _handle{ data, _detail_im_str::defer_ref_cnt_tag_t{} }
 	{
 	}
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
-	constexpr im_str( detail::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
+	constexpr im_str( _detail_im_str::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
 		: std::string_view( data, size )
 		, _handle( std::move( handle ) )
 	{
 	}
 
+	friend constexpr void swap( im_str& l, im_str& r ) noexcept;
+
+	friend void swap( im_str& l, std::string_view& r ) = delete;
+	friend void swap( std::string_view& l, im_str& r ) = delete;
+
 protected:
 	Handle_t _handle{};
-
-	friend void swap( im_str& l, im_str& r )
-	{
-		using std::swap;
-		swap( l._as_strview(), r._as_strview() );
-		swap( l._handle, r._handle );
-	}
 
 	constexpr std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
 
 	constexpr const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
 
-	void _copy_from( const std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
+	void _copy_from( const std::string_view other, _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
 		if( other.data() == nullptr ) {
 			this->_as_strview() = std::string_view{ "" };
@@ -325,7 +329,19 @@ protected:
 	}
 };
 
-namespace detail_concat {
+constexpr void swap( im_str& l, im_str& r ) noexcept
+{
+	swap( l._handle, r._handle );
+
+	// TODO: in c++20:
+	// using std::swap;
+	// swap( l._as_strview(), r._as_strview() );  // not yet constexpr
+	std::string_view t = l._as_strview();
+	l._as_strview()    = r._as_strview();
+	r._as_strview()    = t;
+}
+
+namespace _detail_im_str_concat {
 // ARGS must be std::string_view
 template<class... ARGS>
 im_zstr variadic_helper( const ARGS... args );
@@ -334,30 +350,30 @@ template<class T>
 im_zstr range_helper( const T& args );
 
 template<class... ARGS>
-im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args );
+im_zstr variadic_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args );
 
 template<class T>
-im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
+im_zstr range_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
 
-} // namespace detail_concat
+} // namespace _detail_im_str_concat
 
-namespace detail {
+namespace _detail_im_str {
 inline constexpr std::string_view getEmptyZeroTerminatedStringView() noexcept
 {
 	return std::string_view{ "" };
 }
-} // namespace detail
+} // namespace _detail_im_str
 
 class im_zstr : public im_str {
 	using im_str::im_str;
 
 public:
 	constexpr im_zstr() noexcept
-		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag{} )
+		: im_str( _detail_im_str::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag{} )
 	{
 	}
-	explicit im_zstr( std::string_view other )
-		: im_str( other.data() == nullptr ? detail::getEmptyZeroTerminatedStringView() : other )
+	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_zstr( std::string_view other )
+		: im_str( other.data() == nullptr ? _detail_im_str::getEmptyZeroTerminatedStringView() : other )
 	{
 	}
 
@@ -383,6 +399,11 @@ public:
 	{
 	}
 
+	IM_STR_CONSTEXPR_DESTRUCTOR static im_zstr from_c_str( const char* str )
+	{
+		return im_zstr{ std::string_view( str ) };
+	};
+
 	constexpr const char* c_str() const { return this->data(); }
 
 	constexpr bool is_zero_terminated() const noexcept
@@ -397,28 +418,48 @@ public:
 	// would break im_zstr's invariant of always being zero terminated
 	constexpr void remove_suffix( size_type n ) = delete;
 
+	friend constexpr void swap( im_zstr& l,
+								im_zstr& r ) noexcept; // needs to be defined out of line, otherwise swap(handle,handle)
+													   // can't be used in the implemenentation
+
+	friend void swap( im_str& l, im_zstr& r ) = delete;
+	friend void swap( im_zstr& l, im_str& r ) = delete;
+
 private:
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
-	im_zstr( detail::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
+	im_zstr( _detail_im_str::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
 		: im_str( std::move( handle ), data, size )
 	{
 	}
 
 	template<class... ARGS>
-	friend im_zstr detail_concat::variadic_helper( const ARGS... args );
+	friend im_zstr _detail_im_str_concat::variadic_helper( const ARGS... args );
 
 	template<class T>
-	friend im_zstr detail_concat::range_helper( const T& args );
+	friend im_zstr _detail_im_str_concat::range_helper( const T& args );
 
 	template<class... ARGS>
-	friend im_zstr detail_concat::variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc,
-												   const ARGS... args );
+	friend im_zstr _detail_im_str_concat::variadic_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc,
+														   const ARGS... args );
 
 	template<class T>
-	friend im_zstr detail_concat::range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
+	friend im_zstr _detail_im_str_concat::range_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc,
+														const T&                                   args );
 };
+
+constexpr void swap( im_zstr& l, im_zstr& r ) noexcept
+{
+	swap( l._handle, r._handle );
+
+	// TODO: in c++20:
+	// using std::swap;
+	// swap( l._as_strview(), r._as_strview() );  // not yet constexpr
+	std::string_view t = l._as_strview();
+	l._as_strview()    = r._as_strview();
+	r._as_strview()    = t;
+}
 
 inline im_zstr im_str::unshare() const
 {
@@ -443,7 +484,7 @@ IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() &&
 	}
 }
 
-namespace detail_concat {
+namespace _detail_im_str_concat {
 //######## impl helper for concat ###############
 inline void addTo( char*& buffer, const std::string_view str )
 {
@@ -460,7 +501,7 @@ im_zstr variadic_helper( const ARGS... args )
 	const std::size_t newSize = ( 0 + ... + args.size() );
 
 	auto buffer
-		= ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
+		= ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
 
 	auto* tmp_data_ptr = buffer.data;
 	( addTo( tmp_data_ptr, args ), ... );
@@ -477,7 +518,7 @@ im_zstr range_helper( const T& args )
 		  } );
 
 	auto buffer
-		= ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
+		= ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
 
 	auto* tmp_data_ptr = buffer.data;
 	for( auto&& e : args ) {
@@ -490,12 +531,12 @@ im_zstr range_helper( const T& args )
 // overloads that use memory resources
 
 template<class... ARGS>
-im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args )
+im_zstr variadic_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARGS... args )
 {
 	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
 	const std::size_t newSize = ( 0 + ... + args.size() );
 
-	auto buffer = ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+	auto buffer = ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
 		static_cast<int>( newSize ), alloc );
 
 	auto* tmp_data_ptr = buffer.data;
@@ -505,14 +546,14 @@ im_zstr variadic_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const
 }
 
 template<class T>
-im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
+im_zstr range_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
 {
 	const std::size_t newSize
 		= std::accumulate( args.begin(), args.end(), std::size_t( 0 ), []( std::size_t s, const auto& str ) {
 			  return s + std::string_view( str ).size();
 		  } );
 
-	auto buffer = ::mba::detail::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+	auto buffer = ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
 		static_cast<int>( newSize ), alloc );
 
 	auto* tmp_data_ptr = buffer.data;
@@ -523,7 +564,7 @@ im_zstr range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T&
 	return im_zstr( std::move( buffer.handle ), buffer.data, newSize );
 }
 
-} // namespace detail_concat
+} // namespace _detail_im_str_concat
 
 template<class ARG1, class... ARGS>
 inline auto concat( const ARG1 arg1, const ARGS&... args )
@@ -531,29 +572,29 @@ inline auto concat( const ARG1 arg1, const ARGS&... args )
 {
 	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
 				   "variadic concat can only be used with arguments that can be converted to std::string_view" );
-	return detail_concat::variadic_helper( std::string_view( arg1 ), std::string_view( args )... );
+	return _detail_im_str_concat::variadic_helper( std::string_view( arg1 ), std::string_view( args )... );
 }
 template<class T>
 inline auto concat( const T& args ) -> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
 {
 	// static_assert( <args_is_a_range> )
-	return detail_concat::range_helper( args );
+	return _detail_im_str_concat::range_helper( args );
 }
 
 template<class ARG1, class... ARGS>
-inline auto concat( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARG1 arg1, const ARGS&... args )
+inline auto concat( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const ARG1 arg1, const ARGS&... args )
 	-> std::enable_if_t<std::is_convertible_v<ARG1, std::string_view>, im_zstr>
 {
 	static_assert( ( std::is_convertible_v<ARGS, std::string_view> && ... ),
 				   "variadic concat can only be used with arguments that can be converted to string_view" );
-	return detail_concat::variadic_helper( alloc, std::string_view( arg1 ), std::string_view( args )... );
+	return _detail_im_str_concat::variadic_helper( alloc, std::string_view( arg1 ), std::string_view( args )... );
 }
 template<class T>
-inline auto concat( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
+inline auto concat( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args )
 	-> std::enable_if_t<!std::is_convertible_v<T, std::string_view>, im_zstr>
 {
 	// static_assert( <args_is_a_range> )
-	return detail_concat::range_helper( alloc, args );
+	return _detail_im_str_concat::range_helper( alloc, args );
 }
 
 static_assert( sizeof( im_str ) <= 3 * sizeof( void* ) );

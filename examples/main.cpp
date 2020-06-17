@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-int c_api_func(const char* str) {
+std::size_t c_api_func(const char* str) {
 	return std::strlen( str );
 }
 
@@ -16,4 +16,6 @@ int main() {
 	auto greeting = mba::concat( str1, "World"s, "!" );
 
 	std::cout << greeting << std::endl;
+
+	std::cout << greeting.size() << " == " << c_api_func( greeting.c_str() ) << std::endl;
 }

@@ -66,8 +66,8 @@ im_str run( const im_str::DynArray_t& strings, const std::vector<char>& split_ch
 		size_t i = 0;
 
 		for( auto&& s : cstrings ) {
-			static_assert( 0 < Algo && Algo < 2, "No algorithm with that number available at the moment" );
-			if constexpr( Algo == 1 ) {
+			static_assert( 0 <= Algo && Algo < 1, "No algorithm with that number available at the moment" );
+			if constexpr( Algo == 0 ) {
 				tmp[i++] = s.split_full( split_char );
 			} /*else {
 				// put other algorithm here
@@ -79,24 +79,35 @@ im_str run( const im_str::DynArray_t& strings, const std::vector<char>& split_ch
 	return concat( cstrings );
 }
 
-template<int Algo>
+template<int Algo, int Rep = 10, int It = 20>
 // __declspec(noinline)
 void test_algo( const im_str::DynArray_t& s, const std::vector<char>& split_chars )
 {
 	using namespace std::chrono;
-	for( int z = 0; z < 10; ++z ) {
-		std::chrono::nanoseconds total{};
-		for( int i = 0; i < 20; ++i ) {
+	std::vector<int> res( Rep );
+	assert( res.size() == Rep );
 
-			auto start = steady_clock::now();
+	for( int z = -1; z < Rep; ++z ) {
 
+		const auto start = steady_clock::now();
+		for( int i = 0; i < It; ++i ) {
 			run<Algo>( s, split_chars );
-
-			auto end = steady_clock::now();
-			total += ( end - start );
 		}
-		std::cout << total / std::chrono::milliseconds{ 1 } / 20 << std::endl;
+		const auto end = steady_clock::now();
+
+		// discard first repetition
+		if( z >= 0 ) {
+			const auto total = ( end - start ) / std::chrono::milliseconds{ 1 } / It;
+			std::cout << total << "ms per iteration" << std::endl;
+			res[z] = (int)total;
+		}
 	}
+
+	auto avg  = std::accumulate( res.begin(), res.end(), 0 ) / (double)res.size();
+	auto avgs = std::accumulate( res.begin(), res.end(), 0, []( auto acc, auto v ) { return acc + v * v; } )
+				/ (double)res.size();
+	std::cout << "Avg: " << avg << "ms | std-dev:"<< std::sqrt(avgs - avg * avg) << "ms" << std::endl;
+
 }
 
 int main()
@@ -112,7 +123,7 @@ int main()
 		++it;
 	}
 
-	test_algo<1>( cstrings, split_chars );
+	test_algo<0>( cstrings, split_chars );
 	std::cout << "========================================================" << std::endl;
 	// test_algo<2>( cstrings, split_chars );
 	// std::cout << "========================================================" << std::endl;
