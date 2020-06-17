@@ -10,7 +10,7 @@
 
 #include "./config.hpp"
 
-namespace mba::detail {
+namespace mba::_detail_im_str {
 
 #ifdef IM_STR_DEBUG_HOOKS
 inline namespace debug_version {

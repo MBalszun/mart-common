@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace mba::detail {
+namespace mba::_detail_im_str {
 
 /**
  * A minimal implementation of an array with fixed runtim-size.
