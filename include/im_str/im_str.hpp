@@ -302,15 +302,13 @@ protected:
 	{
 	}
 
+	friend constexpr void swap( im_str& l, im_str& r ) noexcept;
+
+	friend void swap( im_str& l, std::string_view& r ) = delete;
+	friend void swap( std::string_view& l, im_str& r )  = delete;
+
 protected:
 	Handle_t _handle{};
-
-	friend void swap( im_str& l, im_str& r )
-	{
-		using std::swap;
-		swap( l._as_strview(), r._as_strview() );
-		swap( l._handle, r._handle );
-	}
 
 	constexpr std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
 
@@ -330,6 +328,18 @@ protected:
 		*this = im_str( std::move( handle ), data, other.size() );
 	}
 };
+
+constexpr void swap( im_str& l, im_str& r ) noexcept
+{
+	swap( l._handle, r._handle );
+
+	// TODO: in c++20:
+	// using std::swap;
+	// swap( l._as_strview(), r._as_strview() );  // not yet constexpr
+	std::string_view t = l._as_strview();
+	l._as_strview()    = r._as_strview();
+	r._as_strview()    = t;
+}
 
 namespace detail_concat {
 // ARGS must be std::string_view
@@ -408,6 +418,12 @@ public:
 	// would break im_zstr's invariant of always being zero terminated
 	constexpr void remove_suffix( size_type n ) = delete;
 
+	friend constexpr void swap( im_zstr& l, im_zstr& r ) noexcept;	  // needs to be defined out of line, otherwise swap(handle,handle) can't be used in the implemenentation
+
+
+	friend void swap( im_str& l, im_zstr& r ) = delete;
+	friend void swap( im_zstr& l, im_str& r ) = delete;
+
 private:
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
@@ -430,6 +446,18 @@ private:
 	template<class T>
 	friend im_zstr detail_concat::range_helper( detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc, const T& args );
 };
+
+constexpr void swap( im_zstr& l, im_zstr& r ) noexcept
+{
+	swap( l._handle, r._handle );
+
+	// TODO: in c++20:
+	// using std::swap;
+	// swap( l._as_strview(), r._as_strview() );  // not yet constexpr
+	std::string_view t = l._as_strview();
+	l._as_strview()    = r._as_strview();
+	r._as_strview()    = t;
+}
 
 inline im_zstr im_str::unshare() const
 {

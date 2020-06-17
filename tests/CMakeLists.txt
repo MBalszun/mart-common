@@ -20,6 +20,7 @@ add_executable(im_str_test
 	test_ref_cnt_buf.cpp
 	test_split.cpp
 	test_substr.cpp
+	test_swap.cpp
 	test_dynamic_array.cpp
 	test_alloc.cpp
 	tests.cpp
