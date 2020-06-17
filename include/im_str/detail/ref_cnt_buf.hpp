@@ -272,7 +272,8 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 		std::free( header );
 	} else {
 		size_type size = header->size;
-		alloc->deallocate( header, size, alignment );
+		const auto total_size = sizeof( Header ) + size + 1;
+		alloc->deallocate( header, total_size, alignment );
 	}
 #else
 	std::free( header );
