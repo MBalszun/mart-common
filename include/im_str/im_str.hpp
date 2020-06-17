@@ -228,13 +228,14 @@ public:
 		for( auto& slice : ret ) {
 
 			const auto found_pos = this->find( delimiter, start_pos );
-			slice                = im_str(
-                // std::string_view::substr(offset,count) allows count to be bigger than size,
-                // so we don't have to check for npos here
-                self_view.substr( start_pos, found_pos - start_pos ),
-                _handle,
-                detail::defer_ref_cnt_tag // ref count will be incremented at the end of the function
-            );
+
+			slice = im_str(
+				// std::string_view::substr(offset,count) allows count to be bigger than size,
+				// so we don't have to check for npos here
+				self_view.substr( start_pos, found_pos - start_pos ),
+				_handle,
+				detail::defer_ref_cnt_tag // ref count will be incremented at the end of the function
+			);
 
 			start_pos = found_pos + 1u;
 		}
@@ -243,14 +244,12 @@ public:
 #ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4307 ) // we know that this overflows
+#endif
 
-		assert( start_pos == std::string_view::npos + (std::size_t)1 );
+		assert( start_pos == std::string_view::npos + (std::size_t)1u );
 
+#ifdef _MSC_VER
 #pragma warning( pop )
-#else
-
-		assert( start_pos == std::string_view::npos + (std::size_t)1 );
-
 #endif
 
 		return ret;
@@ -259,7 +258,7 @@ public:
 	constexpr bool is_zero_terminated() const { return this->data()[size()] == '\0'; }
 
 	/**
-	 * This will create a new im_str (actuall a im_zstr) whose data resides in a freshly
+	 * This will create a new im_str (actually a im_zstr) whose data resides in a freshly
 	 * allocated memory block
 	 */
 	im_zstr unshare() const;
