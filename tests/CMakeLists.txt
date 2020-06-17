@@ -21,6 +21,7 @@ add_executable(im_str_test
 	test_split.cpp
 	test_substr.cpp
 	test_dynamic_array.cpp
+	test_alloc.cpp
 	tests.cpp
 )
 
