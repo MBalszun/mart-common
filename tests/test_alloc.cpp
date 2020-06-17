@@ -2,10 +2,13 @@
 
 #include "include_catch.hpp"
 
+#if IM_STR_USE_ALLOC
+
 #include <memory>
 #include <memory_resource>
 #include <string>
 #include <vector>
+
 
 namespace {
 
@@ -77,9 +80,11 @@ TestAlloc alloc;
 } // namespace
 
 
+#endif
+
 TEST_CASE( "custom_alloc", "[im_str]" )
 {
-
+#if IM_STR_USE_ALLOC
 	{ 	// construction from string causes single allocation
 		std::string s{ "Hello World" };
 		CHECK( alloc.allocs.size() == 0 );
@@ -109,4 +114,5 @@ TEST_CASE( "custom_alloc", "[im_str]" )
 
 	// in total there where two allocations happening
 	CHECK( alloc.all_allocs.size() == 2 );
+#endif
 }
