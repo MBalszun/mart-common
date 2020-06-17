@@ -5,7 +5,7 @@ option( IM_STR_RUN_SANITIZERS "Run tests with ubsan and address sanitizer" OFF )
 option( IM_STR_COVERAGE "Generate coverage data" OFF )
 
 if(MSVC)
-	string( REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
+	string( REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
 	add_compile_options( /permissive- /W4 )
 	add_definitions( -D_SCL_SECURE_NO_WARNINGS )
 else()
