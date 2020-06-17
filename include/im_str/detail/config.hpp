@@ -38,17 +38,9 @@
 
 #ifndef IM_STR_USE_CUSTOM_DYN_ARRAY
 	#define IM_STR_USE_CUSTOM_DYN_ARRAY	1
-	#define IM_STR_DYN_ARRAY_ABI_NAME
 #else
 	#define IM_STR_USE_CUSTOM_DYN_ARRAY	0
-	#define IM_STR_DYN_ARRAY_ABI_NAME no_custom_dyn_array
 #endif
-
-
-#define	IM_STR_ABI_NAME im_str_abi_ns_ ## IM_STR_DYN_ARRAY_ABI_NAME
-
-
-
 // clang-format on
 
 #endif
