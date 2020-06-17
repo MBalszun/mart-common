@@ -51,7 +51,8 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	explicit im_str( std::string_view other, detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
+	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_str( std::string_view                           other,
+												 detail::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
 	}
@@ -357,7 +358,7 @@ public:
 		: im_str( detail::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag{} )
 	{
 	}
-	explicit im_zstr( std::string_view other )
+	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_zstr( std::string_view other )
 		: im_str( other.data() == nullptr ? detail::getEmptyZeroTerminatedStringView() : other )
 	{
 	}
