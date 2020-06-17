@@ -1,20 +1,21 @@
 #ifndef IM_STR_IM_STR_H
 #define IM_STR_IM_STR_H
 
+#include "detail/config.hpp"
 #include "detail/ref_cnt_buf.hpp"
+
+#if IM_STR_USE_CUSTOM_DYN_ARRAY
+#include "detail/dynamic_array.hpp"
+#else
+#include <vector> // used for split_full TODO: move this into separate file
+#endif            // IM_STR_USE_CUSTOM_DYN_ARRAY
 
 #include <algorithm>
 #include <cassert>
 #include <numeric>
 #include <string_view>
+#include <type_traits>
 #include <utility> // tuple/pair
-
-#define IM_STR_USE_CUSTOM_DYN_ARRAY
-#ifdef IM_STR_USE_CUSTOM_DYN_ARRAY
-#include "detail/dynamic_array.hpp"
-#else
-#include <vector> // used for split_full TODO: move this into separate file
-#endif            // IM_STR_USE_CUSTOM_DYN_ARRAY
 
 namespace mba {
 
