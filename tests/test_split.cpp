@@ -136,14 +136,16 @@ TEST_CASE( "Split Separator multi", "[im_str]" )
 TEST_CASE( "Split full", "[im_str]" )
 {
 	std::vector<im_str> ref{ "Hello", "my", "dear!", "How", "are", "you?" };
+	im_str::DynArray_t  result;
 
-	std::string base = "Hello my dear! How are you?";
-	im_str      s( base );
+	{
+		std::string base = "Hello my dear! How are you?";
+		im_str      s( base );
+		result = s.split_full( ' ' );
+	}
 
-	const auto words = s.split_full( ' ' );
-
-	CHECK( words.size() == 6 );
-	CHECK( std::equal( ref.begin(), ref.end(), words.begin(), words.end() ) );
+	CHECK( result.size() == 6 );
+	CHECK( std::equal( ref.begin(), ref.end(), result.begin(), result.end() ) );
 }
 
 TEST_CASE( "Split_on_nonexisting_char", "[im_str]" )

@@ -17,7 +17,7 @@ template<class Container>
 constexpr bool has_standard_container_typedefs()
 {
 	using T = Container;
-	[[maybe_unused]] typename T::traits_type            traits{};
+	//[[maybe_unused]] typename T::traits_type            traits{};
 	[[maybe_unused]] typename T::value_type             v{};
 	[[maybe_unused]] typename T::pointer                p{};
 	[[maybe_unused]] typename T::const_pointer          cp{};
@@ -350,6 +350,18 @@ TEST_CASE( "Examples", "[im_str]" )
 		assert( full.empty() );
 		c_func( fullz.c_str() );
 	}
+}
+
+TEST_CASE("reverse_iterator", "im_zstr") {
+	using namespace std::string_literals;
+	mba::im_zstr str { "Hello World"s };
+
+	CHECK( str.rbegin()[2] == 'r' );
+	CHECK( str.crbegin()[2] == 'r' );
+
+	CHECK( str.crend() == str.crbegin()+ str.size() );
+
+
 }
 
 #if IM_STR_USE_CONSTEXPR_DESTRUCTOR
