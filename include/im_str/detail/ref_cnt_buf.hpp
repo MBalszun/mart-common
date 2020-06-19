@@ -196,6 +196,8 @@ public:
 		}
 	}
 
+	constexpr void release() { _cnt = nullptr; }
+
 	/*^^^^ API ^^^^*/
 
 	// clang-format off
@@ -297,6 +299,6 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 } // inline namespace debug_version
 #endif
 
-} // namespace mba::detail
+} // namespace mba::_detail_im_str
 
 #endif

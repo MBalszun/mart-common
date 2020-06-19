@@ -30,6 +30,6 @@ TEST_CASE( "Substring", "[im_str]" )
 	}
 	{
 		auto s = cs.substr_sentinel( 0, 'l' );
-		REQUIRE( s1 == "He" );
+		REQUIRE( s == "He" );
 	}
 }

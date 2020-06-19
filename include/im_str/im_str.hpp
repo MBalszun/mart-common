@@ -3,6 +3,7 @@
 
 #include "detail/config.hpp"
 #include "detail/ref_cnt_buf.hpp"
+#include "detail/string_view_mixin.hpp"
 
 #if IM_STR_USE_CUSTOM_DYN_ARRAY
 #include "detail/dynamic_array.hpp"
@@ -34,8 +35,8 @@ class im_zstr;
  * Forward declaration, as some im_str member functions return a
  * zero terminated im_str
  */
-class im_str : public std::string_view {
-	using Base_t = std::string_view;
+class im_str : public mba::_detail::str_view_mixin<im_str> {
+	using Base_t = mba::_detail::str_view_mixin<im_str>;
 
 protected:
 	using Handle_t = _detail_im_str::atomic_ref_cnt_buffer;
@@ -60,7 +61,7 @@ public:
 	// NOTE: Use only for string literals (arrays with static storage duration)!!!
 	template<std::size_t N>
 	constexpr im_str( const char ( &other )[N] ) noexcept
-		: std::string_view( other )
+		: _view( other )
 	// we don't have to copy the data to the freestore as string litterals already have static lifetime
 	{
 	}
@@ -83,7 +84,7 @@ public:
 	 * @return
 	 */
 	constexpr im_str( std::string_view string, trust_me_this_is_from_a_string_litteral_t ) noexcept
-		: std::string_view( string )
+		: _view( string )
 	{
 	}
 
@@ -100,7 +101,7 @@ public:
 	/* ############### Special member functions ##################################################################### */
 	constexpr im_str( const im_str& other ) noexcept = default;
 	constexpr im_str( im_str&& other ) noexcept
-		: std::string_view( _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} ) )
+		: _view( _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} ) )
 		, _handle( std::move( other._handle ) )
 	{
 	}
@@ -108,19 +109,21 @@ public:
 	// NOTE could be = defaulted in c++20 but needs to be written down explicitly in c++17 in order to be constexpr
 	constexpr im_str& operator=( const im_str& other ) noexcept
 	{
-		this->_handle                           = other._handle;
-		static_cast<std::string_view&>( *this ) = static_cast<const std::string_view&>( other );
+		this->_view   = other._view;
+		this->_handle = other._handle;
 		return *this;
 	}
 
 	constexpr im_str& operator=( im_str&& other ) noexcept
 	{
-		this->_as_strview() = _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} );
-		_handle             = std::move( other._handle );
+		this->_view   = _detail_im_str::c_expr_exchange( other._as_strview(), std::string_view{} );
+		this->_handle = std::move( other._handle );
 		return *this;
 	}
 
 	/* ################## String functions  ######################################################################### */
+	constexpr operator std::string_view() const { return this->_view; }
+
 	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
 	{
 		im_str retval;
@@ -131,7 +134,7 @@ public:
 
 	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::string_view range ) const
 	{
-		// TODO: structly speaking those pointer comparisons are UB
+		// TODO: strictly speaking those pointer comparisons are UB
 		assert( ( data() <= range.data() ) && ( range.data() + range.size() <= data() + size() ) );
 		im_str retval;
 		retval._as_strview() = range;
@@ -141,15 +144,16 @@ public:
 
 	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( iterator start, iterator end ) const
 	{
-		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer on platforms where they are
-		// not the same type
+		assert( end >= start );
+		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer
+		// if the iterator isn't a pointer
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
 	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr_sentinel( std::size_t offset, char sentinel ) const
 	{
-		const auto size = this->find( sentinel, offset );
-		return substr( offset, size == npos ? this->size() - offset : size - offset );
+		const auto size = _view.find( sentinel, offset );
+		return substr( offset, size - offset );
 	}
 
 	/*
@@ -202,14 +206,14 @@ public:
 	// split string on first occurence of c.
 	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
 	{
-		auto pos = this->find( c );
+		auto pos = _view.find( c );
 		return split_at( pos, s );
 	}
 
 	// split string on last occurence of c
 	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
 	{
-		auto pos = this->rfind( c );
+		auto pos = _view.rfind( c );
 		return split_at( pos, s );
 	}
 
@@ -220,37 +224,54 @@ public:
 		const auto split_cnt = 1 + std::count( begin(), end(), delimiter );
 
 		DynArray_t ret( split_cnt );
+		{
+			/* DANGER:
+			 * Inside this loop we create im_str copies of the current im_str, but don't bump the ref count one by one
+			 * for efficiency reasons, but only once at the end. In case an exception is thrown midway, we have to make
+			 * sure that the already created slices don't decrement the ref-count when they are destructed
+			 */
 
-		const std::string_view self_view = this->_as_strview();
+			struct ScopeGuard {
+				DynArray_t& slices;
+				bool        comitted = false;
+				~ScopeGuard()
+				{
+					if( !comitted ) {
+						for( auto& slice : slices ) {
+							slice.release();
+						}
+					}
+				}
+			} guard{ ret };
 
-		/* !!! DANGER: THIS LOOP MUST NOT THROW DUE TO THE USE OF detail::defer_ref_cnt_tag_t !!! */
-		std::size_t start_pos = 0;
-		for( auto& slice : ret ) {
+			const std::string_view self_view = this->_as_strview();
+			std::size_t            start_pos = 0;
+			for( auto& slice : ret ) {
 
-			const auto found_pos = this->find( delimiter, start_pos );
+				const auto found_pos = _view.find( delimiter, start_pos );
 
-			slice = im_str(
-				// std::string_view::substr(offset,count) allows count to be bigger than size,
-				// so we don't have to check for npos here
-				self_view.substr( start_pos, found_pos - start_pos ),
-				_handle,
-				_detail_im_str::defer_ref_cnt_tag // ref count will be incremented at the end of the function
-			);
+				slice = im_str(
+					// std::string_view::substr(offset,count) allows count to be bigger than size,
+					// so we don't have to check for npos here
+					self_view.substr( start_pos, found_pos - start_pos ),
+					_handle,
+					_detail_im_str::defer_ref_cnt_tag // ref count will be incremented at the end of the function
+				);
 
-			start_pos = found_pos + 1u;
-		}
-		_handle.add_ref_cnt( static_cast<int>( ret.size() ) );
+				start_pos = found_pos + 1u;
+			}
 
 #ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4307 ) // we know that this overflows
 #endif
-
-		assert( start_pos == std::string_view::npos + (std::size_t)1u );
-
+			assert( start_pos == std::string_view::npos + (std::size_t)1u );
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
+			guard.comitted = true;
+		}
+		_handle.add_ref_cnt( static_cast<int>( split_cnt ) );
 
 		return ret;
 	}
@@ -282,14 +303,14 @@ protected:
 	};
 
 	constexpr im_str( std::string_view sv, static_lifetime_tag )
-		: std::string_view( sv )
+		: _view( sv )
 	{
 	}
 
-	constexpr im_str( std::string_view                     sv,
+	constexpr im_str( std::string_view                             sv,
 					  const _detail_im_str::atomic_ref_cnt_buffer& data,
 					  _detail_im_str::defer_ref_cnt_tag_t ) noexcept
-		: std::string_view( sv )
+		: _view( sv )
 		, _handle{ data, _detail_im_str::defer_ref_cnt_tag_t{} }
 	{
 	}
@@ -297,7 +318,7 @@ protected:
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
 	constexpr im_str( _detail_im_str::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
-		: std::string_view( data, size )
+		: _view( data, size )
 		, _handle( std::move( handle ) )
 	{
 	}
@@ -308,11 +329,17 @@ protected:
 	friend void swap( std::string_view& l, im_str& r ) = delete;
 
 protected:
-	Handle_t _handle{};
+	std::string_view _view{};
+	Handle_t         _handle{};
 
-	constexpr std::string_view& _as_strview() { return static_cast<std::string_view&>( *this ); }
+	friend Base_t;
+	constexpr std::size_t _size_for_mixin() const noexcept { return _view.size(); }
+	constexpr const char* _data_for_mixin() const noexcept { return _view.data(); }
 
-	constexpr const std::string_view& _as_strview() const { return static_cast<const std::string_view&>( *this ); }
+	constexpr std::string_view&       _as_strview() { return _view; }
+	constexpr const std::string_view& _as_strview() const { return _view; }
+
+	void release() noexcept { _handle.release(); }
 
 	void _copy_from( const std::string_view other, _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
@@ -446,7 +473,7 @@ private:
 
 	template<class T>
 	friend im_zstr _detail_im_str_concat::range_helper( _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc,
-														const T&                                   args );
+														const T&                                           args );
 };
 
 constexpr void swap( im_zstr& l, im_zstr& r ) noexcept
@@ -500,8 +527,8 @@ im_zstr variadic_helper( const ARGS... args )
 	static_assert( ( std::is_same_v<ARGS, std::string_view> && ... ) );
 	const std::size_t newSize = ( 0 + ... + args.size() );
 
-	auto buffer
-		= ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
+	auto buffer = ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+		static_cast<int>( newSize ) );
 
 	auto* tmp_data_ptr = buffer.data;
 	( addTo( tmp_data_ptr, args ), ... );
@@ -517,8 +544,8 @@ im_zstr range_helper( const T& args )
 			  return s + std::string_view( str ).size();
 		  } );
 
-	auto buffer
-		= ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( static_cast<int>( newSize ) );
+	auto buffer = ::mba::_detail_im_str::atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer(
+		static_cast<int>( newSize ) );
 
 	auto* tmp_data_ptr = buffer.data;
 	for( auto&& e : args ) {
