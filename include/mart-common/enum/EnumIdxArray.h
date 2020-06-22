@@ -15,15 +15,14 @@
  */
 
 /* ######## INCLUDES ######### */
-/* Standard Library Includes */
-#include <array>
-#include <type_traits>
+/* Project Includes */
+#include "EnumHelpers.h"
+#include "../ArrayViewAdaptor.h"
 
 /* Proprietary Library Includes */
+/* Standard Library Includes */
+#include <type_traits>
 
-/* Project Includes */
-
-#include "EnumHelpers.h"
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {
@@ -34,22 +33,22 @@ namespace mart {
  * NOTE: Currently the enums have to be values that directly translate to 0-based indexes
  */
 template<class T, class EnumT, std::size_t N = mart::enumCnt<EnumT>()>
-struct EnumIdxArray : std::array<T, N> {
-	using Storage_t = std::array<T, N>;
+struct EnumIdxArray : ArrayViewAdaptor<T, EnumIdxArray<T, EnumT, N>> {
+	using Base_t    = ArrayViewAdaptor<T, EnumIdxArray<T, EnumT, N>>;
+	using Storage_t = T[N];
 
 	// only explicitly importing types used in the new memberfunctions to reduce typing
 	//(user will have automatically access to all member types of the base
-	using typename Storage_t::const_reference;
-	using typename Storage_t::reference;
-	using typename Storage_t::size_type;
+	using typename Base_t::const_reference;
+	using typename Base_t::reference;
+	using typename Base_t::size_type;
 
 	/* ###### CTORS ###### */
-	constexpr EnumIdxArray() noexcept
-		: Storage_t{} {};
-	constexpr EnumIdxArray( const EnumIdxArray& other ) = default;
-	constexpr EnumIdxArray( EnumIdxArray&& )            = default;
-	EnumIdxArray& operator=( const EnumIdxArray& ) = default;
-	EnumIdxArray& operator=( EnumIdxArray&& ) = default;
+	constexpr EnumIdxArray() = default;
+	constexpr EnumIdxArray( const EnumIdxArray& other )  = default;
+	constexpr EnumIdxArray( EnumIdxArray&& )             = default;
+	constexpr EnumIdxArray& operator=( const EnumIdxArray& ) = default;
+	constexpr EnumIdxArray& operator=( EnumIdxArray&& ) = default;
 
 	// This is a constructor forwarding the arguments to the internal array,
 	// but we have to make sure it doesn't superseed the copy constructor -> hence the enable_if
@@ -57,26 +56,33 @@ struct EnumIdxArray : std::array<T, N> {
 			 class... ARGS,
 			 class = std::enable_if_t<!std::is_same<EnumIdxArray<T, EnumT, N>, std::decay_t<A1>>::value>>
 	constexpr EnumIdxArray( A1&& arg, ARGS&&... args )
-		: Storage_t{{std::forward<A1>( arg ), std::forward<ARGS>( args )...}}
+		: _storage{ std::forward<A1>( arg ), std::forward<ARGS>( args )... }
 	{
 	}
 
 private:
 	/*#### data ####*/
-	static constexpr auto toIdx( EnumT e ) -> size_type
+	static constexpr auto toIdx( EnumT e ) -> std::size_t
 	{
 		return static_cast<size_type>( static_cast<std::underlying_type_t<EnumT>>( e ) );
 	};
-	Storage_t&                 as_array() { return static_cast<Storage_t&>( *this ); }
-	constexpr const Storage_t& as_array() const { return static_cast<const Storage_t&>( *this ); }
+
+	Storage_t _storage{};
 
 public:
-	/*#### container interface ####*/
-	reference                 at( EnumT pos ) { return as_array().at( toIdx( pos ) ); }
-	constexpr const_reference at( EnumT pos ) const { return as_array().at( toIdx( pos ) ); }
+	constexpr T*          _arrayView_data() noexcept { return _storage; }
+	constexpr const T*    _arrayView_data() const noexcept { return _storage; }
+	constexpr std::size_t _arrayView_size() const noexcept { return N; }
 
-	reference                 operator[]( EnumT pos ) { return as_array()[toIdx( pos )]; }
-	constexpr const_reference operator[]( EnumT pos ) const { return as_array()[toIdx( pos )]; }
+	constexpr reference       operator[]( EnumT pos ) { return _storage[toIdx( pos )]; }
+	constexpr const_reference operator[]( EnumT pos ) const { return _storage[toIdx( pos )]; }
+
+	constexpr void fill( const T& value )
+	{
+		for( auto& e : _storage ) {
+			e = value;
+		};
+	}
 };
 
 } // namespace mart
