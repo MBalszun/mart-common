@@ -70,6 +70,12 @@ template<int K, class T, int N, int... I>
 #endif // ! _MSC_VER
 }
 
+template<class U, class T, int N, int... I>
+[[nodiscard]] constexpr Vec<U, N> elements_cast_helper( const Vec<T, N>& base, std::integer_sequence<int, I...> )
+{
+	return { static_cast<U>(base[I])... };
+}
+
 } // namespace _vec_impl
 
 /*################# Vec class implementation ######################*/
@@ -137,6 +143,12 @@ struct Vec {
 		// return [this]<int... I>( std::integer_sequence<int, I...> ) { return Vec<T, K>{( *this )[I]...}; }
 		//( std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
+	}
+
+	template<class U>
+	[[nodiscard]] constexpr mart::Vec<U, N> elments_cast_to() const
+	{
+		return _impl_mart_vec::elements_cast_helper<U>( *this, std::make_integer_sequence<int, N>{} );
 	}
 };
 
@@ -211,6 +223,12 @@ struct Vec<T, 2> {
 
 		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
 	}
+
+	template<class U>
+	[[nodiscard]] constexpr mart::Vec<U, N> elments_cast_to() const
+	{
+		return _impl_mart_vec::elements_cast_helper<U>( *this, std::make_integer_sequence<int, N>{} );
+	}
 };
 
 template<class T>
@@ -284,6 +302,12 @@ struct Vec<T, 3> {
 	[[nodiscard]] constexpr Vec<T, K> toKDim() const
 	{
 		return _impl_mart_vec::toKDim_helper<K>( *this, std::make_integer_sequence<int, ( K < N ? K : N )>{} );
+	}
+
+	template<class U>
+	[[nodiscard]] constexpr mart::Vec<U, N> elments_cast_to() const
+	{
+		return _impl_mart_vec::elements_cast_helper<U>( *this, std::make_integer_sequence<int, N>{} );
 	}
 };
 
