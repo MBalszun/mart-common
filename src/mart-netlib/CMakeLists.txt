@@ -27,7 +27,7 @@ target_include_directories( mart-netlib-portlayer
 )
 #windows.h doesn't yet work with the new preprocessor
 target_compile_options( mart-netlib-portlayer
-	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/experimental:preprocessor->
+	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor->
 )
 
 ######
