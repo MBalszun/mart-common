@@ -121,7 +121,7 @@ auto Socket::sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMem
 auto Socket::send( mart::ConstMemoryView data ) -> mart::ConstMemoryView
 {
 	const auto res = _socket_handle.send( data, 0 );
-	if( !res.result ) {
+	if( !res.result.success() ) {
 		throw nw::generic_nw_error(
 			make_error_message_with_appended_last_errno( res.result.error_code(), "Failed to send data. Details:  " ) );
 	}
