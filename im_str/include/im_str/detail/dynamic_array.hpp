@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace mba::detail {
+namespace mba::_detail_im_str {
 
 /**
  * A minimal implementation of an array with fixed runtim-size.
@@ -28,7 +28,17 @@ public:
 	T*       end() noexcept { return _data.get() + _size; };
 	const T* end() const noexcept { return _data.get() + _size; };
 
+	T&       operator[]( std::size_t i ) noexcept { return _data[i]; }
+	const T& operator[]( std::size_t i ) const noexcept { return _data[i]; }
+
 	constexpr dynamic_array() noexcept = default;
+
+	dynamic_array( std::initializer_list<T> list )
+		: _size( list.size() )
+		, _data( std::make_unique<T[]>( list.size() ) )
+	{
+		std::copy( list.begin(), list.end(), _data.get() );
+	}
 
 	dynamic_array( std::size_t size )
 		: _size( size )
@@ -51,7 +61,7 @@ public:
 
 	dynamic_array& operator=( const dynamic_array& other )
 	{
-		if( other._size > _size ) { _data = std::make_unique<T[]>( other._size ); }
+		if( other._size !=  _size ) { _data = std::make_unique<T[]>( other._size ); }
 
 		_size = other._size;
 		std::copy( other.begin(), other.end(), begin() );

@@ -1,25 +1,69 @@
-# ImStr [![Build Status](https://travis-ci.org/MBalszun/im_str.svg?branch=master)](https://travis-ci.org/Mike-Bal/im_str)
-An immutable string class which doesn't allocate if constructed from a string litteral.
+# ImStr [![Build Status](https://travis-ci.org/MBalszun/im_str.svg?branch=master)](https://travis-ci.org/MBalszun/im_str)
+### **NOTE: This readme is an early draft. It’s known to be incomplet and incorrekt ;)**
 
-**NOTE: This readme is an early draft. It’s known to be incomplet and incorrekt**
+An immutable, ref-counted string class
+- Doesn't allocate if constructed from a string litteral.
+- Provides convenient split and concatenation functionality.
+- Requires c++17
+- Optional support for `std::pmr::memory_resource` (but not for `std::pmr::allocator`)
+- Can be a constexpr variable in c++20 when constructed from a string litteral.
+
+*) Note "String litteral" means from a `const char c[N]` object, which is blindly assumed to be a string litteral.
 
 # Desciption
-The central class of this library is the immutable string type `im_str`. Essentially it is a `std::string_view` (with some additional member functions like `split`) that either points to a string litteral or owns the data it points to (in a shared manner).
+The central class of this library is the immutable string type `im_str` and it's zero terminated version `im_zstr`. Conceptually it is a `std::string_view` (with some additional member functions like `split`) that either points to a string litteral or owns the data it points to via a shared pointer. The main motivation behind this type was to have a string type that -- on the one hand -- doesn't force allocation and copying if the data it is constructed from has static storage duration anyway (such as string litterals) but that is - on the other hand - transparently takes care of allocation and dealocation when necessary (other than std::string_view).
 
-The main idea behind it is to have a light weight string type that minimizes allocations - in particular when created when from string litterals - and is easier to analyze for the optimizer than `std::string`.
+
+	#include <im_str/im_str.hpp>
+
+	#include <iostream>
+	#include <string_view>
+
+	struct AppConfig {
+		mba::im_str log_file_name;
+		mba::im_str greeting;
+	};
+
+	// in c++17 this needs to be const instead of constexpr
+	constexpr AppConfig default_config{ "log.txt", "Hello, World! How are you today?" };
+
+	AppConfig make_config( int argc, char** argv )
+	{
+		if( argc >= 3 ) {
+			return AppConfig{
+				mba::im_str::from_c_str( argv[1] ),
+				mba::im_str::from_c_str( argv[2] )
+			};
+		} else {
+			return default_config;
+		}
+	}
+
+	void run( const AppConfig& entry )
+	{
+		std::cout << entry.greeting << std::endl;
+	}
+
+	int main( int argc, char** argv )
+	{
+		auto config = make_config( argc, argv );
+		run( config );
+	}
 
 # Usage
+## Integration
 
 The library is header only so you can just copy the content of the `include` directory to whereever you want it and add the folder to the include path. The other possiblility is to use it as a subdirectory from your cmake file i.e.
 
     add_subdirectory( <path-to-im_str-root> )
     target_link_libraries( my_app PRIVATE ImStr::im_str )
 
-This library requires c++17 (the cmake target deliberately doesn't pass the cxx_std_17 requirement though)
+It currently doesn't support installation and usage via `find_package`
 
-# API
-## Overview
-At this point, the API is essentially a superset of `std::string_view` with some added member functions for string splitting. The advantage compared to `std::string_view` is that `im_str` ensures the string data remains valid **and unchanged** during its lifetime, so there is no danger of dangling (e.g. when creating a subview of a temporary string).
+
+## API overview
+At this point, the API is essentially a superset of `std::string_view` with some added member functions for string splitting.
+The advantage compared to `std::string_view` is that `im_str` ensures the string data remains valid **and unchanged** during its lifetime, so there is no danger of dangling (e.g. when creating a subview of a temporary string).
 
 Usage is pretty much the same as you would expect from an immutable, ref-counted string type (TODO: Add full API ref)
 
@@ -30,60 +74,60 @@ Usage is pretty much the same as you would expect from an immutable, ref-counted
 
     int main() {
 		using namespace mba;
-        
+
 		im_str name = "John";
 		assert( name == "John" );
 		assert( name.size() == 4 );
-		std::cout << name; // Will print "John";
 
 		im_str cpy = name;
-		name       = im_str( "Jane Doe" );
-		assert( cpy == "John" );
+		name       = im_str( "Jane Doe" ); // No allocation here
+		assert( cpy == "John" );           // cpy hasn't changed when reassigning the original name variable
 
-		auto [first, second] = name.split_on_first( ' ' );
+		auto [first1, second1] = name.split_on_first( ' ' );
+		assert( first1 == "Jane" );
+		assert( second1 == "Doe" );
 
-		name = im_str {};
-		cpy  = im_str {};
-
-		assert( first == "Jane" );
-		assert( second == "Doe" );
+		auto [first2, second2] = im_str( "Hello;World" ).split_on_first( ';', mba::im_str::Split::After );
+		assert( first2 == "Hello;" );
+		assert( second == "World" );
     }
 
 
-Even though `im_str` doesn't implement SSO (yet), there isn't a single allocation happening in the above code. Allocations are neccesary, when an `im_str` is created from something other than a string litteral or another `im_str`:
+Even though `im_str` doesn't implement SSO (yet), there isn't a single allocation happening in the above code.
+Allocations are only neccesary, when an `im_str` is created from something other than a string litteral or another `im_str`:
 
     std::string name = "Mike";
-    mba::im_str  is           = mba::im_str( name );                   // This allocates
+    mba::im_str  is  = mba::im_str( name );          // This allocates
 
     mba::im_str full_greeting = mba::concat( "Hello, ", name, "!\n" ); // This will also allocate (once)
 
     std::cout << full_greeting; // Prints "Hello, Mike!", followed by a newline
 
-Just like string_view, im_str is not guaranteed to be zero terminated (this can be queried via the member `im_str::is_zero_terminated()` though.
-However, the library also provides the type `im_zstr`, which is from `im_str` and is guaranteed to be always zero terminated. `concat` actually returns a `im_zstr`
+Just like string_view, im_str is not guaranteed to be zero terminated (this can be queried via the member `im_str::is_zero_terminated()` though).
+However, the library also provides the type `im_zstr`, which is derived from `im_str` and is guaranteed to be always zero terminated. `concat` actually returns a `im_zstr`
 
 	using namespace mba;
-    
+
 	im_str full = "Hello, World!";
 	assert( full.is_zero_terminated() );
 
 	im_str sub = full.substr( 0, 3 );
 	assert( sub.is_zero_terminated() == false );
 
-	im_zstr subz = sub.create_zstr();    // This will allocate
+	im_zstr subz = sub.create_zstr();    // This will allocate because `sub` isn't zero terminated
 	assert( subz.is_zero_terminated() ); // This will always be true
 
-	im_zstr fullz = std::move( full ).create_zstr(); // This  will not allocate
+	im_zstr fullz = std::move( full ).create_zstr(); // This  will not allocate and not change the ref count
 	assert( full.empty() );
 	c_func( fullz.c_str() );
-    
+
 
 ## [TODO] Full API description
 ### `im_str`
 ### `im_zstr`
 
 Same as `im_str`, but guaranteed to be zero terminated and hence provides `.c_str()` member. This is e.g. the result from `concat`.
-When created from a `im_str` via object `create_zstr()`, the member function first checks if the string data is already zero terminated, in which case it just bumps the ref-count and the created `im_zstr` object shares the original data. Otherwise creates a copy of the data on the heap.
+When created from a `im_str` via `create_zstr()`, the member function first checks if the string data is already zero terminated, in which case it just bumps the ref-count and the created `im_zstr` object shares the original data. Otherwise creates a copy of the data on the heap.
 
 ### `concat`
 
@@ -133,7 +177,7 @@ where compilers usually are not able to optimize other code based on the value o
 
 TODO
 
-# Design Decisions
+# Controversial Design Decisions
 Generally speaking, this library tends to err on the side of simplicity over genericity / flexibility. It is mainly used in a relativley narrow set of applications and I rather optimize for specific usecases than paying the overhead (bet it compile-time, runtime, binary size or code complexity) which often results from overly generic designs whose benefits I'm not (yet) able to reap. Also, the lib is in it's infancy, so I just didn't come around to properly implement some interesting features.
 
 ## Inheriting from `std::string_vew`

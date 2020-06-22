@@ -4,31 +4,22 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <new>     // placement new
 #include <utility> // std::move
-#include <cstdlib>
 
-#ifndef IM_STR_USE_ALLOC
-	#if __has_include( <memory_resource>)
-		#include <memory_resource>
-		#define IM_STR_USE_ALLOC 1
-	#endif
-#else
-	#define IM_STR_USE_ALLOC 0
-#endif
+#include "./config.hpp"
 
-
-
-namespace mba::detail {
+namespace mba::_detail_im_str {
 
 #ifdef IM_STR_DEBUG_HOOKS
 inline namespace debug_version {
 struct Stats {
-	std::atomic_uint64_t total_cnt_accesses {0};
-	std::atomic_uint64_t total_allocs {0};
-	std::atomic_uint64_t current_allocs {0};
-	std::atomic_uint64_t inc_ref_cnt {0};
-	std::atomic_uint64_t dec_ref_cnt {0};
+	std::atomic_uint64_t total_cnt_accesses{ 0 };
+	std::atomic_uint64_t total_allocs{ 0 };
+	std::atomic_uint64_t current_allocs{ 0 };
+	std::atomic_uint64_t inc_ref_cnt{ 0 };
+	std::atomic_uint64_t dec_ref_cnt{ 0 };
 
 	void inc_ref() noexcept
 	{
@@ -50,7 +41,10 @@ struct Stats {
 
 	void dealloc() noexcept { current_allocs.fetch_sub( 1, std::memory_order_relaxed ); }
 
-	std::uint64_t get_total_cnt_accesses() const noexcept{ return total_cnt_accesses.load( std::memory_order_relaxed ); };
+	std::uint64_t get_total_cnt_accesses() const noexcept
+	{
+		return total_cnt_accesses.load( std::memory_order_relaxed );
+	};
 	std::uint64_t get_total_allocs() const noexcept { return total_allocs.load( std::memory_order_relaxed ); };
 	std::uint64_t get_current_allocs() const noexcept { return current_allocs.load( std::memory_order_relaxed ); };
 	std::uint64_t get_inc_ref_cnt() const noexcept { return inc_ref_cnt.load( std::memory_order_relaxed ); };
@@ -77,13 +71,13 @@ struct Stats {
 };
 #else
 struct Stats {
-	constexpr Stats() noexcept = default;
+	constexpr Stats() noexcept                     = default;
 	constexpr Stats( const Stats& other ) noexcept = default;
 
-	constexpr void inc_ref() noexcept {}
-	constexpr void dec_ref() noexcept {}
-	constexpr void alloc() noexcept {}
-	constexpr void dealloc() noexcept {}
+	constexpr void inc_ref() noexcept { }
+	constexpr void dec_ref() noexcept { }
+	constexpr void alloc() noexcept { }
+	constexpr void dealloc() noexcept { }
 	constexpr void reset() noexcept {};
 
 	constexpr std::uint64_t get_total_cnt_accesses() const noexcept { return 0; };
@@ -96,7 +90,7 @@ struct Stats {
 
 static Stats& stats()
 {
-	static Stats stats {};
+	static Stats stats{};
 	return stats;
 }
 
@@ -105,20 +99,14 @@ constexpr struct defer_ref_cnt_tag_t {
 
 // Note: std::exchange is not constexpr in c++17
 template<class T, class U = T>
-constexpr T c_expr_exchange( T& obj, U&& new_value )
+constexpr T c_expr_exchange( T& obj, U&& new_value ) noexcept
 {
 	T old_value = std::move( obj );
 	obj         = std::forward<U>( new_value );
 	return old_value;
 }
 
-inline constexpr std::size_t c_expr_max( std::size_t l, std::size_t r )
-{
-	return l > r ? l : r;
-}
-
 struct AllocResult;
-
 /**
  * Note: Almost all of the member functions are labled constexpr.
  * However, they can only be used in a constexpr context if the
@@ -129,28 +117,33 @@ class atomic_ref_cnt_buffer {
 	using size_type = int;
 
 public:
+/*
+ * Use different types	to somewhat mitigate the ODR viaolation problem:
+ * Function versions that have been compiled with support for  std::pmr::memory_resource will
+ * get a different mangled name than functions without
+ */
 #if IM_STR_USE_ALLOC
 	using alloc_t     = std::pmr::memory_resource;
 	using alloc_ptr_t = alloc_t*;
 #else
 	using alloc_ptr_t = std::nullptr_t;
 #endif
-	/*#### Constructors and special member functions ######*/
+	/*vvvv Constructors and special member functions vvvvv*/
 	static AllocResult allocate_null_terminated_char_buffer( int size, alloc_ptr_t = nullptr );
 
 	constexpr atomic_ref_cnt_buffer() noexcept = default;
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t ) noexcept
-		: _cnt {other._cnt}
+		: _cnt{ other._cnt }
 	{
 	}
 
 	constexpr atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other ) noexcept
-		: _cnt {other._cnt}
+		: _cnt{ other._cnt }
 	{
 		_incref();
 	}
 	constexpr atomic_ref_cnt_buffer( atomic_ref_cnt_buffer&& other ) noexcept
-		: _cnt {c_expr_exchange( other._cnt, nullptr )}
+		: _cnt{ c_expr_exchange( other._cnt, nullptr ) }
 	{
 	}
 
@@ -170,7 +163,7 @@ public:
 		return *this;
 	}
 
-	~atomic_ref_cnt_buffer() { _decref(); }
+	IM_STR_CONSTEXPR_IN_CPP_20 ~atomic_ref_cnt_buffer() { _decref(); }
 
 	friend constexpr void swap( atomic_ref_cnt_buffer& l, atomic_ref_cnt_buffer& r ) noexcept
 	{
@@ -179,11 +172,23 @@ public:
 		l._cnt   = r._cnt;
 		r._cnt   = tmp;
 	}
-	/*#### API ######*/
 
-	constexpr int add_ref_cnt( int cnt ) const
+	/*^^^^ Constructors and special member functions ^^^^*/
+
+	/*vvvv API vvvv*/
+
+	/**
+	 * @brief Bump the ref count by \p cnt
+	 *
+	 * Intended to be used with the atomic_ref_cnt_buffer( const atomic_ref_cnt_buffer& other, defer_ref_cnt_tag_t )
+	 * constructor
+	 *
+	 * @param cnt
+	 * @return new ref count
+	 */
+	constexpr int add_ref_cnt( int cnt ) const noexcept
 	{
-		if( !_cnt ) {
+		if( _cnt == nullptr ) {
 			return 0;
 		} else {
 			stats().inc_ref();
@@ -191,10 +196,16 @@ public:
 		}
 	}
 
-	friend constexpr bool operator==( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt == nullptr; }
-	friend constexpr bool operator==( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt == nullptr; }
-	friend constexpr bool operator!=( const atomic_ref_cnt_buffer& l, std::nullptr_t ) { return l._cnt != nullptr; }
-	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) { return r._cnt != nullptr; }
+	constexpr void release() { _cnt = nullptr; }
+
+	/*^^^^ API ^^^^*/
+
+	// clang-format off
+	friend constexpr bool operator==( const atomic_ref_cnt_buffer& l, std::nullptr_t ) noexcept { return l._cnt == nullptr; }
+	friend constexpr bool operator==( std::nullptr_t, const atomic_ref_cnt_buffer& r ) noexcept { return r._cnt == nullptr; }
+	friend constexpr bool operator!=( const atomic_ref_cnt_buffer& l, std::nullptr_t ) noexcept { return l._cnt != nullptr; }
+	friend constexpr bool operator!=( std::nullptr_t, const atomic_ref_cnt_buffer& r ) noexcept { return r._cnt != nullptr; }
+	// clang-format on
 
 private:
 	struct Header {
@@ -202,7 +213,8 @@ private:
 		size_type   size;
 		alloc_ptr_t alloc;
 	};
-	static_assert( sizeof( Header ) <= 4+4+sizeof(void*) ); // make sure there is no padding and we use 32bit integers
+	static_assert( sizeof( Header )
+				   <= 4 + 4 + sizeof( void* ) ); // make sure there is no padding and we use 32bit integers
 
 	// This is used in allocate_null_terminated_char_buffer
 	constexpr explicit atomic_ref_cnt_buffer( Header& buffer ) noexcept
@@ -246,23 +258,23 @@ inline AllocResult atomic_ref_cnt_buffer::allocate_null_terminated_char_buffer( 
 	assert( size >= 0 );
 	stats().alloc();
 
-	const auto total_size       = sizeof( Header ) + size + 1;
+	const auto total_size = sizeof( Header ) + size + 1;
 
 #if IM_STR_USE_ALLOC
-	const bool bool_use_default = resource == nullptr;
-	char* const start = (char*)( bool_use_default                //
-									 ? std::malloc( total_size ) //
-									 : resource->allocate( total_size, alignment ) );
+	const bool  bool_use_default = ( resource == nullptr );
+	char* const start            = (char*)( bool_use_default                //
+                                     ? std::malloc( total_size ) //
+                                     : resource->allocate( total_size, alignment ) );
 #else
 	char* const start = (char*)std::malloc( total_size );
 #endif
 
-	auto* const header_ptr = new( start ) Header {Cnt_t {1}, size_type {size}, resource};
+	auto* const header_ptr = new( start ) Header{ Cnt_t{ 1 }, size_type{ size }, resource };
 
 	auto* const data_ptr = start + sizeof( Header ); // Start of string
 	data_ptr[size]       = '\0';                     // zero terminate
 
-	return {data_ptr, atomic_ref_cnt_buffer {*header_ptr}};
+	return { data_ptr, atomic_ref_cnt_buffer{ *header_ptr } };
 }
 
 inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
@@ -274,8 +286,9 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 	if( alloc == nullptr ) {
 		std::free( header );
 	} else {
-		size_type size = header->size;
-		alloc->deallocate( header, size, alignment );
+		size_type  size       = header->size;
+		const auto total_size = sizeof( Header ) + size + 1;
+		alloc->deallocate( header, total_size, alignment );
 	}
 #else
 	std::free( header );
@@ -286,6 +299,6 @@ inline void atomic_ref_cnt_buffer::dealloc_buffer( Header* header )
 } // inline namespace debug_version
 #endif
 
-} // namespace mba::detail
+} // namespace mba::_detail_im_str
 
 #endif

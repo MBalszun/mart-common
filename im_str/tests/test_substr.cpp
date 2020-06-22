@@ -28,4 +28,8 @@ TEST_CASE( "Substring", "[im_str]" )
 		auto s = cs.substr( cs.begin() + 2, cs.end() );
 		REQUIRE( s == "lloWorld" );
 	}
+	{
+		auto s = cs.substr_sentinel( 0, 'l' );
+		REQUIRE( s == "He" );
+	}
 }
