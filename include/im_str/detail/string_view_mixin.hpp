@@ -23,6 +23,9 @@ namespace mba::_detail {
 /**
  * @brief A mixin that provides a simple interface similar to std::string_view
  *
+ * Currently without the elaborate find and substring memberfunctions that
+ * std::String_view provides
+ *
  * Types that want to use it need to provide the following two functions:
  *
  *     const char* _data_for_mixin() const noexcept;
@@ -95,7 +98,7 @@ protected:
 	constexpr const T& _as_derived() const noexcept { return static_cast<T const&>( *this ); }
 
 	// Special member functions
-	constexpr str_view_mixin() noexcept                           = default;
+	constexpr str_view_mixin() noexcept                        = default;
 	constexpr str_view_mixin( const str_view_mixin& ) noexcept = default;
 	constexpr str_view_mixin( str_view_mixin&& ) noexcept      = default;
 	constexpr str_view_mixin& operator=( const str_view_mixin& ) noexcept = default;
