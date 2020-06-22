@@ -163,7 +163,7 @@ public:
 		return *this;
 	}
 
-	IM_STR_CONSTEXPR_DESTRUCTOR ~atomic_ref_cnt_buffer() { _decref(); }
+	IM_STR_CONSTEXPR_IN_CPP_20 ~atomic_ref_cnt_buffer() { _decref(); }
 
 	friend constexpr void swap( atomic_ref_cnt_buffer& l, atomic_ref_cnt_buffer& r ) noexcept
 	{

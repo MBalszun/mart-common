@@ -9,12 +9,12 @@
 #ifndef IM_STR_USE_CONSTEXPR_DESTRUCTOR
 	#if __cpp_constexpr >= 201907
 		#define IM_STR_USE_CONSTEXPR_DESTRUCTOR 1
-		#define IM_STR_CONSTEXPR_DESTRUCTOR constexpr
+		#define IM_STR_CONSTEXPR_IN_CPP_20 constexpr
 	#else
 		#define IM_STR_USE_CONSTEXPR_DESTRUCTOR 0
-		#define IM_STR_CONSTEXPR_DESTRUCTOR
+		#define IM_STR_CONSTEXPR_IN_CPP_20
 	#endif
-#endif // !IM_STR_CONSTEXPR_DESTRUCTOR
+#endif // !IM_STR_USE_CONSTEXPR_DESTRUCTOR
 
 
 // Handle custom allocation logic via pmr memory_resource

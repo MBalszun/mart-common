@@ -52,7 +52,7 @@ public:
 	// Default ConstString points at empty string
 	constexpr im_str() noexcept = default;
 
-	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_str( std::string_view                                   other,
+	IM_STR_CONSTEXPR_IN_CPP_20 explicit im_str( std::string_view                                   other,
 												 _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
@@ -93,7 +93,7 @@ public:
 	template<class T>
 	im_str( T const* const& other ) = delete;
 
-	IM_STR_CONSTEXPR_DESTRUCTOR static im_str from_c_str( const char* str )
+	IM_STR_CONSTEXPR_IN_CPP_20 static im_str from_c_str( const char* str )
 	{
 		return im_str{ std::string_view( str ) };
 	};
@@ -124,7 +124,7 @@ public:
 	/* ################## String functions  ######################################################################### */
 	constexpr operator std::string_view() const { return this->_view; }
 
-	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
 	{
 		im_str retval;
 		retval._as_strview() = this->_as_strview().substr( offset, count );
@@ -132,7 +132,7 @@ public:
 		return retval;
 	}
 
-	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( std::string_view range ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::string_view range ) const
 	{
 		// TODO: strictly speaking those pointer comparisons are UB
 		assert( ( data() <= range.data() ) && ( range.data() + range.size() <= data() + size() ) );
@@ -142,7 +142,7 @@ public:
 		return retval;
 	}
 
-	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr( iterator start, iterator end ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( iterator start, iterator end ) const
 	{
 		assert( end >= start );
 		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer
@@ -150,7 +150,7 @@ public:
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
-	IM_STR_CONSTEXPR_DESTRUCTOR im_str substr_sentinel( std::size_t offset, char sentinel ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr_sentinel( std::size_t offset, char sentinel ) const
 	{
 		const auto size = _view.find( sentinel, offset );
 		return substr( offset, size - offset );
@@ -173,7 +173,7 @@ public:
 	}
 
 	// split string into two substrings [0,i) and [i, this->size() )
-	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_at( std::size_t i ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str> split_at( std::size_t i ) const
 	{
 		assert( i < size() || i == npos );
 		if( i == npos ) { return { *this, {} }; }
@@ -181,7 +181,7 @@ public:
 	}
 
 	// split string into two substrings [0,i) and [i, this->size() )
-	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_at( std::size_t i, Split s ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str> split_at( std::size_t i, Split s ) const
 	{
 		assert( i < size() || i == npos );
 		if( i == npos ) { return { *this, {} }; }
@@ -190,28 +190,28 @@ public:
 	}
 
 	// split string on first occurence of c.
-	[[deprecated( "Use split_on_first instead" )]] IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str>
+	[[deprecated( "Use split_on_first instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
 																			   split_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_first( c, s );
 	}
 
 	// split string on last occurence of c.
-	[[deprecated( "Use split_on_last instead" )]] IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str>
+	[[deprecated( "Use split_on_last instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
 																			  split_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_last( c, s );
 	}
 
 	// split string on first occurence of c.
-	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str> split_on_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		auto pos = _view.find( c );
 		return split_at( pos, s );
 	}
 
 	// split string on last occurence of c
-	IM_STR_CONSTEXPR_DESTRUCTOR std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str> split_on_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		auto pos = _view.rfind( c );
 		return split_at( pos, s );
@@ -287,12 +287,12 @@ public:
 	/**
 	 * Returns a copy if the string is already zero terminated and calls unshare otherwise
 	 */
-	IM_STR_CONSTEXPR_DESTRUCTOR im_zstr create_zstr() const&;
+	IM_STR_CONSTEXPR_IN_CPP_20 im_zstr create_zstr() const&;
 
 	/**
 	 * Moves "this" into the return value if string is already zero terminated and calls unshare otherwise
 	 */
-	IM_STR_CONSTEXPR_DESTRUCTOR im_zstr create_zstr() &&;
+	IM_STR_CONSTEXPR_IN_CPP_20 im_zstr create_zstr() &&;
 
 protected:
 	class static_lifetime_tag {
@@ -399,7 +399,7 @@ public:
 		: im_str( _detail_im_str::getEmptyZeroTerminatedStringView(), im_str::static_lifetime_tag{} )
 	{
 	}
-	IM_STR_CONSTEXPR_DESTRUCTOR explicit im_zstr( std::string_view other )
+	IM_STR_CONSTEXPR_IN_CPP_20 explicit im_zstr( std::string_view other )
 		: im_str( other.data() == nullptr ? _detail_im_str::getEmptyZeroTerminatedStringView() : other )
 	{
 	}
@@ -426,7 +426,7 @@ public:
 	{
 	}
 
-	IM_STR_CONSTEXPR_DESTRUCTOR static im_zstr from_c_str( const char* str )
+	IM_STR_CONSTEXPR_IN_CPP_20 static im_zstr from_c_str( const char* str )
 	{
 		return im_zstr{ std::string_view( str ) };
 	};
@@ -493,7 +493,7 @@ inline im_zstr im_str::unshare() const
 	return im_zstr( static_cast<std::string_view>( *this ) );
 }
 
-IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() const&
+IM_STR_CONSTEXPR_IN_CPP_20 inline im_zstr im_str::create_zstr() const&
 {
 	if( is_zero_terminated() ) {
 		return im_zstr{ { *this }, is_zero_terminated_tag{} }; // just copy
@@ -502,7 +502,7 @@ IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() const&
 	}
 }
 
-IM_STR_CONSTEXPR_DESTRUCTOR inline im_zstr im_str::create_zstr() &&
+IM_STR_CONSTEXPR_IN_CPP_20 inline im_zstr im_str::create_zstr() &&
 {
 	if( is_zero_terminated() ) {
 		return im_zstr{ std::move( *this ), is_zero_terminated_tag{} }; // already zero terminated - just move
