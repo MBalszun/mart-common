@@ -53,7 +53,7 @@ public:
 	constexpr im_str() noexcept = default;
 
 	IM_STR_CONSTEXPR_IN_CPP_20 explicit im_str( std::string_view                                   other,
-												 _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
+												_detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
 	}
@@ -97,6 +97,7 @@ public:
 	{
 		return im_str{ std::string_view( str ) };
 	};
+
 
 	/* ############### Special member functions ##################################################################### */
 	constexpr im_str( const im_str& other ) noexcept = default;
@@ -199,14 +200,14 @@ public:
 
 	// split string on first occurence of c.
 	[[deprecated( "Use split_on_first instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
-																			   split_first( char c = ' ', Split s = Split::Drop ) const
+																			  split_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_first( c, s );
 	}
 
 	// split string on last occurence of c.
 	[[deprecated( "Use split_on_last instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
-																			  split_last( char c = ' ', Split s = Split::Drop ) const
+																			 split_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_last( c, s );
 	}
@@ -298,13 +299,15 @@ public:
 		return ret;
 	}
 
-	constexpr bool is_zero_terminated() const { return this->data()[size()] == '\0'; }
+	constexpr bool is_zero_terminated() const noexcept { return this->data()[size()] == '\0'; }
+
+	constexpr bool wrapps_a_string_litteral() const noexcept { return _handle == nullptr; }
 
 	/**
 	 * This will create a new im_str (actually a im_zstr) whose data resides in a freshly
 	 * allocated memory block
 	 */
-	im_zstr unshare() const;
+	IM_STR_CONSTEXPR_IN_CPP_20 im_zstr unshare() const;
 
 	/**
 	 * Returns a copy if the string is already zero terminated and calls unshare otherwise
@@ -342,17 +345,16 @@ protected:
 	{
 	}
 
-	constexpr im_str( std::string_view                             sv,
-					  const _detail_im_str::atomic_ref_cnt_buffer& data,
-					  _detail_im_str::defer_ref_cnt_tag_t ) noexcept
+	constexpr im_str( std::string_view sv, const Handle_t& data, _detail_im_str::defer_ref_cnt_tag_t ) noexcept
 		: _view( sv )
 		, _handle{ data, _detail_im_str::defer_ref_cnt_tag_t{} }
 	{
 	}
+
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
-	constexpr im_str( _detail_im_str::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
+	constexpr im_str( Handle_t&& handle, const char* data, size_t size )
 		: _view( data, size )
 		, _handle( std::move( handle ) )
 	{
@@ -374,7 +376,7 @@ protected:
 	constexpr std::string_view&       _as_strview() { return _view; }
 	constexpr const std::string_view& _as_strview() const { return _view; }
 
-	void release() noexcept { _handle.release(); }
+	constexpr void release() noexcept { _handle.release(); }
 
 	void _copy_from( const std::string_view other, _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
@@ -473,12 +475,6 @@ public:
 		assert( im_str::is_zero_terminated() );
 		return true;
 	}
-
-	constexpr bool wrapps_a_string_litteral() const noexcept { return _handle == nullptr; }
-
-	// Deleted, because this function is inherited from std::string_view and
-	// would break im_zstr's invariant of always being zero terminated
-	constexpr void remove_suffix( size_type n ) = delete;
 
 	friend constexpr void swap( im_zstr& l,
 								im_zstr& r ) noexcept; // needs to be defined out of line, otherwise swap(handle,handle)
