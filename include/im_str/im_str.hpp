@@ -217,7 +217,21 @@ public:
 		return split_at( pos, s );
 	}
 
-	DynArray_t split_full( char delimiter ) const noexcept
+	/**
+	 * @brief  Splits string at each occurence of \p delimiter (dropping the delimiter)
+	 *
+	 * Example:
+	 * auto groups = im_str("123;456;78").split_full(';');
+	 * assert( groups[0] == "123" );
+	 * assert( groups[1] == "456" );
+	 * assert( groups[2] == "58" );
+	 *
+	 * @param delimiter	 char on which to split
+	 *
+	 * @return An array containing all substrings. If \p delimiter is not found, the array holds a single entry, which
+	 * is a complete copy of this
+	 */
+	DynArray_t split_full( const char delimiter, const Split s = Split::Drop ) const noexcept
 	{
 		if( size() == 0 ) { return {}; }
 
@@ -226,9 +240,9 @@ public:
 		DynArray_t ret( split_cnt );
 		{
 			/* DANGER:
-			 * Inside this loop we create im_str copies of the current im_str, but don't bump the ref count one by one
-			 * for efficiency reasons, but only once at the end. In case an exception is thrown midway, we have to make
-			 * sure that the already created slices don't decrement the ref-count when they are destructed
+			 * Inside the following loop we create im_str copies of the current im_str, but don't bump the ref count one
+			 * by one for efficiency reasons, but only once at the end. In case an exception is thrown midway, we have
+			 * to make sure that the already created slices don't decrement the ref-count when they are destructed
 			 */
 
 			struct ScopeGuard {
@@ -248,17 +262,17 @@ public:
 			std::size_t            start_pos = 0;
 			for( auto& slice : ret ) {
 
-				const auto found_pos = _view.find( delimiter, start_pos );
+				const auto found_pos = _view.find( delimiter, start_pos + (s == Split::Before) );
 
 				slice = im_str(
 					// std::string_view::substr(offset,count) allows count to be bigger than size,
 					// so we don't have to check for npos here
-					self_view.substr( start_pos, found_pos - start_pos ),
+					self_view.substr( start_pos, found_pos - start_pos + ( s == Split::After ) ),
 					_handle,
 					_detail_im_str::defer_ref_cnt_tag // ref count will be incremented at the end of the function
 				);
 
-				start_pos = found_pos + 1u;
+				start_pos = found_pos + ( s == Split::Drop || s == Split::After );
 			}
 
 #ifdef _MSC_VER
