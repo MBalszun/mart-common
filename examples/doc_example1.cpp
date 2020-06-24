@@ -19,7 +19,7 @@ struct AppConfig {
 AppConfig make_config( int argc, char** argv )
 {
 	if( argc >= 3 ) {
-		return AppConfig{ mba::im_str::from_c_str( argv[1] ), mba::im_str::from_c_str( argv[2] ) };
+		return AppConfig{ mba::im_zstr::from_c_str( argv[1] ), mba::im_zstr::from_c_str( argv[2] ) };
 	} else {
 		return default_config;
 	}
