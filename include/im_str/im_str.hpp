@@ -124,25 +124,33 @@ public:
 	/* ################## String functions  ######################################################################### */
 	constexpr operator std::string_view() const { return this->_view; }
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) const& noexcept
 	{
-		im_str retval;
-		retval._as_strview() = this->_as_strview().substr( offset, count );
-		retval._handle       = this->_handle;
-		return retval;
+		return {
+			this->_as_strview().substr( offset, count ), //
+			this->_handle                                //
+		};
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::string_view range ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) && noexcept
+	{
+		return {
+			this->_as_strview().substr( offset, count ), //
+			std::move( this->_handle )                   //
+		};
+	}
+
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::string_view range ) const noexcept
 	{
 		// TODO: strictly speaking those pointer comparisons are UB
 		assert( ( data() <= range.data() ) && ( range.data() + range.size() <= data() + size() ) );
-		im_str retval;
-		retval._as_strview() = range;
-		retval._handle       = this->_handle;
-		return retval;
+		return {
+			range,        //
+			this->_handle //
+		};
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( iterator start, iterator end ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( iterator start, iterator end ) const noexcept
 	{
 		assert( end >= start );
 		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer
@@ -150,7 +158,7 @@ public:
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr_sentinel( std::size_t offset, char sentinel ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr_sentinel( std::size_t offset, char sentinel ) const noexcept
 	{
 		const auto size = _view.find( sentinel, offset );
 		return substr( offset, size - offset );
@@ -316,8 +324,21 @@ protected:
 	class is_zero_terminated_tag {
 	};
 
-	constexpr im_str( std::string_view sv, static_lifetime_tag )
+	constexpr im_str( std::string_view sv, static_lifetime_tag )  noexcept
 		: _view( sv )
+	{
+	}
+
+	// mostly used in substr
+	constexpr im_str( std::string_view sv, const Handle_t& data ) noexcept
+		: _view( sv )
+		, _handle{ data }
+	{
+	}
+
+	constexpr im_str( std::string_view sv, Handle_t&& data ) noexcept
+		: _view( sv )
+		, _handle{ std::move(data) }
 	{
 	}
 
