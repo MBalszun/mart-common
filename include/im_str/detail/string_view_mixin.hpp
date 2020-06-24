@@ -57,8 +57,12 @@ struct str_view_mixin {
 	constexpr size_type size() const noexcept { return this->_as_derived()._size_for_mixin(); }
 	constexpr size_type length() const noexcept { return this->_as_derived()._size_for_mixin(); }
 	constexpr bool      empty() const noexcept { return size() == 0; }
+	constexpr size_type max_size() const noexcept { return std::string_view{}.max_size(); };
 
 	constexpr char operator[]( size_type i ) const noexcept { return *( data() + i ); }
+
+	constexpr char front() const noexcept { return *data(); }
+	constexpr char back() const noexcept { return *( data() + size() - 1u ); }
 
 	// Iterators
 	constexpr iterator         begin() const noexcept { return data(); }
