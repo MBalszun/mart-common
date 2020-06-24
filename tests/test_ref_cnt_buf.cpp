@@ -33,7 +33,7 @@ TEST_CASE( "ref_cnt_buf_default_construction_does_nothing", "[im_str]" )
 	auto b2 = _detail_im_str::atomic_ref_cnt_buffer{};
 	auto b3( b2 );
 
-#ifdef __clang__
+#if defined( __clang__ ) &&  __clang_major__ >= 8
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
 #endif
@@ -42,7 +42,7 @@ TEST_CASE( "ref_cnt_buf_default_construction_does_nothing", "[im_str]" )
 	// TODO: also check with non-default constructed buffers
 	b1 = b1;
 
-#ifdef __clang__
+#if defined( __clang__ ) && __clang_major__ >= 8
 #pragma GCC diagnostic pop
 #endif
 
