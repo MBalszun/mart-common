@@ -50,8 +50,8 @@ using Vec3D = Vec<T, 3>;
 template<class T>
 using Vec4D = Vec<T, 4>;
 
-template<class T, int N>
-using Matrix = Vec<Vec<T, N>, N>; // each vector is a row
+template<class T, int N1, int N2 = N1>
+using Matrix = Vec<Vec<T, N2>, N1>; // each vector is a row
 
 namespace _impl_mart_vec {
 
