@@ -34,12 +34,12 @@ namespace _impl_print_chrono {
 
 // actual functions that take care of formatting
 // clang-format off
-	inline void printChronoUnit(std::ostream& out, std::chrono::nanoseconds v)	{ out << v.count() << "ns"; };
-	inline void printChronoUnit(std::ostream& out, std::chrono::microseconds v) { out << v.count() << "us"; };
-	inline void printChronoUnit(std::ostream& out, std::chrono::milliseconds v) { out << v.count() << "ms"; };
-	inline void printChronoUnit(std::ostream& out, std::chrono::seconds v)		{ out << v.count() << "s"; };
-	inline void printChronoUnit(std::ostream& out, std::chrono::minutes v)		{ out << v.count() << "min"; };
-	inline void printChronoUnit(std::ostream& out, std::chrono::hours v)		{ out << v.count() << "h"; };
+	inline void printChronoUnit(std::ostream& out, std::chrono::nanoseconds v)	{ out << v.count() << "ns"; }
+	inline void printChronoUnit(std::ostream& out, std::chrono::microseconds v) { out << v.count() << "us"; }
+	inline void printChronoUnit(std::ostream& out, std::chrono::milliseconds v) { out << v.count() << "ms"; }
+	inline void printChronoUnit(std::ostream& out, std::chrono::seconds v)		{ out << v.count() << "s";  }
+	inline void printChronoUnit(std::ostream& out, std::chrono::minutes v)		{ out << v.count() << "min";}
+	inline void printChronoUnit(std::ostream& out, std::chrono::hours v)		{ out << v.count() << "h";  }
 // clang-format on
 
 // wrapper for duration for which  operator<< gets overloaded in such a way, that the correct suffix is appended
@@ -55,7 +55,7 @@ struct PrintableDuration {
 	template<class Dur>
 	PrintableDuration<typename Dur::rep, typename Dur::period> as()
 	{
-		return {std::chrono::duration_cast<Dur>( value )};
+		return { std::chrono::duration_cast<Dur>( value ) };
 	}
 };
 
@@ -83,7 +83,7 @@ struct os_flag_guard {
 template<typename rep, typename period>
 inline auto sformat( std::chrono::duration<rep, period> dur ) -> _impl_print_chrono::PrintableDuration<rep, period>
 {
-	return _impl_print_chrono::PrintableDuration<rep, period>{dur};
+	return _impl_print_chrono::PrintableDuration<rep, period>{ dur };
 }
 
 template<typename rep, typename period, typename repto = rep, typename periodto = period>
@@ -91,7 +91,7 @@ inline auto sformat( std::chrono::duration<rep, period> dur, std::chrono::durati
 	-> _impl_print_chrono::PrintableDuration<repto, periodto>
 {
 	return _impl_print_chrono::PrintableDuration<repto, periodto>{
-		std::chrono::duration_cast<std::chrono::duration<repto, periodto>>( dur )};
+		std::chrono::duration_cast<std::chrono::duration<repto, periodto>>( dur ) };
 }
 
 enum class Pad : std::uint8_t { Middle, Left, Right };
@@ -166,13 +166,26 @@ inline std::ostream& operator<<( std::ostream& out, const formatted_data_range& 
 
 inline auto padded( std::string_view str, size_t total_length, Pad pad ) -> _impl_print::PaddedStringView
 {
-	return {str, total_length, pad};
+	return { str, total_length, pad };
 }
 
 inline auto sformat( mart::ConstMemoryView range, _impl_print::data_fmt_info fmt = _impl_print::default_data_fmt )
 {
-	return _impl_print::formatted_data_range{range, fmt};
+	return _impl_print::formatted_data_range{ range, fmt };
 }
+
+namespace chrono_ostream_op_overloads {
+
+// clang-format off
+inline std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds v)	{ out << v.count() << "ns";  return out; }
+inline std::ostream& operator<<(std::ostream& out, std::chrono::microseconds v) { out << v.count() << "us";  return out; }
+inline std::ostream& operator<<(std::ostream& out, std::chrono::milliseconds v) { out << v.count() << "ms";  return out; }
+inline std::ostream& operator<<(std::ostream& out, std::chrono::seconds v)		{ out << v.count() << "s";   return out; }
+inline std::ostream& operator<<(std::ostream& out, std::chrono::minutes v)		{ out << v.count() << "min"; return out; }
+inline std::ostream& operator<<(std::ostream& out, std::chrono::hours v)		{ out << v.count() << "h";   return out; }
+// clang-format on
+
+} // namespace chrono_stream_op_overloads
 
 } // namespace mart
 
