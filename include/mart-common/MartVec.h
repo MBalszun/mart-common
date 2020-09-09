@@ -820,6 +820,16 @@ template<class T, int N, class F, class Init_t>
 }
 
 template<class T, int N>
+[[nodiscard]] constexpr auto reduce( const Vec<T, N>& v )
+{
+	T init{};
+	for( int i = 0; i < N; ++i ) {
+		init += v[i];
+	}
+	return init;
+}
+
+template<class T, int N>
 [[nodiscard]] constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r )
 {
 	bool ret = true;
