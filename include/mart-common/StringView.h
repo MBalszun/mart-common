@@ -21,6 +21,10 @@
 #include <utility>
 #include <string_view>
 
+#ifdef __cpp_rtti
+#include <typeinfo>
+#endif
+
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
 
 namespace mart {

@@ -33,7 +33,7 @@ namespace port_layer {
 
 #ifdef MBA_UTILS_USE_WINSOCKS
 using native_handle_t = std::uintptr_t;
-enum class handle_t : native_handle_t { Invalid = ~0 };
+enum class handle_t : native_handle_t { Invalid = ~0ull };
 
 #else
 using native_handle_t = int;

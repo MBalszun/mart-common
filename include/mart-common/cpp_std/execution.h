@@ -44,9 +44,9 @@ using std::execution::parallel_policy;
 using std::execution::parallel_unsequenced_policy;
 using std::execution::sequenced_policy;
 
-constexpr const sequenced_policy&            seq        = std::execution::seq;
-constexpr const parallel_policy&             par        = std::execution::par;
-constexpr const parallel_unsequenced_policy& par_unsequ = std::execution::par_unseq;
+inline constexpr const sequenced_policy&            seq        = std::execution::seq;
+inline constexpr const parallel_policy&             par        = std::execution::par;
+inline constexpr const parallel_unsequenced_policy& par_unsequ = std::execution::par_unseq;
 
 } // namespace execution
 } // namespace mart
