@@ -61,16 +61,24 @@ struct PrintableDuration {
 
 } // namespace _impl_print_chrono
 
-struct os_flag_guard {
-	os_flag_guard( std::ostream& stream )
-		: _stream( stream )
+class os_flag_guard final {
+public:
+	explicit os_flag_guard( std::ostream& stream )
+		: _stream( &stream )
 		, _flags( stream.flags() )
+		, _fillc( stream.fill() )
 	{
 	}
-	~os_flag_guard() { _stream.flags( _flags ); }
+	~os_flag_guard()
+	{
+		_stream->fill( _fillc );
+		_stream->flags( _flags );
+	}
 
-	std::ostream&      _stream;
+private:
+	std::ostream*      _stream;
 	std::ios::fmtflags _flags;
+	char               _fillc;
 };
 
 /**
