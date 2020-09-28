@@ -500,6 +500,7 @@ ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::micros
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	dword to_ms = static_cast<dword>( std::chrono::duration_cast<std::chrono::milliseconds>( timeout ).count() );
+	if( to_ms == 0 && timeout != std::chrono::microseconds::zero() ) { to_ms = 1; }
 	auto  native_timeout = to_ms;
 #else
 	auto    to             = to_timeval( timeout );
