@@ -270,7 +270,9 @@ public:
 	{
 #ifdef MBA_UTILS_USE_WINSOCKS
 		DWORD to_ms = static_cast<DWORD>( std::chrono::duration_cast<std::chrono::milliseconds>( timeout ).count() );
-		auto  res   = this->setsockopt( SOL_SOCKET, SO_SNDTIMEO, to_ms );
+		// make sure a timeout != 0 isnt truncated to 0, which results in infinite timeout
+		if( to_ms == 0 && timeout != std::chrono::microseconds::zero() ) { to_ms = 1; }
+		auto res = this->setsockopt( SOL_SOCKET, SO_SNDTIMEO, to_ms );
 #else
 		auto to  = nw::to_timeval( timeout );
 		auto res = this->setsockopt( SOL_SOCKET, SO_SNDTIMEO, to );
@@ -282,6 +284,7 @@ public:
 	{
 #ifdef MBA_UTILS_USE_WINSOCKS
 		DWORD to_ms = static_cast<DWORD>( std::chrono::duration_cast<std::chrono::milliseconds>( timeout ).count() );
+		if( to_ms == 0 && timeout != std::chrono::microseconds::zero() ) { to_ms = 1; }
 		auto  res   = this->setsockopt( SOL_SOCKET, SO_RCVTIMEO, to_ms );
 #else
 		auto to  = nw::to_timeval( timeout );
