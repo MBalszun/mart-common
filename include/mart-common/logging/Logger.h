@@ -132,7 +132,11 @@ private:
 	// NOTE: this whole function will ever only be called once and only from initDefaultLogger
 	static Logger& _initDefaultLogger_impl( const LoggerConf_t& conf )
 	{
-		std::cout << "[MartLog] Initializing default logger\n";
+#if MART_LOG_MAX_LOG_LVL == MART_LOG_LOG_LVL_TRACE
+		if( conf.logLvl == mart::log::Level::Trace ) {
+			std::cout << "[MartLog] Initializing default logger" << std::endl;
+		}
+#endif //
 		static Logger instance( conf );
 		return instance;
 	}
