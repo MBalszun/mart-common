@@ -37,9 +37,10 @@ namespace nw {
 namespace ip {
 namespace udp {
 
-using endpoint = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::UDP>;
+using endpoint [[deprecated]] = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::UDP>;
 
-class Socket {
+class [[deprecated]]  Socket
+{
 public:
 	Socket()
 		: _socket_handle( socks::Domain::inet, socks::TransportType::datagram, 0 )
