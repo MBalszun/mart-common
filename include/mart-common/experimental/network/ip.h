@@ -312,8 +312,8 @@ struct basic_endpoint_v4 {
 	{
 		std::string_view suffix;
 		switch( p ) {
-			case TransportProtocol::UDP: suffix = " (UDP)";
-			case TransportProtocol::TCP: suffix = " (TCP)";
+			case TransportProtocol::UDP: suffix = " (UDP)"; break;
+			case TransportProtocol::TCP: suffix = " (TCP)"; break;
 			default: suffix = " (Unknown)";
 		}
 		return mba::concat( address.asString(), ":", std::to_string( port.inHostOrder() ), suffix );
