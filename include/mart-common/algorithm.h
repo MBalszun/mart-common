@@ -196,7 +196,6 @@ auto max_element( R&& range, Compare comp )
 	return std::max_element( begin( range ), end( range ), comp );
 }
 
-
 template<class R, class Projection, class Cmp>
 auto min_max_element_pr_cmp_impl( R&& range, const Projection pr, const Cmp cmp )
 	-> decltype( cmp( pr( *std::begin( range ) ), pr( *std::begin( range ) ) ), std::begin( range ) )
@@ -227,7 +226,6 @@ auto min_element( R&& range, const Projection pr, const Cmp cmp = std::less<>{} 
 	return ::mart::min_max_element_pr_cmp_impl( std::forward<R>( range ), pr, cmp );
 }
 
-
 template<class R, class Projection, class Cmp = std::greater<>>
 auto max_element( R&& range, const Projection pr, const Cmp cmp = std::greater<>{} )
 	-> decltype( cmp( pr( *std::begin( range ) ), pr( *std::begin( range ) ) ), std::begin( range ) )
@@ -238,21 +236,21 @@ auto max_element( R&& range, const Projection pr, const Cmp cmp = std::greater<>
 template<class R>
 auto minmax_element( R&& range ) -> std::pair<decltype( std::begin( range ) ), decltype( std::begin( range ) )>
 {
-	return std::minmax_element( range.begin(), range.end() );
+	return std::minmax_element( std::begin( range ), std::end( range ) );
 }
 
 template<class R, class Compare>
 auto minmax_element( R&& range, Compare comp )
 	-> std::pair<decltype( std::begin( range ) ), decltype( std::begin( range ) )>
 {
-	return std::minmax_element( range.begin(), range.end(), comp );
+	return std::minmax_element( std::begin( range ), std::end( range ), comp );
 }
 
 // transform
 template<class Input, class Output, class UnaryOperation>
 void transform( const Input& in, Output& out, UnaryOperation unary_op )
 {
-	std::transform( in.begin(), in.end(), out.begin(), unary_op );
+	std::transform( std::begin( in ), std::end( in ), std::begin( out ), unary_op );
 }
 
 /*### algorithm related ###*/
