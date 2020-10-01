@@ -35,7 +35,12 @@ namespace mart {
 template<class T, class EnumT, std::size_t N = mart::enumCnt<EnumT>()>
 struct EnumIdxArray : ArrayViewAdaptor<T, EnumIdxArray<T, EnumT, N>> {
 	using Base_t    = ArrayViewAdaptor<T, EnumIdxArray<T, EnumT, N>>;
-	using Storage_t = T[N];
+
+	// FIXME for some reson, the member zero initialization below (Storage_t _storage{};)
+	// fails if Storage_t is a plain T[N] on gcc-10
+	struct Storage_t {
+		T data[N];
+	};
 
 	// only explicitly importing types used in the new memberfunctions to reduce typing
 	//(user will have automatically access to all member types of the base
@@ -56,7 +61,7 @@ struct EnumIdxArray : ArrayViewAdaptor<T, EnumIdxArray<T, EnumT, N>> {
 			 class... ARGS,
 			 class = std::enable_if_t<!std::is_same<EnumIdxArray<T, EnumT, N>, std::decay_t<A1>>::value>>
 	constexpr EnumIdxArray( A1&& arg, ARGS&&... args )
-		: _storage{ std::forward<A1>( arg ), std::forward<ARGS>( args )... }
+		: _storage{ { std::forward<A1>( arg ), std::forward<ARGS>( args )... } }
 	{
 	}
 
@@ -70,16 +75,16 @@ private:
 	Storage_t _storage{};
 
 public:
-	constexpr T*          _arrayView_data() noexcept { return _storage; }
-	constexpr const T*    _arrayView_data() const noexcept { return _storage; }
+	constexpr T*          _arrayView_data() noexcept { return _storage.data; }
+	constexpr const T*    _arrayView_data() const noexcept { return _storage.data; }
 	constexpr std::size_t _arrayView_size() const noexcept { return N; }
 
-	constexpr reference       operator[]( EnumT pos ) { return _storage[toIdx( pos )]; }
-	constexpr const_reference operator[]( EnumT pos ) const { return _storage[toIdx( pos )]; }
+	constexpr reference       operator[]( EnumT pos ) { return _storage.data[toIdx( pos )]; }
+	constexpr const_reference operator[]( EnumT pos ) const { return _storage.data[toIdx( pos )]; }
 
 	constexpr void fill( const T& value )
 	{
-		for( auto& e : _storage ) {
+		for( auto& e : _storage.data ) {
 			e = value;
 		};
 	}
