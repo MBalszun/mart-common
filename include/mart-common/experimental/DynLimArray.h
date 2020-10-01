@@ -19,6 +19,7 @@
 
 #include <array>
 #include <utility>
+#include <stdexcept>
 
 /* Proprietary Library Includes */
 #include "../algorithm.h"
