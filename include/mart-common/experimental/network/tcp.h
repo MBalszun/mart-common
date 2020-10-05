@@ -35,10 +35,10 @@ namespace nw {
 namespace ip {
 namespace tcp {
 
-using endpoint [[deprecated]]  = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::TCP>;
+using endpoint = ip::_impl_details_ip::basic_endpoint_v4<TransportProtocol::TCP>;
 
 class Acceptor;
-class [[deprecated]] Socket
+class Socket
 {
 public:
 	Socket() = default;

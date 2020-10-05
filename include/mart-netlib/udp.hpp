@@ -82,7 +82,7 @@ public:
 	{
 		mart::nw::socks::port_layer::SockaddrIn addr{};
 		auto                                    res = _socket_handle.recvfrom( buffer, 0, addr );
-		return {res.received_data, endpoint( addr )};
+		return { res.received_data, endpoint( addr ) };
 	}
 	RecvfromResult recvfrom( mart::MemoryView buffer );
 
@@ -90,14 +90,19 @@ public:
 
 	bool set_tx_timeout( std::chrono::microseconds timeout ) { return _socket_handle.set_tx_timeout( timeout ); }
 	bool set_rx_timeout( std::chrono::microseconds timeout ) { return _socket_handle.set_rx_timeout( timeout ); }
-	std::chrono::microseconds get_tx_timeout() { return _socket_handle.get_tx_timeout(); }
-	std::chrono::microseconds get_rx_timeout() { return _socket_handle.get_rx_timeout(); }
+	std::chrono::microseconds get_tx_timeout() const { return _socket_handle.get_tx_timeout(); }
+	std::chrono::microseconds get_rx_timeout() const { return _socket_handle.get_rx_timeout(); }
 
 	bool set_blocking( bool should_block ) { return _socket_handle.set_blocking( should_block ).success(); }
 	bool is_blocking() { return _socket_handle.is_blocking(); }
 	bool is_valid() const { return _socket_handle.is_valid(); }
 
-	bool close() { return _socket_handle.close().success(); }
+	bool close()
+	{
+		_ep_local  = {};
+		_ep_remote = {};
+		return _socket_handle.close().success();
+	}
 
 	const endpoint& getLocalEndpoint() const { return _ep_local; }
 	const endpoint& getRemoteEndpoint() const { return _ep_remote; }

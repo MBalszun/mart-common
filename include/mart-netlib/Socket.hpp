@@ -217,12 +217,12 @@ public:
 	{
 		return port_layer::set_timeout( _handle, Direction::Rx, timeout ).success();
 	}
-	std::chrono::microseconds get_tx_timeout() noexcept
+	std::chrono::microseconds get_tx_timeout() const noexcept
 	{
 		return port_layer::get_timeout( _handle, Direction::Tx ).value_or( {} );
 	}
 
-	std::chrono::microseconds get_rx_timeout() noexcept
+	std::chrono::microseconds get_rx_timeout() const noexcept
 	{
 		return port_layer::get_timeout( _handle, Direction::Rx ).value_or( {} );
 	}
