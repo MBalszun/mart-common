@@ -23,6 +23,7 @@
 #include <mart-common/ArrayView.h>
 
 /* Standard Library Includes */
+#include <cassert>
 #include <chrono>
 #include <optional>
 #include <string_view>
@@ -66,7 +67,17 @@ public:
 	{
 		return _socket_handle.sendto( data, 0, ep.toSockAddr_in() ).remaining_data;
 	}
+	auto try_sendto_default( mart::ConstMemoryView data ) noexcept -> mart::ConstMemoryView
+	{
+		assert( _ep_remote.valid );
+		return _socket_handle.sendto( data, 0, _ep_remote.toSockAddr_in() ).remaining_data;
+	}
 	auto sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView;
+	auto sendto_default( mart::ConstMemoryView data ) -> mart::ConstMemoryView
+	{
+		assert( _ep_remote.valid );
+		return sendto( data, _ep_remote );
+	}
 
 	mart::MemoryView try_recv( mart::MemoryView buffer ) noexcept
 	{
@@ -104,8 +115,13 @@ public:
 		return _socket_handle.close().success();
 	}
 
-	const endpoint& getLocalEndpoint() const { return _ep_local; }
-	const endpoint& getRemoteEndpoint() const { return _ep_remote; }
+	//[[deprecated]] const endpoint& getLocalEndpoint() const noexcept { return _ep_local; }
+	//[[deprecated]] const endpoint& getRemoteEndpoint() const noexcept { return _ep_remote; }
+
+	const endpoint& get_local_endpoint() const { return _ep_local; }
+	const endpoint& get_remote_endpoint() const { return _ep_remote; }
+
+	void set_default_remote_endpoint( endpoint ep ) noexcept { _ep_remote = std::move( ep ); }
 
 private:
 	static bool _txWasSuccess( mart::ConstMemoryView data, nw::socks::ReturnValue<mart::nw::socks::txrx_size_t> ret )

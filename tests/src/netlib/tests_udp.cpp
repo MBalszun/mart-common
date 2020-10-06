@@ -25,13 +25,13 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 	// socket can't be rebinded to a different one
 	CHECK( !s2.try_bind( e1 ) );
 	CHECK_NOTHROW( s2.connect( e2 ) );
-	CHECK( s2.getLocalEndpoint() == e1 );
-	CHECK( s2.getRemoteEndpoint() == e2 );
+	CHECK( s2.get_local_endpoint() == e1 );
+	CHECK( s2.get_remote_endpoint() == e2 );
 
 	CHECK( s2.try_connect( e3 ) );
 
-	CHECK( s2.getLocalEndpoint() == e1 );
-	CHECK( s2.getRemoteEndpoint() == e3 );
+	CHECK( s2.get_local_endpoint() == e1 );
+	CHECK( s2.get_remote_endpoint() == e3 );
 
 	CHECK_NOTHROW( s2.send( mart::view_bytes( 5 ) ) );
 	// TODO calling sendto on a connected socket has different behavior on linux and windows
