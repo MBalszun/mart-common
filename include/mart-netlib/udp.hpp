@@ -117,8 +117,8 @@ public:
 		return _socket_handle.close().success();
 	}
 
-	//[[deprecated]] const endpoint& getLocalEndpoint() const noexcept { return _ep_local; }
-	//[[deprecated]] const endpoint& getRemoteEndpoint() const noexcept { return _ep_remote; }
+	[[deprecated]] const endpoint& getLocalEndpoint() const noexcept { return _ep_local; }
+	[[deprecated]] const endpoint& getRemoteEndpoint() const noexcept { return _ep_remote; }
 
 	const endpoint& get_local_endpoint() const { return _ep_local; }
 	const endpoint& get_remote_endpoint() const { return _ep_remote; }
