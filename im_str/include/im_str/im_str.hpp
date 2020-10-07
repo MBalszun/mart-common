@@ -53,7 +53,7 @@ public:
 	constexpr im_str() noexcept = default;
 
 	IM_STR_CONSTEXPR_IN_CPP_20 explicit im_str( std::string_view                                   other,
-												 _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
+												_detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc = nullptr )
 	{
 		_copy_from( other, alloc );
 	}
@@ -98,6 +98,7 @@ public:
 		return im_str{ std::string_view( str ) };
 	};
 
+
 	/* ############### Special member functions ##################################################################### */
 	constexpr im_str( const im_str& other ) noexcept = default;
 	constexpr im_str( im_str&& other ) noexcept
@@ -124,25 +125,33 @@ public:
 	/* ################## String functions  ######################################################################### */
 	constexpr operator std::string_view() const { return this->_view; }
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) const& noexcept
 	{
-		im_str retval;
-		retval._as_strview() = this->_as_strview().substr( offset, count );
-		retval._handle       = this->_handle;
-		return retval;
+		return {
+			this->_as_strview().substr( offset, count ), //
+			this->_handle                                //
+		};
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::string_view range ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::size_t offset = 0, std::size_t count = npos ) && noexcept
+	{
+		return {
+			this->_as_strview().substr( offset, count ), //
+			std::move( this->_handle )                   //
+		};
+	}
+
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( std::string_view range ) const noexcept
 	{
 		// TODO: strictly speaking those pointer comparisons are UB
 		assert( ( data() <= range.data() ) && ( range.data() + range.size() <= data() + size() ) );
-		im_str retval;
-		retval._as_strview() = range;
-		retval._handle       = this->_handle;
-		return retval;
+		return {
+			range,        //
+			this->_handle //
+		};
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( iterator start, iterator end ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr( iterator start, iterator end ) const noexcept
 	{
 		assert( end >= start );
 		// UGLY: start-begin()+data() is necessary to convert from an iterator to a pointer
@@ -150,7 +159,7 @@ public:
 		return substr( std::string_view( start - begin() + data(), static_cast<size_type>( end - start ) ) );
 	}
 
-	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr_sentinel( std::size_t offset, char sentinel ) const
+	IM_STR_CONSTEXPR_IN_CPP_20 im_str substr_sentinel( std::size_t offset, char sentinel ) const noexcept
 	{
 		const auto size = _view.find( sentinel, offset );
 		return substr( offset, size - offset );
@@ -191,14 +200,14 @@ public:
 
 	// split string on first occurence of c.
 	[[deprecated( "Use split_on_first instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
-																			   split_first( char c = ' ', Split s = Split::Drop ) const
+																			  split_first( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_first( c, s );
 	}
 
 	// split string on last occurence of c.
 	[[deprecated( "Use split_on_last instead" )]] IM_STR_CONSTEXPR_IN_CPP_20 std::pair<im_str, im_str>
-																			  split_last( char c = ' ', Split s = Split::Drop ) const
+																			 split_last( char c = ' ', Split s = Split::Drop ) const
 	{
 		return split_on_last( c, s );
 	}
@@ -217,7 +226,21 @@ public:
 		return split_at( pos, s );
 	}
 
-	DynArray_t split_full( char delimiter ) const noexcept
+	/**
+	 * @brief  Splits string at each occurence of \p delimiter (dropping the delimiter)
+	 *
+	 * Example:
+	 * auto groups = im_str("123;456;78").split_full(';');
+	 * assert( groups[0] == "123" );
+	 * assert( groups[1] == "456" );
+	 * assert( groups[2] == "58" );
+	 *
+	 * @param delimiter	 char on which to split
+	 *
+	 * @return An array containing all substrings. If \p delimiter is not found, the array holds a single entry, which
+	 * is a complete copy of this
+	 */
+	DynArray_t split_full( const char delimiter, const Split s = Split::Drop ) const noexcept
 	{
 		if( size() == 0 ) { return {}; }
 
@@ -226,9 +249,9 @@ public:
 		DynArray_t ret( split_cnt );
 		{
 			/* DANGER:
-			 * Inside this loop we create im_str copies of the current im_str, but don't bump the ref count one by one
-			 * for efficiency reasons, but only once at the end. In case an exception is thrown midway, we have to make
-			 * sure that the already created slices don't decrement the ref-count when they are destructed
+			 * Inside the following loop we create im_str copies of the current im_str, but don't bump the ref count one
+			 * by one for efficiency reasons, but only once at the end. In case an exception is thrown midway, we have
+			 * to make sure that the already created slices don't decrement the ref-count when they are destructed
 			 */
 
 			struct ScopeGuard {
@@ -248,17 +271,17 @@ public:
 			std::size_t            start_pos = 0;
 			for( auto& slice : ret ) {
 
-				const auto found_pos = _view.find( delimiter, start_pos );
+				const auto found_pos = _view.find( delimiter, start_pos + (s == Split::Before) );
 
 				slice = im_str(
 					// std::string_view::substr(offset,count) allows count to be bigger than size,
 					// so we don't have to check for npos here
-					self_view.substr( start_pos, found_pos - start_pos ),
+					self_view.substr( start_pos, found_pos - start_pos + ( s == Split::After ) ),
 					_handle,
 					_detail_im_str::defer_ref_cnt_tag // ref count will be incremented at the end of the function
 				);
 
-				start_pos = found_pos + 1u;
+				start_pos = found_pos + ( s == Split::Drop || s == Split::After );
 			}
 
 #ifdef _MSC_VER
@@ -276,13 +299,15 @@ public:
 		return ret;
 	}
 
-	constexpr bool is_zero_terminated() const { return this->data()[size()] == '\0'; }
+	constexpr bool is_zero_terminated() const noexcept { return this->data()[size()] == '\0'; }
+
+	constexpr bool wrapps_a_string_litteral() const noexcept { return _handle == nullptr; }
 
 	/**
 	 * This will create a new im_str (actually a im_zstr) whose data resides in a freshly
 	 * allocated memory block
 	 */
-	im_zstr unshare() const;
+	IM_STR_CONSTEXPR_IN_CPP_20 im_zstr unshare() const;
 
 	/**
 	 * Returns a copy if the string is already zero terminated and calls unshare otherwise
@@ -302,22 +327,34 @@ protected:
 	class is_zero_terminated_tag {
 	};
 
-	constexpr im_str( std::string_view sv, static_lifetime_tag )
+	constexpr im_str( std::string_view sv, static_lifetime_tag )  noexcept
 		: _view( sv )
 	{
 	}
 
-	constexpr im_str( std::string_view                             sv,
-					  const _detail_im_str::atomic_ref_cnt_buffer& data,
-					  _detail_im_str::defer_ref_cnt_tag_t ) noexcept
+	// mostly used in substr
+	constexpr im_str( std::string_view sv, const Handle_t& data ) noexcept
+		: _view( sv )
+		, _handle{ data }
+	{
+	}
+
+	constexpr im_str( std::string_view sv, Handle_t&& data ) noexcept
+		: _view( sv )
+		, _handle{ std::move(data) }
+	{
+	}
+
+	constexpr im_str( std::string_view sv, const Handle_t& data, _detail_im_str::defer_ref_cnt_tag_t ) noexcept
 		: _view( sv )
 		, _handle{ data, _detail_im_str::defer_ref_cnt_tag_t{} }
 	{
 	}
+
 	/**
 	 * private constructor, that takes ownership of a buffer and a size (used in _copy_from and _concat_impl)
 	 */
-	constexpr im_str( _detail_im_str::atomic_ref_cnt_buffer&& handle, const char* data, size_t size )
+	constexpr im_str( Handle_t&& handle, const char* data, size_t size )
 		: _view( data, size )
 		, _handle( std::move( handle ) )
 	{
@@ -339,7 +376,7 @@ protected:
 	constexpr std::string_view&       _as_strview() { return _view; }
 	constexpr const std::string_view& _as_strview() const { return _view; }
 
-	void release() noexcept { _handle.release(); }
+	constexpr void release() noexcept { _handle.release(); }
 
 	void _copy_from( const std::string_view other, _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
@@ -438,12 +475,6 @@ public:
 		assert( im_str::is_zero_terminated() );
 		return true;
 	}
-
-	constexpr bool wrapps_a_string_litteral() const noexcept { return _handle == nullptr; }
-
-	// Deleted, because this function is inherited from std::string_view and
-	// would break im_zstr's invariant of always being zero terminated
-	constexpr void remove_suffix( size_type n ) = delete;
 
 	friend constexpr void swap( im_zstr& l,
 								im_zstr& r ) noexcept; // needs to be defined out of line, otherwise swap(handle,handle)

@@ -133,19 +133,54 @@ TEST_CASE( "Split Separator multi", "[im_str]" )
 	}
 }
 
+void print( const mba::im_str::DynArray_t& sections )
+{
+	for( const auto& s : sections ) {
+		std::cout << '\"' << s << "\"" << ' ';
+	}
+	std::cout << std::endl;
+}
+
 TEST_CASE( "Split full", "[im_str]" )
 {
-	std::vector<im_str> ref{ "Hello", "my", "dear!", "How", "are", "you?" };
-	im_str::DynArray_t  result;
+	const std::string         base = "Hello my dear! How are you?";
+	const std::vector<im_str> ref_drop{ "Hello", "my", "dear!", "How", "are", "you?" };
+	const std::vector<im_str> ref_before{ "Hello", " my", " dear!", " How", " are", " you?" };
+	const std::vector<im_str> ref_after{ "Hello ", "my ", "dear! ", "How ", "are ", "you?" };
 
+	im_str::DynArray_t result;
 	{
-		std::string base = "Hello my dear! How are you?";
-		im_str      s( base );
-		result = s.split_full( ' ' );
+		im_str s( base );
+		result = s.split_full( ' ', mba::im_str::Split::Drop );
+	}
+	CHECK( result.size() == 6 );
+	{
+		auto res_drop = std::equal( ref_drop.begin(), ref_drop.end(), result.begin(), result.end() );
+		if( !res_drop ) { print( result ); }
+		CHECK( res_drop );
 	}
 
+	{
+		im_str s( base );
+		result = s.split_full( ' ', mba::im_str::Split::Before );
+	}
 	CHECK( result.size() == 6 );
-	CHECK( std::equal( ref.begin(), ref.end(), result.begin(), result.end() ) );
+	{
+		auto res_before = std::equal( ref_before.begin(), ref_before.end(), result.begin(), result.end() );
+		if( !res_before ) { print( result ); }
+		CHECK( res_before );
+	}
+
+	{
+		im_str s( base );
+		result = s.split_full( ' ', mba::im_str::Split::After );
+	}
+	CHECK( result.size() == 6 );
+	{
+		auto res_after = std::equal( ref_after.begin(), ref_after.end(), result.begin(), result.end() );
+		if( !res_after ) { print( result ); }
+		CHECK( res_after );
+	}
 }
 
 TEST_CASE( "Split_on_nonexisting_char", "[im_str]" )
