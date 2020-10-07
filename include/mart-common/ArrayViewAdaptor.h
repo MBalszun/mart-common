@@ -67,7 +67,7 @@ namespace mart {
 template<class T, class DerivedType>
 class ArrayViewAdaptor {
 public:
-    // clang format doesn't support alignment of individual parts of a declaration/definition
+	// clang format doesn't support alignment of individual parts of a declaration/definition
 	// clang-format off
 
 	//The usual type defs for c++ container
@@ -106,7 +106,9 @@ public:
 protected:
 	//special member functions are protected
 	//in order to prevent ArrayViewAdaptor to be instantiated on it's own
-	constexpr ArrayViewAdaptor() noexcept	= default;
+	constexpr                   ArrayViewAdaptor() noexcept	= default;
+	constexpr                   ArrayViewAdaptor( const  ArrayViewAdaptor& other ) noexcept	= default;
+	constexpr ArrayViewAdaptor& operator=       ( const  ArrayViewAdaptor& other ) noexcept	= default;
 
 private:
 	[[nodiscard]] constexpr       pointer _data()       noexcept { return static_cast<      DerivedType*>(this)->_arrayView_data(); }

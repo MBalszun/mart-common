@@ -19,13 +19,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <iterator> //iterator tags
-#include <stdexcept>
+#include <exception> // std::terminate
+#include <iterator>  //iterator tags
 #include <type_traits>
-#ifndef NDEBUG
-#include <string> //exception messages
-#endif
-
 /* Proprietary Library Includes */
 
 /* Project Includes */
@@ -94,14 +90,22 @@ using enable_if_random_it_t = std::enable_if_t<is_random_it_v<IT>>;
 template<class U, class K>
 using transfer_constness_t = std::conditional_t<std::is_const<U>::value, std::add_const_t<K>, K>;
 
+template<class U>
+using container_iterator_cat = typename std::iterator_traits<typename U::iterator>::iterator_category;
+
+template<class U, class value_type>
+constexpr auto has_compatible_value_type()
+{
+	return std::is_same_v<typename U::value_type,
+						  std::remove_const_t<value_type>> || std::is_same_v<typename U::value_type, value_type>;
+}
+
 template<class U, class value_type>
 constexpr auto is_compatible_container_helper( int )
 	-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == std::declval<U>().data() )
 {
-	return std::is_same<typename std::iterator_traits<typename U::iterator>::iterator_category,
-						std::random_access_iterator_tag>::value
-		   && ( std::is_same<typename U::value_type, std::remove_const_t<value_type>>::value
-				|| std::is_same<typename U::value_type, value_type>::value );
+	return std::is_base_of_v<std::random_access_iterator_tag, container_iterator_cat<U>> //
+		   && has_compatible_value_type<U, value_type>();
 };
 
 template<class U, class value_type>
@@ -206,11 +210,10 @@ public:
 	constexpr ArrayView& operator=( const ArrayView& other ) noexcept = default;
 
 	// conversion to view that can't be used to change the underlying data
-	operator ArrayView<const T>() const noexcept { return {_data, _size}; }
+	operator ArrayView<const T>() const noexcept { return { _data, _size }; }
 
 	/* #### view functions #### */
 	constexpr size_type length() const noexcept { return this->size(); }
-	constexpr bool      empty() const noexcept { return this->size() == 0; }
 
 	constexpr size_type size_inBytes() const noexcept { return _size * sizeof( value_type ); }
 
@@ -228,13 +231,13 @@ public:
 
 	constexpr ArrayView<T> max_subview( size_t offset, size_t count ) const noexcept
 	{
-		return offset > _size ? ArrayView<T>{} : ArrayView<T>{_data + offset, std::min( count, _size - offset )};
+		return offset > _size ? ArrayView<T>{} : ArrayView<T>{ _data + offset, std::min( count, _size - offset ) };
 	}
 
 	constexpr ArrayView<T> subview( size_t offset, size_t count ) const
 	{
-		_throwIfInvalidSubview( offset, count );
-		return ArrayView<T>{_data + offset, count};
+		_terminateIfInvalidSubview( offset, count );
+		return ArrayView<T>{ _data + offset, count };
 	}
 
 	/**
@@ -252,20 +255,20 @@ public:
 	 */
 	constexpr ArrayView<T> subview( size_t offset ) const
 	{
-		_throwIfInvalidSubview( offset, _size - offset );
-		return ArrayView<T>{_data + offset, _size - offset};
+		_terminateIfInvalidSubview( offset, _size - offset );
+		return ArrayView<T>{ _data + offset, _size - offset };
 	}
 
 	constexpr ArrayView<T> max_subview( size_t offset ) const noexcept
 	{
-		return offset > _size ? ArrayView{} : ArrayView{_data + offset, _size - offset};
+		return offset > _size ? ArrayView{} : ArrayView{ _data + offset, _size - offset };
 	}
 
 	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( size_t offset ) const
 	{
-		_throwIfOffsetOutOfRange( offset );
-		return std::pair<ArrayView<T>, ArrayView<T>>{ArrayView<T>{_data, offset},
-													 ArrayView<T>{_data + offset, _size - offset}};
+		_terminateIfOffsetOutOfRange( offset );
+		return std::pair<ArrayView<T>, ArrayView<T>>{ ArrayView<T>{ _data, offset },
+													  ArrayView<T>{ _data + offset, _size - offset } };
 	}
 
 	constexpr std::pair<ArrayView<T>, ArrayView<T>> split( const_iterator splitpoint ) const
@@ -276,32 +279,17 @@ public:
 	constexpr bool isValid() const noexcept { return _data != nullptr; }
 
 protected:
-	constexpr bool _throwIfOffsetOutOfRange( size_t idx ) const
+	constexpr void _terminateIfOffsetOutOfRange( size_t idx ) const
 	{
-		return idx <= _size ? true
-#ifndef NDEBUG
-							: throw std::out_of_range( "Tried to specify offset " + std::to_string( idx )
-													   + "into an Array view of size" + std::to_string( _size ) );
-#else
-							: throw std::out_of_range( "Tried to specify offset that exceeds size of array_view" );
-#endif
+		if( idx > _size ) std::terminate();
 	}
-	constexpr bool _throwIfInvalidSubview( size_t offset, size_t count ) const
+	constexpr void _terminateIfInvalidSubview( size_t offset, size_t count ) const
 	{
 		// this will trigger a compile time error, when called in a constexpr context
 		// XXX: nasty hack:
 		// c++11 constexpr functions need to have a return type other than void, although we are not interested in it
 		// here
-		return offset + count <= _size
-				   ? true
-#ifndef NDEBUG
-				   : throw std::out_of_range(
-					   std::string( "Tried to create a subview that would exceed the original array view." )
-					   + "Original size: " + std::to_string( _size ) + ". Offset/Count:" + std::to_string( offset )
-					   + "/" + std::to_string( count ) + "\n" );
-#else
-				   : throw std::out_of_range( "Tried to create a subview that would exceed the original array view." );
-#endif
+		if( offset + count > _size ) std::terminate();
 	}
 
 	pointer   _data = nullptr;
@@ -317,14 +305,14 @@ protected:
 template<class C, class = typename C::value_type>
 constexpr auto view_elements( const C& c ) noexcept -> mart::ArrayView<std::remove_reference_t<decltype( *c.data() )>>
 {
-	return {c};
+	return { c };
 }
 
 template<class C, class = typename C::value_type>
 constexpr auto view_elements_mutable( C& c ) noexcept
 	-> mart::ArrayView<std::remove_const_t<std::remove_reference_t<decltype( *c.data() )>>>
 {
-	return {c};
+	return { c };
 }
 
 template<class T>

@@ -42,24 +42,24 @@ TEST_CASE( "constructed_from_container_has_same_elements", "[ArrayView]" )
 	CHECK( std::equal( v3.begin(), v3.end(), view_v3.begin(), view_v3.end() ) );
 }
 
-TEST_CASE( "array_view_subview_throws_when_invalid_range_is_specified", "[ArrayView]" )
-{
-	int na[] = {-3, 1, 5, 6, 7, 8};
-
-	mart::ArrayView<int> view_na( na );
-
-	bool exception_thrown = false;
-
-	try {
-
-		[[maybe_unused]] auto sr = view_na.subview( 0, 100 );
-
-	} catch( ... ) {
-		exception_thrown = true;
-	}
-
-	CHECK( exception_thrown );
-}
+//TEST_CASE( "array_view_subview_throws_when_invalid_range_is_specified", "[ArrayView]" )
+//{
+//	int na[] = {-3, 1, 5, 6, 7, 8};
+//
+//	mart::ArrayView<int> view_na( na );
+//
+//	bool exception_thrown = false;
+//
+//	try {
+//
+//		[[maybe_unused]] auto sr = view_na.subview( 0, 100 );
+//
+//	} catch( ... ) {
+//		exception_thrown = true;
+//	}
+//
+//	CHECK( exception_thrown );
+//}
 
 TEST_CASE( "array_view_copy_works_and_doesnt_collide_with_general_std_copy_wrapper", "[ArrayView]" )
 {
