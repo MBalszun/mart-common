@@ -589,6 +589,15 @@ struct logical_or {
 	}
 };
 
+struct abs {
+	template<class T>
+	constexpr auto operator()( const T& l ) const noexcept
+	{
+		using std::abs;
+		return abs(l);
+	}
+};
+
 struct logical_and {
 	template<class T, class U>
 	constexpr auto operator()( const T& l, const U& r ) const noexcept
@@ -787,6 +796,7 @@ DEFINE_UNARY_ND_VECTOR_OP( floor, _impl_vec::floor )
 DEFINE_UNARY_ND_VECTOR_OP( round, _impl_vec::round )
 DEFINE_UNARY_ND_VECTOR_OP( lround, _impl_vec::lround )
 DEFINE_UNARY_ND_VECTOR_OP( iround, _impl_vec::iround )
+DEFINE_UNARY_ND_VECTOR_OP( abs, _impl_vec::abs )
 
 // min max
 DEFINE_HOMOGEN_ND_VECTOR_OP( max, _impl_vec::maximum )
