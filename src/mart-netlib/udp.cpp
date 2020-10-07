@@ -22,13 +22,13 @@ std::string_view errno_nr_as_string( mart::nw::socks::ErrorCode error, mart::Arr
 {
 #if __has_include( <charconv> )
 	auto res = std::to_chars( buffer.begin(), buffer.end(), error.raw_value() );
-	return {buffer.begin(), static_cast<std::string_view::size_type>( res.ptr - buffer.begin() )};
+	return { buffer.begin(), static_cast<std::string_view::size_type>( res.ptr - buffer.begin() ) };
 #else
 	auto res = std::to_string( error.raw_value() );
 	auto n   = std::min( res.size(), buffer.size() );
 
 	std::copy_n( res.begin(), n, buffer.begin() );
-	return {buffer.begin(), n};
+	return { buffer.begin(), n };
 #endif
 }
 
@@ -108,24 +108,22 @@ socks::ErrorCode Socket::try_connect( endpoint ep ) noexcept
 	return result;
 }
 
-auto Socket::sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView
+void Socket::sendto( mart::ConstMemoryView data, endpoint ep )
 {
 	const auto res = _socket_handle.sendto( data, 0, ep.toSockAddr_in() );
-	if( !res.result ) {
+	if( !_txWasSuccess( data, res ) ) {
 		throw nw::generic_nw_error( make_error_message_with_appended_last_errno(
 			res.result.error_code(), "Failed to send data to ", ep.toString(), ". Details:  " ) );
 	}
-	return res.remaining_data;
 }
 
-auto Socket::send( mart::ConstMemoryView data ) -> mart::ConstMemoryView
+void Socket::send( mart::ConstMemoryView data )
 {
 	const auto res = _socket_handle.send( data, 0 );
-	if( !res.result.success() ) {
+	if( !_txWasSuccess( data, res ) ) {
 		throw nw::generic_nw_error(
 			make_error_message_with_appended_last_errno( res.result.error_code(), "Failed to send data. Details:  " ) );
 	}
-	return res.remaining_data;
 }
 
 namespace {
@@ -152,7 +150,7 @@ Socket::RecvfromResult Socket::recvfrom( mart::MemoryView buffer )
 			res.result.error_code(), "Failed to receive data. Details:  " ) );
 	}
 
-	return {res.received_data, udp::endpoint( addr )};
+	return { res.received_data, udp::endpoint( addr ) };
 }
 
 mart::MemoryView Socket::recv( mart::MemoryView buffer )

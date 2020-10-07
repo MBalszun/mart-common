@@ -57,12 +57,12 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 	int buffer = 0;
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
 
-	CHECK( s.try_send( mart::view_bytes( buffer ) ).size() != 0 );
-	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ).isValid() );
+	CHECK( s.try_send( mart::view_bytes( buffer ) ) );
+	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ) );
 	{
 		udp::endpoint e4{};
-		CHECK( s.try_sendto( mart::view_bytes( buffer ), e4 ).size() != 0 );
-		CHECK_THROWS( s.sendto( mart::view_bytes( buffer ), e4 ).isValid() );
+		CHECK( s.try_sendto( mart::view_bytes( buffer ), e4 ) );
+		CHECK_THROWS( s.sendto( mart::view_bytes( buffer ), e4 ) );
 	}
 
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );

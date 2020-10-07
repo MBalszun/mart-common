@@ -56,27 +56,29 @@ public:
 	socks::ErrorCode try_connect( endpoint ep ) noexcept;
 	void             connect( endpoint ep );
 
-	/* All send functions return the remaining (non-sent) data */
-	auto try_send( mart::ConstMemoryView data ) noexcept -> mart::ConstMemoryView
+	bool try_send( mart::ConstMemoryView data ) noexcept
 	{
-		return _socket_handle.send( data, 0 ).remaining_data;
+		auto ret = _socket_handle.send( data, 0 );
+		return _txWasSuccess(data, ret);
 	}
-	auto send( mart::ConstMemoryView data ) -> mart::ConstMemoryView;
+	void send( mart::ConstMemoryView data );
 
-	auto try_sendto( mart::ConstMemoryView data, endpoint ep ) noexcept -> mart::ConstMemoryView
+	bool try_sendto( mart::ConstMemoryView data, endpoint ep ) noexcept
 	{
-		return _socket_handle.sendto( data, 0, ep.toSockAddr_in() ).remaining_data;
+		auto ret = _socket_handle.sendto( data, 0, ep.toSockAddr_in() );
+		return _txWasSuccess( data, ret );
 	}
-	auto try_sendto_default( mart::ConstMemoryView data ) noexcept -> mart::ConstMemoryView
+	bool try_sendto_default( mart::ConstMemoryView data )
 	{
 		assert( _ep_remote.valid );
-		return _socket_handle.sendto( data, 0, _ep_remote.toSockAddr_in() ).remaining_data;
+		auto ret = _socket_handle.sendto( data, 0, _ep_remote.toSockAddr_in() );
+		return _txWasSuccess(data,ret);
 	}
-	auto sendto( mart::ConstMemoryView data, endpoint ep ) -> mart::ConstMemoryView;
-	auto sendto_default( mart::ConstMemoryView data ) -> mart::ConstMemoryView
+	void sendto( mart::ConstMemoryView data, endpoint ep );
+	void sendto_default( mart::ConstMemoryView data )
 	{
 		assert( _ep_remote.valid );
-		return sendto( data, _ep_remote );
+		sendto( data, _ep_remote );
 	}
 
 	mart::MemoryView try_recv( mart::MemoryView buffer ) noexcept
@@ -124,9 +126,9 @@ public:
 	void set_default_remote_endpoint( endpoint ep ) noexcept { _ep_remote = std::move( ep ); }
 
 private:
-	static bool _txWasSuccess( mart::ConstMemoryView data, nw::socks::ReturnValue<mart::nw::socks::txrx_size_t> ret )
+	static inline bool _txWasSuccess( mart::ConstMemoryView data, const mart::nw::socks::RaiiSocket::SendResult& ret )
 	{
-		return ret.success() && mart::narrow<nw::socks::txrx_size_t>( data.size() ) == ret.value();
+		return ret.result.success() && mart::narrow<nw::socks::txrx_size_t>( data.size() ) == ret.result.value();
 	}
 	endpoint _ep_local{};
 	endpoint _ep_remote{};
