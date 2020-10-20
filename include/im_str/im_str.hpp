@@ -519,7 +519,7 @@ constexpr void swap( im_zstr& l, im_zstr& r ) noexcept
 	r._as_strview()    = t;
 }
 
-inline im_zstr im_str::unshare() const
+IM_STR_CONSTEXPR_IN_CPP_20 inline im_zstr im_str::unshare() const
 {
 	return im_zstr( static_cast<std::string_view>( *this ) );
 }
