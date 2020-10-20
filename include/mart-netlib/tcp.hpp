@@ -117,7 +117,7 @@ public:
 			throw generic_nw_error(
 				make_error_message_with_appended_last_errno( t_ep.result, "Could not get port of connected socket " ) );
 		}
-		_ep_local = t_ep.endpoint;
+		_ep_local = t_ep.ep;
 	}
 	void bind( endpoint ep )
 	{
@@ -170,7 +170,7 @@ public:
 private:
 	struct RetForGetSockAddress {
 		mart::net::socks::ErrorCode result;
-		endpoint                    endpoint;
+		endpoint                    ep;
 	};
 	static RetForGetSockAddress getSockAddress( const nw::socks::RaiiSocket& socket )
 	{
@@ -180,9 +180,9 @@ private:
 		ret.result = socket.getsockname( t_locaddr );
 
 		if( ret.result ) {
-			ret.endpoint = endpoint( t_locaddr );
+			ret.ep = endpoint( t_locaddr );
 		} else {
-			ret.endpoint = endpoint{};
+			ret.ep = endpoint{};
 		}
 
 		return ret;
@@ -290,7 +290,7 @@ public:
 		auto sock = _socket_handle.accept( addr );
 		auto res  = Socket::getSockAddress( sock );
 		if( sock.is_valid() && res.result.success() ) {
-			return Socket( std::move( sock ), res.endpoint, endpoint( addr ) );
+			return Socket( std::move( sock ), res.ep, endpoint( addr ) );
 		} else {
 			return {};
 		}
@@ -308,7 +308,7 @@ public:
 		auto sock = _socket_handle.accept( addr );
 		auto res  = Socket::getSockAddress( sock );
 		if( sock.is_valid() && res.result.success() ) {
-			return Socket( std::move( sock ), res.endpoint, endpoint( addr ) );
+			return Socket( std::move( sock ), res.ep, endpoint( addr ) );
 		} else {
 			return {};
 		}
