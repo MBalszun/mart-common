@@ -56,6 +56,8 @@ TEST_CASE( "tcp_simple_exchange", "[net]" )
 		return ac.accept( std::chrono::milliseconds( 1000 ) );
 	} );
 
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
+
 	tcp::Socket s2;
 	s2.bind( e2 );
 	s2.connect( e1 );
