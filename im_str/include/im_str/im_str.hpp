@@ -288,7 +288,7 @@ public:
 #pragma warning( push )
 #pragma warning( disable : 4307 ) // we know that this overflows
 #endif
-			assert( start_pos == std::string_view::npos + (std::size_t)1u );
+			assert( start_pos == std::string_view::npos + ( std::size_t )( s == Split::Drop || s == Split::After ) );
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
