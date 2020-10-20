@@ -37,7 +37,7 @@ jobs:
 
 
 install:
-  - git clone https://github.com/catchorg/Catch2.git && mkdir -p Catch2/build && cd Catch2/build
+  - git clone https://github.com/catchorg/Catch2.git -b v2.13.2 && mkdir -p Catch2/build && cd Catch2/build
   - cmake -DCMAKE_INSTALL_PREFIX=~/cmake_local -DCATCH_BUILD_TESTING=OFF -DCATCH_ENABLE_WERROR=OFF -DCATCH_INSTALL_DOCS=OFF ..
   - cmake --build . --target install
   - cd ../..
