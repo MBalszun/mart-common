@@ -51,7 +51,7 @@ TEST_CASE( "tcp_simple_exchange", "[net]" )
 	tcp::endpoint e1 = { mart::nw::ip::address_local_host, mart::nw::ip::port_nr{ 1584 } };
 	tcp::endpoint e2 = { mart::nw::ip::address_local_host, mart::nw::ip::port_nr{ 1486 } };
 
-	auto s1_future = std::async( [&] {
+	auto s1_future = std::async( std::launch::async, [&] {
 		tcp::Acceptor ac( e1 );
 		return ac.accept( std::chrono::milliseconds( 1000 ) );
 	} );
