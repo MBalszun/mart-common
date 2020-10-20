@@ -71,9 +71,7 @@ public:
 
 	constexpr bool isZeroTerminated() const noexcept { return this->is_zero_terminated(); }
 
-#if !MART_COMMON_STRING_VIEW_USE_STD1
 	operator mart::StringView() const noexcept { return mart::StringView( std::string_view( *this ) ); }
-#endif
 
 	mba::im_zstr createZStr() const& noexcept { return this->create_zstr(); }
 
