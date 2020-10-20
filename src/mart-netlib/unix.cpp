@@ -11,3 +11,4 @@ namespace un {
 namespace mart::nw::socks::detail {
 template class DgramSocket<mart::nw::un::endpoint>;
 }
+

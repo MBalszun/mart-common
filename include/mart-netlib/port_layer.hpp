@@ -78,6 +78,8 @@ ReturnValue<txrx_size_t> recvfrom( handle_t handle, byte_range_mut buf, int flag
 ErrorCode setsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range data ) noexcept;
 ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption optname, byte_range_mut& buffer ) noexcept;
 
+ErrorCode getsockname( handle_t handle, Sockaddr& addr ) noexcept;
+
 ErrorCode get_last_socket_error() noexcept;
 bool      waInit() noexcept;
 

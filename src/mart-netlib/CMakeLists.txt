@@ -39,6 +39,7 @@ target_sources(mart-netlib
 	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/ip.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/udp.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/detail/socket_base.cpp
 )
 
 if(MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET)

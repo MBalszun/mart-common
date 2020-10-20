@@ -143,18 +143,22 @@ constexpr std::optional<port_nr> try_parse_v4_port( const std::string_view strin
 
 enum class TransportProtocol { Udp, Tcp };
 
+
 namespace _impl_details_ip {
+
+
 
 [[noreturn]] void _throw_ipv4_parse_fail_invalid_format( std::string_view str );
 [[noreturn]] void _throw_ipv4_parse_fail_port( std::string_view str, std::string_view port );
 
 struct basic_endpoint_v4_base {
 	using abi_endpoint_type = mart::nw::socks::port_layer::SockaddrIn;
+	static constexpr socks::Domain domain = socks::Domain::Inet;
 
 	/* ####### State ############ */
 	address_v4 address{};
 	port_nr    port{};
-	bool       valid = false;
+	bool       _valid = false;
 
 	/* ####### constructors ############ */
 	constexpr basic_endpoint_v4_base() noexcept = default;
@@ -164,21 +168,21 @@ struct basic_endpoint_v4_base {
 	constexpr basic_endpoint_v4_base( address_v4 address, port_nr port ) noexcept
 		: address( address )
 		, port( port )
-		, valid{true}
+		, _valid{true}
 	{
 	}
 
 	constexpr basic_endpoint_v4_base( uint32_host_t address, uint16_host_t port ) noexcept
 		: address( address )
 		, port( port )
-		, valid{true}
+		, _valid{true}
 	{
 	}
 
 	constexpr basic_endpoint_v4_base( std::string_view address, uint16_host_t port ) noexcept
 		: address( address_v4( address ) )
 		, port( port )
-		, valid{true}
+		, _valid{true}
 	{
 	}
 
@@ -201,7 +205,7 @@ struct basic_endpoint_v4_base {
 				_throw_ipv4_parse_fail_port( str, addr_port_pair.second );
 			}
 		}();
-		valid = true;
+		_valid = true;
 	}
 
 	mart::nw::socks::port_layer::SockaddrIn toSockAddr_in() const noexcept
@@ -213,6 +217,8 @@ struct basic_endpoint_v4_base {
 	mart::nw::socks::port_layer::SockaddrIn toSockAddr() const noexcept { return toSockAddr_in(); }
 
 	mba::im_zstr toString() const;
+
+	constexpr bool valid() const noexcept { return _valid; }
 
 protected:
 	mba::im_zstr toStringEx( TransportProtocol p ) const;
@@ -246,7 +252,7 @@ struct basic_endpoint_v4 : _impl_details_ip::basic_endpoint_v4_base {
 
 	friend constexpr bool operator!=( basic_endpoint_v4 l, basic_endpoint_v4 r ) noexcept { return !( l == r ); }
 
-	static constexpr std::optional<basic_endpoint_v4<p>> try_parse( std::string_view str )
+	static constexpr std::optional<basic_endpoint_v4<p>> try_parse( std::string_view str ) noexcept
 	{
 		auto rs = _impl_details_ip::try_parse_basic_v4_endpoint( str );
 		if( rs.has_value() ) {
@@ -269,7 +275,7 @@ constexpr bool is_valid_v4_endpoint( std::string_view str )
 }
 
 template<TransportProtocol p>
-constexpr std::optional<basic_endpoint_v4<p>> try_parse_v4_endpoint( std::string_view str )
+constexpr std::optional<basic_endpoint_v4<p>> try_parse_v4_endpoint( std::string_view str ) noexcept
 {
 	return basic_endpoint_v4<p>::try_parse( str );
 }

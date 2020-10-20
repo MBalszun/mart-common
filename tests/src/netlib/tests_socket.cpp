@@ -1,3 +1,5 @@
+#include <mart-netlib/RaiiSocket.hpp>
+
 #include <mart-netlib/Socket.hpp>
 
 #include <mart-common/enum/EnumHelpers.h>

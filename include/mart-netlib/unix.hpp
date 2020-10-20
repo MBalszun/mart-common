@@ -24,7 +24,7 @@
 #include <filesystem>
 #include <string_view>
 
-#include "detail/dgram_socket_base.hpp"
+#include "detail/socket_base.hpp"
 
 namespace mart::nw {
 // classes related to the unix sockets protocol in general
@@ -33,6 +33,7 @@ namespace un {
 class endpoint {
 public:
 	using abi_endpoint_type = mart::nw::socks::port_layer::SockaddrUn;
+	static constexpr socks::Domain domain = socks::Domain::Local;
 
 	constexpr endpoint() noexcept = default;
 	endpoint( mba::im_zstr path ) noexcept
@@ -40,7 +41,7 @@ public:
 	{
 	}
 	explicit endpoint( std::string_view path ) noexcept
-		: _addr( path )
+		: _addr( mba::im_zstr(path) )
 	{
 	}
 	explicit endpoint( const std::filesystem::path& path ) noexcept
@@ -54,8 +55,11 @@ public:
 	{
 	}
 
-	mba::im_zstr asString() const noexcept { return _addr; }
-	mba::im_zstr toStringEx() const noexcept { return _addr; }
+	mba::im_str asString() const noexcept { return _addr; }
+	mba::im_str toString() const noexcept { return _addr; }
+	mba::im_str toStringEx() const noexcept { return _addr; }
+
+	bool valid() const noexcept { return _addr.data() != nullptr; }
 
 	abi_endpoint_type toSockAddrUn() const noexcept { return abi_endpoint_type( _addr.data(), _addr.size() ); }
 
@@ -67,7 +71,7 @@ public:
 	friend bool operator<( const endpoint& l, const endpoint& r ) noexcept { return l._addr < r._addr; }
 
 private:
-	mba::im_zstr _addr{};
+	mba::im_str _addr{};
 };
 } // namespace un
 } // namespace mart::nw

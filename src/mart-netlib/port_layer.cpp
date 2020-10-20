@@ -88,13 +88,13 @@ using buffer_len_t  = int;
 
 ErrorCode get_last_socket_error() noexcept
 {
-	return ErrorCode{static_cast<ErrorCode::Value_t>(
+	return ErrorCode{ static_cast<ErrorCode::Value_t>(
 #ifdef MBA_UTILS_USE_WINSOCKS
 		WSAGetLastError()
 #else
         errno
 #endif
-			)};
+			) };
 }
 
 namespace {
@@ -136,7 +136,7 @@ static_assert( (int)ErrorCode::Value_t::WouldBlock == EWOULDBLOCK, "" );
 ErrorCode get_appropriate_error_code( int function_result )
 {
 	if( function_result == 0 ) {
-		return {ErrorCode::Value_t::NoError};
+		return { ErrorCode::Value_t::NoError };
 	} else {
 		return get_last_socket_error();
 	}
@@ -145,7 +145,7 @@ ErrorCode get_appropriate_error_code( int function_result )
 MART_NETLIB_PORT_LAYER_MAYBE_UNUSED ErrorCode get_appropriate_error_code( bool success )
 {
 	if( success ) {
-		return {ErrorCode::Value_t::NoError};
+		return { ErrorCode::Value_t::NoError };
 	} else {
 		return get_last_socket_error();
 	}
@@ -163,7 +163,7 @@ template<class T>
 ReturnValue<T> make_return_value( const T error_value, non_deduced_t<T> function_result )
 {
 	if( function_result != error_value ) {
-		return ReturnValue<T>{function_result};
+		return ReturnValue<T>{ function_result };
 	} else {
 		return ReturnValue<T>( get_last_socket_error() );
 	}
@@ -213,7 +213,6 @@ bool startup()
 	MART_NETLIB_PORT_LAYER_MAYBE_UNUSED const static bool isInit = port_layer::waInit();
 	return isInit;
 }
-
 
 ReturnValue<handle_t> socket( Domain domain, TransportType transport_type, Protocol protocol ) noexcept
 {
@@ -271,14 +270,14 @@ mart ::nw::socks::ReturnValue<mart ::nw::socks::Domain> from_native_domain( int 
 {
 	using RType = mart ::nw::socks::ReturnValue<mart::nw::socks::Domain>;
 	switch( domain ) {
-		case -1: return RType{mart ::nw::socks::Domain::Invalid};
-		case AF_UNIX: return RType{mart::nw::socks::Domain::Local};
-		case AF_INET: return RType{mart::nw::socks::Domain::Inet};
-		case AF_INET6: return RType{mart::nw::socks::Domain::Inet6};
-		case AF_UNSPEC: return RType{mart::nw::socks::Domain::Unspec};
+		case -1: return RType{ mart ::nw::socks::Domain::Invalid };
+		case AF_UNIX: return RType{ mart::nw::socks::Domain::Local };
+		case AF_INET: return RType{ mart::nw::socks::Domain::Inet };
+		case AF_INET6: return RType{ mart::nw::socks::Domain::Inet6 };
+		case AF_UNSPEC: return RType{ mart::nw::socks::Domain::Unspec };
 	}
 	assert( false );
-	return RType{ErrorCodeValues::InvalidArgument};
+	return RType{ ErrorCodeValues::InvalidArgument };
 }
 
 int to_native( TransportType transport_type ) noexcept
@@ -297,12 +296,12 @@ mart::nw::socks::ReturnValue<TransportType> from_native_transport_type( int tran
 {
 	using RType = mart ::nw::socks::ReturnValue<mart::nw::socks::TransportType>;
 	switch( transport_type ) {
-		case SOCK_STREAM: return RType{mart::nw::socks::TransportType::Stream};
-		case SOCK_DGRAM: return RType{mart::nw::socks::TransportType::Datagram};
-		case SOCK_SEQPACKET: return RType{mart::nw::socks::TransportType::Seqpacket};
+		case SOCK_STREAM: return RType{ mart::nw::socks::TransportType::Stream };
+		case SOCK_DGRAM: return RType{ mart::nw::socks::TransportType::Datagram };
+		case SOCK_SEQPACKET: return RType{ mart::nw::socks::TransportType::Seqpacket };
 	}
 	assert( false );
-	return RType{ErrorCodeValues::InvalidArgument};
+	return RType{ ErrorCodeValues::InvalidArgument };
 }
 
 int to_native( Protocol protocol ) noexcept
@@ -320,12 +319,12 @@ mart ::nw::socks::ReturnValue<mart::nw::socks::Protocol> from_native_protocol( i
 {
 	using RType = mart::nw::socks::ReturnValue<mart::nw::socks::Protocol>;
 	switch( protocol ) {
-		case 0: return RType{mart::nw::socks::Protocol::Default};
-		case IPPROTO_UDP: return RType{mart::nw::socks::Protocol::Udp};
-		case IPPROTO_TCP: return RType{mart::nw::socks::Protocol::Tcp};
+		case 0: return RType{ mart::nw::socks::Protocol::Default };
+		case IPPROTO_UDP: return RType{ mart::nw::socks::Protocol::Udp };
+		case IPPROTO_TCP: return RType{ mart::nw::socks::Protocol::Tcp };
 	}
 	assert( false );
-	return RType{ErrorCodeValues::InvalidArgument};
+	return RType{ ErrorCodeValues::InvalidArgument };
 }
 
 namespace {
@@ -367,6 +366,14 @@ ErrorCode getsockopt( handle_t handle, SocketOptionLevel level, SocketOption opt
 	const auto ret
 		= ::getsockopt( to_native( handle ), to_native( level ), to_native( optname ), data.char_ptr(), &len );
 	data._size = len;
+	return get_appropriate_error_code( ret );
+}
+
+ErrorCode getsockname( handle_t handle, Sockaddr& addr ) noexcept
+{
+	auto       len = to_native_addr_len( addr.size() );
+	const auto ret = ::getsockname( to_native( handle ), addr.to_native_ptr(), &len );
+	addr.set_valid_data_range( len );
 	return get_appropriate_error_code( ret );
 }
 
@@ -412,7 +419,7 @@ ReturnValue<handle_t> accept( handle_t handle ) noexcept
 
 ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noexcept
 {
-	return make_return_value( txrx_size_t{-1},
+	return make_return_value( txrx_size_t{ -1 },
 							  ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
@@ -442,10 +449,10 @@ ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, con
 	// sending messages to address 0.0.0.0 is apparently handled differently on different platforms,
 	// so we have to catch it manually here
 	if( is_invalid_destination_address( to ) ) {
-		return ReturnValue<txrx_size_t>{ErrorCode{ErrorCodeValues::InvalidArgument}};
+		return ReturnValue<txrx_size_t>{ ErrorCode{ ErrorCodeValues::InvalidArgument } };
 	}
 
-	return make_return_value( txrx_size_t{-1},
+	return make_return_value( txrx_size_t{ -1 },
 							  ::sendto( to_native( handle ),
 										buf.char_ptr(),
 										to_native_buf_len( buf.size() ),
@@ -456,7 +463,7 @@ ReturnValue<txrx_size_t> sendto( handle_t handle, byte_range buf, int flags, con
 
 ReturnValue<txrx_size_t> recv( handle_t handle, byte_range_mut buf, int flags ) noexcept
 {
-	return make_return_value( txrx_size_t{-1},
+	return make_return_value( txrx_size_t{ -1 },
 							  ::recv( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
 
@@ -466,7 +473,7 @@ ReturnValue<txrx_size_t> recvfrom( handle_t handle, byte_range_mut buf, int flag
 	auto ret      = ::recvfrom(
         to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags, from.to_native_ptr(), &from_len );
 	from.set_valid_data_range( from_len );
-	return make_return_value( txrx_size_t{-1}, ret );
+	return make_return_value( txrx_size_t{ -1 }, ret );
 }
 
 // implementation details for timeout related functions
@@ -501,7 +508,7 @@ ErrorCode set_timeout( handle_t handle, Direction direction, std::chrono::micros
 #ifdef MBA_UTILS_USE_WINSOCKS
 	dword to_ms = static_cast<dword>( std::chrono::duration_cast<std::chrono::milliseconds>( timeout ).count() );
 	if( to_ms == 0 && timeout != std::chrono::microseconds::zero() ) { to_ms = 1; }
-	auto  native_timeout = to_ms;
+	auto native_timeout = to_ms;
 #else
 	auto    to             = to_timeval( timeout );
 	auto    native_timeout = to;
@@ -527,7 +534,7 @@ ReturnValue<std::chrono::microseconds> get_timeout( handle_t handle, Direction d
 	auto res   = getsockopt( handle, SocketOptionLevel::Socket, option_name, bytes );
 
 	if( !res || bytes.size() != sizeof( native_timeout ) ) {
-		return ReturnValue<std::chrono::microseconds>{res};
+		return ReturnValue<std::chrono::microseconds>{ res };
 	} else {
 #ifdef MBA_UTILS_USE_WINSOCKS
 		microseconds ret = microseconds( milliseconds( native_timeout ) );
@@ -618,7 +625,9 @@ namespace {
 	constexpr std::size_t max_unix_path_length = sizeof( native.sun_path );
 	native.sun_family                          = AF_UNIX;
 	std::size_t actual_length                  = length < max_unix_path_length - 1 ? length : max_unix_path_length - 1;
-	std::memcpy( native.sun_path, u8path, actual_length );
+	if (actual_length > 0) {
+		std::memcpy( native.sun_path, u8path, actual_length );
+	}
 	native.sun_path[actual_length] = '\0';
 	return native;
 }
@@ -797,15 +806,15 @@ AddrInfo from_native( const ::addrinfo& native )
 	switch( from_native_domain( native.ai_addr->sa_family ).value_or( Domain::Invalid ) ) {
 		case Domain::Local:
 			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrUn>>( new SockaddrPolyWrapper<SockaddrUn>{
-				SockaddrUn( *reinterpret_cast<const ::sockaddr_un*>( native.ai_addr ) )} );
+				SockaddrUn( *reinterpret_cast<const ::sockaddr_un*>( native.ai_addr ) ) } );
 			break;
 		case Domain::Inet6:
 			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrIn6>>( new SockaddrPolyWrapper<SockaddrIn6>{
-				SockaddrIn6( *reinterpret_cast<const ::sockaddr_in6*>( native.ai_addr ) )} );
+				SockaddrIn6( *reinterpret_cast<const ::sockaddr_in6*>( native.ai_addr ) ) } );
 			break;
 		case Domain::Inet:
 			ret.addr = std ::unique_ptr<SockaddrPolyWrapper<SockaddrIn>>( new SockaddrPolyWrapper<SockaddrIn>{
-				SockaddrIn( *reinterpret_cast<const ::sockaddr_in*>( native.ai_addr ) )} );
+				SockaddrIn( *reinterpret_cast<const ::sockaddr_in*>( native.ai_addr ) ) } );
 			break;
 		case Domain::Invalid: break;
 		case Domain::Unspec: break;
@@ -824,7 +833,9 @@ getaddrinfo( const char* node_name, const char* service_name, const AddrInfo& hi
 	::addrinfo* native_addr;
 	const auto  native_hint = to_native_hint( hints );
 	auto        res         = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
-	if( res != 0 ) { return NonTrivialReturnValue<std::vector<AddrInfo>>( {static_cast<ErrorCode::Value_t>( res )} ); }
+	if( res != 0 ) {
+		return NonTrivialReturnValue<std::vector<AddrInfo>>( { static_cast<ErrorCode::Value_t>( res ) } );
+	}
 
 	std::vector<AddrInfo> ret;
 	while( native_addr != nullptr ) {
@@ -841,7 +852,9 @@ getaddrinfo( const char* node_name, const char* service_name, const AddrInfoHint
 	::addrinfo* native_addr;
 	const auto  native_hint = to_native_hint( hints );
 	auto        res         = ::getaddrinfo( node_name, service_name, &native_hint, &native_addr );
-	if( res != 0 ) { return NonTrivialReturnValue<std::vector<AddrInfo>>( {static_cast<ErrorCode::Value_t>( res )} ); }
+	if( res != 0 ) {
+		return NonTrivialReturnValue<std::vector<AddrInfo>>( { static_cast<ErrorCode::Value_t>( res ) } );
+	}
 
 	std::vector<AddrInfo> ret;
 	while( native_addr != nullptr ) {

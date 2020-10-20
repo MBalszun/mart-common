@@ -48,7 +48,7 @@ namespace _impl_details_ip {
 basic_endpoint_v4_base::basic_endpoint_v4_base( const mart::nw::socks::port_layer::SockaddrIn& addr )
 	: address( addr.address() )
 	, port( addr.port() )
-	, valid{addr.is_valid() ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
+	, _valid{addr.is_valid() ? true : throw mart::nw::invalid_address_string( "Invalid sockaddr_in passed " )}
 {
 }
 

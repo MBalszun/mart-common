@@ -19,7 +19,7 @@ TEST_CASE( "udp_socket_simple_member_check1", "[net]" )
 	udp::Socket s4( std::move( s1 ) );
 	s2 = std::move( s4 );
 
-	[[maybe_unused]] mart::nw::socks::RaiiSocket& raw_socket = s2.getRawSocket();
+	[[maybe_unused]] mart::nw::socks::RaiiSocket& raw_socket = s2.as_raii_socket();
 
 	s2.bind( e1 );
 	// socket can't be rebinded to a different one
@@ -49,20 +49,30 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	CHECK_NOTHROW( s.bind( udp::endpoint{"127.0.0.1:3446"} ) );
 	using namespace std::chrono_literals;
-	CHECK( s.set_rx_timeout( 32ms ) ); // TODO: on some platforms (travis), must be multiple of 4ms
-	CHECK( s.set_tx_timeout( 20ms ) );
-	CHECK( s.get_tx_timeout() == 20ms );
+	CHECK_NOTHROW( s.set_rx_timeout( 32ms ) ); // TODO: on some platforms (travis), must be multiple of 4ms
+	CHECK_NOTHROW( s.set_tx_timeout( 20ms ) );
 	CHECK( s.get_rx_timeout() == 32ms );
+	CHECK( s.get_tx_timeout() == 20ms );
 
 	int buffer = 0;
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
 
-	CHECK( s.try_send( mart::view_bytes( buffer ) ) );
+	// Fails because unconnected
+	CHECK( !s.try_send( mart::view_bytes( buffer ) ) );
 	CHECK_THROWS( s.send( mart::view_bytes( buffer ) ) );
+
+	// Fails due to invalid endpoint
 	{
 		udp::endpoint e4{};
-		CHECK( s.try_sendto( mart::view_bytes( buffer ), e4 ) );
+		CHECK( !s.try_sendto( mart::view_bytes( buffer ), e4 ) );
 		CHECK_THROWS( s.sendto( mart::view_bytes( buffer ), e4 ) );
+	}
+
+	// Fails due to invalid endpoint
+	{
+		udp::endpoint e{ "127.0.0.1:6666" };
+		CHECK( s.try_sendto( mart::view_bytes( buffer ), e ) );
+		CHECK_NOTHROW( s.sendto( mart::view_bytes( buffer ), e ) );
 	}
 
 	CHECK( !s.try_recv( mart::view_bytes_mutable( buffer ) ).isValid() );
@@ -73,7 +83,7 @@ TEST_CASE( "udp_socket_simple_member_check2", "[net]" )
 
 	s.clearRxBuff();
 
-	CHECK( s.set_blocking( false ) );
+	CHECK( s.try_set_blocking( false ) );
 	CHECK( !s.is_blocking() );
 
 	s.close();
