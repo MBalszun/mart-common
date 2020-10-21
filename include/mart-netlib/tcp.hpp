@@ -99,8 +99,8 @@ public:
 	Socket& operator=( Socket&& other ) noexcept
 	{
 		mart::nw::socks::detail::HighLevelSocketBase::operator=( std::move( other ) );
-		_ep_local      = std::exchange( other._ep_local, endpoint{} );
-		_ep_remote     = std::exchange( other._ep_remote, endpoint{} );
+		_ep_local                                             = std::exchange( other._ep_local, endpoint{} );
+		_ep_remote                                            = std::exchange( other._ep_remote, endpoint{} );
 		return *this;
 	}
 	void connect( endpoint ep )
@@ -119,6 +119,19 @@ public:
 		}
 		_ep_local = t_ep.ep;
 	}
+
+	bool try_connect( endpoint ep )
+	{
+		auto result = _socket.connect( ep.toSockAddr() );
+		if( !result.success() ) { return false; }
+		_ep_remote = ep;
+
+		auto t_ep = getSockAddress( _socket );
+		if( !t_ep.result.success() ) { return false; }
+		_ep_local = t_ep.ep;
+		return true;
+	}
+
 	void bind( endpoint ep )
 	{
 		assert( _socket.is_valid() );
@@ -163,7 +176,6 @@ public:
 		return res.received_data;
 	}
 
-
 	const endpoint& get_local_endpoint() const { return _ep_local; }
 	const endpoint& get_remote_endpoint() const { return _ep_remote; }
 
@@ -201,11 +213,12 @@ private:
 	}
 
 	friend Acceptor;
-	endpoint              _ep_local{};
-	endpoint              _ep_remote{};
+	endpoint _ep_local{};
+	endpoint _ep_remote{};
 };
 
-inline Socket connect(endpoint ep) {
+inline Socket connect( endpoint ep )
+{
 	Socket s;
 	s.connect( ep );
 	return s;
@@ -265,6 +278,18 @@ public:
 		_state    = State::bound;
 	}
 
+	bool try_bind( endpoint ep )
+	{
+		assert( _state == State::open );
+
+		auto result = _socket_handle.bind( ep.toSockAddr_in() );
+		if( !result.success() ) { return false; }
+
+		_ep_local = ep;
+		_state    = State::bound;
+		return true;
+	}
+
 	void listen( int backlog = 10 )
 	{
 		assert( _state == State::bound );
@@ -275,6 +300,16 @@ public:
 				result, "Tcp acceptor could not start to listen on address ", _ep_local.toStringEx() ) );
 		}
 		_state = State::listening;
+	}
+
+	bool try_listen( int backlog = 10 )
+	{
+		assert( _state == State::bound );
+
+		auto result = _socket_handle.listen( backlog );
+		if( !result.success() ) { return false; }
+		_state = State::listening;
+		return true;
 	}
 
 	bool is_valid() { return _socket_handle.is_valid(); }
@@ -298,7 +333,6 @@ public:
 
 	Socket accept( std::chrono::microseconds timeout = std::chrono::hours( 300 ) )
 	{
-		endpoint remote;
 		_socket_handle.set_blocking( true );
 		_socket_handle.set_rx_timeout( timeout );
 		_socket_handle.set_tx_timeout( timeout );
