@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <string_view>
+#include <limits>
 
 #ifdef __cpp_rtti
 #include <typeinfo>
