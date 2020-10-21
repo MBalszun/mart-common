@@ -69,7 +69,7 @@ public:
 	std::chrono::microseconds get_rx_timeout() const;
 
 	inline bool try_set_blocking( bool should_block )       noexcept { return _socket.set_blocking( should_block ).success(); }
-	[[deprecated]] inline bool set_blocking( bool should_block )       noexcept { return try_set_blocking(should_block); }
+	       void set_blocking( bool should_block );
 	inline bool is_blocking()                         const noexcept { return _socket.is_blocking(); }
 	inline bool is_valid()                            const noexcept { return _socket.is_valid(); }
 

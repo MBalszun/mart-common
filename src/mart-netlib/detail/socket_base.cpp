@@ -131,6 +131,17 @@ std::chrono::microseconds HighLevelSocketBase::get_rx_timeout() const
 	return t;
 }
 
+void HighLevelSocketBase::set_blocking( bool should_block )
+{
+	if( !try_set_blocking( should_block ) ) {
+		throw generic_nw_error(
+			make_error_message_with_appended_last_errno( mart::nw::socks::port_layer::get_last_socket_error(),
+														 "Could not switch blocking mode to ",
+														 ( should_block ? "true" : "false"),
+														 " on socket" ) );
+	}
+}
+
 
 void HighLevelSocketBase::close() {
 	if( !try_close() ) {
