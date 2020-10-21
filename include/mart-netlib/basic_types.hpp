@@ -197,7 +197,7 @@ enum class Protocol { Default, Udp, Tcp };
 
 enum class SocketOptionLevel { Socket };
 
-enum class SocketOption { so_rcvtimeo, so_sndtimeo };
+enum class SocketOption { so_rcvtimeo, so_sndtimeo, so_reuseaddr };
 
 enum class Direction { Tx, Rx };
 

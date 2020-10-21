@@ -343,6 +343,7 @@ int to_native( SocketOption option )
 	switch( option ) {
 		case mart::nw::socks::SocketOption::so_rcvtimeo: return SO_RCVTIMEO; break;
 		case mart::nw::socks::SocketOption::so_sndtimeo: return SO_SNDTIMEO; break;
+		case mart::nw::socks::SocketOption::so_reuseaddr: return SO_REUSEADDR; break;
 	}
 	assert( false );
 	return static_cast<int>( option );
