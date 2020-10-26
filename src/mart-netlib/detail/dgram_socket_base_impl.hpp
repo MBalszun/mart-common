@@ -96,7 +96,7 @@ void DgramSocket<EndpointT>::connect( endpoint ep )
 	auto result = _socket.connect( ep.toSockAddr() );
 	if( !result.success() ) {
 		throw generic_nw_error( make_error_message_with_appended_last_errno(
-			result, "Could not connect socket to address ", ep.toStringEx() ) );
+			result, "Could not connect datagram socket to address \"", ep.toStringEx(), "\"" ) );
 	}
 
 	_ep_remote = ep;
@@ -108,7 +108,7 @@ void DgramSocket<EndpointT>::bind( endpoint ep )
 	auto result = _socket.bind( ep.toSockAddr() );
 	if( !result.success() ) {
 		throw generic_nw_error( make_error_message_with_appended_last_errno(
-			result, "Could not bind udp socket to address ", ep.toStringEx() ) );
+			result, "Could not bind datagram socket to address \"", ep.toStringEx(), "\"" ) );
 	}
 
 	_ep_local = ep;
