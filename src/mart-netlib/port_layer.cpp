@@ -420,6 +420,10 @@ ReturnValue<handle_t> accept( handle_t handle ) noexcept
 
 ReturnValue<txrx_size_t> send( handle_t handle, byte_range buf, int flags ) noexcept
 {
+#ifndef MBA_UTILS_USE_WINSOCKS
+flags = flags | MSG_NOSIGNAL;
+#endif // ! MBA_UTILS_USE_WINSOCKS
+
 	return make_return_value( txrx_size_t{ -1 },
 							  ::send( to_native( handle ), buf.char_ptr(), to_native_buf_len( buf.size() ), flags ) );
 }
