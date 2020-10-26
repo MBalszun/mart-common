@@ -23,7 +23,8 @@
 
 #ifndef MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS
 
-#if defined( __cpp_lib_execution ) && defined( __cpp_lib_parallel_algorithm )
+// FIXME: parallel algorithms support on libstdc++ and libc++ seems to be fragile on ubuntu20.04 - deactivate for now
+#if defined( __cpp_lib_execution ) && defined( __cpp_lib_parallel_algorithm ) && defined( _MSC_VER )
 #define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 1
 #else
 #define MART_COMMON_STDLIB_HAS_PARALLEL_ALGORITHMS 0
