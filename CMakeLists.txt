@@ -16,6 +16,7 @@ endif()
 option( MART_COMMON_INCLUDE_TESTS "Build tests" OFF )
 option( MART_COMMON_INCLUDE_EXAMPLES "Build examples" OFF)
 option( MART_COMMON_INCLUDE_NET_LIB "Also build netlib components (Those are not header only)" ON)
+option( MART_COMMON_IGNORE_STD_PARALLEL_ALGORITHMS ON)
 
 ####### im_str is a separately devoped library that was copied into mart common for convenience
 #
