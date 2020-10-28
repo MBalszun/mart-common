@@ -21,7 +21,10 @@
 
 #include <mart-common/utils.h>
 
+#if __has_include(<filesystem>)
 #include <filesystem>
+#endif
+
 #include <string_view>
 
 #include "detail/socket_base.hpp"
@@ -44,11 +47,14 @@ public:
 		: _addr( mba::im_zstr(path) )
 	{
 	}
+
+#ifdef __cpp_lib_filesystem
 	explicit endpoint( const std::filesystem::path& path ) noexcept
 		// TODO use "native()" on platforms that use u8 encoding natively
 		: _addr( std::string_view( path.string() ) )
 	{
 	}
+#endif
 
 	explicit endpoint( const abi_endpoint_type& path ) noexcept
 		: endpoint( std::string_view( path.path() ) )
