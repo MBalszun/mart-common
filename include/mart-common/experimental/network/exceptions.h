@@ -7,7 +7,8 @@
 
 namespace mart::experimental::nw {
 
-class RuntimeError : public std::exception {
+class [[deprecated]] RuntimeError : public std::exception
+{
 	mba::im_zstr _msg;
 
 public:
@@ -18,7 +19,8 @@ public:
 	const char* what() const noexcept override { return _msg.c_str(); }
 };
 
-struct InvalidArgument : RuntimeError {
+struct [[deprecated]] InvalidArgument : RuntimeError
+{
 	using RuntimeError::RuntimeError;
 };
 

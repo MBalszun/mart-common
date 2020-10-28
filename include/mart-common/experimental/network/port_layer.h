@@ -96,7 +96,7 @@ static constexpr int      socket_error_value = -1;
 #endif // MBA_UTILS_USE_WINSOCKS
 
 // Wrapper functions for socket related functions, that are specific to a certain platform
-inline bool set_blocking( handle_t socket, bool should_block )
+[[deprecated]] inline bool set_blocking( handle_t socket, bool should_block )
 {
 	bool ret = true;
 #ifdef MBA_UTILS_USE_WINSOCKS
@@ -115,7 +115,7 @@ inline bool set_blocking( handle_t socket, bool should_block )
 	return ret;
 }
 
-inline int close_socket( handle_t handle )
+[[deprecated]] inline int close_socket( handle_t handle )
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	return ::closesocket( handle );
@@ -124,7 +124,7 @@ inline int close_socket( handle_t handle )
 #endif
 }
 
-inline int getLastSocketError()
+[[deprecated]] inline int getLastSocketError()
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	return WSAGetLastError();
@@ -133,7 +133,7 @@ inline int getLastSocketError()
 #endif
 }
 
-inline bool waInit()
+[[deprecated]] inline bool waInit()
 {
 #ifdef MBA_UTILS_USE_WINSOCKS
 	// https://docs.microsoft.com/en-us/windows/desktop/api/winsock/nf-winsock-wsastartup
@@ -162,7 +162,7 @@ inline bool waInit()
 namespace ip {
 namespace port_layer {
 
-inline const char* inet_net_to_pres( int af, const void* src, char* dst, size_t size )
+[[deprecated]] inline const char* inet_net_to_pres( int af, const void* src, char* dst, size_t size )
 {
 #ifdef MBA_UTILS_USE_WINSOCKS // detect windows os - use other guards if necessary
 	return InetNtop( af, src, dst, size );
@@ -171,7 +171,7 @@ inline const char* inet_net_to_pres( int af, const void* src, char* dst, size_t 
 #endif
 }
 
-inline int inet_pres_to_net( int af, const char* src, void* dst )
+[[deprecated]] inline int inet_pres_to_net( int af, const char* src, void* dst )
 {
 #ifdef MBA_UTILS_USE_WINSOCKS // detect windows os - use other guards if necessary
 	return InetPton( af, src, dst );

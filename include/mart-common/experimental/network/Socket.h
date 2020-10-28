@@ -63,13 +63,13 @@ inline bool startUp()
 
 } // namespace _impl_details_nw
 
-enum class Domain {
+enum class [[deprecated]] Domain{
 	local = AF_UNIX,
 	inet  = AF_INET,
 	inet6 = AF_INET6,
 };
 
-enum class TransportType {
+enum class [[deprecated]] TransportType{
 	stream    = SOCK_STREAM,
 	datagram  = SOCK_DGRAM,
 	seqpacket = SOCK_SEQPACKET,
@@ -106,7 +106,8 @@ struct is_sock_addr_type {
  * which sometimes use a little more convenient parameter types (e.g. ArrayView instead of pointer+length)
  * It doesn't retain any state except the handle and may cache a few config flags.
  */
-class Socket {
+class [[deprecated]] Socket
+{
 	template<class T>
 	static sockaddr* asSockAddrPtr( T& addr )
 	{

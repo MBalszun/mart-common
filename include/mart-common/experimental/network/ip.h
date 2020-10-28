@@ -110,7 +110,7 @@ constexpr std::optional<uint32_host_t> parse_address( const std::string_view str
 
 } // namespace impl_addr_v4
 
-class address_v4 {
+class [[deprecated]] address_v4 {
 public:
 	constexpr address_v4() = default;
 	constexpr explicit address_v4( uint32_host_t addr_h )
@@ -201,7 +201,8 @@ inline bool has_invalid_char( const std::string_view str )
 }
 } // namespace impl_port_v4
 
-class port_nr {
+class [[deprecated]] port_nr
+{
 public:
 	constexpr port_nr() = default;
 	constexpr explicit port_nr( uint16_host_t value )
@@ -238,7 +239,8 @@ enum class TransportProtocol { UDP, TCP };
 namespace _impl_details_ip {
 
 template<TransportProtocol p>
-struct basic_endpoint_v4 {
+struct [[deprecated]] basic_endpoint_v4
+{
 	constexpr basic_endpoint_v4() = default;
 
 	constexpr explicit basic_endpoint_v4( const sockaddr_in& native )

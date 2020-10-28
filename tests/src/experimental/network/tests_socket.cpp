@@ -1,3 +1,4 @@
+#pragma warning( disable : 4996 )
 #include <mart-common/experimental/network/Socket.h>
 
 #include <catch2/catch.hpp>
