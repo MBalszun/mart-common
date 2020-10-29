@@ -64,7 +64,7 @@ struct TestAlloc : std::pmr::memory_resource {
 
 		return ptr;
 	}
-	void do_deallocate( void* p, std::size_t bytes, std::size_t /*alignment*/ ) override
+	void do_deallocate( void* p, [[maybe_unused]] std::size_t bytes, std::size_t /*alignment*/ ) override
 	{
 		auto pos = std::find_if( allocs.begin(), allocs.end(), [p]( const Alloc& a ) { return a.data == p; } );
 		assert( pos != allocs.end() );
