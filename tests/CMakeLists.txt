@@ -1,6 +1,10 @@
 cmake_minimum_required( VERSION 3.9 )
 project( ImStrTests LANGUAGES CXX )
 
+if(POLICY CMP0110)
+cmake_policy(SET CMP0110 NEW)
+endif()
+
 option( IM_STR_RUN_SANITIZERS "Run tests with ubsan and address sanitizer" OFF )
 option( IM_STR_COVERAGE "Generate coverage data" OFF )
 
