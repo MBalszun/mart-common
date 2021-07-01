@@ -378,7 +378,8 @@ protected:
 
 	constexpr void release() noexcept { _handle.release(); }
 
-	void _copy_from( const std::string_view other, _detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
+	IM_STR_CONSTEXPR_IN_CPP_20 void _copy_from( const std::string_view                             other,
+												_detail_im_str::atomic_ref_cnt_buffer::alloc_ptr_t alloc )
 	{
 		if( other.data() == nullptr ) {
 			this->_as_strview() = std::string_view{ "" };
