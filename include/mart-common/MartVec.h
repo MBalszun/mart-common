@@ -363,12 +363,12 @@ template<class T, class U, int N>
 	return ret;
 }
 
-template<class T, int N>
-[[nodiscard]] constexpr Matrix<T, N> transpose( const Matrix<T, N> m )
+template<class T, int N, int M>
+[[nodiscard]] constexpr Matrix<T,M, N> transpose( const Matrix<T, N, M> m )
 {
-	Matrix<T, N> r{};
+	Matrix<T, M, N> r{};
 	for( int i = 0; i < N; ++i ) {
-		for( int j = 0; j < N; ++j ) {
+		for( int j = 0; j < M; ++j ) {
 			r[i][j] = m[j][i];
 		}
 	}
@@ -390,12 +390,12 @@ template<class T, int N>
  * NOTE:
  * This can either be matrix vector or Matrix Matrix,
  * as a matrix is just a vector of row vectors */
-template<class T, class U, int N>
-[[nodiscard]] constexpr auto mx_multiply( const Matrix<T, N>& mx, const Vec<U, N>& vec )
+template<class T, class U, int N1, int N2>
+[[nodiscard]] constexpr auto mx_multiply( const Matrix<T, N1, N2>& mx, const Vec<U, N2>& vec )
 {
-	Vec<decltype( mart::inner_product( mx[0], vec ) ), N> ret{};
+	Vec<decltype( mart::inner_product( mx[0], vec ) ), N1> ret{};
 
-	for( int i = 0; i < N; ++i ) {
+	for( int i = 0; i < N1; ++i ) {
 		ret[i] = mart::inner_product( mx[i], vec );
 	}
 	return ret;
@@ -882,6 +882,21 @@ constexpr Vec<T, N>& Vec<T, N>::operator/=( const Vec<T, N>& other )
 	*this = *this / other;
 	return *this;
 };
+
+// extract a matrix of size M_R x N_R starting at element m,n
+template<int M_R, int N_R, class T, int M, int N>
+constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const int m = 0, const int n = 0 )
+{
+	assert( M_R + m <= M );
+	assert( N_R + n <= N );
+	mart::Matrix<T, M_R, N_R> ret{};
+	for( int i = 0; i < M_R; ++i ) {
+		for( int j = 0; j < N_R; ++j ) {
+			ret[i][j] = mat[i + m][j + n];
+		}
+	}
+	return ret;
+}
 
 } // namespace mart
 
