@@ -63,7 +63,7 @@ template<int K, class T, int N, int... I>
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif // ! _MSC_VER
 
-	return Vec<T, K>{( base )[I]...};
+	return Vec<T, K>{ ( base )[I]... };
 
 #ifndef _MSC_VER
 #pragma GCC diagnostic pop
@@ -73,10 +73,10 @@ template<int K, class T, int N, int... I>
 template<class U, class T, int N, int... I>
 [[nodiscard]] constexpr Vec<U, N> elements_cast_helper( const Vec<T, N>& base, std::integer_sequence<int, I...> )
 {
-	return { static_cast<U>(base[I])... };
+	return { static_cast<U>( base[I] )... };
 }
 
-} // namespace _vec_impl
+} // namespace _impl_mart_vec
 
 /*################# Vec class implementation ######################*/
 template<class T, int N>
@@ -208,7 +208,7 @@ struct Vec<T, 2> {
 	[[nodiscard]] Vec<T, 2> unityVec() const
 	{
 		auto abs = norm();
-		return {T( x / abs ), T( y / abs )};
+		return { T( x / abs ), T( y / abs ) };
 	}
 
 	// returns a K dimensional vector
@@ -292,7 +292,7 @@ struct Vec<T, 3> {
 	[[nodiscard]] Vec unityVec() const
 	{
 		auto abs = norm();
-		return {T( x / abs ), T( y / abs ), T( z / abs )};
+		return { T( x / abs ), T( y / abs ), T( z / abs ) };
 	}
 
 	// returns a K dimensional vector
@@ -329,7 +329,7 @@ constexpr auto concat_impl( const Vec<T, sizeof...( I1 )>& v1,
 							std::integer_sequence<int, I2...> ) //
 	-> Vec<T, sizeof...( I1 ) + sizeof...( I2 )>
 {
-	return {v1[I1]..., v2[I2]...};
+	return { v1[I1]..., v2[I2]... };
 }
 } // namespace _impl_mart_vec
 
@@ -364,7 +364,7 @@ template<class T, class U, int N>
 }
 
 template<class T, int N, int M>
-[[nodiscard]] constexpr Matrix<T,M, N> transpose( const Matrix<T, N, M> m )
+[[nodiscard]] constexpr Matrix<T, M, N> transpose( const Matrix<T, N, M> m )
 {
 	Matrix<T, M, N> r{};
 	for( int i = 0; i < N; ++i ) {
@@ -421,7 +421,7 @@ template<class T, class F, int... I>
 constexpr auto apply_unary_helper( const Vec<T, sizeof...( I )>& l, F func, std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l[0] ) ), s.size()>;
-	return r_type{func( l[I] )...};
+	return r_type{ func( l[I] )... };
 }
 
 template<class T, class U, class F, int... I>
@@ -431,21 +431,21 @@ constexpr auto apply_binary_helper( const Vec<T, sizeof...( I )>&    l,
 									std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l[0], r[0] ) ), s.size()>;
-	return r_type{func( l[I], r[I] )...};
+	return r_type{ func( l[I], r[I] )... };
 }
 template<class T, class U, class F, int... I>
 constexpr auto
 apply_binary_helper( const U& l, const Vec<T, sizeof...( I )>& r, F func, std::integer_sequence<int, I...> s )
 {
 	using r_type = mart::Vec<decltype( func( l, r[0] ) ), s.size()>;
-	return r_type{func( l, r[I] )...};
+	return r_type{ func( l, r[I] )... };
 }
 template<class T, class U, class F, int... I>
 constexpr auto
 apply_binary_helper( const Vec<T, sizeof...( I )>& l, const U& r, F func, std::integer_sequence<int, I...> s )
 {
 	using r_tye = mart::Vec<decltype( func( l[0], r ) ), s.size()>;
-	return r_tye{func( l[I], r )...};
+	return r_tye{ func( l[I], r )... };
 }
 
 // general dispatcher for applying functor that forwards the call to the respective apply_helper- functions
@@ -584,7 +584,7 @@ struct abs {
 	constexpr auto operator()( const T& l ) const noexcept
 	{
 		using std::abs;
-		return abs(l);
+		return abs( l );
 	}
 };
 
@@ -775,11 +775,11 @@ struct element_greater_equal {
 
 // overloaded operators
 // math operators
-DEFINE_UNARY_ND_VECTOR_OP( operator-, _impl_vec::negate)
-DEFINE_HETEROGEN_ND_VECTOR_OP( operator+, _impl_vec::plus)
-DEFINE_HETEROGEN_ND_VECTOR_OP( operator*, _impl_vec::multiplies)
-DEFINE_HETEROGEN_ND_VECTOR_OP( operator-, _impl_vec::minus)
-DEFINE_HETEROGEN_ND_VECTOR_OP( operator/, _impl_vec::divides)
+DEFINE_UNARY_ND_VECTOR_OP( operator-, _impl_vec::negate )
+DEFINE_HETEROGEN_ND_VECTOR_OP( operator+, _impl_vec::plus )
+DEFINE_HETEROGEN_ND_VECTOR_OP( operator*, _impl_vec::multiplies )
+DEFINE_HETEROGEN_ND_VECTOR_OP( operator-, _impl_vec::minus )
+DEFINE_HETEROGEN_ND_VECTOR_OP( operator/, _impl_vec::divides )
 
 DEFINE_UNARY_ND_VECTOR_OP( ceil, _impl_vec::ceil )
 DEFINE_UNARY_ND_VECTOR_OP( floor, _impl_vec::floor )
