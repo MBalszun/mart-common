@@ -401,16 +401,6 @@ template<class T, class U, int N1, int N2>
 	return ret;
 }
 
-template<int N, class T = double>
-[[nodiscard]] constexpr Matrix<T, N> eye( T v = 1 )
-{
-	Matrix<T, N> r{};
-	for( int i = 0; i < N; ++i ) {
-		r[i][i] = v;
-	}
-	return r;
-}
-
 namespace _impl_vec {
 
 /**
@@ -885,7 +875,7 @@ constexpr Vec<T, N>& Vec<T, N>::operator/=( const Vec<T, N>& other )
 
 // extract a matrix of size M_R x N_R starting at element m,n
 template<int M_R, int N_R, class T, int M, int N>
-constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const int m = 0, const int n = 0 )
+constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const int m = 0, const int n = 0 ) noexcept
 {
 	assert( M_R + m <= M );
 	assert( N_R + n <= N );
@@ -897,6 +887,52 @@ constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const
 	}
 	return ret;
 }
+
+namespace mx {
+
+template<class T, int M, int N1, int N2>
+constexpr Matrix<T, M, N1 + N2> horzcat( const Matrix<T, M, N1>& m1, const Matrix<T, M, N2>& m2 ) noexcept
+{
+	Matrix<T, M, N1 + N2> ret;
+	for( int m = 0; m < M; ++m ) {
+		for( int n = 0; n < N1; ++n ) {
+			ret[m][n] = m1[m][n];
+		}
+	}
+	for( int m = 0; m < M; ++m ) {
+		for( int n = 0; n < N2; ++n ) {
+			ret[m][n + N1] = m2[m][n];
+		}
+	}
+	return ret;
+}
+
+template<class T, int M1, int M2, int N>
+constexpr Matrix<T, M1 + M2, N> vertcat( const Matrix<T, M1, N>& m1, const Matrix<T, M2, N>& m2 ) noexcept
+{
+	return mart::concat( m1, m2 );
+}
+
+template<int N, class T = double>
+[[nodiscard]] constexpr Matrix<T, N> eye( T v = 1 )
+{
+	Matrix<T, N> r{};
+	for( int i = 0; i < N; ++i ) {
+		r[i][i] = v;
+	}
+	return r;
+}
+
+template<int M, int N, class T = double>
+[[nodiscard]] constexpr Matrix<T, M, N> zeros()
+{
+	return {};
+}
+
+} // namespace mx
+
+// backwards compat
+using mart::mx::eye;
 
 } // namespace mart
 
