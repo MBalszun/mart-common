@@ -464,7 +464,7 @@ constexpr auto apply_binary( F func, const T1& arg1, const T2& arg2 )
 // std::plus,td::multiplies,... - like function objects
 struct maximum {
 	template<class T>
-	constexpr T operator()( const T& l, const T& r ) const noexcept
+	[[nodiscard]] constexpr T operator()( const T& l, const T& r ) const noexcept
 	{
 		return l > r ? l : r;
 	}
@@ -472,7 +472,7 @@ struct maximum {
 
 struct minimum {
 	template<class T>
-	constexpr T operator()( const T& l, const T& r ) const noexcept
+	[[nodiscard]] constexpr T operator()( const T& l, const T& r ) const noexcept
 	{
 		return l < r ? l : r;
 	}
@@ -480,7 +480,7 @@ struct minimum {
 
 struct ceil {
 	template<class T>
-	T operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr T operator()( const T& l ) const noexcept
 	{
 		using std::ceil;
 		return ceil( l );
@@ -489,7 +489,7 @@ struct ceil {
 
 struct floor {
 	template<class T>
-	T operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr T operator()( const T& l ) const noexcept
 	{
 		using std::floor;
 		return floor( l );
@@ -498,7 +498,7 @@ struct floor {
 
 struct round {
 	template<class T>
-	T operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr T operator()( const T& l ) const noexcept
 	{
 		using std::round;
 		return round( l );
@@ -507,7 +507,7 @@ struct round {
 
 struct lround {
 	template<class T>
-	long operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr long operator()( const T& l ) const noexcept
 	{
 		using std::lround;
 		return lround( l );
@@ -516,7 +516,7 @@ struct lround {
 
 struct iround {
 	template<class T>
-	int operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr int operator()( const T& l ) const noexcept
 	{
 		using std::lround;
 		return lround( l );
@@ -525,7 +525,7 @@ struct iround {
 
 struct multiplies {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l * r;
 	}
@@ -533,7 +533,7 @@ struct multiplies {
 
 struct divides {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l / r;
 	}
@@ -541,7 +541,7 @@ struct divides {
 
 struct plus {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l + r;
 	}
@@ -549,7 +549,7 @@ struct plus {
 
 struct minus {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l - r;
 	}
@@ -557,7 +557,7 @@ struct minus {
 
 struct negate {
 	template<class T>
-	constexpr auto operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l ) const noexcept
 	{
 		return -l;
 	}
@@ -565,7 +565,7 @@ struct negate {
 
 struct logical_not {
 	template<class T>
-	constexpr auto operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l ) const noexcept
 	{
 		return !l;
 	}
@@ -573,7 +573,7 @@ struct logical_not {
 
 struct logical_or {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l || r;
 	}
@@ -581,7 +581,7 @@ struct logical_or {
 
 struct abs {
 	template<class T>
-	constexpr auto operator()( const T& l ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l ) const noexcept
 	{
 		using std::abs;
 		return abs( l );
@@ -590,7 +590,7 @@ struct abs {
 
 struct logical_and {
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return l && r;
 	}
@@ -609,7 +609,7 @@ struct element_equal {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -628,7 +628,7 @@ struct element_not_equal {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -647,7 +647,7 @@ struct element_less {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -666,7 +666,7 @@ struct element_less_equal {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -685,7 +685,7 @@ struct element_greater {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -705,7 +705,7 @@ struct element_greater_equal {
 	}
 
 	template<class T, class U>
-	constexpr auto operator()( const T& l, const U& r ) const noexcept
+	[[nodiscard]] constexpr auto operator()( const T& l, const U& r ) const noexcept
 	{
 		return this->impl( l, r, nullptr );
 	}
@@ -875,7 +875,8 @@ constexpr Vec<T, N>& Vec<T, N>::operator/=( const Vec<T, N>& other )
 
 // extract a matrix of size M_R x N_R starting at element m,n
 template<int M_R, int N_R, class T, int M, int N>
-constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const int m = 0, const int n = 0 ) noexcept
+[[nodiscard]] constexpr Matrix<T, M_R, N_R>
+submatrix( const mart::Matrix<T, M, N>& mat, const int m = 0, const int n = 0 ) noexcept
 {
 	assert( M_R + m <= M );
 	assert( N_R + n <= N );
@@ -891,7 +892,7 @@ constexpr Matrix<T, M_R, N_R> submatrix( const mart::Matrix<T, M, N>& mat, const
 namespace mx {
 
 template<class T, int M, int N1, int N2>
-constexpr Matrix<T, M, N1 + N2> horzcat( const Matrix<T, M, N1>& m1, const Matrix<T, M, N2>& m2 ) noexcept
+[[nodiscard]] constexpr Matrix<T, M, N1 + N2> horzcat( const Matrix<T, M, N1>& m1, const Matrix<T, M, N2>& m2 ) noexcept
 {
 	Matrix<T, M, N1 + N2> ret;
 	for( int m = 0; m < M; ++m ) {
@@ -908,7 +909,7 @@ constexpr Matrix<T, M, N1 + N2> horzcat( const Matrix<T, M, N1>& m1, const Matri
 }
 
 template<class T, int M1, int M2, int N>
-constexpr Matrix<T, M1 + M2, N> vertcat( const Matrix<T, M1, N>& m1, const Matrix<T, M2, N>& m2 ) noexcept
+[[nodiscard]] constexpr Matrix<T, M1 + M2, N> vertcat( const Matrix<T, M1, N>& m1, const Matrix<T, M2, N>& m2 ) noexcept
 {
 	return mart::concat( m1, m2 );
 }
