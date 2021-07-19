@@ -3,7 +3,10 @@ option(MART_NETLIB_BUILD_UNIX_DOMAIN_SOCKET "Build high level support for unix d
 
 if(MSVC)
 	string( REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
-	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+	add_compile_definitions(
+		_CRT_SECURE_NO_WARNINGS
+		_SCL_SECURE_NO_WARNINGS
+	)
 	add_compile_options( /W4 )
 else()
 	add_compile_options( -Wall -Wextra )
