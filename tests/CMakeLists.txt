@@ -9,8 +9,6 @@ project(mart-common_testing LANGUAGES CXX)
 option(MART_COMMON_RUN_BENCHMARKS "run benchmarks as part of unit_test source" OFF)
 option(MART_COMMON_UPLOAD_COVERAGE "" OFF)
 
-set(CMAKE_CXX_STANDARD 17)
-
 if(MSVC)
 	string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
