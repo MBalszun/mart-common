@@ -54,10 +54,10 @@ inline byte_range to_byte_range( const std::string_view memory )
 inline std::string_view to_text_rep( ErrorCode code )
 {
 #ifdef _MSC_VER
-#pragma warning( suppress : 4996 )
 	// TODO strerror doesn't know the error codes for winsock erros
 	// consider suing soemthing like FormatMessageA:
 	// https://stackoverflow.com/questions/1387064/how-to-get-the-error-message-from-the-error-code-returned-by-getlasterror
+#pragma warning( suppress : 4996 )
 	return std::string_view( std::strerror( code.raw_value() ) );
 #else
 	return std::string_view( std::strerror( code.raw_value() ) );

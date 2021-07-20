@@ -679,8 +679,12 @@ const char* inet_net_to_pres( const ::sockaddr_in* src, char* dst, std::size_t s
 		// can't append port if not enough space for ":", port string and null terminator
 		return dst;
 	}
+#ifdef _MSC_VER
+#pragma warning( disable : 4996 )	// Disable warning about unsafe strncat
+#endif
 	std::strncat( dst, ":", 2 );
 	std::strncat( dst, portstr.c_str(), size - addrlen - 3 );
+
 	return dst;
 }
 
