@@ -85,102 +85,102 @@ public:
 	using reference         = const T&;
 	using iterator_category = std::random_access_iterator_tag;
 
-	FIterator( T value = T(), T step = T( 1.0 ) )
+	constexpr FIterator( T value = T(), T step = T( 1.0 ) )
 		: i{0}
 		, offset{value}
 		, step{step}
 	{
 	}
 
-	value_type operator*() const { return i * step + offset; }
+	constexpr value_type operator*() const { return i * step + offset; }
 	// pointer operator->() const { return &i; }
 
-	FIterator& operator++()
+	constexpr FIterator& operator++()
 	{
 		++i;
 		return *this;
 	}
-	FIterator operator++( int )
+	constexpr FIterator operator++( int )
 	{
 		auto tmp = *this;
 		i++;
 		return tmp;
 	}
 
-	FIterator& operator--()
+	constexpr FIterator& operator--()
 	{
 		--i;
 		return *this;
 	}
-	FIterator operator--( int )
+	constexpr FIterator operator--( int )
 	{
 		auto tmp = *this;
 		i--;
 		return tmp;
 	}
 
-	FIterator& operator+=( difference_type diff )
+	constexpr FIterator& operator+=( difference_type diff )
 	{
 		i += diff;
 		return *this;
 	}
-	FIterator& operator-=( difference_type diff )
+	constexpr FIterator& operator-=( difference_type diff )
 	{
 		i -= diff;
 		return *this;
 	}
 
-	value_type operator[]( difference_type diff ) const { return i + diff; }
+	constexpr value_type operator[]( difference_type diff ) const { return i + diff; }
 
-	friend bool operator!=( FIterator l, FIterator r )
+	friend constexpr bool operator!=( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i != r.i;
 	}
-	friend bool operator==( FIterator l, FIterator r )
+	friend constexpr bool operator==( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i == r.i;
 	}
-	friend bool operator<( FIterator l, FIterator r )
+	friend constexpr bool operator<( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i < r.i;
 	}
-	friend bool operator<=( FIterator l, FIterator r )
+	friend constexpr bool operator<=( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i <= r.i;
 	}
-	friend bool operator>( FIterator l, FIterator r )
+	friend constexpr bool operator>( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i > r.i;
 	}
-	friend bool operator>=( FIterator l, FIterator r )
+	friend constexpr bool operator>=( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i >= r.i;
 	}
 
-	friend FIterator operator+( FIterator it, difference_type n )
+	friend constexpr FIterator operator+( FIterator it, difference_type n )
 	{
 		it.i += n;
 		return it;
 	}
-	friend FIterator operator+( difference_type n, FIterator it ) { return it + n; }
+	friend constexpr FIterator operator+( difference_type n, FIterator it ) { return it + n; }
 
-	friend difference_type operator-( FIterator l, FIterator r )
+	friend constexpr difference_type operator-( FIterator l, FIterator r )
 	{
 		assert( l.offset == r.offset && l.step == r.step );
 		return l.i - r.i;
 	}
-	friend FIterator operator-( FIterator it, difference_type n )
+	friend constexpr FIterator operator-( FIterator it, difference_type n )
 	{
 		it.i -= n;
 		return it;
 	}
-	friend FIterator operator-( difference_type n, FIterator it ) { return it - n; }
+	friend constexpr FIterator operator-( difference_type n, FIterator it ) { return it - n; }
 
 private:
 	template<class>
@@ -197,22 +197,26 @@ struct frange_t {
 	static_assert( std::is_floating_point<T>::value, "frange can only be used for floating point values" );
 	using iterator = FIterator<T>;
 
-	iterator begin() const { return iterator{_start_v, _step}; };
-	iterator end() const
+	constexpr iterator begin() const { return iterator{_start_v, _step}; };
+	constexpr iterator end() const
 	{
 		iterator ret{_start_v, _step};
 		ret.i = static_cast<std::ptrdiff_t>( ( _end_v - _start_v ) / _step ) + 1;
 		return ret;
 	};
 
-	frange_t( T start, T end, T step = T( 1.0 ) )
+	constexpr frange_t( T start, T end, T step = T( 1.0 ) )
 		: _start_v{start}
 		, _end_v{end}
 		, _step{step}
 	{
 	}
 
-	std::ptrdiff_t size() const { return static_cast<std::ptrdiff_t>( ( _end_v - _start_v ) / _step ) + 1; }
+	constexpr std::ptrdiff_t size() const { return static_cast<std::ptrdiff_t>( ( _end_v - _start_v ) / _step ) + 1; }
+
+	constexpr T front() const { return _start_v; }
+	constexpr T back() const { return _end_v; }
+	constexpr T interval() const { return _step; }
 
 	T        _start_v;
 	T        _end_v;
@@ -227,7 +231,7 @@ struct frange_t {
 } // namespace _impl_frange
 
 template<class T>
-_impl_frange::frange_t<T> frange( _impl_irange::non_deduced_t<T> start, T end )
+constexpr _impl_frange::frange_t<T> frange( _impl_irange::non_deduced_t<T> start, T end )
 {
 	return _impl_frange::frange_t<T>{start, end};
 }
