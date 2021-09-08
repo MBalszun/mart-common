@@ -82,7 +82,7 @@ namespace _detail_array_view {
 
 template<class IT>
 constexpr bool is_random_it_v
-	= std::is_same_v<typename std::iterator_traits<IT>::iterator_category, std::random_access_iterator_tag>;
+	= std::is_same<typename std::iterator_traits<IT>::iterator_category, std::random_access_iterator_tag>::value;
 
 template<class IT>
 using enable_if_random_it_t = std::enable_if_t<is_random_it_v<IT>>;
@@ -96,15 +96,15 @@ using container_iterator_cat = typename std::iterator_traits<typename U::iterato
 template<class U, class value_type>
 constexpr auto has_compatible_value_type()
 {
-	return std::is_same_v<typename U::value_type,
-						  std::remove_const_t<value_type>> || std::is_same_v<typename U::value_type, value_type>;
+	return std::is_same<typename U::value_type,
+						  std::remove_const_t<value_type>>::value || std::is_same<typename U::value_type, value_type>::value;
 }
 
 template<class U, class value_type>
 constexpr auto is_compatible_container_helper( int )
 	-> decltype( ( std::declval<U>().data() + std::declval<U>().size() ) == std::declval<U>().data() )
 {
-	return std::is_base_of_v<std::random_access_iterator_tag, container_iterator_cat<U>> //
+	return std::is_base_of<std::random_access_iterator_tag, container_iterator_cat<U>>::value //
 		   && has_compatible_value_type<U, value_type>();
 };
 
@@ -186,7 +186,7 @@ public:
 	 */
 	template<
 		class U,
-		class = std::enable_if_t<!std::is_const_v<T> && _detail_array_view::is_compatible_container_v<U, value_type>>>
+		class = std::enable_if_t<!std::is_const<T>::value && _detail_array_view::is_compatible_container_v<U, value_type>>>
 	constexpr ArrayView( U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
@@ -198,7 +198,7 @@ public:
 	 */
 	template<
 		class U,
-		class = std::enable_if_t<std::is_const_v<T> && _detail_array_view::is_compatible_container_v<U, value_type>>>
+		class = std::enable_if_t<std::is_const<T>::value && _detail_array_view::is_compatible_container_v<U, value_type>>>
 	constexpr ArrayView( const U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
