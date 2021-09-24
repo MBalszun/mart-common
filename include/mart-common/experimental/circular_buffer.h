@@ -16,7 +16,6 @@
 
 /* ######## INCLUDES ######### */
 /* Standard Library Includes */
-#include <array>
 #include <type_traits>
 
 /* Proprietary Library Includes */
@@ -29,11 +28,11 @@ namespace mart {
 
 template<class T, int N>
 class circular_buffer {
-	static_assert( std::is_trivially_destructible_v<T>,
-				   "This circular buffer implementation currently only supports trivially destructible types" );
+	//	static_assert( std::is_trivially_destructible_v<T>,
+	//				   "This circular buffer implementation currently only supports trivially destructible types" );
 	using index_type = int;
 
-	std::array<T, (std::size_t)N> data{};
+	T data[(std::size_t)N]{};
 
 	index_type m_next_read{};
 	index_type m_next_write{};
@@ -49,6 +48,12 @@ public:
 		m_next_write                    = next( m_next_write );
 	};
 
+	constexpr void push_back( T&& value )
+	{
+		data[(std::size_t)m_next_write] = std::move( value );
+		m_next_write                    = next( m_next_write );
+	};
+
 	constexpr T pop_front()
 	{
 		const auto ti = m_next_read;
@@ -58,12 +63,12 @@ public:
 
 	constexpr void pop_front( T& out )
 	{
-		out         = data[(std::size_t)m_next_read];
+		out         = std::move( data[(std::size_t)m_next_read] );
 		m_next_read = next( m_next_read );
 	};
 
-	constexpr auto operator[]( int i ) { return data[( m_next_read + i ) % N]; }
-	constexpr auto operator[]( int i ) const { return data[( m_next_read + i ) % N]; }
+	constexpr auto&       operator[]( int i ) noexcept { return data[( m_next_read + i ) % N]; }
+	constexpr const auto& operator[]( int i ) const noexcept { return data[( m_next_read + i ) % N]; }
 
 	constexpr int size() const
 	{
