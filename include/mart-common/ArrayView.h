@@ -96,8 +96,8 @@ using container_iterator_cat = typename std::iterator_traits<typename U::iterato
 template<class U, class value_type>
 constexpr auto has_compatible_value_type()
 {
-	return std::is_same<typename U::value_type,
-						  std::remove_const_t<value_type>>::value || std::is_same<typename U::value_type, value_type>::value;
+	return std::is_same<typename U::value_type, std::remove_const_t<value_type>>::value
+		   || std::is_same<typename U::value_type, value_type>::value;
 }
 
 template<class U, class value_type>
@@ -184,9 +184,9 @@ public:
 	 * construction from a container, in case T is not const (using SFINAE for disambiguation with the other
 	 * constructor).
 	 */
-	template<
-		class U,
-		class = std::enable_if_t<!std::is_const<T>::value && _detail_array_view::is_compatible_container_v<U, value_type>>>
+	template<class U,
+			 class = std::enable_if_t<!std::is_const<T>::value
+									  && _detail_array_view::is_compatible_container_v<U, value_type>>>
 	constexpr ArrayView( U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
@@ -196,9 +196,9 @@ public:
 	/**
 	 * construction from a container, in case T is const (using SFINAE for disambiguation with the other constructor).
 	 */
-	template<
-		class U,
-		class = std::enable_if_t<std::is_const<T>::value && _detail_array_view::is_compatible_container_v<U, value_type>>>
+	template<class U,
+			 class = std::enable_if_t<std::is_const<T>::value
+									  && _detail_array_view::is_compatible_container_v<U, value_type>>>
 	constexpr ArrayView( const U& other ) noexcept
 		: _data( other.data() )
 		, _size( other.size() )
@@ -226,7 +226,6 @@ public:
 	const char*	asCharPtr()      const noexcept { return asConstCharPtr(); }
 
 	matching_char_t* asCharPtr() noexcept { return reinterpret_cast<matching_char_t*>( _data ); }
-
 	// clang-format on
 
 	constexpr ArrayView<T> max_subview( size_t offset, size_t count ) const noexcept
@@ -308,11 +307,23 @@ constexpr auto view_elements( const C& c ) noexcept -> mart::ArrayView<std::remo
 	return { c };
 }
 
+template<class T, std::size_t N>
+constexpr auto view_elements( T ( &arr )[N] ) noexcept
+{
+	return ArrayView<const T>( arr );
+}
+
 template<class C, class = typename C::value_type>
 constexpr auto view_elements_mutable( C& c ) noexcept
 	-> mart::ArrayView<std::remove_const_t<std::remove_reference_t<decltype( *c.data() )>>>
 {
 	return { c };
+}
+
+template<class T, std::size_t N>
+constexpr auto view_elements_mutable( T ( &arr )[N] ) noexcept
+{
+	return ArrayView<T>( arr );
 }
 
 template<class T>
