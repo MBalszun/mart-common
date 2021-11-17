@@ -363,16 +363,16 @@ template<class T, class U, int N>
 	return ret;
 }
 
-template<class T, int N, int M>
-[[nodiscard]] constexpr Matrix<T, M, N> transpose( const Matrix<T, N, M> m )
+template<class T, int Rows, int Cols>
+[[nodiscard]] constexpr Matrix<T, Cols, Rows> transpose( const Matrix<T, Rows, Cols> m )
 {
-	Matrix<T, M, N> r{};
-	for( int i = 0; i < N; ++i ) {
-		for( int j = 0; j < M; ++j ) {
-			r[i][j] = m[j][i];
+	Matrix< T, Cols, Rows> ret{};
+	for( int r = 0; r < Rows; ++r ) {
+		for( int c = 0; c < Cols; ++c ) {
+			ret[c][r] = m[r][c];
 		}
 	}
-	return r;
+	return ret;
 }
 
 template<class T, int N>
