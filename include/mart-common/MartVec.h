@@ -375,6 +375,14 @@ template<class T, int N, int M>
 	return r;
 }
 
+template<class T, int N>
+[[nodiscard]] constexpr Matrix<T, 1, N> transpose( const mart::Vec<T, N> v )
+{
+	return Matrix<T, 1, N>{
+		v //  the vector is now the first row in the matrix
+	};
+}
+
 /**
  * Left-Multiplies a (colum) vector with a square matrix.
  * mx * vec
