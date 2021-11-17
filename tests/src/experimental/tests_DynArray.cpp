@@ -83,7 +83,9 @@ struct AllocT {
 
 using Alloc =  AllocT<int,100>;
 
+#if __cpp_concepts
 static_assert( mart::detail::AllocWithRealloc<Alloc> );
+#endif
 
 } // namespace
 
