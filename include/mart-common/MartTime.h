@@ -56,8 +56,11 @@
 /* Standard Library Includes */
 #include <algorithm>
 #include <chrono>
-#include <thread>
 #include <type_traits>
+
+#ifndef MART_COMMON_USE_FREESTANDING
+#include <thread>
+#endif
 /* Proprietary Library Includes */
 
 /* Project Includes */
@@ -153,6 +156,8 @@ inline bool hasTimedOut( copter_time_point start, copter_default_period timeout 
 	return ( mart::now() - start ) > timeout;
 }
 
+#ifndef MART_COMMON_USE_FREESTANDING
+
 /**
  * Class to keep track of elapsed time / timeouts
  */
@@ -167,7 +172,7 @@ public:
 
 	explicit Timer( copter_default_period timeout )
 		: _start_time( Clock_t::now() )
-		, _timeout{timeout}
+		, _timeout{ timeout }
 	{
 	}
 
@@ -204,13 +209,81 @@ public:
 
 private:
 	Clock_t::time_point   _start_time;
-	copter_default_period _timeout{-1};
+	copter_default_period _timeout{ -1 };
 
 	// make sure we don't run into underflow issues
 	static_assert( std::is_signed<decltype( _timeout )::rep>::value, "" );
 	static_assert( std::is_signed<decltype( _start_time )::duration::rep>::value, "" );
 };
 
+#endif
+
+template<class ClockT>
+class BasicTimer {
+public:
+	using Clock_t    = ClockT;
+	using duration   = typename Clock_t::duration;
+	using time_point = typename Clock_t::time_point;
+
+	struct uninit_tag {
+	};
+
+	// when using this constructor, start time is not set upon creation and you need to call reset, befor getting useful
+	// values from elapsed() or timed out()
+	constexpr explicit BasicTimer( uninit_tag ) { }
+
+	BasicTimer()
+		: _start_time( Clock_t::now() )
+	{
+	}
+
+	explicit BasicTimer( copter_default_period timeout )
+		: _start_time( Clock_t::now() )
+		, _timeout{ timeout }
+	{
+	}
+
+	/// Resets the timer and returns the elapsed time as if calling elapsed right before the reset
+	duration reset()
+	{
+		auto t      = elapsed();
+		_start_time = Clock_t::now();
+		return t;
+	}
+
+	/// time elapsed since creation of Timer or last call to reset
+	template<class Dur = duration>
+	Dur elapsed() const
+	{
+		return std::chrono::duration_cast<Dur>( Clock_t::now() - _start_time );
+	}
+
+	/// remaining time, before hasTimedOut will be true (will always return a non-negative number)
+	template<class Dur = duration>
+	Dur remaining() const
+	{
+		using namespace std::chrono;
+		return std::max( std::chrono::duration_cast<Dur>( _timeout - ( Clock_t::now() - _start_time ) ), Dur{} );
+	}
+
+	/// true if duration since creation or last call to reset is longer than the timeout that was specified upon
+	/// creation
+	bool hasTimedOut() const
+	{
+		using namespace std::chrono;
+		return ( Clock_t::now() - _start_time ) > _timeout;
+	}
+
+	time_point get_start_time() const { return _start_time; }
+
+	static time_point now() { return Clock_t::now(); }
+
+private:
+	time_point _start_time{};
+	duration   _timeout{ -1 };
+};
+
+#ifndef MART_COMMON_USE_FREESTANDING
 /**
  * Can e.g. be used to periodically execute a loop body:
  *
@@ -265,6 +338,8 @@ private:
 	Clock_t::time_point _lastInvocation;
 	std::ptrdiff_t      _cnt = 0;
 };
+
+#endif
 
 } // namespace mart
 
