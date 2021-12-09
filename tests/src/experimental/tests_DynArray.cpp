@@ -99,7 +99,11 @@ TEST_CASE( "experimental_DynArrayTrivial_append_move", "[experimental][dynarray]
 		mart::DynArrayTriv<int, Alloc> arr1{ 1, 2, 3, 4, 5, 6 };
 
 		arr2 = std::move( arr1 ).append( 7 );
+#ifdef __cpp_concepts
 		CHECK( arr1.size() == 0 );
+#else
+		CHECK( arr1.size() == 6 );
+#endif
 	}
 	CHECK( arr2.back() == 7 );
 }

@@ -108,7 +108,7 @@ struct DynArrayTriv : mart::ArrayViewAdaptor<T, DynArrayTriv<T, Alloc>> {
 	}
 
 #if __cpp_concepts
-	DynArrayTriv append( const T& t ) && requires detail::AllocWithRealloc<Alloc>
+	[[nodiscard]] DynArrayTriv append( const T& t ) && requires detail::AllocWithRealloc<Alloc>
 	{
 		_data       = Alloc{}.reallocate( _data, _size + 1 );
 		_data[_size] = t;
@@ -117,13 +117,14 @@ struct DynArrayTriv : mart::ArrayViewAdaptor<T, DynArrayTriv<T, Alloc>> {
 	}
 #endif
 
-	DynArrayTriv append( const T& t ) const
+	[[nodiscard]] DynArrayTriv append( const T& t ) const
 	{
 		DynArrayTriv ret( _size + 1 );
 		std::copy_n( _data, _size, ret._data );
 		ret._data[_size] = t;
 		return ret;
 	}
+
 	~DynArrayTriv()
 	{
 		if( _data ) { Alloc{}.deallocate( _data, _size ); };
