@@ -69,10 +69,11 @@ TEST_CASE( "array_view_copy_works_and_doesnt_collide_with_general_std_copy_wrapp
 	mart::ArrayView<const int> view_src( src );
 	mart::ArrayView<int>       view_dest( dest );
 
-	auto rem = mart::copy( view_src, view_dest );
+	auto ret = mart::copy( view_src, view_dest );
 
 	CHECK( mart::equal( view_src, view_dest.subview( 0, view_src.size() ) ) );
-	CHECK( rem.size() == dest.size() - src.size() );
+	CHECK( mart::equal( view_src, ret.copied ) );
+	CHECK( ret.free_space.size() == dest.size() - src.size() );
 }
 
 TEST_CASE( "asBytes", "[ArrayView]" )

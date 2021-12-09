@@ -381,21 +381,34 @@ template<class T>
 	return view_bytes( e );
 }
 
+namespace detail {
 template<class T>
-auto copy_some( ArrayView<T> src, ArrayView<std::remove_const_t<T>> dest ) noexcept -> ArrayView<std::remove_const_t<T>>
+struct CopyRetType {
+	ArrayView<std::remove_const_t<T>> copied;
+	ArrayView<std::remove_const_t<T>> free_space;
+};
+
+} // namespace detail
+
+// copy as many bytes from src as fit into dest
+template<class T>
+detail::CopyRetType<T> copy_some( ArrayView<T> src, ArrayView<std::remove_const_t<T>> dest ) noexcept
 {
 	auto cnt = std::min( src.size(), dest.size() );
 	std::copy_n( src.cbegin(), cnt, dest.begin() );
-	return dest.subview( cnt );
+	return { dest.subview( 0, cnt ), dest.subview( cnt ) };
 }
 
+// copy src.size() bytes to dest.
+// UB, if src.size() > dest.size()
+// returns pair
 template<class T>
-auto copy( ArrayView<T> src, ArrayView<std::remove_const_t<T>> dest ) -> ArrayView<std::remove_const_t<T>>
+detail::CopyRetType<T> copy( ArrayView<T> src, ArrayView<std::remove_const_t<T>> dest )
 {
 	assert( src.size() <= dest.size() );
-	if( src.size() > dest.size() ) { return ArrayView<std::remove_const_t<T>>{}; }
+	if( src.size() > dest.size() ) { return {}; }
 	std::copy_n( src.cbegin(), src.size(), dest.begin() );
-	return dest.subview( src.size() );
+	return { dest.subview( 0, src.size() ), dest.subview( src.size() ) };
 }
 
 } // namespace mart
