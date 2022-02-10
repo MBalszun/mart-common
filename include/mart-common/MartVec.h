@@ -366,7 +366,7 @@ template<class T, class U, int N>
 template<class T, int Rows, int Cols>
 [[nodiscard]] constexpr Matrix<T, Cols, Rows> transpose( const Matrix<T, Rows, Cols> m )
 {
-	Matrix< T, Cols, Rows> ret{};
+	Matrix<T, Cols, Rows> ret{};
 	for( int r = 0; r < Rows; ++r ) {
 		for( int c = 0; c < Cols; ++c ) {
 			ret[c][r] = m[r][c];
@@ -936,6 +936,32 @@ template<int M, int N, class T = double>
 [[nodiscard]] constexpr Matrix<T, M, N> zeros()
 {
 	return {};
+}
+
+template<class T, int M>
+[[nodiscard]] constexpr Matrix<T, M, 1> v_2_m( const mart::Vec<T, M>& v ) noexcept
+{
+	Matrix<T, M, 1> ret;
+	for( int i = 0; i < M; ++i ) {
+		ret[i][0] = v[i];
+	}
+	return ret;
+}
+
+template<class T, int M>
+[[nodiscard]] constexpr mart::Vec<T, M> m_2_v( const mart::Matrix<T, 1, M>& m ) noexcept
+{
+	return m[0];
+}
+
+template<class T, int M>
+[[nodiscard]] constexpr mart::Vec<T, M> m_2_v( const mart::Matrix<T, M, 1>& m ) noexcept
+{
+	mart::Vec<T, M> ret;
+	for( int i = 0; i < M; ++i ) {
+		ret[i] = m[i][0];
+	}
+	return ret;
 }
 
 } // namespace mx
