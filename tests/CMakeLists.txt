@@ -22,6 +22,7 @@ if(MSVC)
 	)
 else()
 	add_compile_options(-Wall -Wextra)
+	add_compile_options(-Wno-deprecated-declarations) # we need to test deprecated APIs
 endif()
 
 # let catch print chrono duration values

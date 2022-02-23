@@ -2,7 +2,9 @@
 
 #include <catch2/catch.hpp>
 
-#include <span>
+#if __cpp_lib_span
+	#include <span>
+#endif
 
 TEST_CASE( "experimental_DynArrayTrivial_has_correct_size", "[experimental][dynarray]" )
 {
