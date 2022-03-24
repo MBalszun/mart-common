@@ -964,6 +964,16 @@ template<class T, int M>
 	return ret;
 }
 
+template<class T, int M>
+[[nodiscard]] constexpr mart::Matrix<T, M> diag( const mart::Vec<T, M>& v ) noexcept
+{
+	mart::Matrix<T, M> ret{};
+	for( int i = 0; i < M; ++i ) {
+		ret[i][i] = v[i];
+	}
+	return ret;
+}
+
 } // namespace mx
 
 // backwards compat
