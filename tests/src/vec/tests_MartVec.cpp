@@ -306,6 +306,27 @@ static_assert( check_constexpr_operator_availability<double, 17>() );
 static_assert( check_constexpr_operator_availability<double, 18>() );
 static_assert( check_constexpr_operator_availability<double, 19>() );
 
+constexpr bool check_diag()
+{
+	constexpr auto vec = mart::Vec<double, 5>{ 1, 2, 3, 4, 5 };
+	constexpr auto mx  = mart::mx::diag( vec );
+	static_assert( std::is_same_v<decltype( mx ), const mart::Matrix<double, 5, 5>>,
+				   "mx::diag produces wrong matrix type" );
+
+	for( int r = 0; r < 5; ++r ) {
+		for( int c = 0; c < 5; ++c ) {
+			if( c != r ) {
+				if( mx[r][c] != 0.0 ) { return false; };
+			} else {
+				if( mx[r][c] != r + 1 ) { return false; };
+			}
+		}
+	}
+	return true;
+}
+
+static_assert( check_diag() );
+
 template<class T, int N>
 void check_runtime_operator_availability()
 {
