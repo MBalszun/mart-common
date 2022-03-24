@@ -66,7 +66,7 @@ TEST_CASE("connected_link_follows_on_move_assignment", "[link_tests]" )
 	{
 		Node target2{6};
 		target2    = std::move( target1 );
-		
+
 		CHECK( l );
 		CHECK( l->id == 5 );
 		target2.id = 7;

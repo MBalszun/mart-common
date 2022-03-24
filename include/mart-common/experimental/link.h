@@ -25,7 +25,6 @@ namespace detail {
 
 template<class T>
 struct Span {
-	Span() noexcept  = default;
 	T*          data = nullptr;
 	std::size_t size = 0;
 
@@ -70,16 +69,12 @@ protected:
 	~LinkTargetBase()
 	{
 		for( auto* link : _back_ptrs ) {
-			if( link ) {
-				link->_target = nullptr;
-			}
+			if( link ) { link->_target = nullptr; }
 		}
 	}
 	void retarget_to_this( LinkBase* link )
 	{
-		if( link ) {
-			link->_target = this;
-		}
+		if( link ) { link->_target = this; }
 	}
 
 	bool update_back_ref( LinkBase* old_addr, LinkBase* new_addr )
@@ -128,42 +123,30 @@ public:
 };
 
 LinkBase::LinkBase( LinkBase&& other ) noexcept
-	: _target( std::exchange(other._target,nullptr ))
+	: _target( std::exchange( other._target, nullptr ) )
 {
-	if( _target ) {
-		_target->update_back_ref( &other, this );
-	}
+	if( _target ) { _target->update_back_ref( &other, this ); }
 }
 
 LinkBase::LinkBase( const LinkBase& other ) noexcept
 {
 	if( other._target ) {
-		if( other._target->add_back_ref( this ) ) {
-			_target = other._target;
-		}
+		if( other._target->add_back_ref( this ) ) { _target = other._target; }
 	}
 }
 
 LinkBase& LinkBase::operator=( LinkBase&& other ) noexcept
 {
-	if( _target ) {
-		_target->remove_back_ref( this );
-	}
+	if( _target ) { _target->remove_back_ref( this ); }
 	_target = std::exchange( other._target, nullptr );
-	if( _target ) {
-		_target->update_back_ref( &other, this );
-	}
+	if( _target ) { _target->update_back_ref( &other, this ); }
 	return *this;
 }
 LinkBase& LinkBase::operator=( const LinkBase& other ) noexcept
 {
-	if( _target ) {
-		_target->remove_back_ref( this );
-	}
+	if( _target ) { _target->remove_back_ref( this ); }
 	_target = other._target;
-	if( _target ) {
-		_target->add_back_ref( this );
-	}
+	if( _target ) { _target->add_back_ref( this ); }
 	return *this;
 }
 
@@ -171,7 +154,7 @@ template<std::size_t MaxLink>
 struct LinkTarget : LinkTargetBase {
 	std::array<LinkBase*, MaxLink> _back_ptr_store{};
 	LinkTarget() noexcept
-		: LinkTargetBase( {_back_ptr_store.data(), _back_ptr_store.size()} )
+		: LinkTargetBase( { _back_ptr_store.data(), _back_ptr_store.size() } )
 	{
 	}
 
@@ -184,7 +167,7 @@ struct LinkTarget : LinkTargetBase {
 
 	// Retarget on moves
 	LinkTarget( LinkTarget&& other ) noexcept
-		: LinkTargetBase( {_back_ptr_store.data(), _back_ptr_store.size()} )
+		: LinkTargetBase( { _back_ptr_store.data(), _back_ptr_store.size() } )
 		, _back_ptr_store( other._back_ptr_store )
 	{
 		other._back_ptr_store.fill( nullptr );
@@ -237,6 +220,6 @@ struct Link : LinkBase {
 	explicit operator bool() const { return _target != nullptr; }
 };
 
-} // namespace mdev
+} // namespace mart
 
 #endif
