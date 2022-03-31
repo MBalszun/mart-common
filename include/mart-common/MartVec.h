@@ -932,10 +932,49 @@ template<int N, class T = double>
 	return r;
 }
 
+template<int N, int M, class T = double>
+[[nodiscard]] constexpr Matrix<T, N, M> eye( T v = 1 )
+{
+	constexpr int cnt = N < M ? N : M;
+	Matrix<T, N, M> r{};
+	for( int i = 0; i < cnt; ++i ) {
+		r[i][i] = v;
+	}
+	return r;
+}
+
 template<int M, int N, class T = double>
 [[nodiscard]] constexpr Matrix<T, M, N> zeros()
 {
 	return {};
+}
+
+template<int N, class T = double>
+[[nodiscard]] constexpr Vec<T, N> zeros()
+{
+	return {};
+}
+
+template<int M, int N, class T = double, T val = 1.0>
+[[nodiscard]] constexpr Matrix<T, M, N> ones()
+{
+	Matrix<T, M, N> ret;
+	for( int r = 0; r < M; ++r ) {
+		for( int c = 0; c < N; ++c ) {
+			ret[r][c] = val;
+		}
+	}
+	return ret;
+}
+
+template<int M, class T = double, T val = 1.0>
+[[nodiscard]] constexpr Vec<T, M> ones()
+{
+	Vec<T, M> ret;
+	for( int r = 0; r < M; ++r ) {
+		ret[r] = val;
+	}
+	return ret;
 }
 
 template<class T, int M>
@@ -970,6 +1009,16 @@ template<class T, int M>
 	mart::Matrix<T, M> ret{};
 	for( int i = 0; i < M; ++i ) {
 		ret[i][i] = v[i];
+	}
+	return ret;
+}
+
+template<class T, int M>
+[[nodiscard]] constexpr mart::Matrix<T, M> diag( const mart::Matrix<T, M, 1>& v ) noexcept
+{
+	mart::Matrix<T, M> ret{};
+	for( int i = 0; i < M; ++i ) {
+		ret[i][i] = v[i][0];
 	}
 	return ret;
 }
