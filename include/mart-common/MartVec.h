@@ -351,13 +351,26 @@ template<class T, class U, int N>
 }
 
 // assumes colum times row vetor
-template<class T, class U, int N>
-[[nodiscard]] constexpr auto outer_product( const Vec<T, N>& cv, const Vec<U, N>& rv )
+template<class T, class U, int M, int N>
+[[nodiscard]] constexpr auto outer_product( const Vec<T, M>& lv, const Vec<U, N>& rv )
 {
-	mart::Matrix<decltype( cv[0] * rv[0] ), N> ret{};
-	for( int c = 0; c < N; ++c ) {
-		for( int r = 0; r < N; ++r ) {
-			ret[r][c] = cv[r] * rv[c];
+	mart::Matrix<decltype( lv[0] * rv[0] ), M, N> ret{};
+	for( int r = 0; r < M; ++r ) {
+		for( int c = 0; c < N; ++c ) {
+			ret[r][c] = lv[r] * rv[c];
+		}
+	}
+	return ret;
+}
+
+// assumes colum times row vetor
+template<class T, class U, int M, int N>
+[[nodiscard]] constexpr auto outer_division( const Vec<T, M>& lv, const Vec<U, N>& rv )
+{
+	mart::Matrix<decltype( lv[0] * rv[0] ), M, N> ret{};
+	for( int r = 0; r < M; ++r ) {
+		for( int c = 0; c < N; ++c ) {
+			ret[r][c] = lv[r] / rv[c];
 		}
 	}
 	return ret;
@@ -935,7 +948,7 @@ template<int N, class T = double>
 template<int N, int M, class T = double>
 [[nodiscard]] constexpr Matrix<T, N, M> eye( T v = 1 )
 {
-	constexpr int cnt = N < M ? N : M;
+	constexpr int   cnt = N < M ? N : M;
 	Matrix<T, N, M> r{};
 	for( int i = 0; i < cnt; ++i ) {
 		r[i][i] = v;

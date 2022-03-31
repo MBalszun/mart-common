@@ -29,6 +29,19 @@ struct Wrapper {
 };
 
 template<class T, int N>
+constexpr mart::Vec<T, N> generate_sequence( T start = 0, T inc = 1 )
+{
+	mart::Vec<T, N> ret{};
+
+	for( int i = 0; i < N; ++i ) {
+		ret[i] = start;
+		start += inc;
+	}
+
+	return ret;
+}
+
+template<class T, int N>
 constexpr mart::Vec<T, N> generateOnes()
 {
 	mart::Vec<T, N> v{};
@@ -326,6 +339,87 @@ constexpr bool check_diag()
 }
 
 static_assert( check_diag() );
+
+template<int M, int N, class Tl, class Tr>
+constexpr bool check_outer_multiplication_and_division()
+{
+	constexpr auto left  = generate_sequence<Tl, M>( 1, 1 );
+	constexpr auto right = generate_sequence<Tr, N>( 10, 1 );
+	constexpr auto mxp   = mart::outer_product( left, right );
+	constexpr auto mxd = mart::outer_division( left, right );
+
+	for( int r = 0; r < M; ++r ) {
+		for( int c = 0; c < N; ++c ) {
+			if( mxp[r][c] != ( r + 1 ) * ( c + 10 ) ) { return false; };
+			if( mxd[r][c] != ( r + 1 ) / ( c + 10 ) ) { return false; };
+		}
+	}
+	return true;
+}
+
+template<int M, int N, class Tl, class Tr>
+constexpr bool check_outer_multiplication()
+{
+	constexpr auto left  = generate_sequence<Tl, M>( 1, 1 );
+	constexpr auto right = generate_sequence<Tr, N>( 10, 1 );
+	constexpr auto mx    = mart::outer_product( left, right );
+
+	for( int r = 0; r < M; ++r ) {
+		for( int c = 0; c < N; ++c ) {
+			if( mx[r][c] != ( r + 1 ) * ( c + 10 ) ) { return false; };
+		}
+	}
+
+	return true;
+}
+
+static_assert( check_outer_multiplication<1, 1, int, double>() );
+static_assert( check_outer_multiplication<2, 1, int, double>() );
+static_assert( check_outer_multiplication<3, 1, int, double>() );
+static_assert( check_outer_multiplication<4, 1, int, double>() );
+static_assert( check_outer_multiplication<5, 1, int, double>() );
+static_assert( check_outer_multiplication<10, 1, int, double>() );
+static_assert( check_outer_multiplication<20, 1, int, double>() );
+
+static_assert( check_outer_multiplication<1, 1, double, double>() );
+static_assert( check_outer_multiplication<1, 2, double, double>() );
+static_assert( check_outer_multiplication<1, 3, double, double>() );
+static_assert( check_outer_multiplication<1, 4, double, double>() );
+static_assert( check_outer_multiplication<1, 5, double, double>() );
+static_assert( check_outer_multiplication<1, 10, double, double>() );
+static_assert( check_outer_multiplication<1, 20, double, double>() );
+
+static_assert( check_outer_multiplication<1, 10, double, double>() );
+static_assert( check_outer_multiplication<2, 10, double, double>() );
+static_assert( check_outer_multiplication<3, 10, double, double>() );
+static_assert( check_outer_multiplication<4, 10, double, double>() );
+static_assert( check_outer_multiplication<5, 10, double, double>() );
+static_assert( check_outer_multiplication<10, 10, double, double>() );
+static_assert( check_outer_multiplication<20, 10, double, double>() );
+
+static_assert( check_outer_multiplication<1, 20, double, double>() );
+static_assert( check_outer_multiplication<2, 20, double, double>() );
+static_assert( check_outer_multiplication<3, 20, double, double>() );
+static_assert( check_outer_multiplication<4, 20, double, double>() );
+static_assert( check_outer_multiplication<5, 20, double, double>() );
+static_assert( check_outer_multiplication<10, 20, double, double>() );
+static_assert( check_outer_multiplication<20, 20, double, double>() );
+
+static_assert( check_outer_multiplication<10, 1, double, double>() );
+static_assert( check_outer_multiplication<10, 2, double, double>() );
+static_assert( check_outer_multiplication<10, 3, double, double>() );
+static_assert( check_outer_multiplication<10, 4, double, double>() );
+static_assert( check_outer_multiplication<10, 5, double, double>() );
+static_assert( check_outer_multiplication<10, 10, double, double>() );
+static_assert( check_outer_multiplication<10, 20, double, double>() );
+
+static_assert( check_outer_multiplication<20, 1, double, double>() );
+static_assert( check_outer_multiplication<20, 2, double, double>() );
+static_assert( check_outer_multiplication<20, 3, double, double>() );
+static_assert( check_outer_multiplication<20, 4, double, double>() );
+static_assert( check_outer_multiplication<20, 5, double, double>() );
+static_assert( check_outer_multiplication<20, 10, double, double>() );
+static_assert( check_outer_multiplication<20, 20, double, double>() );
 
 template<class T, int N>
 void check_runtime_operator_availability()
