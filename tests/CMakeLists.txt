@@ -84,5 +84,7 @@ if( MART_COMMON_UPLOAD_COVERAGE )
 	endif()
 endif()
 
+if( MART_COMMON_INCLUDE_NET_LIB)
 add_subdirectory(src/netlib)
+endif()
 
