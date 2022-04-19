@@ -101,6 +101,13 @@ struct Vec {
 	}
 	[[nodiscard]] static constexpr int size() { return N; }
 
+	[[nodiscard]] constexpr T* begin() { return data; }
+	[[nodiscard]] constexpr T* end() { return data + N; }
+	[[nodiscard]] constexpr const T* begin() const { return data; }
+	[[nodiscard]] constexpr const T* end() const { return data + N; }
+	[[nodiscard]] constexpr const T* cbegin() const { return data; }
+	[[nodiscard]] constexpr const T* cend() const { return data + N; }
+
 	[[nodiscard]] constexpr auto squareNorm() const
 	{
 		decltype( std::declval<T>() * std::declval<T>() ) init{};
