@@ -92,6 +92,12 @@ auto adjacent_find( R&& rng ) -> decltype( std::begin( rng ) )
 	return std::adjacent_find( MART_COMMON_ALL( rng ) );
 }
 
+template<class R, class Cmp>
+auto adjacent_find( R&& rng, Cmp cmp ) -> decltype( std::begin( rng ) )
+{
+	return std::adjacent_find( MART_COMMON_ALL( rng ), cmp );
+}
+
 template<class R, class T>
 auto lower_bound( R&& rng, const T& value ) -> decltype( std::begin( rng ) )
 {
