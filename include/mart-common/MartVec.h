@@ -105,8 +105,8 @@ struct Vec {
 	}
 	[[nodiscard]] static constexpr int size() { return N; }
 
-	[[nodiscard]] constexpr T* begin() { return data; }
-	[[nodiscard]] constexpr T* end() { return data + N; }
+	[[nodiscard]] constexpr T*       begin() { return data; }
+	[[nodiscard]] constexpr T*       end() { return data + N; }
 	[[nodiscard]] constexpr const T* begin() const { return data; }
 	[[nodiscard]] constexpr const T* end() const { return data + N; }
 	[[nodiscard]] constexpr const T* cbegin() const { return data; }
@@ -862,7 +862,7 @@ template<class T, int N>
 }
 
 template<class T, int N>
-[[nodiscard]] constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r )
+[[nodiscard]] constexpr bool operator==( const Vec<T, N>& l, const Vec<T, N>& r ) noexcept
 {
 	bool ret = true;
 	for( int i = 0; i < N; ++i ) {
@@ -872,7 +872,7 @@ template<class T, int N>
 }
 
 template<class T, int N>
-[[nodiscard]] constexpr bool operator!=( const Vec<T, N> l, const Vec<T, N> r )
+[[nodiscard]] constexpr bool operator!=( const Vec<T, N> l, const Vec<T, N> r ) noexcept
 {
 	return !( l == r );
 }
