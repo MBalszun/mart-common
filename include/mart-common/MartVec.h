@@ -31,6 +31,10 @@
 #include <cmath>
 #include <utility>
 
+#ifdef __cpp_lib_three_way_comparison
+#include <compare>
+#endif
+
 /* Proprietary Library Includes */
 /* Project Includes */
 /* ~~~~~~~~ INCLUDES ~~~~~~~~~ */
@@ -872,6 +876,38 @@ template<class T, int N>
 {
 	return !( l == r );
 }
+
+template<class T, int N>
+[[nodiscard]] constexpr bool lexicographical_compare( const Vec<T, N> l, const Vec<T, N> r ) noexcept
+{
+	for( int i = 0; i < N; ++i ) {
+		if( l[i] < r[i] ) {
+			return true;
+		} else if( l[i] > r[i] ) {
+			return false;
+		}
+	}
+	// l and r are equal
+	return false;
+}
+
+#ifdef __cpp_lib_three_way_comparison
+template<class T, int N>
+[[nodiscard]] constexpr std::strong_ordering lexicographical_compare_three_way( const Vec<T, N> l,
+																				const Vec<T, N> r ) noexcept
+{
+	for( int i = 0; i < N; ++i ) {
+		if( l[i] < r[i] ) {
+			return std::strong_ordering::less;
+		} else if( l[i] > r[i] ) {
+			return std::strong_ordering::greater;
+		}
+	}
+
+	return std::strong_ordering::equal;
+}
+
+#endif
 
 template<class T, int N>
 constexpr Vec<T, N>& Vec<T, N>::operator+=( const Vec<T, N>& other )
