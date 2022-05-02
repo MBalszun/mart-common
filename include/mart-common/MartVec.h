@@ -186,6 +186,15 @@ struct Vec<T, 2> {
 	}
 	[[nodiscard]] static constexpr int size() { return N; }
 
+	// WARNING: Strictly speaking this interface is illegal under the c++ rules.
+	// As there is no array here, accessing y by incrementing a pointer to x is UB
+	[[nodiscard]] constexpr T*       begin() { return &x; }
+	[[nodiscard]] constexpr T*       end() { return &x + N; }
+	[[nodiscard]] constexpr const T* begin() const { return &x; }
+	[[nodiscard]] constexpr const T* end() const { return &x + N; }
+	[[nodiscard]] constexpr const T* cbegin() const { return &x; }
+	[[nodiscard]] constexpr const T* cend() const { return &x + N; }
+
 	[[nodiscard]] constexpr auto squareNorm() const { return x * x + y * y; }
 
 	[[nodiscard]] auto norm() const
@@ -269,6 +278,15 @@ struct Vec<T, 3> {
 		return idx == 0 ? x : idx == 1 ? y : z;
 	}
 	[[nodiscard]] static constexpr int size() { return N; }
+
+	//WARNING: Strictly speaking this interface is illegal under the c++ rules.
+	// As there is no array here, accessing y by incrementing a pointer to x is UB
+	[[nodiscard]] constexpr T*       begin() { return &x; }
+	[[nodiscard]] constexpr T*       end() { return &x + N; }
+	[[nodiscard]] constexpr const T* begin() const { return &x; }
+	[[nodiscard]] constexpr const T* end() const { return &x + N; }
+	[[nodiscard]] constexpr const T* cbegin() const { return &x; }
+	[[nodiscard]] constexpr const T* cend() const { return &x + N; }
 
 	[[nodiscard]] constexpr auto squareNorm() const { return x * x + y * y + z * z; }
 
