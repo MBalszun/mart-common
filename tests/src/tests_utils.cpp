@@ -98,3 +98,28 @@ TEST_CASE( "execute_on_exit", "[utils]" )
 	}
 	CHECK( flag_was_set );
 }
+
+TEST_CASE( "move_if", "[utils]" )
+{
+	// NOTE: currently all tests are performed at compiletime, as we ar just checking types
+	int         i1{};
+	int&        i2 = i1;
+	const int   i3{};
+	const int&  i4 = i3;
+	int&&       i5 = std::move( i1 );
+	const int&& i6 = std::move( i3 );
+
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i1 ) ), decltype( std::move( i1 ) )> );
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i2 ) ), decltype( std::move( i2 ) )> );
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i3 ) ), decltype( std::move( i3 ) )> );
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i4 ) ), decltype( std::move( i4 ) )> );
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i5 ) ), decltype( std::move( i5 ) )> );
+	static_assert( std::is_same_v<decltype( mart::move_if<true>( i6 ) ), decltype( std::move( i6 ) )> );
+
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i1 ) ), int&> );
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i2 ) ), int&> );
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i3 ) ), const int&> );
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i4 ) ), const int&> );
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i5 ) ), int&> );
+	static_assert( std::is_same_v<decltype( mart::move_if<false>( i6 ) ), const int&> );
+}

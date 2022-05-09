@@ -165,6 +165,23 @@ struct ExecuteOnExit_t {
 	F _f;
 };
 
+
+/**
+ * @brief Conditionally moves the argument depending on NTTP DoMove
+ * @tparam DoMove
+ * @param t object to move (or not)
+ * @return std::remove_reference_t<T>&& if DoMove is true and std::remove_reference_t<T>& otherwise
+*/
+template<bool DoMove, class T>
+constexpr decltype( auto ) move_if( T& t ) noexcept
+{
+	if constexpr( DoMove ) {
+		return static_cast<std::remove_reference_t<T>&&>( t );
+	} else {
+		return static_cast<std::remove_reference_t<T>&>( t );
+	}
+}
+
 } // namespace mart
 
 #endif // LIB_MART_COMMON_GUARD_UTILS_H
