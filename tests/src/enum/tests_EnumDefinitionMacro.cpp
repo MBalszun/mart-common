@@ -25,4 +25,10 @@ TEST_CASE( "enum_values", "[StringView]" )
 		CHECK( foo( e ) == i );
 		i++;
 	}
+
+	CHECK( mart::to_string_view( Airplains::F114 ) == std::string_view("F114") );
+	CHECK( mart::to_string_view( Airplains::A380 ) == std::string_view("A380") );
+	CHECK( mart::to_string_view( Airplains::F22 ) == std::string_view("F22") );
+	CHECK( mart::to_string_view( Airplains::Eurofighter ) == std::string_view("Eurofighter") );
+	CHECK( mart::to_string_view( Airplains::Cessna ) == std::string_view("Cessna") );
 }

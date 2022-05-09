@@ -65,12 +65,11 @@ constexpr Enum mart_idxToEnum_impl( size_t v )
 
 // clang-format off
 template <class Enum> constexpr auto enumCnt      ()               -> std::size_t                                                       { return mart_enumCnt_impl( static_cast<Enum*>( nullptr ) );}
-template <class Enum> constexpr auto to_string_view( Enum id )     -> std::string_view                                                  { return mart_to_string_v_impl( id ); }
+template <class Enum, std::enable_if_t<std::is_enum_v<Enum>>* = nullptr> constexpr auto to_string_view( Enum id ) -> std::string_view   { return mart_to_string_v_impl( id ); }
 
 template <class Enum> constexpr auto idxToEnum    ( size_t value ) -> Enum                                                              { return mart_idxToEnum_impl<Enum>( value ); }
 template <class Enum> constexpr auto getEnums     ()               -> decltype( mart_getEnums_impl    ( static_cast<Enum*>(nullptr) ) ) { return mart_getEnums_impl    (static_cast<Enum*>(nullptr)); }
 template <class Enum> constexpr auto getEnumNames ()               -> decltype( mart_getEnumNames_impl( static_cast<Enum*>(nullptr) ) ) { return mart_getEnumNames_impl(static_cast<Enum*>(nullptr)); }
-
 // clang-format on
 
 template<class Enum>
