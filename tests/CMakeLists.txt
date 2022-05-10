@@ -30,7 +30,9 @@ add_compile_definitions(CATCH_CONFIG_ENABLE_ALL_STRINGMAKERS)
 
 
 
-if(NOT TARGET Catch2::Catch2)
+if( TARGET Catch2::Catch2 )
+	include( ParseAndAddCatchTests )
+else()
 	find_package(Catch2 CONFIG)
 
 	set( PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME ON )
