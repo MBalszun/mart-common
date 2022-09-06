@@ -88,6 +88,8 @@ struct Vec {
 	static_assert( N > 0, "mart::Vector must at least have a size of 1" );
 	static constexpr int Dim = N;
 	using value_type         = T;
+	using iterator           = T*;
+	using const_iterator     = const T*;
 
 	T data[N];
 
@@ -168,6 +170,8 @@ struct Vec<T, 2> {
 	static constexpr int N   = 2;
 	static constexpr int Dim = 2;
 	using value_type         = T;
+	using iterator           = T*;
+	using const_iterator     = const T*;
 
 	T x;
 	T y;
@@ -256,6 +260,8 @@ struct Vec<T, 3> {
 	static constexpr int N   = 3;
 	static constexpr int Dim = 3;
 	using value_type         = T;
+	using iterator           = T*;
+	using const_iterator     = const T*;
 
 	T x;
 	T y;
@@ -279,8 +285,8 @@ struct Vec<T, 3> {
 	}
 	[[nodiscard]] static constexpr int size() { return N; }
 
-	//WARNING: Strictly speaking this interface is illegal under the c++ rules.
-	// As there is no array here, accessing y by incrementing a pointer to x is UB
+	// WARNING: Strictly speaking this interface is illegal under the c++ rules.
+	//  As there is no array here, accessing y by incrementing a pointer to x is UB
 	[[nodiscard]] constexpr T*       begin() { return &x; }
 	[[nodiscard]] constexpr T*       end() { return &x + N; }
 	[[nodiscard]] constexpr const T* begin() const { return &x; }
